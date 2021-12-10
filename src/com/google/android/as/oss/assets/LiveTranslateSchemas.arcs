@@ -1,0 +1,125 @@
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import '//com/google/android/as/oss/assets/SystemInfoSchemas.arcs'
+
+// Data about a chip event.
+schema ChipEvent
+  // Unique identifier for a chip event.
+  eventId: Int
+  // Event timestamp in milliseconds.
+  timestampMillis: Long
+  // Unique identifier for a conversation. The id is reset every 2 hours.
+  // The id is different for the same conversation after 2 hours.
+  conversationId: Text
+  // The source language of the translation.
+  sourceLanguage: Text
+  // The target language of the translation.
+  targetLanguage: Text
+  // The event UX type.
+  // It's an enumerated Values:
+  //  DISCOVERY,
+  //  FEATURE_PROMO,
+  //  DOWNLOAD_CONSENT,
+  //  DOWNLOADING,
+  //  FULL_PAGE_TRANSLATE,
+  //  PREFERENCE_MENU,
+  //  COPY_TO_TRANSLATE_DISCOVERY,
+  //  TRANSLATE_COPIED_TEXT,
+  //  AUTO_TRANSLATE_TOAST,
+  //  NEVER_TRANSLATE_TOAST
+  type: Text
+  // The action of the event.
+  // It's an enumerated Values:
+  //  SHOWN,
+  //  EXIT_CONVERSATION,
+  //  TOGGLE,
+  //  DISMISS_AUTO,
+  //  DISMISS_MANUAL,
+  //  DISMISS_DRAG_DOWN,
+  //  ACCEPT_DOWNLOAD,
+  //  CANCEL_DOWNLOAD,
+  //  DOCK,
+  //  UNDOCK,
+  //  WAIT_FOR_DOWNLOAD,
+  //  UNDO,
+  action: Text
+  // System info of the device.
+  systemInfo: inline SystemInfo
+  // The name of the package of the app in which the message was received.
+  packageName: Text
+
+// Describes event about copy-to-translate feature.
+schema CopyTranslateEvent
+  // Unique identifier for a conversation. The id is reset every 2 hours.
+  // The id is different for the same conversation after 2 hours.
+  conversationId: Text
+  // Unique identifier for a copy-to-translate event.
+  eventId: Int
+  // Event timestamp in milliseconds.
+  timestampMillis: Long
+  // The source language of the translation.
+  sourceLanguage: Text
+  // The target language of the translation.
+  targetLanguage: Text
+  // Unique identifier for a chat message.
+  messageId: Int
+  // System info of the device.
+  systemInfo: inline SystemInfo
+  // The name of the package of the app in which the message was received.
+  packageName: Text
+
+// Data about message.
+schema Message
+  // Unique identifier for a chat message.
+  messageId: Int
+  // Message string length.
+  length: Int
+
+schema PageTranslateEvent
+  // Unique identifier for a conversation. The id is reset every 2 hours.
+  // The id is different for the same conversation after 2 hours.
+  conversationId: Text
+  // Unique identifier for a full page translate event.
+  eventId: Int
+  // Event timestamp in milliseconds.
+  timestampMillis: Long
+  // The source language of the translation.
+  sourceLanguage: Text
+  // The target language of the translation.
+  targetLanguage: Text
+  // Whether it's auto translate or manual toggled translate.
+  isAuto: Boolean
+  // Unique identifier for a chat message.
+  messageId: Int
+  // System info of the device.
+  systemInfo: inline SystemInfo
+  // The name of the package of the app in which the message was received.
+  packageName: Text
+
+schema ConfigChangedEvent
+  // Event timestamp in milliseconds.
+  timestampMillis: Long
+  // Possible values: [‘is_enabled’, ‘lang_added_for_auto_translate’, ‘never_translate’]
+  label: Text
+  // Value of the label. It could be the language name.
+  value: Text
+
+schema PreferenceEvent
+  // Event timestamp in milliseconds.
+  timestampMillis: Long
+  // Possible values: [change_source_lang, change_target_lang, help, feedback]
+  action: Text
+
+

@@ -1,0 +1,72 @@
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto2";
+
+package com.google.android.as.oss.fl.api;
+
+option java_multiple_files = true;
+option java_package = "com.google.android.as.oss.fl.api.proto";
+
+// A TrainerOptions represents options used to schedule/cancel federated job.
+// TODO: Add support for personalization in PCS.
+message TrainerOptions {
+  enum JobType {
+    JOB_TYPE_UNSPECIFIED = 0;
+    // schedule in-app federated job.
+    JOB_TYPE_SCHEDULE = 1;
+    // cancel in-app federated job.
+    JOB_TYPE_CANCEL = 2;
+  }
+
+  optional JobType job_type = 1;
+  /**
+   * Federated compute session name. This name must be unique across the APK.
+   */
+  optional string session_name = 2;
+  /**
+   * The job id that federated compute should use for its in-app trainer. This
+   * must be unique across the APK.
+   */
+  optional int32 trainer_job_id = 3;
+  /**
+   * The name of the population that you want to participate in. This will be
+   * passed to the federated compute in-app trainer and it must match the
+   * population name used in your federated compute server config.
+   */
+  optional string population_name = 4;
+  /**
+   * Time interval between federated compute jobs. This will be passed to
+   * the federated compute in-app trainer.
+   */
+  optional int64 training_interval_ms = 5;
+}
+
+// A TrainerResponse represents the response returned by the service.
+message TrainerResponse {
+  enum ResponseCode {
+    RESPONSE_CODE_UNSPECIFIED = 0;
+    // Successfully scheduled/canceled federated job.
+    RESPONSE_CODE_SUCCESS = 1;
+    // Requested JobType not supported.
+    RESPONSE_CODE_UNSUPPORTED_JOB_TYPE = 2;
+  }
+
+  optional ResponseCode response_code = 1;
+}
+
+service TrainingService {
+  // Schedule/Cancel in-app federated job and return a TrainerResponse.
+  rpc ScheduleFederatedComputation(TrainerOptions) returns (TrainerResponse);
+}

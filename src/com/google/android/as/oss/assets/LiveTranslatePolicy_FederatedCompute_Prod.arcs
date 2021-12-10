@@ -1,0 +1,242 @@
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import './LiveTranslateSchemas.arcs'
+
+@intendedPurpose('
+  To measure and improve the quality of Live Translate.
+
+  ALLOWED EGRESSES: FederatedCompute.
+  ALLOWED USAGES: Federated analytics, federated learning.
+  ALLOWED POPULATIONS: Production builds.
+')
+
+
+@egressType('FederatedCompute')
+policy LiveTranslatePolicy_FederatedCompute {
+
+ config federatedCompute {
+    minRoundSize: '1000',
+    // This policy doesn't require SecAgg
+    minSecAggRoundSize: '0',
+  }
+
+  config requiredUserConsent {
+    value: 'UsageAndDiagnosticsCheckbox',
+  }
+
+  config approvalCondition {
+    value: 'PreApproved',
+  }
+
+  config checkpointTtlDays {
+    value: '720'
+  }
+
+  @allowedRetention(medium: 'Ram', encryption: false)
+  @allowedRetention(medium: 'Disk', encryption: false)
+  @maxAge('28days')
+  from ChipEvent access {
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    conversationId,
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    @allowedUsage(label: 'truncatedToDays', usageType: '*')
+    timestampMillis,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    sourceLanguage,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    targetLanguage,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    type,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    action,
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    @allowedUsage(label: 'top2000PackageNamesWith2000Wau', usageType: '*')
+    packageName,
+
+    systemInfo {
+      @allowedUsage(label: 'raw', usageType: 'join')
+      id,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      device,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      osBuild,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      sdkVersion,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      applicationBuild,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      isGoogler,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      locale,
+    }
+  }
+
+
+  @allowedRetention(medium: 'Ram', encryption: false)
+  @allowedRetention(medium: 'Disk', encryption: false)
+  @maxAge('28days')
+  from CopyTranslateEvent access {
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    conversationId,
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    @allowedUsage(label: 'truncatedToDays', usageType: '*')
+    timestampMillis,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    sourceLanguage,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    targetLanguage,
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    messageId,
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    @allowedUsage(label: 'top2000PackageNamesWith2000Wau', usageType: '*')
+    packageName,
+
+    systemInfo {
+      @allowedUsage(label: 'raw', usageType: 'join')
+      id,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      device,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      osBuild,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      sdkVersion,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      applicationBuild,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      isGoogler,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      locale,
+    }
+  }
+
+
+  @allowedRetention(medium: 'Ram', encryption: false)
+  @allowedRetention(medium: 'Disk', encryption: false)
+  @maxAge('28days')
+  from PageTranslateEvent access {
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    conversationId,
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    @allowedUsage(label: 'truncatedToDays', usageType: '*')
+    timestampMillis,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    sourceLanguage,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    targetLanguage,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    isAuto,
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    messageId,
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    @allowedUsage(label: 'top2000PackageNamesWith2000Wau', usageType: '*')
+    packageName,
+
+    systemInfo {
+      @allowedUsage(label: 'raw', usageType: 'join')
+      id,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      device,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      osBuild,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      sdkVersion,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      applicationBuild,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      isGoogler,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      locale,
+    }
+  }
+
+
+  @allowedRetention(medium: 'Ram', encryption: false)
+  @allowedRetention(medium: 'Disk', encryption: false)
+  @maxAge('28days')
+  from Message access {
+    @allowedUsage(label: 'raw', usageType: 'join')
+    messageId,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    length,
+  }
+
+
+  @allowedRetention(medium: 'Ram', encryption: false)
+  @allowedRetention(medium: 'Disk', encryption: false)
+  @maxAge('28days')
+  from ConfigChangedEvent access {
+    @allowedUsage(label: 'raw', usageType: 'join')
+    @allowedUsage(label: 'truncatedToDays', usageType: '*')
+    timestampMillis,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    label,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    value,
+  }
+
+
+  @allowedRetention(medium: 'Ram', encryption: false)
+  @allowedRetention(medium: 'Disk', encryption: false)
+  @maxAge('28days')
+  from PreferenceEvent access {
+    @allowedUsage(label: 'raw', usageType: 'join')
+    @allowedUsage(label: 'truncatedToDays', usageType: '*')
+    timestampMillis,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    action,
+  }
+}

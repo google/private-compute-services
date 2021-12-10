@@ -1,0 +1,87 @@
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// *****************************************************************************
+// DISCLAIMER: USERS OF THIS POLICY ARE REQUIRED
+//   1. TO USE THE POLICY FOR ITS INTENDED PURPOSE
+//   2. TO USE DATA OBTAINED VIA THIS POLICY IN A WAY THAT IS COMPLIANT WITH
+//      THE POLICY
+// *****************************************************************************
+
+import './SmartSelectSchemas.arcs'
+
+// If you want to learn more about this model and the privacy aspects:
+// https://ai.googleblog.com/2021/11/predicting-text-selections-with.html
+
+@intendedPurpose('
+  To train and improve SmartSelect ML models that correctly select and classify actionable text.
+
+  ALLOWED EGRESSES: FederatedCompute.
+  ALLOWED USAGES: Federated learning.
+  ALLOWED POPULATIONS: Production builds.
+')
+@egressType('FederatedCompute')
+policy SmartSelectPolicy_FederatedCompute {
+
+  config federatedCompute {
+    // Smart select is approved to use a smaller round size than standard.
+    // Smart select needs a smaller round size due to:
+    // 1) the population size is small because only users with entity selections
+    // are selected to participate in a round;
+    // 2) population is divided into sub-populations to search hyperparameters;
+    // 3) model's convergence is slow with a round size of 1000.
+    minRoundSize: '200',
+    minSecAggRoundSize: '100',
+  }
+
+  config requiredUserConsent {
+    value: 'UsageAndDiagnosticsCheckbox',
+  }
+
+  config approvalCondition {
+    value: 'PreApproved',
+  }
+
+  config checkpointTtlDays {
+    value: '720'
+  }
+
+  @allowedRetention(medium: 'Ram', encryption: false)
+  @allowedRetention(medium: 'Disk', encryption: false)
+  @maxAge('14days')
+  from LinkFragmentEntity access {
+    @allowedUsage(label: 'raw', usageType: 'join')
+    @allowedUsage(label: 'truncatedToDays', usageType: '*')
+    timestampMillis,
+
+    linkFragment {
+      @allowedUsage(label: 'raw', usageType: '*')
+      collection,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      fragments,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      userAction,
+
+      @allowedUsage(label: 'raw', usageType: 'join')
+      @allowedUsage(label: 'top2000PackageNamesWith2000Wau', usageType: '*')
+      originApp,
+
+      @allowedUsage(label: 'raw', usageType: 'join')
+      @allowedUsage(label: 'top2000PackageNamesWith2000Wau', usageType: '*')
+      destinationApp
+    }
+  }
+}

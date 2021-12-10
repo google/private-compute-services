@@ -1,0 +1,162 @@
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// *****************************************************************************
+// DISCLAIMER: USERS OF THIS POLICY ARE REQUIRED
+//   1. TO USE THE POLICY FOR ITS INTENDED PURPOSE
+//   2. TO USE DATA OBTAINED VIA THIS POLICY IN A WAY THAT IS COMPLIANT WITH
+//      THE POLICY
+// *****************************************************************************
+
+import './AutofillSchemas.arcs'
+
+@intendedPurpose('
+  To make improvements to the platform Autofill service – for example, provide suggestions for text input fields based on screen content, including smart copy & paste, smart replies and others.
+
+  ALLOWED EGRESSES: FederatedCompute.
+  ALLOWED USAGES: Federated analytics, federated learning.
+  ALLOWED POPULATIONS: Production builds.
+')
+@egressType('FederatedCompute')
+policy AutofillPolicy_FederatedCompute {
+
+  config federatedCompute {
+    minRoundSize: '1000',
+    // This policy doesn't require SecAgg
+    minSecAggRoundSize: '0',
+  }
+
+  config requiredUserConsent {
+    value: 'UsageAndDiagnosticsCheckbox',
+  }
+
+  config approvalCondition {
+    value: 'PreApproved',
+  }
+
+  config checkpointTtlDays {
+    value: '720'
+  }
+
+  @allowedRetention(medium: 'Ram', encryption: false)
+  @allowedRetention(medium: 'Disk', encryption: false)
+  @maxAge('14days')
+  from AutofillRequest access {
+    @allowedUsage(label: 'raw', usageType: '*')
+    configId,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    tcVersion,
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    @allowedUsage(label: 'truncatedToDays', usageType: '*')
+    timestampMillis,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    suggestionShown,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    userAction,
+
+    @allowedUsage(label: 'bucketed', usageType: '*')
+    processingDuration,
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    @allowedUsage(label: 'top2000PackageNamesWith2000Wau', usageType: '*')
+    targetPackageName,
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    @allowedUsage(label: 'top2000PackageNamesWith2000Wau', usageType: '*')
+    targetActivityName,
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    @allowedUsage(label: 'top2000PackageNamesWith2000Wau', usageType: '*')
+    targetResourceId,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    scoringFlags,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    deviceLocale,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    languageTags,
+
+    candidates {
+      @allowedUsage(label: 'raw', usageType: '*')
+      entityType,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      candidateProviderType,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      scenarios,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      suppressionReasons,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      observationCount,
+
+      @allowedUsage(label: 'raw', usageType: 'join')
+      @allowedUsage(label: 'truncatedToDays', usageType: '*')
+      lastObservationTimeMs,
+
+      @allowedUsage(label: 'raw', usageType: 'join')
+      @allowedUsage(label: 'top2000PackageNamesWith2000Wau', usageType: '*')
+      sourcePackageName,
+
+      @allowedUsage(label: 'raw', usageType: 'join')
+      @allowedUsage(label: 'top2000PackageNamesWith2000Wau', usageType: '*')
+      sourceActivityName,
+
+      @allowedUsage(label: 'raw', usageType: 'join')
+      @allowedUsage(label: 'top2000PackageNamesWith2000Wau', usageType: '*')
+      sourceResourceId,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      localRank,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      globalRank,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      matchesCommittedText,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      suggested,
+
+      @allowedUsage(label: 'raw', usageType: '*')
+      selected,
+    },
+  }
+
+  @allowedRetention(medium: 'Ram', encryption: false)
+  @maxAge('14days')
+  from AutofillRequest access {
+    candidates {
+      @allowedUsage(label: 'raw', usageType: '*')
+      templateIndex,
+    }
+  }
+
+  @allowedRetention(medium: 'Ram', encryption: false)
+  @maxAge('2days')
+  from AutofillRequest access {
+    candidates {
+      @allowedUsage(label: 'raw', usageType: '*')
+      text,
+    }
+  }
+}

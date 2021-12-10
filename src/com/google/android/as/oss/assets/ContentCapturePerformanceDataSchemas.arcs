@@ -1,0 +1,64 @@
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+schema ContentCapturePerformance
+  // Timestamp in millis, storing low level timestamp in the example store.
+  timestampInMs: Long
+  // Autofill Model version indicates which features are turned on and so forth.
+  autofillModelVersion: Int
+  // Session type.
+  // Enumerated Values: 0 (SESSION_UNKNOWN), 1 (SESSION_ACTIVITY), 2 (SESSION_DAY)
+  sessionType: Int
+  // Elapsed time (duration in milliseconds) spent processing events in this session.
+  processingTimeMs: Long
+  // The cpu time. The unit is milliseconds.
+  cpuTimeMs: Long
+  // Elapsed time (duration in milliseconds, including both idle and processing
+  // time) for the session captured by this performance report.
+  elapsedTimeMs: Long
+  // The events count.
+  eventsProcessed: Int
+  // The activity events count.
+  activityEventsProcessed: Int
+  // The annotator calls count.
+  annotatorCalls: Int
+  // The count of global annotation updates.
+  globalAnnotationUpdates: Int
+  // The count of task annotation updates.
+  taskAnnotationUpdates: Int
+  // The count of node annotation updates.
+  nodeAnnotationUpdates: Int
+  // The count of event annotation updates.
+  eventAnnotationUpdates: Int
+  // The added nodes count.
+  nodesAdded: Int
+  // The removed nodes count.
+  nodesRemoved: Int
+  // The count of property updates.
+  propertyUpdates: Int
+  // Number of strings flowing through the pipeline.
+  stringsAdded: Int
+  // Number of characters across all strings flowing through the pipeline.
+  charsAdded: Int
+  // Number of native calls which are expensive operations, such as batch text 
+  // classifier native calls.
+  nativeProcessingCalls: Int
+  // Time spent on native calls, in milliseconds.
+  nativeProcessingTimeMs: Long
+  // Content capture session time, in milliseconds. Active session
+  // starts at an activity created and ends at activity paused.
+  activeSessionTimeMs: Long
+  // The name of the package which generated this data, if that package is in
+  // the top 2000 most used packages.
+  sourcePackageName: Text

@@ -1,0 +1,170 @@
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// *****************************************************************************
+// DISCLAIMER: USERS OF THIS POLICY ARE REQUIRED
+//   1. TO USE THE POLICY FOR ITS INTENDED PURPOSE
+//   2. TO USE DATA OBTAINED VIA THIS POLICY IN A WAY THAT IS COMPLIANT WITH
+//      THE POLICY
+// *****************************************************************************
+
+import './SafecommsSchemas.arcs'
+
+@intendedPurpose('
+  To improve phishing detection for messaging apps.
+
+  ALLOWED EGRESSES: FederatedCompute.
+  ALLOWED USAGES: Federated analytics, federated learning.
+  ALLOWED POPULATIONS: Production builds.
+')
+@egressType('FederatedCompute')
+policy SafecommsPolicy_FederatedCompute {
+
+  config federatedCompute {
+    minRoundSize: '1000',
+    // This policy doesn't require SecAgg
+    minSecAggRoundSize: '0',
+  }
+
+  config requiredUserConsent {
+    value: 'UsageAndDiagnosticsCheckbox',
+  }
+
+  config approvalCondition {
+    value: 'PreApproved',
+  }
+
+  config checkpointTtlDays {
+    value: '720'
+  }
+
+  @allowedRetention(medium: 'Ram', encryption: false)
+  @allowedRetention(medium: 'Disk', encryption: false)
+  @maxAge('14days')
+  from SafecommsInteraction access {
+    @allowedUsage(label: 'raw', usageType: 'join')
+    id,
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    @allowedUsage(label: 'truncatedToDays', usageType: '*')
+    timestampMillis,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    predictedValue,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    isContact,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    isFirstMessageFromSender,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    hasUrl,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    hasEmail,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    hasPhoneNumber,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    hasCurrencySymbol,
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    @allowedUsage(label: 'top2000PackageNamesWith2000Wau', usageType: '*')
+    packageName,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    messageLength,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    featureInteraction,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    userInteraction,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    modelVersion,
+  }
+
+  @allowedRetention(medium: 'Ram', encryption: false)
+  @allowedRetention(medium: 'Disk', encryption: false)
+  @maxAge('14days')
+  from SafecommsConversationEntity access {
+    @allowedUsage(label: 'raw', usageType: 'join')
+    id,
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    @allowedUsage(label: 'truncatedToDays', usageType: '*')
+    timestampMillis,
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    @allowedUsage(label: 'top2000PackageNamesWith2000Wau', usageType: '*')
+    messagingAppPackageName,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    riskType,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    verdict,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    lastMessageSource,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    predictedValue,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    modelVersion,
+  }
+
+  @allowedRetention(medium: 'Ram', encryption: false)
+  @allowedRetention(medium: 'Disk', encryption: false)
+  @maxAge('14days')
+  from SafecommsUiEvent access {
+    @allowedUsage(label: 'raw', usageType: 'join')
+    id,
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    @allowedUsage(label: 'truncatedToDays', usageType: '*')
+    timestampMillis,
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    safecommsConversationEntityId,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    uiScreen,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    uiEvent,
+  }
+
+  @allowedRetention(medium: 'Ram', encryption: false)
+  @allowedRetention(medium: 'Disk', encryption: false)
+  @maxAge('14days')
+  from SafecommsFeatureStatusChangeEvent access {
+    @allowedUsage(label: 'raw', usageType: 'join')
+    id,
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    @allowedUsage(label: 'truncatedToDays', usageType: '*')
+    timestampMillis,
+
+    @allowedUsage(label: 'raw', usageType: 'join')
+    featureEnabled,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    featureDisableReason,
+  }
+}

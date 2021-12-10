@@ -1,0 +1,57 @@
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto2";
+
+package com.google.android.as.oss.pir.api;
+
+import 'private_retrieval/java/proto/private_retrieval_log.proto';
+
+option java_multiple_files = true;
+option java_package = "com.google.android.as.oss.pir.api.pir.proto";
+
+message PirDownloadRequest {
+  optional string url = 1;
+  optional string api_key = 2;
+  optional int32 num_chunks_per_request = 3;
+  optional int64 task_id = 4;
+}
+
+message PirDownloadResponse {
+  oneof response {
+    private_retrieval.PirEvent pir_event = 1;
+    NumberOfChunksDeterminedEvent number_of_chunks_determinted = 2;
+    BytesDownloadedEvent bytes_downloaded_event = 3;
+    DeletePartialDownloadEvent delete_partial_download_event = 4;
+  }
+}
+
+message NumberOfChunksDeterminedEvent {
+  optional int32 number_of_chunks = 1;
+}
+
+message BytesDownloadedEvent {
+  optional int64 offset = 1;
+  optional bytes payload = 2;
+}
+
+message DeletePartialDownloadEvent {}
+
+// TODO: Add support for network constraint.
+service PirService {
+  // Download a resource through Private Information Retrieval.
+  // Actual download contents is serialized into a ParcelFileDescriptor passed
+  // in the header.
+  rpc Download(PirDownloadRequest) returns (stream PirDownloadResponse);
+}
