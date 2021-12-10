@@ -26,6 +26,7 @@ message PirDownloadRequest {
   optional string api_key = 2;
   optional int32 num_chunks_per_request = 3;
   optional int64 task_id = 4;
+  // Test change
 }
 
 message PirDownloadResponse {
