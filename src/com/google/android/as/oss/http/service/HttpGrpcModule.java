@@ -16,11 +16,10 @@
 
 package com.google.android.as.oss.http.service;
 
-import com.google.android.as.oss.common.ExecutorAnnotations.IoExecutorQualifier;
 import com.google.android.as.oss.grpc.Annotations.GrpcService;
 import com.google.android.as.oss.grpc.Annotations.GrpcServiceName;
 import com.google.android.as.oss.http.api.proto.HttpServiceGrpc;
-import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
@@ -28,7 +27,6 @@ import dagger.hilt.components.SingletonComponent;
 import dagger.multibindings.IntoSet;
 import io.grpc.BindableService;
 import java.time.Duration;
-import java.util.concurrent.Executor;
 import okhttp3.OkHttpClient;
 
 @Module
@@ -39,16 +37,10 @@ abstract class HttpGrpcModule {
   private static final Duration DEFAULT_HTTP_WRITE_TIMEOUT = Duration.ofSeconds(60);
   private static final boolean DEFAULT_HTTP_RETRY_ON_CONN_FAILURE = true;
 
-  // TODO: this has to @Bind into set.
-  @Provides
+  @Binds
   @IntoSet
   @GrpcService
-  static BindableService provideBindableService(
-      OkHttpClient client,
-      NetworkUsageLogRepository networkUsageLogRepository,
-      @IoExecutorQualifier Executor executor) {
-    return new HttpGrpcBindableService(client, executor, networkUsageLogRepository);
-  }
+  abstract BindableService bindBindableService(HttpGrpcBindableService httpGrpcBindableService);
 
   @Provides
   @IntoSet

@@ -16,13 +16,17 @@
 
 package com.google.android.as.oss.http.service;
 
+import androidx.annotation.GuardedBy;
 import androidx.annotation.VisibleForTesting;
+import com.google.android.as.oss.common.ExecutorAnnotations.IoExecutorQualifier;
+import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.http.api.proto.HttpDownloadRequest;
 import com.google.android.as.oss.http.api.proto.HttpDownloadResponse;
 import com.google.android.as.oss.http.api.proto.HttpProperty;
 import com.google.android.as.oss.http.api.proto.HttpServiceGrpc;
 import com.google.android.as.oss.http.api.proto.ResponseBodyChunk;
 import com.google.android.as.oss.http.api.proto.ResponseHeaders;
+import com.google.android.as.oss.http.config.PcsHttpConfig;
 import com.google.android.as.oss.networkusage.db.ConnectionDetails;
 import com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType;
 import com.google.android.as.oss.networkusage.db.NetworkUsageEntity;
@@ -37,6 +41,7 @@ import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.inject.Inject;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -52,15 +57,18 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
   private final OkHttpClient client;
   private final Executor executor;
   private final NetworkUsageLogRepository networkUsageLogRepository;
+  private final ConfigReader<PcsHttpConfig> configReader;
 
   @Inject
   HttpGrpcBindableService(
       OkHttpClient client,
-      Executor ioExecutor,
-      NetworkUsageLogRepository networkUsageLogRepository) {
+      @IoExecutorQualifier Executor ioExecutor,
+      NetworkUsageLogRepository networkUsageLogRepository,
+      ConfigReader<PcsHttpConfig> httpConfigReader) {
     this.client = client;
     this.executor = ioExecutor;
     this.networkUsageLogRepository = networkUsageLogRepository;
+    this.configReader = httpConfigReader;
   }
 
   @Override
@@ -89,7 +97,7 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
       response = client.newCall(okRequest.build()).execute();
     } catch (IOException e) {
       responseObserver.onError(e);
-      insertNetworkUsageLogRow(request, Status.FAILED, 0L);
+      insertNetworkUsageLogRow(networkUsageLogRepository, request, Status.FAILED, 0L);
       return;
     }
     ((ServerCallStreamObserver<HttpDownloadResponse>) responseObserver)
@@ -116,61 +124,85 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
           "Received an empty body for URL '%s'. Responding with fetch_completed.",
           request.getUrl());
       responseObserver.onCompleted();
-      insertNetworkUsageLogRow(request, Status.SUCCEEDED, 0L);
+      insertNetworkUsageLogRow(networkUsageLogRepository, request, Status.SUCCEEDED, 0L);
       return;
     }
 
-    executor.execute(
-        new Runnable() {
-          private long totalBytesRead = 0;
+    if (configReader.getConfig().onReadyHandlerEnabled()) {
+      ServerCallStreamObserver<HttpDownloadResponse> serverStreamObserver =
+          (ServerCallStreamObserver<HttpDownloadResponse>) responseObserver;
 
-          @Override
-          public void run() {
-            try (InputStream is = body.byteStream()) {
-              byte[] buffer = new byte[BUFFER_LENGTH];
+      Runnable onReadyHandler =
+          new HttpGrpcStreamHandler(
+              request,
+              serverStreamObserver,
+              body.byteStream(),
+              executor,
+              networkUsageLogRepository);
+      serverStreamObserver.setOnReadyHandler(onReadyHandler);
+      // First call is required to be manual as per GRPC docs.
+      onReadyHandler.run();
+    } else {
+      executor.execute(
+          new Runnable() {
+            private long totalBytesRead = 0;
 
-              while (true) {
-                int bytesRead = is.read(buffer);
-                if (bytesRead == -1) {
-                  break;
+            @Override
+            public void run() {
+              try (InputStream is = body.byteStream()) {
+                byte[] buffer = new byte[BUFFER_LENGTH];
+
+                while (true) {
+                  int bytesRead = is.read(buffer);
+                  if (bytesRead == -1) {
+                    break;
+                  }
+
+                  if (bytesRead > 0) {
+                    totalBytesRead += bytesRead;
+                    responseObserver.onNext(
+                        HttpDownloadResponse.newBuilder()
+                            .setResponseBodyChunk(
+                                ResponseBodyChunk.newBuilder()
+                                    .setResponseBytes(ByteString.copyFrom(buffer, 0, bytesRead))
+                                    .build())
+                            .build());
+                  }
                 }
 
-                if (bytesRead > 0) {
-                  totalBytesRead += bytesRead;
-                  responseObserver.onNext(
-                      HttpDownloadResponse.newBuilder()
-                          .setResponseBodyChunk(
-                              ResponseBodyChunk.newBuilder()
-                                  .setResponseBytes(ByteString.copyFrom(buffer, 0, bytesRead))
-                                  .build())
-                          .build());
-                }
-              }
-
-              logger.atInfo().log("Responding with fetch_completed for URL '%s'", request.getUrl());
-              responseObserver.onCompleted();
-              insertNetworkUsageLogRow(request, Status.SUCCEEDED, totalBytesRead);
-            } catch (IOException e) {
-              logger.atWarning().withCause(e).log(
-                  "Failed performing IO operation while handling URL '%s'", request.getUrl());
-              responseObserver.onError(e);
-              insertNetworkUsageLogRow(request, Status.FAILED, totalBytesRead);
-            } catch (StatusRuntimeException e) {
-              if (responseObserver instanceof ServerCallStreamObserver
-                  && ((ServerCallStreamObserver) responseObserver).isCancelled()) {
+                logger.atInfo().log(
+                    "Responding with fetch_completed for URL '%s'", request.getUrl());
+                responseObserver.onCompleted();
+                insertNetworkUsageLogRow(
+                    networkUsageLogRepository, request, Status.SUCCEEDED, totalBytesRead);
+              } catch (IOException e) {
                 logger.atWarning().withCause(e).log(
-                    "Failed to fetch response body for URL '%s'. Call cancelled by client.",
-                    request.getUrl());
-              } else {
+                    "Failed performing IO operation while handling URL '%s'", request.getUrl());
                 responseObserver.onError(e);
-                insertNetworkUsageLogRow(request, Status.FAILED, totalBytesRead);
+                insertNetworkUsageLogRow(
+                    networkUsageLogRepository, request, Status.FAILED, totalBytesRead);
+              } catch (StatusRuntimeException e) {
+                if (responseObserver instanceof ServerCallStreamObserver
+                    && ((ServerCallStreamObserver) responseObserver).isCancelled()) {
+                  logger.atWarning().withCause(e).log(
+                      "Failed to fetch response body for URL '%s'. Call cancelled by client.",
+                      request.getUrl());
+                } else {
+                  responseObserver.onError(e);
+                  insertNetworkUsageLogRow(
+                      networkUsageLogRepository, request, Status.FAILED, totalBytesRead);
+                }
               }
             }
-          }
-        });
+          });
+    }
   }
 
-  private void insertNetworkUsageLogRow(HttpDownloadRequest request, Status status, long size) {
+  private static void insertNetworkUsageLogRow(
+      NetworkUsageLogRepository networkUsageLogRepository,
+      HttpDownloadRequest request,
+      Status status,
+      long size) {
     if (!networkUsageLogRepository.shouldLogNetworkUsage(ConnectionType.HTTP, request.getUrl())
         || !networkUsageLogRepository.getContentMap().isPresent()) {
       return;
@@ -187,5 +219,114 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
             connectionDetails, status, size, request.getUrl());
 
     networkUsageLogRepository.insertNetworkUsageEntity(entity);
+  }
+
+  private static class HttpGrpcStreamHandler implements Runnable {
+    private final AtomicLong totalBytesRead = new AtomicLong(0);
+
+    @GuardedBy("this")
+    private final byte[] buffer = new byte[BUFFER_LENGTH];
+
+    @GuardedBy("this")
+    private int bytesPendingToBeSent = 0;
+
+    private final HttpDownloadRequest request;
+    private final ServerCallStreamObserver<HttpDownloadResponse> responseObserver;
+    private final InputStream bodyStream;
+    private final Executor backgroundExecutor;
+    private final NetworkUsageLogRepository networkUsageLogRepository;
+
+    public HttpGrpcStreamHandler(
+        HttpDownloadRequest request,
+        ServerCallStreamObserver<HttpDownloadResponse> serverStreamObserver,
+        InputStream is,
+        Executor executor,
+        NetworkUsageLogRepository networkUsageLogRepository) {
+      this.request = request;
+      this.responseObserver = serverStreamObserver;
+      this.bodyStream = is;
+      this.backgroundExecutor = executor;
+      this.networkUsageLogRepository = networkUsageLogRepository;
+    }
+
+    @Override
+    public synchronized void run() {
+      logger.atFine().log(
+          "onReadyHandler called for URL [%s]. Bytes sent so far: [%d].",
+          request.getUrl(), totalBytesRead.get());
+      boolean saveStreamToResumeWhenClientIsReadyAgain = false;
+      try {
+        while (bytesPendingToBeSent >= 0) {
+          // Do not overwrite the buffer with new data if previous buffer has not been transmitted.
+          if (bytesPendingToBeSent == 0) {
+            bytesPendingToBeSent = bodyStream.read(buffer);
+          }
+
+          if (bytesPendingToBeSent == -1) {
+            // stream is over
+            break;
+          }
+
+          if (bytesPendingToBeSent > 0) {
+            if (!responseObserver.isReady()) {
+              // We have received a valid chunk, but client is busy processing previous data. We
+              // return for now, but the data is saved in the member buffer to be processed next
+              // time.
+              saveStreamToResumeWhenClientIsReadyAgain = true;
+              return;
+            }
+            responseObserver.onNext(
+                HttpDownloadResponse.newBuilder()
+                    .setResponseBodyChunk(
+                        ResponseBodyChunk.newBuilder()
+                            .setResponseBytes(ByteString.copyFrom(buffer, 0, bytesPendingToBeSent))
+                            .build())
+                    .build());
+            totalBytesRead.addAndGet(bytesPendingToBeSent);
+            // Data has been sent, nothing more to process for now.
+            bytesPendingToBeSent = 0;
+          }
+        }
+
+        logger.atInfo().log("Responding with fetch_completed for URL [%s].", request.getUrl());
+        responseObserver.onCompleted();
+        backgroundExecutor.execute(
+            () ->
+                insertNetworkUsageLogRow(
+                    networkUsageLogRepository, request, Status.SUCCEEDED, totalBytesRead.get()));
+      } catch (IOException e) {
+        logger.atWarning().withCause(e).log(
+            "Failed performing IO operation while downloading URL [%s].", request.getUrl());
+        responseObserver.onError(e);
+        backgroundExecutor.execute(
+            () ->
+                insertNetworkUsageLogRow(
+                    networkUsageLogRepository, request, Status.FAILED, totalBytesRead.get()));
+      } catch (StatusRuntimeException e) {
+        if (responseObserver.isCancelled()) {
+          logger.atWarning().withCause(e).log(
+              "Failed to fetch response body for URL [%s]. Call cancelled by client.",
+              request.getUrl());
+        } else {
+          responseObserver.onError(e);
+          // TODO: Cancellation should also be logged in network usage log.
+          backgroundExecutor.execute(
+              () ->
+                  insertNetworkUsageLogRow(
+                      networkUsageLogRepository, request, Status.FAILED, totalBytesRead.get()));
+        }
+      } finally {
+        if (!saveStreamToResumeWhenClientIsReadyAgain) {
+          try {
+            bodyStream.close();
+          } catch (IOException e) {
+            logger.atWarning().withCause(e).log(
+                "Encountered an error while closing the download stream");
+          }
+        } else {
+          logger.atFine().log("Keeping download stream open for URL: [%s]", request.getUrl());
+        }
+      }
+    }
   }
 }
