@@ -115,6 +115,13 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
       return;
     }
 
+    if (!connectionManager.isClientSupported(query.getClientName())) {
+      callback.onStartQueryFailure(
+          TrainingError.TRAINING_ERROR_PCC_CLIENT_NOT_SUPPORTED_VALUE,
+          "Incorrect client name provided in the query.");
+      return;
+    }
+
     if (!checkFederatedConfigs(query, selectorContext)) {
       callback.onStartQueryFailure(
           TrainingError.TRAINING_ERROR_PCC_CONFIG_VALIDATION_FAILED_VALUE,
