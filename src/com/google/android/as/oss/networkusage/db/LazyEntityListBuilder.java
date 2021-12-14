@@ -22,7 +22,10 @@ import static com.google.android.as.oss.networkusage.db.NetworkUsageLogUtils.cre
 import static com.google.android.as.oss.networkusage.db.NetworkUsageLogUtils.createFcTrainingResultUploadNetworkUsageEntity;
 import static java.lang.Math.max;
 
-import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.MutableLiveData;
 import com.google.common.collect.ImmutableList;
 import java.util.Collections;
 import java.util.List;
@@ -33,41 +36,72 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * A builder for the list of entities shown in the NetworkUsageLog UI, which caches the latest
- * values of DB queries atomically and constructs the new list only when requested.
+ * values of DB queries atomically and constructs the new list when requested.
  */
 public final class LazyEntityListBuilder {
 
   private final AtomicLong totalFcCheckInDownloadSize = new AtomicLong(-1);
   private final AtomicLong totalFcResultUploadSize = new AtomicLong(-1);
-  private final AtomicBoolean isEntitySetInitialized = new AtomicBoolean(false);
+  private final AtomicBoolean isNonAggregatedEntitySetInitialized = new AtomicBoolean(false);
   private final SortedSet<NetworkUsageEntity> nonAggregatedEntitySet =
       Collections.synchronizedSortedSet(new TreeSet<>(NetworkUsageEntity.BY_LATEST_TIMESTAMP));
+  private final MutableLiveData<ImmutableList<NetworkUsageEntity>> mergedEntityListLiveData;
 
-  public void updateNonAggregatedEntityList(@Nullable List<NetworkUsageEntity> newList) {
-    if (newList == null) {
-      return;
+  public static LazyEntityListBuilder create(
+      LiveData<List<NetworkUsageEntity>> nonAggregatedEntityListLiveData,
+      LiveData<Long> totalFcCheckInDownloadSizeLiveData,
+      LiveData<Long> totalFcResultUploadSizeLiveData) {
+
+    MediatorLiveData<ImmutableList<NetworkUsageEntity>> liveDataMerger = new MediatorLiveData<>();
+    LazyEntityListBuilder entityListBuilder = new LazyEntityListBuilder(liveDataMerger);
+
+    liveDataMerger.addSource(
+        nonAggregatedEntityListLiveData, entityListBuilder::updateNonAggregatedEntityList);
+    liveDataMerger.addSource(
+        totalFcCheckInDownloadSizeLiveData, entityListBuilder::updateTotalFcCheckInDownloadSize);
+    liveDataMerger.addSource(
+        totalFcResultUploadSizeLiveData, entityListBuilder::updateTotalFcResultUploadSize);
+
+    return entityListBuilder;
+  }
+
+  public LiveData<ImmutableList<NetworkUsageEntity>> getMergedEntityListLiveData() {
+    return mergedEntityListLiveData;
+  }
+
+  @VisibleForTesting
+  void updateNonAggregatedEntityList(List<NetworkUsageEntity> newList) {
+    if (newList != null) {
+      nonAggregatedEntitySet.addAll(newList);
     }
-    nonAggregatedEntitySet.addAll(newList);
-    isEntitySetInitialized.set(true);
+    isNonAggregatedEntitySetInitialized.set(true);
+    considerNotifyObservers();
   }
 
-  public void updateTotalFcCheckInDownloadSize(long newValue) {
-    totalFcCheckInDownloadSize.updateAndGet(current -> max(current, newValue));
+  @VisibleForTesting
+  void updateTotalFcCheckInDownloadSize(Long newValue) {
+    totalFcCheckInDownloadSize.updateAndGet(
+        current -> max(current, newValue == null ? 0 : newValue));
+    considerNotifyObservers();
   }
 
-  public void updateTotalFcResultUploadSize(long newValue) {
-    totalFcResultUploadSize.updateAndGet(current -> max(current, newValue));
+  @VisibleForTesting
+  void updateTotalFcResultUploadSize(Long newValue) {
+    totalFcResultUploadSize.updateAndGet(current -> max(current, newValue == null ? 0 : newValue));
+    considerNotifyObservers();
   }
 
   // Checks that each of the joining values has been assigned at least once.
-  public boolean isInitialized() {
+  @VisibleForTesting
+  boolean isInitialized() {
     return totalFcCheckInDownloadSize.get() >= 0
         && totalFcResultUploadSize.get() >= 0
-        && isEntitySetInitialized.get();
+        && isNonAggregatedEntitySetInitialized.get();
   }
 
   // Builds the list of NetworkUsageEntities that should be shown in the UI.
-  public ImmutableList<NetworkUsageEntity> buildList() {
+  @VisibleForTesting
+  ImmutableList<NetworkUsageEntity> buildList() {
     ImmutableList.Builder<NetworkUsageEntity> builder = ImmutableList.builder();
 
     if (totalFcResultUploadSize.get() > 0) {
@@ -87,5 +121,17 @@ public final class LazyEntityListBuilder {
     builder.addAll(nonAggregatedEntitySet);
 
     return builder.build();
+  }
+
+  // Notify observers of the mergedEntityListLiveData of changes.
+  private void considerNotifyObservers() {
+    if (isInitialized() && mergedEntityListLiveData != null) {
+      mergedEntityListLiveData.setValue(buildList());
+    }
+  }
+
+  private LazyEntityListBuilder(
+      MediatorLiveData<ImmutableList<NetworkUsageEntity>> mergedEntityListLiveData) {
+    this.mergedEntityListLiveData = mergedEntityListLiveData;
   }
 }

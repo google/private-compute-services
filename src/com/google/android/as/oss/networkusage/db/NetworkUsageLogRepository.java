@@ -16,7 +16,6 @@
 
 package com.google.android.as.oss.networkusage.db;
 
-import androidx.lifecycle.LiveData;
 import com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType;
 import com.google.android.as.oss.networkusage.ui.content.NetworkUsageLogContentMap;
 import java.util.Optional;
@@ -50,5 +49,5 @@ public interface NetworkUsageLogRepository {
   Optional<NetworkUsageLogContentMap> getContentMap();
 
   /** Returns a LiveData of LazyEntityListBuilder created from the database. */
-  LiveData<LazyEntityListBuilder> createLazyEntityListBuilderLiveData();
+  Optional<LazyEntityListBuilder> createLazyEntityListBuilder();
 }
