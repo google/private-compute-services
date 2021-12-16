@@ -16,6 +16,7 @@
 
 package com.google.android.as.oss.http.config.impl;
 
+import androidx.core.os.BuildCompat;
 import com.google.android.as.oss.common.config.AbstractConfigReader;
 import com.google.android.as.oss.common.config.FlagListener;
 import com.google.android.as.oss.common.config.FlagManager;
@@ -27,7 +28,7 @@ class PcsHttpConfigReader extends AbstractConfigReader<PcsHttpConfig> {
   private static final String FLAG_PREFIX = "PcsHttp__";
 
   static final BooleanFlag ENABLE_ON_READY_HANDLER =
-      BooleanFlag.create("PcsHttp__enable_on_ready_handler", false);
+      BooleanFlag.create("PcsHttp__enable_on_ready_handler", BuildCompat.isAtLeastT());
 
   private final FlagManager flagManager;
 
