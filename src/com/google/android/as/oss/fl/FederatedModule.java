@@ -29,14 +29,16 @@ import dagger.hilt.components.SingletonComponent;
 @Module
 @InstallIn(SingletonComponent.class)
 abstract class FederatedModule {
+  private static final String ASI_CLIENT_NAME = "com.google.android.as";
+  private static final String GPPS_CLIENT_NAME = "com.google.android.odad";
 
   @Provides
   @ExampleStoreClientsInfo
   static ImmutableMap<String, String> providePcsClientToExampleStoreActionMap() {
     return ImmutableMap.of(
-        "com.google.android.as",
+        ASI_CLIENT_NAME,
         "com.google.android.apps.miphone.aiai.EXAMPLE_STORE_V1",
-        "com.google.android.odad",
+        GPPS_CLIENT_NAME,
         "com.google.android.apps.miphone.odad.EXAMPLE_STORE_V1");
   }
 
@@ -44,9 +46,9 @@ abstract class FederatedModule {
   @ResultHandlingClientsInfo
   static ImmutableMap<String, String> providePcsClientToResultHandlingActionMap() {
     return ImmutableMap.of(
-        "com.google.android.as",
+        ASI_CLIENT_NAME,
         "com.google.android.apps.miphone.aiai.COMPUTATION_RESULT_V1",
-        "com.google.android.odad",
+        GPPS_CLIENT_NAME,
         "com.google.android.apps.miphone.odad.COMPUTATION_RESULT_V1");
   }
 
@@ -54,13 +56,13 @@ abstract class FederatedModule {
   @AsiPackageName
   static String provideAsiPackageName() {
     // This refers to the Android System Intelligence app.
-    return "com.google.android.as";
+    return ASI_CLIENT_NAME;
   }
 
   @Provides
   @GppsPackageName
   static String provideGppsPackageName() {
     // This refers to the Google Play Protect Service app.
-    return "com.google.android.odad";
+    return GPPS_CLIENT_NAME;
   }
 }
