@@ -16,15 +16,20 @@
 
 package com.google.android.as.oss.fl;
 
+import com.google.android.as.oss.common.initializer.PcsInitializer;
 import com.google.android.as.oss.fl.Annotations.AsiPackageName;
 import com.google.android.as.oss.fl.Annotations.ExampleStoreClientsInfo;
 import com.google.android.as.oss.fl.Annotations.GppsPackageName;
 import com.google.android.as.oss.fl.Annotations.ResultHandlingClientsInfo;
+import com.google.android.as.oss.fl.federatedcompute.config.PcsFcFlags;
+import com.google.android.as.oss.fl.federatedcompute.init.PcsFcInit;
+import com.google.android.as.oss.fl.federatedcompute.logging.FcLogManager;
 import com.google.common.collect.ImmutableMap;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
 import dagger.hilt.components.SingletonComponent;
+import dagger.multibindings.IntoSet;
 
 @Module
 @InstallIn(SingletonComponent.class)
@@ -64,5 +69,11 @@ abstract class FederatedModule {
   static String provideGppsPackageName() {
     // This refers to the Google Play Protect Service app.
     return GPPS_CLIENT_NAME;
+  }
+
+  @Provides
+  @IntoSet
+  static PcsInitializer provideFcInitializer(PcsFcFlags pcsFcFlags, FcLogManager logManager) {
+    return () -> PcsFcInit.init(pcsFcFlags, logManager);
   }
 }

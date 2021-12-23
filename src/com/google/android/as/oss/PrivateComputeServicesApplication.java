@@ -18,12 +18,11 @@ package com.google.android.as.oss;
 
 import android.app.Application;
 import android.content.Context;
-import com.google.android.as.oss.fl.federatedcompute.config.PcsFcFlags;
-import com.google.android.as.oss.fl.federatedcompute.init.PcsFcInit;
-import com.google.android.as.oss.fl.federatedcompute.logging.FcLogManager;
+import com.google.android.as.oss.common.initializer.PcsInitializer;
 import com.google.common.flogger.GoogleLogger;
 import dagger.hilt.android.HiltAndroidApp;
 import dagger.hilt.android.qualifiers.ApplicationContext;
+import java.util.Set;
 import javax.inject.Inject;
 
 @HiltAndroidApp(Application.class)
@@ -31,15 +30,16 @@ public class PrivateComputeServicesApplication extends Hilt_PrivateComputeServic
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
 
   @Inject @ApplicationContext Context context;
-
-  @Inject PcsFcFlags pcsFcFlags;
-  @Inject FcLogManager logManager;
+  @Inject Set<PcsInitializer> initializers;
 
   @Override
   public void onCreate() {
     super.onCreate();
+
     logger.atInfo().log("PrivateComputeServicesApplication#onCreate");
 
-    PcsFcInit.init(pcsFcFlags, logManager);
+    for (PcsInitializer initializer : initializers) {
+      initializer.run();
+    }
   }
 }
