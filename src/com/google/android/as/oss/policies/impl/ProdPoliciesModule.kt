@@ -44,6 +44,7 @@ object ProdPoliciesModule {
       "NowPlayingUsagePolicy_FederatedCompute_Prod.binarypb",
       "PecanUsageEventPolicy_FederatedCompute_ASI_PROD.binarypb",
       "PecanScrollingEventPolicy_FederatedCompute_ASI_PROD.binarypb",
+      "PecanLatencyAnalyticsEventPolicy_FederatedCompute_ASI_PROD.binarypb",
     )
   }
 }
