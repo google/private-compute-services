@@ -41,7 +41,7 @@ object ProdPoliciesModule {
       "SmartSelectPolicy_FederatedCompute_Prod.binarypb",
       "ContentCapturePerformanceDataPolicy_FederatedCompute_Prod.binarypb",
       "GPPServicePolicy_FederatedCompute_Prod.binarypb",
-      "NowPlayingUsagePolicy_FederatedCompute_Prod.binarypb",
+      "NowPlayingUsagePolicy_FederatedCompute_ASI_PROD.binarypb",
       "PecanUsageEventPolicy_FederatedCompute_ASI_PROD.binarypb",
       "PecanScrollingEventPolicy_FederatedCompute_ASI_PROD.binarypb",
       "PecanLatencyAnalyticsEventPolicy_FederatedCompute_ASI_PROD.binarypb",
