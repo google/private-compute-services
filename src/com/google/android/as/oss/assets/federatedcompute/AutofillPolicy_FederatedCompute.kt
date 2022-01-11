@@ -36,7 +36,7 @@ val AutofillPolicy_FederatedCompute =
     checkpointMaxTtlDays(720)
 
     target(IN_MEMORY_AUTOFILL_REQUEST_ENTITY_GENERATED_DTD, maxAge = Duration.ofDays(14)) {
-      retention(StorageMedium.RAM, encryptionRequired = false)
+      retention(StorageMedium.RAM)
 
       "persistedId" { rawUsage(UsageType.JOIN) }
       "timestampMillis" {
@@ -46,7 +46,7 @@ val AutofillPolicy_FederatedCompute =
     }
 
     target(IN_MEMORY_AUTOFILL_REQUEST_ENTITY_GENERATED_DTD, maxAge = Duration.ofDays(2)) {
-      retention(StorageMedium.RAM, encryptionRequired = false)
+      retention(StorageMedium.RAM)
 
       /** Allowed for substring/equality comparison. */
       "committedText" { rawUsage(UsageType.ANY) }
@@ -56,15 +56,15 @@ val AutofillPolicy_FederatedCompute =
       IN_MEMORY_AUTOFILL_CANDIDATE_TEMPLATE_IDX_ENTITY_GENERATED_DTD,
       maxAge = Duration.ofDays(14)
     ) {
-      retention(StorageMedium.RAM, encryptionRequired = false)
+      retention(StorageMedium.RAM)
 
       "persistedId" { rawUsage(UsageType.JOIN) }
       "templateIdx" { rawUsage(UsageType.ANY) }
     }
 
     target(PERSISTED_AUTOFILL_REQUEST_ENTITY_GENERATED_DTD, maxAge = Duration.ofDays(14)) {
-      retention(StorageMedium.RAM, encryptionRequired = false)
-      retention(StorageMedium.DISK, encryptionRequired = false)
+      retention(StorageMedium.RAM)
+      retention(StorageMedium.DISK)
 
       "configId" { rawUsage(UsageType.ANY) }
       "tcVersion" { rawUsage(UsageType.ANY) }
@@ -93,8 +93,8 @@ val AutofillPolicy_FederatedCompute =
     }
 
     target(PERSISTED_AUTOFILL_CANDIDATE_ENTITY_GENERATED_DTD, maxAge = Duration.ofDays(14)) {
-      retention(StorageMedium.RAM, encryptionRequired = false)
-      retention(StorageMedium.DISK, encryptionRequired = false)
+      retention(StorageMedium.RAM)
+      retention(StorageMedium.DISK)
 
       "requestId" { rawUsage(UsageType.ANY) }
       "entityType" { rawUsage(UsageType.ANY) }

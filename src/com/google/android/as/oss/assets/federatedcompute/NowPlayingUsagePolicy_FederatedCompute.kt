@@ -39,8 +39,8 @@ val NowPlayingUsagePolicy_FederatedCompute =
     checkpointMaxTtlDays(720)
 
     target(NOW_PLAYING_RECOGNITION_EVENT_GENERATED_DTD, Duration.ofDays(14)) {
-      retention(StorageMedium.RAM, encryptionRequired = false)
-      retention(StorageMedium.DISK, encryptionRequired = false)
+      retention(StorageMedium.RAM)
+      retention(StorageMedium.DISK)
 
       "timestampMillis" {
         conditionalUsage("truncatedToDays", UsageType.ANY)

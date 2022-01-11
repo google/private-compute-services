@@ -36,8 +36,8 @@ val SafecommsPolicy_FederatedCompute =
     checkpointMaxTtlDays(720)
 
     target(SAFECOMMS_ENTITY_GENERATED_DTD, maxAge = Duration.ofDays(14)) {
-      retention(StorageMedium.RAM, encryptionRequired = false)
-      retention(StorageMedium.DISK, encryptionRequired = false)
+      retention(StorageMedium.RAM)
+      retention(StorageMedium.DISK)
 
       "timestampMillis" {
         conditionalUsage("truncatedToDays", UsageType.ANY)
@@ -60,8 +60,8 @@ val SafecommsPolicy_FederatedCompute =
     }
 
     target(SAFECOMMS_CONVERSATION_ENTITY_GENERATED_DTD, maxAge = Duration.ofDays(14)) {
-      retention(StorageMedium.RAM, encryptionRequired = false)
-      retention(StorageMedium.DISK, encryptionRequired = false)
+      retention(StorageMedium.RAM)
+      retention(StorageMedium.DISK)
 
       "id" { rawUsage(UsageType.JOIN) }
       "timestampMillis" {
@@ -80,8 +80,8 @@ val SafecommsPolicy_FederatedCompute =
     }
 
     target(SAFECOMMS_UI_EVENT_GENERATED_DTD, maxAge = Duration.ofDays(14)) {
-      retention(StorageMedium.RAM, encryptionRequired = false)
-      retention(StorageMedium.DISK, encryptionRequired = false)
+      retention(StorageMedium.RAM)
+      retention(StorageMedium.DISK)
 
       "timestampInMillis" {
         conditionalUsage("truncatedToDays", UsageType.ANY)

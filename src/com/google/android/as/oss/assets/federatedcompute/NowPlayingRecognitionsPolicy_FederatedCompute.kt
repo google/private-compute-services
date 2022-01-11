@@ -40,8 +40,8 @@ val NowPlayingRecognitionsPolicy_FederatedCompute =
     checkpointMaxTtlDays(720)
 
     target(NOW_PLAYING_TRACK_RECOGNITION_GENERATED_DTD, Duration.ofDays(14)) {
-      retention(StorageMedium.RAM, encryptionRequired = false)
-      retention(StorageMedium.DISK, encryptionRequired = false)
+      retention(StorageMedium.RAM)
+      retention(StorageMedium.DISK)
 
       "trackId" { rawUsage(UsageType.ANY) }
     }

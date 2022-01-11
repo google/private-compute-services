@@ -36,8 +36,8 @@ val PecanLatencyAnalyticsEventPolicy_FederatedCompute =
     checkpointMaxTtlDays(720)
 
     target(PECAN_LATENCY_ANALYTICS_EVENT_GENERATED_DTD, Duration.ofDays(7)) {
-      retention(StorageMedium.RAM, encryptionRequired = false)
-      retention(StorageMedium.DISK, encryptionRequired = false)
+      retention(StorageMedium.RAM)
+      retention(StorageMedium.DISK)
 
       "eventId" { rawUsage(UsageType.JOIN) }
       "packageName" {
