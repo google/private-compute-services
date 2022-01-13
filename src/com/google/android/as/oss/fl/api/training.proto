@@ -19,8 +19,6 @@ package com.google.android.as.oss.fl.api;
 option java_multiple_files = true;
 option java_package = "com.google.android.as.oss.fl.api.proto";
 
-// A TrainerOptions represents options used to schedule/cancel federated job.
-// TODO: Add support for personalization in PCS.
 message TrainerOptions {
   enum JobType {
     JOB_TYPE_UNSPECIFIED = 0;
@@ -28,6 +26,13 @@ message TrainerOptions {
     JOB_TYPE_SCHEDULE = 1;
     // cancel in-app federated job.
     JOB_TYPE_CANCEL = 2;
+  }
+  enum TrainingMode {
+    TRAINING_MODE_UNSPECIFIED = 0;
+    // Training mode server side.
+    TRAINING_MODE_FEDERATION = 1;
+    // Training mode local (personalization).
+    TRAINING_MODE_LOCAL_COMPUTATION = 2;
   }
 
   optional JobType job_type = 1;
@@ -51,6 +56,22 @@ message TrainerOptions {
    * the federated compute in-app trainer.
    */
   optional int64 training_interval_ms = 5;
+  /**
+   * Uri for the initial local computation file.
+   */
+  optional string local_computation_plan_uri = 6;
+  /**
+   * Uri for the input resources used by local computation file.
+   */
+  optional string input_directory_uri = 7;
+  /**
+   * Uri for the output of local computation.
+   */
+  optional string output_directory_uri = 8;
+  /**
+   * Training mode: server side (federation) or local (personalization).
+   */
+  optional TrainingMode training_mode = 9;
 }
 
 // A TrainerResponse represents the response returned by the service.

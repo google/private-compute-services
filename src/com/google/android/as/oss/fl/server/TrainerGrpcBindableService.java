@@ -17,8 +17,10 @@
 package com.google.android.as.oss.fl.server;
 
 import android.content.Context;
+import android.net.Uri;
 import com.google.android.as.oss.fl.api.proto.TrainerOptions;
 import com.google.android.as.oss.fl.api.proto.TrainerOptions.JobType;
+import com.google.android.as.oss.fl.api.proto.TrainerOptions.TrainingMode;
 import com.google.android.as.oss.fl.api.proto.TrainerResponse;
 import com.google.android.as.oss.fl.api.proto.TrainerResponse.ResponseCode;
 import com.google.android.as.oss.fl.api.proto.TrainingServiceGrpc;
@@ -63,25 +65,47 @@ public class TrainerGrpcBindableService extends TrainingServiceGrpc.TrainingServ
     }
   }
 
-  private void scheduleTraining(
-      TrainerOptions trainerOptions, StreamObserver<TrainerResponse> responseStreamObserver) {
-
-    logger.atInfo().log(
-        "Scheduling training for population:%s session_name:%s",
-        trainerOptions.getPopulationName(), trainerOptions.getSessionName());
-
+  private InAppTrainerOptions.Builder buildTrainerOpts(TrainerOptions trainerOptions) {
     InAppTrainerOptions.Builder inAppTrainerOptionsBuilder =
         InAppTrainerOptions.newBuilder()
             .setJobSchedulerJobId(trainerOptions.getTrainerJobId(), false)
-            .setSessionName(trainerOptions.getSessionName())
-            .setFederatedOptions(trainerOptions.getPopulationName())
-            .setAttestationMode(ATTESTATION_MODE);
+            .setSessionName(trainerOptions.getSessionName());
+
+    if (trainerOptions.hasTrainingMode()
+        && trainerOptions.getTrainingMode() == TrainingMode.TRAINING_MODE_LOCAL_COMPUTATION) {
+      Uri localComputationPlanUri = Uri.parse(trainerOptions.getLocalComputationPlanUri());
+      Uri inputDirectoryUri = Uri.parse(trainerOptions.getInputDirectoryUri());
+      Uri outputDirectoryUri = Uri.parse(trainerOptions.getOutputDirectoryUri());
+      inAppTrainerOptionsBuilder.setLocalComputationOptions(
+          localComputationPlanUri, inputDirectoryUri, outputDirectoryUri);
+    } else {
+      inAppTrainerOptionsBuilder
+          .setFederatedOptions(trainerOptions.getPopulationName())
+          .setAttestationMode(ATTESTATION_MODE);
+    }
+
     if (trainerOptions.hasTrainingIntervalMs()) {
       inAppTrainerOptionsBuilder.setTrainingInterval(
           TrainingInterval.newBuilder()
               .setSchedulingMode(SchedulingMode.RECURRENT)
               .setMinimumIntervalMillis(trainerOptions.getTrainingIntervalMs())
               .build());
+    }
+    return inAppTrainerOptionsBuilder;
+  }
+
+  private void scheduleTraining(
+      TrainerOptions trainerOptions, StreamObserver<TrainerResponse> responseStreamObserver) {
+    InAppTrainerOptions.Builder inAppTrainerOptionsBuilder = buildTrainerOpts(trainerOptions);
+
+    if (trainerOptions.hasTrainingMode()
+        && trainerOptions.getTrainingMode() == TrainingMode.TRAINING_MODE_FEDERATION) {
+      logger.atInfo().log(
+          "Scheduling local computation for session_name:%s", trainerOptions.getSessionName());
+    } else {
+      logger.atInfo().log(
+          "Scheduling training for population:%s session_name:%s",
+          trainerOptions.getPopulationName(), trainerOptions.getSessionName());
     }
 
     Task<InAppTrainer> trainerTask =
@@ -127,17 +151,17 @@ public class TrainerGrpcBindableService extends TrainingServiceGrpc.TrainingServ
 
   private void disableTraining(
       TrainerOptions trainerOptions, StreamObserver<TrainerResponse> responseStreamObserver) {
+    InAppTrainerOptions.Builder inAppTrainerOptionsBuilder = buildTrainerOpts(trainerOptions);
 
-    logger.atInfo().log(
-        "Cancelling training for population:%s session_name:%s",
-        trainerOptions.getPopulationName(), trainerOptions.getSessionName());
-
-    InAppTrainerOptions.Builder inAppTrainerOptionsBuilder =
-        InAppTrainerOptions.newBuilder()
-            .setJobSchedulerJobId(trainerOptions.getTrainerJobId(), false)
-            .setSessionName(trainerOptions.getSessionName())
-            .setFederatedOptions(trainerOptions.getPopulationName())
-            .setAttestationMode(ATTESTATION_MODE);
+    if (trainerOptions.hasTrainingMode()
+        && trainerOptions.getTrainingMode() == TrainingMode.TRAINING_MODE_FEDERATION) {
+      logger.atInfo().log(
+          "Cancelling local computation for session_name:%s", trainerOptions.getSessionName());
+    } else {
+      logger.atInfo().log(
+          "Cancelling training for population:%s session_name:%s",
+          trainerOptions.getPopulationName(), trainerOptions.getSessionName());
+    }
 
     Task<InAppTrainer> trainerTask =
         trainerSupplier.get(context, executor, inAppTrainerOptionsBuilder.build());
