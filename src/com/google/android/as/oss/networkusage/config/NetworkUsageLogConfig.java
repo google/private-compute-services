@@ -28,10 +28,14 @@ public abstract class NetworkUsageLogConfig {
 
   public abstract boolean networkUsageLogEnabled();
 
+  public abstract boolean rejectUnknownRequests();
+
   /** Builder for {@link NetworkUsageLogConfig} */
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder setNetworkUsageLogEnabled(boolean value);
+
+    public abstract Builder setRejectUnknownRequests(boolean value);
 
     public abstract NetworkUsageLogConfig build();
   }

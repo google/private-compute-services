@@ -29,6 +29,9 @@ class NetworkUsageLogConfigReader extends AbstractConfigReader<NetworkUsageLogCo
   static final BooleanFlag ENABLE_NETWORK_USAGE_LOG =
       BooleanFlag.create("AstreaNetworkUsageLog__enable_network_usage_log", false);
 
+  static final BooleanFlag REJECT_UNKNOWN_REQUESTS =
+      BooleanFlag.create("AstreaNetworkUsageLog__reject_unknown_requests", false);
+
   private final FlagManager flagManager;
 
   static NetworkUsageLogConfigReader create(FlagManager flagManager) {
@@ -51,6 +54,7 @@ class NetworkUsageLogConfigReader extends AbstractConfigReader<NetworkUsageLogCo
   protected NetworkUsageLogConfig computeConfig() {
     return NetworkUsageLogConfig.builder()
         .setNetworkUsageLogEnabled(flagManager.get(ENABLE_NETWORK_USAGE_LOG))
+        .setRejectUnknownRequests(flagManager.get(REJECT_UNKNOWN_REQUESTS))
         .build();
   }
 
