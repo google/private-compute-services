@@ -38,7 +38,9 @@ schema ChipEvent
   //  COPY_TO_TRANSLATE_DISCOVERY,
   //  TRANSLATE_COPIED_TEXT,
   //  AUTO_TRANSLATE_TOAST,
-  //  NEVER_TRANSLATE_TOAST
+  //  NEVER_TRANSLATE_TOAST,
+  //  SETTING_DOWNLOAD_CONSENT,
+  //  SETTING_DOWNLOADING,
   type: Text
   // The action of the event.
   // It's an enumerated Values:
@@ -54,6 +56,9 @@ schema ChipEvent
   //  UNDOCK,
   //  WAIT_FOR_DOWNLOAD,
   //  UNDO,
+  //  TRANSLATE_ALL,
+  //  TOGGLE_SOURCE,
+  //  TOGGLE_TARGET
   action: Text
   // System info of the device.
   systemInfo: inline SystemInfo
@@ -111,7 +116,7 @@ schema PageTranslateEvent
 schema ConfigChangedEvent
   // Event timestamp in milliseconds.
   timestampMillis: Long
-  // Possible values: [‘is_enabled’, ‘lang_added_for_auto_translate’, ‘never_translate’]
+  // Possible values: [is_enabled, lang_added_for_auto_translate, never_translate]
   label: Text
   // Value of the label. It could be the language name.
   value: Text
@@ -119,7 +124,20 @@ schema ConfigChangedEvent
 schema PreferenceEvent
   // Event timestamp in milliseconds.
   timestampMillis: Long
-  // Possible values: [change_source_lang, change_target_lang, help, feedback]
+  // Possible values:
+  //  CHANGE_SOURCE_LANG,
+  //  CHANGE_TARGET_LANG,
+  //  HELP,
+  //  FEEDBACK,
+  //  ASK_TO_TRANSLATE,
+  //  AUTO_TRANSLATE,
+  //  DONT_TRANSLATE,
+  //  HIDE_TRANSLATION,
+  //  PLAY_SOUND
   action: Text
 
-
+schema DownloadEvent
+  // Event timestamp in milliseconds.
+  timestampMillis: Long
+  // Possible values: [started, succeed, failed]
+  status: Text

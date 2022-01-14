@@ -49,7 +49,8 @@ policy LiveTranslatePolicy_FederatedCompute {
   @maxAge('28days')
   from ChipEvent access {
 
-    @allowedUsage(label: 'raw', usageType: 'join')
+    // We want to count conversation number.
+    @allowedUsage(label: 'raw', usageType: '*')
     conversationId,
 
     @allowedUsage(label: 'raw', usageType: 'join')
@@ -238,5 +239,17 @@ policy LiveTranslatePolicy_FederatedCompute {
 
     @allowedUsage(label: 'raw', usageType: '*')
     action,
+  }
+
+  @allowedRetention(medium: 'Ram', encryption: false)
+  @allowedRetention(medium: 'Disk', encryption: false)
+  @maxAge('28days')
+  from DownloadEvent access {
+    @allowedUsage(label: 'raw', usageType: 'join')
+    @allowedUsage(label: 'truncatedToDays', usageType: '*')
+    timestampMillis,
+
+    @allowedUsage(label: 'raw', usageType: '*')
+    status,
   }
 }
