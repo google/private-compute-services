@@ -157,4 +157,16 @@ val LiveTranslatePolicy_FederatedCompute =
       }
       "systemInfoId" { rawUsage(UsageType.JOIN) }
     }
+
+    target(PERSISTED_LIVE_TRANSLATE_DOWNLOAD_EVENT_GENERATED_DTD, maxAge = Duration.ofDays(28)) {
+      retention(StorageMedium.RAM)
+      retention(StorageMedium.DISK)
+
+      "id" { rawUsage(UsageType.JOIN) }
+      "timestampMillis" {
+        ConditionalUsage.TruncatedToDays.whenever(UsageType.ANY)
+        rawUsage(UsageType.JOIN)
+      }
+      "status" { rawUsage(UsageType.ANY) }
+    }
   }
