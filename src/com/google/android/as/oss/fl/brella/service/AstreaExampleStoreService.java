@@ -16,6 +16,8 @@
 
 package com.google.android.as.oss.fl.brella.service;
 
+import static com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType.FC_TRAINING_START_QUERY;
+
 import android.os.IInterface;
 import android.os.RemoteException;
 import arcs.core.data.proto.PolicyProto;
@@ -101,13 +103,6 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
       return;
     }
 
-    if (networkUsageLogRepository.getDbExecutor().isPresent()) {
-      networkUsageLogRepository
-          .getDbExecutor()
-          .get()
-          .execute(() -> insertNetworkUsageLogRowForTrainingEvent(query));
-    }
-
     if (!isPolicyCompliant(query)) {
       callback.onStartQueryFailure(
           TrainingError.TRAINING_ERROR_PCC_POLICY_NOT_PRESENT_VALUE,
@@ -127,6 +122,22 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
           TrainingError.TRAINING_ERROR_PCC_CONFIG_VALIDATION_FAILED_VALUE,
           "Training configs don't match federation configs defined in the policy.");
       return;
+    }
+
+    String featureName = query.getFeatureName().name();
+
+    if (networkUsageLogRepository.shouldRejectRequest(FC_TRAINING_START_QUERY, featureName)) {
+      callback.onStartQueryFailure(
+          TrainingError.TRAINING_ERROR_PCC_CLIENT_NOT_SUPPORTED_VALUE,
+          String.format("Unknown PCS request for feature %s", featureName));
+      return;
+    }
+
+    if (networkUsageLogRepository.getDbExecutor().isPresent()) {
+      networkUsageLogRepository
+          .getDbExecutor()
+          .get()
+          .execute(() -> insertNetworkUsageLogRowForTrainingEvent(query));
     }
 
     Futures.addCallback(

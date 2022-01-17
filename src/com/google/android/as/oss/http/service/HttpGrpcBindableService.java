@@ -33,6 +33,7 @@ import com.google.android.as.oss.networkusage.db.NetworkUsageEntity;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogUtils;
 import com.google.android.as.oss.networkusage.db.Status;
+import com.google.android.as.oss.networkusage.ui.content.UnrecognizedNetworkRequestException;
 import com.google.common.flogger.GoogleLogger;
 import com.google.protobuf.ByteString;
 import io.grpc.StatusRuntimeException;
@@ -76,12 +77,12 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
       HttpDownloadRequest request, StreamObserver<HttpDownloadResponse> responseObserver) {
     logger.atInfo().log("Downloading requested for URL '%s'", request.getUrl());
 
-    // TODO: We should reject unknown request after making sure we have covered all
-    // URLs in NetworkUsageLogContentMap.
     if (networkUsageLogRepository.shouldRejectRequest(ConnectionType.HTTP, request.getUrl())) {
       logger.atWarning().log(
           "WARNING: Unknown url='%s'. All urls must be defined in NetworkUsageLogContentMap.",
           request.getUrl());
+      responseObserver.onError(UnrecognizedNetworkRequestException.forUrl(request.getUrl()));
+      return;
     }
 
     Request.Builder okRequest = new Request.Builder().url(request.getUrl());

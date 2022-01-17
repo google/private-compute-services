@@ -20,6 +20,7 @@ import androidx.annotation.VisibleForTesting;
 import com.google.android.as.oss.common.ExecutorAnnotations.PirExecutorQualifier;
 import com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
+import com.google.android.as.oss.networkusage.ui.content.UnrecognizedNetworkRequestException;
 import com.google.android.as.oss.pir.api.pir.proto.PirDownloadRequest;
 import com.google.android.as.oss.pir.api.pir.proto.PirDownloadResponse;
 import com.google.android.as.oss.pir.api.pir.proto.PirServiceGrpc;
@@ -86,12 +87,12 @@ public class PirGrpcBindableService extends PirServiceGrpc.PirServiceImplBase {
   @Override
   public void download(
       PirDownloadRequest request, StreamObserver<PirDownloadResponse> responseObserver) {
-    // TODO: We should reject unknown request after making sure we have covered all
-    // URLs in NetworkUsageLogContentMap.
     if (networkUsageLogRepository.shouldRejectRequest(ConnectionType.PIR, request.getUrl())) {
       pirLogger.logWarn(
           "WARNING: Unknown url='%s'. All urls must be defined in NetworkUsageLogContentMap.",
           request.getUrl());
+      responseObserver.onError(UnrecognizedNetworkRequestException.forUrl(request.getUrl()));
+      return;
     }
     Optional<PirDownloadTask> task = setupTask(request, responseObserver);
     if (!task.isPresent()) {
