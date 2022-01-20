@@ -44,7 +44,9 @@ val LiveTranslatePolicy_FederatedCompute =
         ConditionalUsage.TruncatedToDays.whenever(UsageType.ANY)
         rawUsage(UsageType.JOIN)
       }
-      "conversationId" { rawUsage(UsageType.JOIN) }
+      // ConversationId are randomly generated and just used to locally count unique threads
+      // translated.
+      "conversationId" { rawUsage(UsageType.ANY) }
       "sourceLanguage" { rawUsage(UsageType.ANY) }
       "targetLanguage" { rawUsage(UsageType.ANY) }
       "type" { rawUsage(UsageType.ANY) }
