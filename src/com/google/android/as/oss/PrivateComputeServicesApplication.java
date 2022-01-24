@@ -23,6 +23,7 @@ import com.google.common.flogger.GoogleLogger;
 import dagger.hilt.android.HiltAndroidApp;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.inject.Inject;
 
 @HiltAndroidApp(Application.class)
