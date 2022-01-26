@@ -37,7 +37,7 @@ object ProdPoliciesModule {
       context,
       "AutofillPolicy_FederatedCompute_ASI_PROD.binarypb",
       "SafecommsPolicy_FederatedCompute_ASI_PROD.binarypb",
-      "LiveTranslatePolicy_FederatedCompute_Prod.binarypb",
+      "LiveTranslatePolicy_FederatedCompute_ASI_PROD.binarypb",
       "SmartSelectPolicy_FederatedCompute_Prod.binarypb",
       "ContentCapturePerformanceDataPolicy_FederatedCompute_Prod.binarypb",
       "GPPServicePolicy_FederatedCompute_Prod.binarypb",
