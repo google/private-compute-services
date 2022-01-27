@@ -20,7 +20,6 @@ import static java.util.Comparator.comparing;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import androidx.annotation.VisibleForTesting;
 import androidx.room.Embedded;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
@@ -71,7 +70,6 @@ public abstract class NetworkUsageEntity implements Parcelable {
     return new AutoValue_NetworkUsageEntity.Builder();
   }
 
-  @VisibleForTesting
   public abstract Builder toBuilder();
 
   /** Required by Room. Please use {@link Builder} instead. */
