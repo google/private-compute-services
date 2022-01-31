@@ -16,11 +16,12 @@
 
 package com.google.android.as.oss.networkusage.db.noop;
 
+import androidx.lifecycle.LiveData;
 import com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType;
-import com.google.android.as.oss.networkusage.db.LazyEntityListBuilder;
 import com.google.android.as.oss.networkusage.db.NetworkUsageEntity;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
 import com.google.android.as.oss.networkusage.ui.content.NetworkUsageLogContentMap;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
@@ -65,7 +66,7 @@ public class NetworkUsageLogRepositoryNoOpImpl implements NetworkUsageLogReposit
   }
 
   @Override
-  public Optional<LazyEntityListBuilder> createLazyEntityListBuilder() {
-    return Optional.empty();
+  public LiveData<List<NetworkUsageEntity>> getAll() {
+    return new LiveData<List<NetworkUsageEntity>>() {};
   }
 }
