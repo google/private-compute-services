@@ -33,7 +33,6 @@ import com.google.android.as.oss.fl.brella.api.proto.TrainingError;
 import com.google.android.as.oss.fl.brella.service.ConnectionManager.ConnectionType;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogUtils;
-import com.google.android.as.oss.networkusage.db.Status;
 import com.google.android.as.oss.proto.AstreaProtos.AstreaQuery;
 import com.google.fcp.client.ExampleStoreService;
 import com.google.common.collect.ImmutableMap;
@@ -137,7 +136,10 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
       networkUsageLogRepository
           .getDbExecutor()
           .get()
-          .execute(() -> insertNetworkUsageLogRowForTrainingEvent(query));
+          .execute(
+              () ->
+                  insertNetworkUsageLogRowForTrainingEvent(
+                      query, selectorContext.getComputationProperties().getRunId()));
     }
 
     Futures.addCallback(
@@ -264,7 +266,7 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
 
   // Note: The success/failure status and the upload size in bytes, are reported in another row
   // when we receive a LogEvent of kind TRAIN_RESULT_UPLOADED or TRAIN_FAILURE_UPLOADED.
-  private void insertNetworkUsageLogRowForTrainingEvent(AstreaQuery query) {
+  private void insertNetworkUsageLogRowForTrainingEvent(AstreaQuery query, long runId) {
     if (!networkUsageLogRepository.isNetworkUsageLogEnabled()) {
       return;
     }
@@ -272,7 +274,7 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
         NetworkUsageLogUtils.createFcTrainingStartQueryNetworkUsageEntity(
             NetworkUsageLogUtils.createFcTrainingStartQueryConnectionDetails(
                 query.getFeatureName().name(), query.getClientName()),
-            Status.SUCCEEDED,
+            runId,
             query.getPolicy()));
   }
 }

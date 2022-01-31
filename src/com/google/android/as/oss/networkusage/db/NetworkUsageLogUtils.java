@@ -26,7 +26,6 @@ import com.google.android.as.oss.networkusage.api.proto.HttpConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.PirConnectionKey;
 import com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType;
 import com.google.common.base.Strings;
-import java.time.Instant;
 
 /** Utility class for creating NetworkUsageLog entities. */
 public final class NetworkUsageLogUtils {
@@ -98,18 +97,23 @@ public final class NetworkUsageLogUtils {
   }
 
   public static NetworkUsageEntity createFcTrainingResultUploadNetworkUsageEntity(
-      ConnectionDetails connectionDetails, Status status, long size) {
+      ConnectionDetails connectionDetails, long runId, long size) {
     checkArgument(connectionDetails.type() == ConnectionType.FC_TRAINING_RESULT_UPLOAD);
-    return getNetworkUsageEntityBuilder(connectionDetails, status, size).build();
+    checkArgument(runId >= 0);
+    return getNetworkUsageEntityBuilder(connectionDetails, Status.SUCCEEDED, size)
+        .setFcRunId(runId)
+        .build();
   }
 
   public static NetworkUsageEntity createFcTrainingStartQueryNetworkUsageEntity(
-      ConnectionDetails connectionDetails, Status status, PolicyProto policyProto) {
+      ConnectionDetails connectionDetails, long runId, PolicyProto policyProto) {
     checkArgument(connectionDetails.type() == ConnectionType.FC_TRAINING_START_QUERY);
     checkArgument(connectionDetails.connectionKey().hasFlConnectionKey());
     checkNotNull(policyProto);
     checkArgument(policyProto.isInitialized());
-    return getNetworkUsageEntityBuilder(connectionDetails, status, /* size= */ 0)
+    checkArgument(runId >= 0);
+    return getNetworkUsageEntityBuilder(connectionDetails, Status.SUCCEEDED, /* size= */ 0)
+        .setFcRunId(runId)
         .setPolicyProto(policyProto)
         .build();
   }
@@ -126,14 +130,10 @@ public final class NetworkUsageLogUtils {
     checkNotNull(status);
     checkArgument(size >= 0);
 
-    return NetworkUsageEntity.builder()
-        .setId(0) // Allows room to auto-generate ids
-        .setCreationTime(Instant.now())
+    return NetworkUsageEntity.defaultBuilder()
         .setConnectionDetails(connectionDetails)
         .setStatus(status)
-        .setSize(size)
-        .setUrl("")
-        .setPolicyProto(PolicyProto.getDefaultInstance());
+        .setSize(size);
   }
 
   private static ConnectionDetails.Builder getDefaultConnectionDetailsBuilder(

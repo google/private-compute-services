@@ -20,6 +20,7 @@ import static java.util.Comparator.comparing;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import androidx.room.ColumnInfo;
 import androidx.room.Embedded;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
@@ -61,13 +62,29 @@ public abstract class NetworkUsageEntity implements Parcelable {
   /** The instantaneous point of creation of the entry. */
   public abstract Instant creationTime();
 
-  /** Required for FC_TRAINING events only. The policy that the query is compliant with. */
+  /**
+   * Required for FC_TRAINING_START_QUERY and FC_TRAINING_RESULT_UPLOAD events only. The id of the
+   * FC task. A unique runId corresponds to one or more FC_TRAINING_START_QUERY events, and one or
+   * zero FC_TRAINING_RESULT_UPLOAD events.
+   */
+  @CopyAnnotations
+  @ColumnInfo(defaultValue = "-1")
+  public abstract long fcRunId();
+
+  /**
+   * Required for FC_TRAINING_START_QUERY events only. The policy that the query is compliant with.
+   */
   @CopyAnnotations
   @ParcelAdapter(PolicyProtoTypeAdapter.class)
   public abstract PolicyProto policyProto();
 
-  public static Builder builder() {
-    return new AutoValue_NetworkUsageEntity.Builder();
+  public static Builder defaultBuilder() {
+    return builder()
+        .setId(0) // Allows room to auto-generate ids
+        .setCreationTime(Instant.now())
+        .setUrl("")
+        .setFcRunId(-1L)
+        .setPolicyProto(PolicyProto.getDefaultInstance());
   }
 
   public abstract Builder toBuilder();
@@ -80,6 +97,7 @@ public abstract class NetworkUsageEntity implements Parcelable {
       Status status,
       long size,
       Instant creationTime,
+      long fcRunId,
       PolicyProto policyProto) {
     return builder()
         .setId(id)
@@ -88,8 +106,13 @@ public abstract class NetworkUsageEntity implements Parcelable {
         .setStatus(status)
         .setSize(size)
         .setCreationTime(creationTime)
+        .setFcRunId(fcRunId)
         .setPolicyProto(policyProto)
         .build();
+  }
+
+  private static Builder builder() {
+    return new AutoValue_NetworkUsageEntity.Builder();
   }
 
   /** Builder for creating new instances. */
@@ -106,6 +129,8 @@ public abstract class NetworkUsageEntity implements Parcelable {
     public abstract Builder setSize(long size);
 
     public abstract Builder setCreationTime(Instant instant);
+
+    public abstract Builder setFcRunId(long fcRunId);
 
     public abstract Builder setPolicyProto(PolicyProto policyProto);
 
