@@ -40,7 +40,7 @@ object ProdPoliciesModule {
       "LiveTranslatePolicy_FederatedCompute_ASI_PROD.binarypb",
       "SmartSelectPolicy_FederatedCompute_ASI_PROD.binarypb",
       "ContentCapturePerformanceDataPolicy_FederatedCompute_ASI_PROD.binarypb",
-      "GPPServicePolicy_FederatedCompute_Prod.binarypb",
+      "GPPServicePolicy_FederatedCompute_GPPS_PROD.binarypb",
       "NowPlayingUsagePolicy_FederatedCompute_ASI_PROD.binarypb",
       "PecanUsageEventPolicy_FederatedCompute_ASI_PROD.binarypb",
       "PecanScrollingEventPolicy_FederatedCompute_ASI_PROD.binarypb",
