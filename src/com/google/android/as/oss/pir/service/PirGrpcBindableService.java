@@ -89,8 +89,8 @@ public class PirGrpcBindableService extends PirServiceGrpc.PirServiceImplBase {
       PirDownloadRequest request, StreamObserver<PirDownloadResponse> responseObserver) {
     if (networkUsageLogRepository.shouldRejectRequest(ConnectionType.PIR, request.getUrl())) {
       pirLogger.logWarn(
-          "WARNING: Unknown url='%s'. All urls must be defined in NetworkUsageLogContentMap.",
-          request.getUrl());
+          UnrecognizedNetworkRequestException.forUrl(request.getUrl()),
+          "Rejected unknown PIR request to PCS");
       responseObserver.onError(UnrecognizedNetworkRequestException.forUrl(request.getUrl()));
       return;
     }

@@ -33,6 +33,7 @@ import com.google.android.as.oss.fl.brella.api.proto.TrainingError;
 import com.google.android.as.oss.fl.brella.service.ConnectionManager.ConnectionType;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogUtils;
+import com.google.android.as.oss.networkusage.ui.content.UnrecognizedNetworkRequestException;
 import com.google.android.as.oss.proto.AstreaProtos.AstreaQuery;
 import com.google.fcp.client.ExampleStoreService;
 import com.google.common.collect.ImmutableMap;
@@ -126,6 +127,8 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
     String featureName = query.getFeatureName().name();
 
     if (networkUsageLogRepository.shouldRejectRequest(FC_TRAINING_START_QUERY, featureName)) {
+      logger.atWarning().withCause(UnrecognizedNetworkRequestException.forFeatureName(featureName))
+          .log("Rejected unknown FC request to PCS");
       callback.onStartQueryFailure(
           TrainingError.TRAINING_ERROR_PCC_CLIENT_NOT_SUPPORTED_VALUE,
           String.format("Unknown PCS request for feature %s", featureName));

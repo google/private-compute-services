@@ -78,9 +78,8 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
     logger.atInfo().log("Downloading requested for URL '%s'", request.getUrl());
 
     if (networkUsageLogRepository.shouldRejectRequest(ConnectionType.HTTP, request.getUrl())) {
-      logger.atWarning().log(
-          "WARNING: Unknown url='%s'. All urls must be defined in NetworkUsageLogContentMap.",
-          request.getUrl());
+      logger.atWarning().withCause(UnrecognizedNetworkRequestException.forUrl(request.getUrl()))
+          .log("Rejected unknown HTTPS request to PCS");
       responseObserver.onError(UnrecognizedNetworkRequestException.forUrl(request.getUrl()));
       return;
     }
