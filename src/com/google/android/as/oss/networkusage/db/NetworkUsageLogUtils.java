@@ -99,7 +99,6 @@ public final class NetworkUsageLogUtils {
   public static NetworkUsageEntity createFcTrainingResultUploadNetworkUsageEntity(
       ConnectionDetails connectionDetails, long runId, long size) {
     checkArgument(connectionDetails.type() == ConnectionType.FC_TRAINING_RESULT_UPLOAD);
-    checkArgument(runId >= 0);
     return getNetworkUsageEntityBuilder(connectionDetails, Status.SUCCEEDED, size)
         .setFcRunId(runId)
         .build();
@@ -111,7 +110,6 @@ public final class NetworkUsageLogUtils {
     checkArgument(connectionDetails.connectionKey().hasFlConnectionKey());
     checkNotNull(policyProto);
     checkArgument(policyProto.isInitialized());
-    checkArgument(runId >= 0);
     return getNetworkUsageEntityBuilder(connectionDetails, Status.SUCCEEDED, /* size= */ 0)
         .setFcRunId(runId)
         .setPolicyProto(policyProto)
