@@ -99,7 +99,7 @@ public class TrainerGrpcBindableService extends TrainingServiceGrpc.TrainingServ
     InAppTrainerOptions.Builder inAppTrainerOptionsBuilder = buildTrainerOpts(trainerOptions);
 
     if (trainerOptions.hasTrainingMode()
-        && trainerOptions.getTrainingMode() == TrainingMode.TRAINING_MODE_FEDERATION) {
+        && trainerOptions.getTrainingMode() == TrainingMode.TRAINING_MODE_LOCAL_COMPUTATION) {
       logger.atInfo().log(
           "Scheduling local computation for session_name:%s", trainerOptions.getSessionName());
     } else {
@@ -154,7 +154,7 @@ public class TrainerGrpcBindableService extends TrainingServiceGrpc.TrainingServ
     InAppTrainerOptions.Builder inAppTrainerOptionsBuilder = buildTrainerOpts(trainerOptions);
 
     if (trainerOptions.hasTrainingMode()
-        && trainerOptions.getTrainingMode() == TrainingMode.TRAINING_MODE_FEDERATION) {
+        && trainerOptions.getTrainingMode() == TrainingMode.TRAINING_MODE_LOCAL_COMPUTATION) {
       logger.atInfo().log(
           "Cancelling local computation for session_name:%s", trainerOptions.getSessionName());
     } else {
