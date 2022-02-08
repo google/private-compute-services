@@ -53,5 +53,9 @@ val NowPlayingUsagePolicy_FederatedCompute =
         conditionalUsage("top2000PackageNamesWith2000Wau", UsageType.ANY)
         rawUsage(UsageType.JOIN)
       }
+      "recognitionResult" { rawUsage(UsageType.ANY) }
+      "recognitionTrigger" { rawUsage(UsageType.ANY) }
+      "detectedMusicScore" { rawUsage(UsageType.ANY) }
+      "comparisonToLastMatch" { rawUsage(UsageType.ANY) }
     }
   }
