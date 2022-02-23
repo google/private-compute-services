@@ -23,15 +23,21 @@ import com.google.auto.value.AutoValue;
 public abstract class PcsHttpConfig {
 
   public static Builder builder() {
-    return new AutoValue_PcsHttpConfig.Builder().setOnReadyHandlerEnabled(false);
+    return new AutoValue_PcsHttpConfig.Builder()
+        .setOnReadyHandlerEnabled(false)
+        .setIpcStreamingThrottleMs(0);
   }
 
   public abstract boolean onReadyHandlerEnabled();
+
+  public abstract int ipcStreamingThrottleMs();
 
   /** Builder for {@link NetworkUsageLogConfig} */
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder setOnReadyHandlerEnabled(boolean value);
+
+    public abstract Builder setIpcStreamingThrottleMs(int value);
 
     public abstract PcsHttpConfig build();
   }

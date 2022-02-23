@@ -16,6 +16,7 @@
 
 package com.google.android.as.oss.http.service;
 
+import android.os.SystemClock;
 import androidx.annotation.GuardedBy;
 import androidx.annotation.VisibleForTesting;
 import com.google.android.as.oss.common.ExecutorAnnotations.IoExecutorQualifier;
@@ -137,6 +138,7 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
               request,
               serverStreamObserver,
               body.byteStream(),
+              configReader.getConfig().ipcStreamingThrottleMs(),
               executor,
               networkUsageLogRepository);
       serverStreamObserver.setOnReadyHandler(onReadyHandler);
@@ -233,6 +235,7 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
     private final HttpDownloadRequest request;
     private final ServerCallStreamObserver<HttpDownloadResponse> responseObserver;
     private final InputStream bodyStream;
+    private final int ipcStreamingThrottleMs;
     private final Executor backgroundExecutor;
     private final NetworkUsageLogRepository networkUsageLogRepository;
 
@@ -240,11 +243,13 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
         HttpDownloadRequest request,
         ServerCallStreamObserver<HttpDownloadResponse> serverStreamObserver,
         InputStream is,
+        int ipcStreamingThrottleMs,
         Executor executor,
         NetworkUsageLogRepository networkUsageLogRepository) {
       this.request = request;
       this.responseObserver = serverStreamObserver;
       this.bodyStream = is;
+      this.ipcStreamingThrottleMs = ipcStreamingThrottleMs;
       this.backgroundExecutor = executor;
       this.networkUsageLogRepository = networkUsageLogRepository;
     }
@@ -283,8 +288,20 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
                             .build())
                     .build());
             totalBytesRead.addAndGet(bytesPendingToBeSent);
+            logger.atFine().log(
+                "PCS sent [%d] bytes to client (%d bytes sent so far).",
+                bytesPendingToBeSent, totalBytesRead.get());
             // Data has been sent, nothing more to process for now.
             bytesPendingToBeSent = 0;
+
+            // If throttling is enabled (value > 0), sleep for x ms after every 16MB download.
+            // Note that totalBytesRead can't be guaranteed to arrive at a particular number, but it
+            // increases by BUFFER_LENGTH increments, so %16MB will be less than BUFFER_LENGTH
+            // exactly once after every 16MB of download.
+            if (ipcStreamingThrottleMs > 0 && totalBytesRead.get() % 16_000_000 < BUFFER_LENGTH) {
+              logger.atFine().log("Throttling download from PCS.");
+              SystemClock.sleep(ipcStreamingThrottleMs);
+            }
           }
         }
 
