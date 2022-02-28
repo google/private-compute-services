@@ -32,7 +32,10 @@
       <intent-filter>
         <action android:name="com.google.fcp.client.EXAMPLE_STORE"/>
       </intent-filter>
-      <intent-filter>
+      <!-- Preventively setting this filter to a low priority so if in the future multiple example
+      store service is allowed, this won't intercept those with more specific filters.
+      Since currently there is only one example store, this is a no-op. -->
+      <intent-filter android:priority="-100">
         <action android:name="com.google.fcp.client.EXAMPLE_STORE_V2" />
         <!-- Important: the v2 <intent-filter> must include at least a <data> entry with an "app"
         scheme, otherwise this intent-filter won't match the intent used by the training service.
