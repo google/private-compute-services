@@ -16,10 +16,10 @@
 
 package com.google.android.libraries.pcc.policies.federatedcompute
 
-/** SmartSelect FederatedCompute policy. */
-val SmartSelectPolicy_FederatedCompute =
+/** SmartSelect policy for federated learning. */
+val SmartSelectLearningPolicy_FederatedCompute =
   flavoredPolicies(
-    name = "SmartSelectPolicy_FederatedCompute",
+    name = "SmartSelectLearningPolicy_FederatedCompute",
     policyType = MonitorOrImproveUserExperienceWithFederatedCompute,
   ) {
     description =
@@ -27,7 +27,7 @@ val SmartSelectPolicy_FederatedCompute =
       To train and improve SmartSelect ML models that correctly select and classify actionable text.
 
       ALLOWED EGRESSES: FederatedCompute.
-      ALLOWED USAGES: Federated analytics, federated learning.
+      ALLOWED USAGES: Federated learning.
     """.trimIndent()
 
     // Smart select needs a smaller round size due to:
