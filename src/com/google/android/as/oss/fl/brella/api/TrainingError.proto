@@ -51,7 +51,7 @@ enum TrainingError {
   /** Training failed while validating configs. */
   TRAINING_ERROR_PCC_CONFIG_VALIDATION_FAILED = 7;
 
-  /** Client specific error codes. */
+  /** Generic error codes. */
   /** The specified policy has an invalid egress type. */
   TRAINING_ERROR_EGRESS_TYPE_NOT_ALLOWED = 10;
   /** A failure occurred while creating the example store iterator. */
@@ -78,4 +78,11 @@ enum TrainingError {
   TRAINING_ERROR_USER_CONSENT_NOT_SUPPORTED = 21;
   /** ExampleStoreIterator.next threw an exception. */
   TRAINING_ERROR_EXAMPLE_ITERATOR_NEXT_FAILED = 22;
+  /** The specified custom selection criteria is invalid. */
+  TRAINING_ERROR_INVALID_CUSTOM_SELECTION_CRITERIA = 23;
+  /** The example store contains no eligible examples */
+  TRAINING_ERROR_NO_ELIGIBLE_EXAMPLES = 24;
+
+  /** Client specific error codes. Use numbers greater than or equal to 40 and
+   * smaller than 50. */
 }
