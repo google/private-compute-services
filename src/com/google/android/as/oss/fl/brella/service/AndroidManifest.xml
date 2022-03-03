@@ -21,8 +21,8 @@
     package="com.google.android.as.oss.fl.brella.service">
 
   <uses-sdk
-      android:minSdkVersion="30"
-      android:targetSdkVersion="30"/>
+      android:minSdkVersion="31"
+      android:targetSdkVersion="31"/>
 
   <application>
     <service
