@@ -22,7 +22,6 @@ import android.os.IInterface;
 import android.os.RemoteException;
 import arcs.core.data.proto.PolicyProto;
 import arcs.core.policy.Policy;
-import arcs.core.policy.proto.PolicyProtoKt;
 import com.google.android.as.oss.common.ExecutorAnnotations.FlExecutorQualifier;
 import com.google.android.as.oss.fl.Annotations.AsiPackageName;
 import com.google.android.as.oss.fl.Annotations.ExampleStoreClientsInfo;
@@ -31,11 +30,13 @@ import com.google.android.as.oss.fl.brella.api.IExampleStore;
 import com.google.android.as.oss.fl.brella.api.StartQueryCallback;
 import com.google.android.as.oss.fl.brella.api.proto.TrainingError;
 import com.google.android.as.oss.fl.brella.service.ConnectionManager.ConnectionType;
+import com.google.android.as.oss.fl.brella.service.util.PolicyFinder;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogUtils;
 import com.google.android.as.oss.networkusage.ui.content.UnrecognizedNetworkRequestException;
 import com.google.android.as.oss.proto.AstreaProtos.AstreaQuery;
 import com.google.fcp.client.ExampleStoreService;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import com.google.common.flogger.GoogleLogger;
@@ -102,8 +103,8 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
           TrainingError.TRAINING_ERROR_PCC_FAILED_TO_PARSE_QUERY_VALUE, "Failed to parse query.");
       return;
     }
-
-    if (!isPolicyCompliant(query)) {
+    Optional<Policy> installedPolicy = PolicyFinder.findCompatiblePolicy(query, installedPolicies);
+    if (!installedPolicy.isPresent()) {
       callback.onStartQueryFailure(
           TrainingError.TRAINING_ERROR_PCC_POLICY_NOT_PRESENT_VALUE,
           "Query does not specify a policy, or the specified policy is not present.");
@@ -117,7 +118,7 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
       return;
     }
 
-    if (!checkFederatedConfigs(query, selectorContext)) {
+    if (!checkFederatedConfigs(query, selectorContext, installedPolicy.get())) {
       callback.onStartQueryFailure(
           TrainingError.TRAINING_ERROR_PCC_CONFIG_VALIDATION_FAILED_VALUE,
           "Training configs don't match federation configs defined in the policy.");
@@ -178,7 +179,8 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
         flExecutor);
   }
 
-  static boolean checkFederatedConfigs(AstreaQuery query, SelectorContext selectorContext) {
+  static boolean checkFederatedConfigs(
+      AstreaQuery query, SelectorContext selectorContext, Policy installedPolicy) {
     if (!selectorContext.getComputationProperties().hasFederated()) {
       // Federated configs are only checked for Federated tasks
       return true;
@@ -191,20 +193,20 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
       return false;
     }
 
-    Policy queryPolicy = PolicyProtoKt.decode(query.getPolicy());
-    if (!queryPolicy.getConfigs().containsKey("federatedCompute")) {
+    if (!installedPolicy.getConfigs().containsKey("federatedCompute")) {
       logger.atWarning().log("Policy provided doesn't have configs.");
       return false;
     }
 
-    Map<String, String> policyConfigs = queryPolicy.getConfigs().get("federatedCompute");
+    Map<String, String> policyConfigs = installedPolicy.getConfigs().get("federatedCompute");
     if (policyConfigs == null || !policyConfigs.containsKey("minSecAggRoundSize")) {
       logger.atWarning().log("Policy provided doesn't have configs.");
       return false;
     }
     int secAggRoundSize = Integer.parseInt(policyConfigs.getOrDefault("minSecAggRoundSize", "0"));
 
-    if (secAggRoundSize > 0) {
+    // Secure Aggregation with size <= 1 is equivalent to disabling SecAgg.
+    if (secAggRoundSize > 1) {
       if (!selectorContext.getComputationProperties().getFederated().hasSecureAggregation()) {
         logger.atWarning().log(
             "SecAgg metadata not provided by Federated Compute, but SecAgg is required by policy.");
@@ -235,36 +237,6 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
       logger.atWarning().withCause(e).log("Couldn't parse criteria.");
     }
     return null;
-  }
-
-  private boolean isPolicyCompliant(AstreaQuery query) {
-    if (!query.hasPolicy()) {
-      logger.atWarning().log("No policy provided in the query.");
-      return false;
-    }
-
-    PolicyProto queryProto = query.getPolicy();
-    if (!installedPolicies.containsKey(queryProto.getName())) {
-      logger.atWarning().log("Policy in the query is not installed.");
-      return false;
-    }
-
-    for (PolicyProto installedPolicyProto : installedPolicies.get(queryProto.getName())) {
-      if (installedPolicyProto == null) {
-        logger.atWarning().log("Installed policy is not expected to be null.");
-        return false;
-      }
-
-      Policy queryPolicy = PolicyProtoKt.decode(queryProto);
-      Policy installedPolicy = PolicyProtoKt.decode(installedPolicyProto);
-
-      if (installedPolicy.equals(queryPolicy)) {
-        return true;
-      }
-    }
-
-    logger.atWarning().log("Installed policy doesn't match the policy pushed in the query.");
-    return false;
   }
 
   // Note: The success/failure status and the upload size in bytes, are reported in another row
