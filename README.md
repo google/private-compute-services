@@ -22,13 +22,12 @@ Core and the cloud.
 
 [Android’s Private Compute Core](https://blog.google/products/android/android-12-beta/)
 is a secure environment that is isolated from the rest of the operating system
-and apps where close-source features can safely access ambient and sensitive
-data.
+and apps where close-source features can safely access ambient and OS data.
 
-Since Android 11, the OS prevents PCC components from having direct
-communication with other apps, and forces its features to use a small set of
-well defined APIs in AOSP. These protections are already open-source and can be
-found
+Since Android 11, the OS prevents Private Compute Core components from having
+direct communication with other apps, and forces its features to use a small set
+of well defined APIs in AOSP. These protections are already open-source and can
+be found
 [here](https://cs.android.com/android/_/android/platform/packages/modules/Permission/+/efd83ae33345e86dd7e890ab03750aa04d954da1:PermissionController/res/xml/roles.xml;l=668,711,755,797,832;drc=77db87e9fcfaed305c2a4eabe72a66def3f91d11).
 
 From Android 12 forward, features inside Private Compute Core do not have direct
