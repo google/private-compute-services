@@ -22,7 +22,6 @@ import static com.google.android.as.oss.fl.brella.service.util.PolicyConstants.R
 import arcs.core.data.proto.PolicyProto;
 import arcs.core.policy.Policy;
 import arcs.core.policy.proto.PolicyProtoKt;
-import com.google.android.as.oss.proto.AstreaProtos.AstreaQuery;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
@@ -46,13 +45,7 @@ public class PolicyFinder {
   // Java 8 compatibility is not universal yet so we still use Guava's Optional.
   @SuppressWarnings("Guava")
   public static Optional<Policy> findCompatiblePolicy(
-      AstreaQuery query, Multimap<String, PolicyProto> installedPolicies) {
-    if (!query.hasPolicy()) {
-      logger.atWarning().log("No policy provided in the query.");
-      return Optional.absent();
-    }
-
-    PolicyProto queryProto = query.getPolicy();
+      PolicyProto queryProto, Multimap<String, PolicyProto> installedPolicies) {
     String policyName = queryProto.getName();
     if (!installedPolicies.containsKey(policyName)) {
       logger.atWarning().log("Policy name=%s in the query is not installed.", policyName);
@@ -67,23 +60,10 @@ public class PolicyFinder {
       }
 
       Policy installedPolicy = PolicyProtoKt.decode(installedPolicyProto);
-
-      if (!installedPolicy.getEgressType().equals(queryPolicy.getEgressType())) {
-        logger.atWarning().log(
-            "Installed policy name=%s egress type doesn't match query egress type.", policyName);
+      if (!isPolicyCompatible(installedPolicy, queryPolicy)) {
         continue;
       }
 
-      if (!installedConfigMatchesQueryConfig(
-          FEDERATED_COMPUTE_CONFIG_KEY, installedPolicy, queryPolicy)) {
-        continue;
-      }
-      if (!installedConfigMatchesQueryConfig(
-          REQUIRED_USER_CONSENT_CONFIG_KEY, installedPolicy, queryPolicy)) {
-        continue;
-      }
-
-      // All the above checks passed, so policy is compatible.
       return Optional.of(installedPolicy);
     }
 
@@ -91,6 +71,28 @@ public class PolicyFinder {
         "Installed policy name=%s isn't compatible with the policy pushed in the query.",
         policyName);
     return Optional.absent();
+  }
+
+  /**
+   * Checks whether a query policy is compatible with an installed policy. The policy is compatible
+   * if all the required policy configs are compatible, and it uses the same egress type.
+   */
+  public static boolean isPolicyCompatible(Policy installedPolicy, Policy queryPolicy) {
+    String policyName = installedPolicy.getName();
+    if (!installedPolicy.getEgressType().equals(queryPolicy.getEgressType())) {
+      logger.atWarning().log(
+          "Installed policy name=%s egress type doesn't match query egress type.", policyName);
+      return false;
+    }
+    if (!installedConfigMatchesQueryConfig(
+        FEDERATED_COMPUTE_CONFIG_KEY, installedPolicy, queryPolicy)) {
+      return false;
+    }
+    if (!installedConfigMatchesQueryConfig(
+        REQUIRED_USER_CONSENT_CONFIG_KEY, installedPolicy, queryPolicy)) {
+      return false;
+    }
+    return true;
   }
 
   /**

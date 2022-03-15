@@ -103,11 +103,21 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
           TrainingError.TRAINING_ERROR_PCC_FAILED_TO_PARSE_QUERY_VALUE, "Failed to parse query.");
       return;
     }
-    Optional<Policy> installedPolicy = PolicyFinder.findCompatiblePolicy(query, installedPolicies);
+
+    if (!query.hasPolicy()) {
+      logger.atWarning().log("No policy provided in the query.");
+      callback.onStartQueryFailure(
+          TrainingError.TRAINING_ERROR_PCC_POLICY_NOT_PRESENT_VALUE,
+          "Query does not specify a policy");
+      return;
+    }
+    PolicyProto queryPolicy = query.getPolicy();
+    Optional<Policy> installedPolicy =
+        PolicyFinder.findCompatiblePolicy(queryPolicy, installedPolicies);
     if (!installedPolicy.isPresent()) {
       callback.onStartQueryFailure(
           TrainingError.TRAINING_ERROR_PCC_POLICY_NOT_PRESENT_VALUE,
-          "Query does not specify a policy, or the specified policy is not present.");
+          "Query specified policy is not installed, or the installed version is incompatible.");
       return;
     }
 
