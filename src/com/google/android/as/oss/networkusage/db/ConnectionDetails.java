@@ -40,6 +40,8 @@ public abstract class ConnectionDetails implements Parcelable {
     return new AutoValue_ConnectionDetails.Builder();
   }
 
+  public abstract Builder toBuilder();
+
   /** Required by Room. Please use {@link Builder} instead. */
   public static ConnectionDetails create(
       ConnectionKey connectionKey, ConnectionType type, String packageName) {
@@ -62,14 +64,30 @@ public abstract class ConnectionDetails implements Parcelable {
     public abstract ConnectionDetails build();
   }
 
-  /** The connection's protocol. */
+  /** The type of download or upload event. */
   public enum ConnectionType {
     UNKNOWN_TYPE,
-    FC_CHECK_IN, // Federated Computation check-in events
-    FC_TRAINING_START_QUERY, // Federated Computation training data upload, excludes upload size
-    FC_TRAINING_RESULT_UPLOAD, // Federated Computation training data upload, includes upload size
-    HTTP, // HTTP downloads
-    PIR // PIR downloads
+    /**
+     * A lightweight download to check the eligibility of clients for Federated Computation jobs.
+     */
+    FC_CHECK_IN,
+    /**
+     * Represents the start of a Federated Computation query. Each {@code FC_TRAINING_START_QUERY}
+     * entity in the database, will have one corresponding {@code FC_TRAINING_RESULT_UPLOAD} entity
+     * with the same {@link NetworkUsageEntity#fcRunId}, or zero in case of a failed query.
+     */
+    FC_TRAINING_START_QUERY,
+    /**
+     * Represents the upload of a completed Federated Computation job; which consists of one or more
+     * queries. Each {@code FC_TRAINING_RESULT_UPLOAD} entity in the database corresponds to one or
+     * more {@code FC_TRAINING_START_QUERY} entities with the same {@link
+     * NetworkUsageEntity#fcRunId}.
+     */
+    FC_TRAINING_RESULT_UPLOAD,
+    /** A download using HTTPS. */
+    HTTP,
+    /** A download using Private Information Retrieval. */
+    PIR
   }
 
   /**
