@@ -18,6 +18,7 @@ package com.google.android.as.oss.http.service;
 
 import android.os.SystemClock;
 import androidx.annotation.GuardedBy;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import com.google.android.as.oss.common.ExecutorAnnotations.IoExecutorQualifier;
 import com.google.android.as.oss.common.config.ConfigReader;
@@ -78,6 +79,10 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
       HttpDownloadRequest request, StreamObserver<HttpDownloadResponse> responseObserver) {
     logger.atInfo().log("Downloading requested for URL '%s'", request.getUrl());
 
+    // To suppress an exception in onNext in case the observer was cancelled.
+    ((ServerCallStreamObserver<HttpDownloadResponse>) responseObserver)
+        .setOnCancelHandler(() -> {});
+
     if (networkUsageLogRepository.shouldRejectRequest(ConnectionType.HTTP, request.getUrl())) {
       logger.atWarning().withCause(UnrecognizedNetworkRequestException.forUrl(request.getUrl()))
           .log("Rejected unknown HTTPS request to PCS");
@@ -101,8 +106,6 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
       insertNetworkUsageLogRow(networkUsageLogRepository, request, Status.FAILED, 0L);
       return;
     }
-    ((ServerCallStreamObserver<HttpDownloadResponse>) responseObserver)
-        .setOnCancelHandler(response::close);
 
     ResponseHeaders.Builder responseHeaders =
         ResponseHeaders.newBuilder().setResponseCode(response.code());
@@ -155,6 +158,12 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
                 byte[] buffer = new byte[BUFFER_LENGTH];
 
                 while (true) {
+                  if (((ServerCallStreamObserver<HttpDownloadResponse>) responseObserver)
+                      .isCancelled()) {
+                    logCallCancelledByClient(
+                        null, networkUsageLogRepository, request, totalBytesRead);
+                    return;
+                  }
                   int bytesRead = is.read(buffer);
                   if (bytesRead == -1) {
                     break;
@@ -184,11 +193,8 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
                 insertNetworkUsageLogRow(
                     networkUsageLogRepository, request, Status.FAILED, totalBytesRead);
               } catch (StatusRuntimeException e) {
-                if (responseObserver instanceof ServerCallStreamObserver
-                    && ((ServerCallStreamObserver) responseObserver).isCancelled()) {
-                  logger.atWarning().withCause(e).log(
-                      "Failed to fetch response body for URL '%s'. Call cancelled by client.",
-                      request.getUrl());
+                if (((ServerCallStreamObserver) responseObserver).isCancelled()) {
+                  logCallCancelledByClient(e, networkUsageLogRepository, request, totalBytesRead);
                 } else {
                   responseObserver.onError(e);
                   insertNetworkUsageLogRow(
@@ -198,6 +204,16 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
             }
           });
     }
+  }
+
+  private static void logCallCancelledByClient(
+      @Nullable Throwable error,
+      NetworkUsageLogRepository networkUsageLogRepository,
+      HttpDownloadRequest request,
+      long size) {
+    logger.atWarning().withCause(error).log(
+        "Failed to fetch response body for URL '%s'. Call cancelled by client.", request.getUrl());
+    insertNetworkUsageLogRow(networkUsageLogRepository, request, Status.FAILED, size);
   }
 
   private static void insertNetworkUsageLogRow(
@@ -264,6 +280,11 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
         while (bytesPendingToBeSent >= 0) {
           // Do not overwrite the buffer with new data if previous buffer has not been transmitted.
           if (bytesPendingToBeSent == 0) {
+            if (responseObserver.isCancelled()) {
+              logCallCancelledByClient(
+                  null, networkUsageLogRepository, request, totalBytesRead.get());
+              return;
+            }
             bytesPendingToBeSent = bodyStream.read(buffer);
           }
 
@@ -321,9 +342,7 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
                     networkUsageLogRepository, request, Status.FAILED, totalBytesRead.get()));
       } catch (StatusRuntimeException e) {
         if (responseObserver.isCancelled()) {
-          logger.atWarning().withCause(e).log(
-              "Failed to fetch response body for URL [%s]. Call cancelled by client.",
-              request.getUrl());
+          logCallCancelledByClient(e, networkUsageLogRepository, request, totalBytesRead.get());
         } else {
           responseObserver.onError(e);
           // TODO: Cancellation should also be logged in network usage log.
