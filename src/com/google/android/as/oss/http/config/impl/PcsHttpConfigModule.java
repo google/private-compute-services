@@ -16,8 +16,7 @@
 
 package com.google.android.as.oss.http.config.impl;
 
-import static com.google.android.as.oss.common.Executors.GENERAL_SINGLE_THREAD_EXECUTOR;
-
+import com.google.android.as.oss.common.ExecutorAnnotations.GeneralExecutorQualifier;
 import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.common.config.FlagManagerFactory;
 import com.google.android.as.oss.common.config.FlagNamespace;
@@ -26,15 +25,16 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
 import dagger.hilt.components.SingletonComponent;
+import java.util.concurrent.Executor;
 
 /** Module that provides ConfigReader for Network Usage Log. */
 @Module
 @InstallIn(SingletonComponent.class)
 public interface PcsHttpConfigModule {
   @Provides
-  static ConfigReader<PcsHttpConfig> provideConfigReader(FlagManagerFactory flagManagerFactory) {
+  static ConfigReader<PcsHttpConfig> provideConfigReader(
+      FlagManagerFactory flagManagerFactory, @GeneralExecutorQualifier Executor executor) {
     return PcsHttpConfigReader.create(
-        flagManagerFactory.create(
-            FlagNamespace.DEVICE_PERSONALIZATION_SERVICES, GENERAL_SINGLE_THREAD_EXECUTOR));
+        flagManagerFactory.create(FlagNamespace.DEVICE_PERSONALIZATION_SERVICES, executor));
   }
 }

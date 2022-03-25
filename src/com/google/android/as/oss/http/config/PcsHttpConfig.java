@@ -25,12 +25,15 @@ public abstract class PcsHttpConfig {
   public static Builder builder() {
     return new AutoValue_PcsHttpConfig.Builder()
         .setOnReadyHandlerEnabled(false)
-        .setIpcStreamingThrottleMs(0);
+        .setIpcStreamingThrottleMs(0)
+        .setWriteToPfd(false);
   }
 
   public abstract boolean onReadyHandlerEnabled();
 
   public abstract int ipcStreamingThrottleMs();
+
+  public abstract boolean writeToPfd();
 
   /** Builder for {@link NetworkUsageLogConfig} */
   @AutoValue.Builder
@@ -38,6 +41,8 @@ public abstract class PcsHttpConfig {
     public abstract Builder setOnReadyHandlerEnabled(boolean value);
 
     public abstract Builder setIpcStreamingThrottleMs(int value);
+
+    public abstract Builder setWriteToPfd(boolean value);
 
     public abstract PcsHttpConfig build();
   }

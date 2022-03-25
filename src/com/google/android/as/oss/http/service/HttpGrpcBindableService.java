@@ -16,6 +16,9 @@
 
 package com.google.android.as.oss.http.service;
 
+import static com.google.android.as.oss.grpc.ContextKeys.WRITEABLE_FILE_CONTEXT_KEY;
+
+import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import androidx.annotation.GuardedBy;
 import androidx.annotation.Nullable;
@@ -43,6 +46,7 @@ import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.inject.Inject;
@@ -78,6 +82,8 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
   public void download(
       HttpDownloadRequest request, StreamObserver<HttpDownloadResponse> responseObserver) {
     logger.atInfo().log("Downloading requested for URL '%s'", request.getUrl());
+    // Snapshot config so we use consistent values for a single request.
+    PcsHttpConfig config = configReader.getConfig();
 
     // To suppress an exception in onNext in case the observer was cancelled.
     ((ServerCallStreamObserver<HttpDownloadResponse>) responseObserver)
@@ -132,7 +138,9 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
       return;
     }
 
-    if (configReader.getConfig().onReadyHandlerEnabled()) {
+    final ParcelFileDescriptor pfd = config.writeToPfd() ? WRITEABLE_FILE_CONTEXT_KEY.get() : null;
+    if (config.onReadyHandlerEnabled() && pfd == null) {
+      // Only use onReadyHandler if it is enabled by flag AND we have not received a direct pfd.
       ServerCallStreamObserver<HttpDownloadResponse> serverStreamObserver =
           (ServerCallStreamObserver<HttpDownloadResponse>) responseObserver;
 
@@ -141,7 +149,7 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
               request,
               serverStreamObserver,
               body.byteStream(),
-              configReader.getConfig().ipcStreamingThrottleMs(),
+              config.ipcStreamingThrottleMs(),
               executor,
               networkUsageLogRepository);
       serverStreamObserver.setOnReadyHandler(onReadyHandler);
@@ -154,7 +162,9 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
 
             @Override
             public void run() {
-              try (InputStream is = body.byteStream()) {
+              try (InputStream is = body.byteStream();
+                  OutputStream os =
+                      (pfd == null) ? null : new ParcelFileDescriptor.AutoCloseOutputStream(pfd)) {
                 byte[] buffer = new byte[BUFFER_LENGTH];
 
                 while (true) {
@@ -171,13 +181,17 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
 
                   if (bytesRead > 0) {
                     totalBytesRead += bytesRead;
-                    responseObserver.onNext(
-                        HttpDownloadResponse.newBuilder()
-                            .setResponseBodyChunk(
-                                ResponseBodyChunk.newBuilder()
-                                    .setResponseBytes(ByteString.copyFrom(buffer, 0, bytesRead))
-                                    .build())
-                            .build());
+                    if (os != null) {
+                      os.write(buffer, 0, bytesRead);
+                    } else {
+                      responseObserver.onNext(
+                          HttpDownloadResponse.newBuilder()
+                              .setResponseBodyChunk(
+                                  ResponseBodyChunk.newBuilder()
+                                      .setResponseBytes(ByteString.copyFrom(buffer, 0, bytesRead))
+                                      .build())
+                              .build());
+                    }
                   }
                 }
 

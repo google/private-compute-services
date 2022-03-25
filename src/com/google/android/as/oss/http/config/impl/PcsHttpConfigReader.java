@@ -34,6 +34,9 @@ class PcsHttpConfigReader extends AbstractConfigReader<PcsHttpConfig> {
   static final IntegerFlag IPC_STREAMING_THROTTLE_MS =
       IntegerFlag.create("PcsHttp__ipc_streaming_throttle_ms", BuildCompat.isAtLeastT() ? 4000 : 0);
 
+  static final BooleanFlag WRITE_TO_PFD =
+      BooleanFlag.create("PcsHttp__write_to_pfd", BuildCompat.isAtLeastT());
+
   private final FlagManager flagManager;
 
   static PcsHttpConfigReader create(FlagManager flagManager) {
@@ -57,6 +60,7 @@ class PcsHttpConfigReader extends AbstractConfigReader<PcsHttpConfig> {
     return PcsHttpConfig.builder()
         .setOnReadyHandlerEnabled(flagManager.get(ENABLE_ON_READY_HANDLER))
         .setIpcStreamingThrottleMs(flagManager.get(IPC_STREAMING_THROTTLE_MS))
+        .setWriteToPfd(flagManager.get(WRITE_TO_PFD))
         .build();
   }
 
