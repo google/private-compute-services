@@ -50,14 +50,12 @@ public final class NetworkUsageLogUtils {
         .build();
   }
 
-  public static ConnectionDetails createFcCheckInConnectionDetails(String packageName) {
-    return getDefaultConnectionDetailsBuilder(ConnectionType.FC_CHECK_IN, packageName).build();
+  public static ConnectionDetails createFcCheckInConnectionDetails() {
+    return getDefaultConnectionDetailsBuilder(ConnectionType.FC_CHECK_IN).build();
   }
 
-  public static ConnectionDetails createFcTrainingResultUploadConnectionDetails(
-      String packageName) {
-    return getDefaultConnectionDetailsBuilder(ConnectionType.FC_TRAINING_RESULT_UPLOAD, packageName)
-        .build();
+  public static ConnectionDetails createFcTrainingResultUploadConnectionDetails() {
+    return getDefaultConnectionDetailsBuilder(ConnectionType.FC_TRAINING_RESULT_UPLOAD).build();
   }
 
   public static ConnectionDetails createFcTrainingStartQueryConnectionDetails(
@@ -90,16 +88,15 @@ public final class NetworkUsageLogUtils {
     return getNetworkUsageEntityForUrl(connectionDetails, status, size, url);
   }
 
-  public static NetworkUsageEntity createFcCheckInNetworkUsageEntity(
-      ConnectionDetails connectionDetails, long size) {
-    checkArgument(connectionDetails.type() == ConnectionType.FC_CHECK_IN);
-    return getNetworkUsageEntityBuilder(connectionDetails, Status.SUCCEEDED, size).build();
+  public static NetworkUsageEntity createFcCheckInNetworkUsageEntity(long size) {
+    return getNetworkUsageEntityBuilder(createFcCheckInConnectionDetails(), Status.SUCCEEDED, size)
+        .build();
   }
 
   public static NetworkUsageEntity createFcTrainingResultUploadNetworkUsageEntity(
-      ConnectionDetails connectionDetails, long runId, long size) {
-    checkArgument(connectionDetails.type() == ConnectionType.FC_TRAINING_RESULT_UPLOAD);
-    return getNetworkUsageEntityBuilder(connectionDetails, Status.SUCCEEDED, size)
+      long runId, long size) {
+    return getNetworkUsageEntityBuilder(
+            createFcTrainingResultUploadConnectionDetails(), Status.SUCCEEDED, size)
         .setFcRunId(runId)
         .build();
   }
@@ -137,9 +134,13 @@ public final class NetworkUsageLogUtils {
   private static ConnectionDetails.Builder getDefaultConnectionDetailsBuilder(
       ConnectionType type, String packageName) {
     checkArgument(!Strings.isNullOrEmpty(packageName));
+    return getDefaultConnectionDetailsBuilder(type).setPackageName(packageName);
+  }
+
+  private static ConnectionDetails.Builder getDefaultConnectionDetailsBuilder(ConnectionType type) {
     return ConnectionDetails.builder()
         .setType(type)
-        .setPackageName(packageName)
+        .setPackageName("unknown")
         .setConnectionKey(ConnectionKey.getDefaultInstance());
   }
 
