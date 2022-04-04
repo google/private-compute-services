@@ -21,6 +21,8 @@ import com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionTyp
 import com.google.android.as.oss.networkusage.db.NetworkUsageEntity;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
 import com.google.android.as.oss.networkusage.ui.content.NetworkUsageLogContentMap;
+import com.google.common.util.concurrent.FutureCallback;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -69,4 +71,7 @@ public class NetworkUsageLogRepositoryNoOpImpl implements NetworkUsageLogReposit
   public LiveData<List<NetworkUsageEntity>> getAll() {
     return new LiveData<List<NetworkUsageEntity>>() {};
   }
+
+  @Override
+  public void deleteAllBefore(Instant instant, FutureCallback<Integer> callback) {}
 }

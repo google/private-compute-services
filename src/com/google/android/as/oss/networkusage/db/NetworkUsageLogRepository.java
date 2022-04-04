@@ -19,6 +19,8 @@ package com.google.android.as.oss.networkusage.db;
 import androidx.lifecycle.LiveData;
 import com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType;
 import com.google.android.as.oss.networkusage.ui.content.NetworkUsageLogContentMap;
+import com.google.common.util.concurrent.FutureCallback;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -52,4 +54,7 @@ public interface NetworkUsageLogRepository {
 
   /** Returns the list of NetworkUsageEntities in the database. */
   LiveData<List<NetworkUsageEntity>> getAll();
+
+  /** Deletes all entities before the given instant. */
+  void deleteAllBefore(Instant instant, FutureCallback<Integer> callback);
 }
