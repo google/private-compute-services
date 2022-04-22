@@ -48,8 +48,7 @@ val AutofillPolicy_FederatedCompute =
     target(IN_MEMORY_AUTOFILL_REQUEST_ENTITY_GENERATED_DTD, maxAge = Duration.ofDays(2)) {
       retention(StorageMedium.RAM)
 
-      /** Allowed for substring/equality comparison. */
-      "committedText" { rawUsage(UsageType.ANY) }
+      "committedText" { rawUsage(UsageType.JOIN) }
     }
 
     target(
