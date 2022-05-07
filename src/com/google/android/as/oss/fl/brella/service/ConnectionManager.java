@@ -132,14 +132,17 @@ class ConnectionManager {
   }
 
   @Nullable String getClientName(InAppTrainerOptions trainerOptions) {
-    String population = trainerOptions.getFederatedPopulationName();
-    // ASI population prefix.
-    if (population.startsWith("aiai/")) {
+    String populationOrSessionName =
+        trainerOptions.getFederatedPopulationName() != null
+            ? trainerOptions.getFederatedPopulationName()
+            : trainerOptions.getSessionName();
+    // ASI population or local computation session prefix.
+    if (populationOrSessionName.startsWith("aiai/")) {
       return asiPackageName;
     }
 
-    // GPPS population prefix.
-    if (population.startsWith("odad/")) {
+    // GPPS population or local computation session prefix.
+    if (populationOrSessionName.startsWith("odad/")) {
       return gppsPackageName;
     }
     return null;
