@@ -91,4 +91,34 @@ val SafecommsPolicy_FederatedCompute =
       "uiScreen" { rawUsage(UsageType.ANY) }
       "uiEvent" { rawUsage(UsageType.ANY) }
     }
+
+    target(SAFECOMMS_FEATURE_STATUS_CHANGE_EVENT_GENERATED_DTD, maxAge = Duration.ofDays(14)) {
+      retention(StorageMedium.RAM)
+      retention(StorageMedium.DISK)
+
+      "timestampMillis" {
+        conditionalUsage("truncatedToDays", UsageType.ANY)
+        rawUsage(UsageType.JOIN)
+      }
+      "featureEnabled" { rawUsage(UsageType.ANY) }
+      "featureDisableReason" { rawUsage(UsageType.ANY) }
+    }
+
+    target(SAFECOMMS_ANALYZER_ENTITY_GENERATED_DTD, maxAge = Duration.ofDays(14)) {
+      retention(StorageMedium.RAM)
+      retention(StorageMedium.DISK)
+
+      "conversationEntityId" { rawUsage(UsageType.ANY) }
+      "packageName" {
+        conditionalUsage("top2000PackageNamesWith2000Wau", UsageType.ANY)
+        rawUsage(UsageType.JOIN)
+      }
+      "timestampMillis" {
+        conditionalUsage("truncatedToDays", UsageType.ANY)
+        rawUsage(UsageType.JOIN)
+      }
+      "verdict" { rawUsage(UsageType.ANY) }
+      "predictedValue" { rawUsage(UsageType.ANY) }
+      "modelVersion" { rawUsage(UsageType.ANY) }
+    }
   }
