@@ -73,7 +73,7 @@ val AutofillPolicy_FederatedCompute =
       }
       "suggestionShown" { rawUsage(UsageType.ANY) }
       "userAction" { rawUsage(UsageType.ANY) }
-      "processingDurationMillis" { ConditionalUsage.Bucketed.whenever(UsageType.ANY) }
+      "bucketizedProcessingDurationMillis" { ConditionalUsage.Bucketed.whenever(UsageType.ANY) }
       "targetPackageName" {
         ConditionalUsage.Top2000PackageNamesWith2000Wau.whenever(UsageType.ANY)
         rawUsage(UsageType.JOIN)
