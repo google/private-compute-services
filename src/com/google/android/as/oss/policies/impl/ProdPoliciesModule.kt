@@ -35,6 +35,7 @@ object ProdPoliciesModule {
   fun providePolicies(@ApplicationContext context: Context): PolicyMap {
     return AssetLoader.loadPolicyMapFromAssets(
       context,
+      "AmbientContextPolicy_FederatedCompute_ASI_PROD.binarypb",
       "AutofillPolicy_FederatedCompute_ASI_PROD.binarypb",
       "SafecommsPolicy_FederatedCompute_ASI_PROD.binarypb",
       "LiveTranslatePolicy_FederatedCompute_ASI_PROD.binarypb",
