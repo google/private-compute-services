@@ -62,7 +62,7 @@ val AmbientContextPolicy_FederatedCompute =
         rawUsage(UsageType.JOIN)
       }
       "resultType" { rawUsage(UsageType.ANY) }
-      "durationMillis" { rawUsage(UsageType.ANY) }
+      "durationMillis" { ConditionalUsage.Bucketed.whenever(UsageType.ANY) }
       "confidenceBucket" { rawUsage(UsageType.ANY) }
       "densityBucket" { rawUsage(UsageType.ANY) }
       "modelId" { rawUsage(UsageType.ANY) }
