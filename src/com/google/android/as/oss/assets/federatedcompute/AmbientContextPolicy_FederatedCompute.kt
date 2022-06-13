@@ -44,7 +44,7 @@ val AmbientContextPolicy_FederatedCompute =
         ConditionalUsage.TruncatedToDays.whenever(UsageType.ANY)
         rawUsage(UsageType.JOIN)
       }
-      "statusCode" { rawUsage(UsageType.ANY) }
+      "serviceStatus" { rawUsage(UsageType.ANY) }
       "packageName" {
         ConditionalUsage.Top2000PackageNamesWith2000Wau.whenever(UsageType.ANY)
         rawUsage(UsageType.JOIN)
@@ -62,7 +62,7 @@ val AmbientContextPolicy_FederatedCompute =
         rawUsage(UsageType.JOIN)
       }
       "resultType" { rawUsage(UsageType.ANY) }
-      "durationMillis" { ConditionalUsage.Bucketed.whenever(UsageType.ANY) }
+      "bucketizedDurationMillis" { ConditionalUsage.Bucketed.whenever(UsageType.ANY) }
       "confidenceBucket" { rawUsage(UsageType.ANY) }
       "densityBucket" { rawUsage(UsageType.ANY) }
       "modelId" { rawUsage(UsageType.ANY) }
