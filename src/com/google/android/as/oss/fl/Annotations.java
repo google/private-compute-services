@@ -43,5 +43,15 @@ public final class Annotations {
   @Retention(RetentionPolicy.RUNTIME)
   public @interface GppsPackageName {}
 
+  /**
+   * Annotation for providing custom TensorFlow library name.
+   *
+   * <p>The custom native library contains a selection of regular TensorFlow and custom ops that are
+   * necessary to fulfill the device personalization computations.
+   */
+  @Qualifier
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface CustomTFLibName {}
+
   private Annotations() {}
 }

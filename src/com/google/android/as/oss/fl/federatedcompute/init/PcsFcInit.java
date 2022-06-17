@@ -23,6 +23,7 @@ import com.google.fcp.client.FCInit;
 import com.google.fcp.client.DynamicFlags;
 import com.google.fcp.client.LogManager;
 import com.google.common.flogger.GoogleLogger;
+import java.util.Optional;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -32,17 +33,22 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public final class PcsFcInit {
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
 
-  // Let federated compute load the native library in its default fashion.
-  private static final boolean LOAD_CUSTOM_LIBRARY = false;
   private static final String CLIENT_NAME = "astrea";
 
-  public static void init(PcsFcFlags pcsFcFlags, FcLogManager fcLogManager) {
+  public static void init(
+      PcsFcFlags pcsFcFlags, FcLogManager fcLogManager, Optional<String> customLibName) {
     logger.atInfo().log("Calling FCInit for PCS.");
     FCInit.setFatSdkConfig(
         new FCFatSdkConfig() {
           @Override
           public boolean loadCustomNativeLibrary() {
-            return LOAD_CUSTOM_LIBRARY;
+            if (customLibName.isPresent()) {
+              System.loadLibrary(customLibName.get());
+              return true;
+            } else {
+              // fallback to the default load fashion if the custom lib is not compiled in.
+              return false;
+            }
           }
 
           @Override
