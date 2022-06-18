@@ -20,6 +20,7 @@ import android.os.Parcel;
 import com.google.fcp.client.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.fcp.client.common.internal.safeparcel.SafeParcelable;
 import com.google.common.base.Objects;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 
 /** Options which describes the job scheduler constraints. */
 // TODO: Resolve nullness suppression.
@@ -42,12 +43,14 @@ public final class InAppTrainingConstraints extends AbstractSafeParcelable {
      * Whether to check if the device is not in interactive mode before running the job. See {@code
      * PowerManager#isInteractive} for details about interactive mode.
      */
+    @CanIgnoreReturnValue
     public Builder setRequiresNonInteractive(boolean requiresNonInteractive) {
       this.requiresNonInteractive = requiresNonInteractive;
       return this;
     }
 
     /** Whether to check if the device is charging before running the job. */
+    @CanIgnoreReturnValue
     public Builder setRequiresCharging(boolean requiresCharging) {
       this.requiresCharging = requiresCharging;
       return this;
@@ -57,6 +60,7 @@ public final class InAppTrainingConstraints extends AbstractSafeParcelable {
      * Whether check if the device is connected to an unmetered network before running the job. This
      * requirement is ignored by personalization jobs.
      */
+    @CanIgnoreReturnValue
     public Builder setRequiresUnmeteredNetwork(boolean requiresUnmeteredNetwork) {
       this.requiresUnmeteredNetwork = requiresUnmeteredNetwork;
       return this;

@@ -23,6 +23,7 @@ import com.google.fcp.client.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.fcp.client.common.internal.safeparcel.SafeParcelable;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.util.Arrays;
 import javax.annotation.Nullable;
 
@@ -43,12 +44,14 @@ public class ExampleConsumption extends AbstractSafeParcelable {
     @Nullable private byte[] resumptionToken;
 
     /** Specifies the collection Uri for the example store. */
+    @CanIgnoreReturnValue
     public Builder setCollectionName(String collectionName) {
       this.collectionName = collectionName;
       return this;
     }
 
     /** Sets the selection criteria. */
+    @CanIgnoreReturnValue
     public Builder setSelectionCriteria(byte[] criteria) {
       this.selectionCriteria = criteria;
       return this;
@@ -60,6 +63,7 @@ public class ExampleConsumption extends AbstractSafeParcelable {
      * <p>Please note this value may not be accurate when additional sample selections happen inside
      * the TF computation.
      */
+    @CanIgnoreReturnValue
     public Builder setExampleCount(int exampleCount) {
       this.exampleCount = exampleCount;
       return this;
@@ -69,6 +73,7 @@ public class ExampleConsumption extends AbstractSafeParcelable {
      * Sets the resumption token that was returned by the ExampleStoreService along with the last
      * used example.
      */
+    @CanIgnoreReturnValue
     public Builder setResumptionToken(@Nullable byte[] resumptionToken) {
       this.resumptionToken = resumptionToken;
       return this;

@@ -23,6 +23,7 @@ import androidx.annotation.IntDef;
 import com.google.fcp.client.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.fcp.client.common.internal.safeparcel.SafeParcelable;
 import com.google.common.base.Objects;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 
 /**
  * Training interval settings, required for local computation tasks, optional for federated tasks.
@@ -72,6 +73,7 @@ public class TrainingInterval extends AbstractSafeParcelable {
      * SchedulingMode}. If the user does not provide a value, the default value will be {@link
      * SchedulingMode#RECURRENT}.
      */
+    @CanIgnoreReturnValue
     public Builder setSchedulingMode(@SchedulingMode int mode) {
       schedulingMode = mode;
       return this;
@@ -88,6 +90,7 @@ public class TrainingInterval extends AbstractSafeParcelable {
      * immediately after the interval expired. Federated compute will still enforce a minimum
      * required interval to ensure system health.
      */
+    @CanIgnoreReturnValue
     public Builder setMinimumIntervalMillis(long minimumIntervalMillis) {
       this.minimumIntervalMillis = minimumIntervalMillis;
       return this;
