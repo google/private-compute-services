@@ -25,9 +25,9 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
-package com.google.android.libraries.pcc.chronicle.api.policy.capabilities
+package com.google.android.`as`.oss.policies.api.capabilities
 
-import com.google.android.libraries.pcc.chronicle.api.policy.annotation.Annotation
+import com.google.android.`as`.oss.policies.api.annotation.Annotation
 
 /**
  * Store capabilities containing a combination of individual [Capability]s (e.g. Persistence and/or

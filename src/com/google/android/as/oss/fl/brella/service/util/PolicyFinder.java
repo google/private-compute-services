@@ -20,8 +20,8 @@ import static com.google.android.as.oss.fl.brella.service.util.PolicyConstants.F
 import static com.google.android.as.oss.fl.brella.service.util.PolicyConstants.REQUIRED_USER_CONSENT_CONFIG_KEY;
 
 import arcs.core.data.proto.PolicyProto;
-import com.google.android.libraries.pcc.chronicle.api.policy.Policy;
-import com.google.android.libraries.pcc.chronicle.api.policy.proto.PolicyProtoKt;
+import com.google.android.as.oss.policies.api.Policy;
+import com.google.android.as.oss.policies.api.proto.PolicyProtoKt;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;

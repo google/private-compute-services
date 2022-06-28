@@ -25,7 +25,7 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
-package com.google.android.libraries.pcc.chronicle.api.policy.annotation
+package com.google.android.`as`.oss.policies.api.annotation
 
 /** [Annotation] parameter's value: may be string, numeric or boolean. */
 sealed class AnnotationParam {

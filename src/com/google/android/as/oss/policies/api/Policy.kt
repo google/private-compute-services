@@ -25,11 +25,11 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
-package com.google.android.libraries.pcc.chronicle.api.policy
+package com.google.android.`as`.oss.policies.api
 
-import com.google.android.libraries.pcc.chronicle.api.policy.annotation.Annotation
-import com.google.android.libraries.pcc.chronicle.api.policy.capabilities.Capabilities
-import com.google.android.libraries.pcc.chronicle.api.policy.capabilities.Capability
+import com.google.android.`as`.oss.policies.api.annotation.Annotation
+import com.google.android.`as`.oss.policies.api.capabilities.Capabilities
+import com.google.android.`as`.oss.policies.api.capabilities.Capability
 
 /** The name of a field within an entity. */
 typealias FieldName = String

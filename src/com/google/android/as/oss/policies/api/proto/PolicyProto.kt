@@ -25,20 +25,20 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
-package com.google.android.libraries.pcc.chronicle.api.policy.proto
+package com.google.android.`as`.oss.policies.api.proto
 
 import arcs.core.data.proto.PolicyConfigProto
 import arcs.core.data.proto.PolicyFieldProto
 import arcs.core.data.proto.PolicyProto
 import arcs.core.data.proto.PolicyRetentionProto
 import arcs.core.data.proto.PolicyTargetProto
-import com.google.android.libraries.pcc.chronicle.api.policy.FieldName
-import com.google.android.libraries.pcc.chronicle.api.policy.Policy
-import com.google.android.libraries.pcc.chronicle.api.policy.PolicyField
-import com.google.android.libraries.pcc.chronicle.api.policy.PolicyRetention
-import com.google.android.libraries.pcc.chronicle.api.policy.PolicyTarget
-import com.google.android.libraries.pcc.chronicle.api.policy.StorageMedium
-import com.google.android.libraries.pcc.chronicle.api.policy.UsageType
+import com.google.android.`as`.oss.policies.api.FieldName
+import com.google.android.`as`.oss.policies.api.Policy
+import com.google.android.`as`.oss.policies.api.PolicyField
+import com.google.android.`as`.oss.policies.api.PolicyRetention
+import com.google.android.`as`.oss.policies.api.PolicyTarget
+import com.google.android.`as`.oss.policies.api.StorageMedium
+import com.google.android.`as`.oss.policies.api.UsageType
 
 fun PolicyProto.decode(): Policy {
   require(name.isNotEmpty()) { "Policy name is missing." }

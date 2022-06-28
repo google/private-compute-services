@@ -25,12 +25,12 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
-package com.google.android.libraries.pcc.chronicle.api.policy.proto
+package com.google.android.`as`.oss.policies.api.proto
 
 import arcs.core.data.proto.AnnotationParamProto
 import arcs.core.data.proto.AnnotationProto
-import com.google.android.libraries.pcc.chronicle.api.policy.annotation.Annotation
-import com.google.android.libraries.pcc.chronicle.api.policy.annotation.AnnotationParam
+import com.google.android.`as`.oss.policies.api.annotation.Annotation
+import com.google.android.`as`.oss.policies.api.annotation.AnnotationParam
 
 private fun AnnotationParamProto.decode(): AnnotationParam {
   return when (valueCase) {

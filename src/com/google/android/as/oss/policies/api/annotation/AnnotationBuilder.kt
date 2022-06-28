@@ -24,7 +24,7 @@
  * grant found at
  * http://polymer.github.io/PATENTS.txt
  */
-package com.google.android.libraries.pcc.chronicle.api.policy.annotation
+package com.google.android.`as`.oss.policies.api.annotation
 
 /**
  * Builds an [Annotation] with the supplied [name], using an [AnnotationBuilder] [block].
