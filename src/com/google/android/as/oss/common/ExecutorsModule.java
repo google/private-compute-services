@@ -31,7 +31,7 @@ import javax.inject.Singleton;
 /** Module to provide {@link Executor} instances. */
 @Module
 @InstallIn(SingletonComponent.class)
-public abstract class ExecutorsModule {
+abstract class ExecutorsModule {
   @Provides
   @Singleton
   @FlExecutorQualifier
