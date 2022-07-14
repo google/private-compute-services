@@ -191,16 +191,8 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
 
   static boolean checkFederatedConfigs(
       AstreaQuery query, SelectorContext selectorContext, Policy installedPolicy) {
-    if (!selectorContext.getComputationProperties().hasFederated()) {
-      // Federated configs are only checked for Federated tasks
+    if (selectorContext.getComputationProperties().hasLocalCompute()) {
       return true;
-    }
-
-    if (!query
-        .getPopulationName()
-        .equals(selectorContext.getComputationProperties().getFederated().getPopulationName())) {
-      logger.atWarning().log("Population in the query does not match population in the configs.");
-      return false;
     }
 
     if (!installedPolicy.getConfigs().containsKey("federatedCompute")) {
@@ -214,6 +206,36 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
       return false;
     }
     int secAggRoundSize = Integer.parseInt(policyConfigs.getOrDefault("minSecAggRoundSize", "0"));
+
+    if (selectorContext.getComputationProperties().hasEligibilityEval()) {
+      if (secAggRoundSize > 1) {
+        // EETs are not allowed to run with SecAgg policy.
+        logger.atWarning().log("EETs are not allowed to run with SecAgg policy.");
+        return false;
+      }
+
+      if (!query
+          .getPopulationName()
+          .equals(
+              selectorContext
+                  .getComputationProperties()
+                  .getEligibilityEval()
+                  .getPopulationName())) {
+        logger.atWarning().log(
+            "Population in the query does not match population in the computation properties.");
+        return false;
+      }
+
+      return true;
+    }
+
+    if (!query
+        .getPopulationName()
+        .equals(selectorContext.getComputationProperties().getFederated().getPopulationName())) {
+      logger.atWarning().log(
+          "Population in the query does not match population in the computation properties.");
+      return false;
+    }
 
     // Secure Aggregation with size <= 1 is equivalent to disabling SecAgg.
     if (secAggRoundSize > 1) {
