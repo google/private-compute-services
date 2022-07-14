@@ -35,30 +35,6 @@ val SafecommsPolicy_FederatedCompute =
     presubmitReviewRequired(OwnersApprovalOnly)
     checkpointMaxTtlDays(720)
 
-    target(SAFECOMMS_ENTITY_GENERATED_DTD, maxAge = Duration.ofDays(14)) {
-      retention(StorageMedium.RAM)
-      retention(StorageMedium.DISK)
-
-      "timestampMillis" {
-        conditionalUsage("truncatedToDays", UsageType.ANY)
-        rawUsage(UsageType.JOIN)
-      }
-      "isContact" { rawUsage(UsageType.ANY) }
-      "isFirstMessageFromSender" { rawUsage(UsageType.ANY) }
-      "hasUrl" { rawUsage(UsageType.ANY) }
-      "hasEmail" { rawUsage(UsageType.ANY) }
-      "hasPhoneNumber" { rawUsage(UsageType.ANY) }
-      "hasCurrencySymbol" { rawUsage(UsageType.ANY) }
-      "packageName" {
-        conditionalUsage("top2000PackageNamesWith2000Wau", UsageType.ANY)
-        rawUsage(UsageType.JOIN)
-      }
-      "messageLength" { rawUsage(UsageType.ANY) }
-      "featureInteraction" { rawUsage(UsageType.ANY) }
-      "userInteraction" { rawUsage(UsageType.ANY) }
-      "modelVersion" { rawUsage(UsageType.ANY) }
-    }
-
     target(SAFECOMMS_CONVERSATION_ENTITY_GENERATED_DTD, maxAge = Duration.ofDays(14)) {
       retention(StorageMedium.RAM)
       retention(StorageMedium.DISK)
