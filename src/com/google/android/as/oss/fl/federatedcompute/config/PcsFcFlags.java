@@ -41,9 +41,4 @@ public abstract class PcsFcFlags {
   public boolean allowLoggingSecAggClientEvent() {
     return false;
   }
-
-  @Override
-  public boolean selectorContextIncludeRunId() {
-    return true;
-  }
 }
