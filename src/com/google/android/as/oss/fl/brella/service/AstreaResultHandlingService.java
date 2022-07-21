@@ -21,6 +21,7 @@ import static com.google.android.as.oss.fl.federatedcompute.util.ClassConversion
 
 import android.os.IInterface;
 import android.os.RemoteException;
+import androidx.annotation.VisibleForTesting;
 import com.google.android.as.oss.common.ExecutorAnnotations.FlExecutorQualifier;
 import com.google.android.as.oss.fl.Annotations.AsiPackageName;
 import com.google.android.as.oss.fl.Annotations.GppsPackageName;
@@ -32,10 +33,12 @@ import com.google.fcp.client.common.api.Status;
 import com.google.fcp.client.ExampleConsumption;
 import com.google.fcp.client.InAppTrainerOptions;
 import com.google.fcp.client.ResultHandlingService;
+import com.google.fcp.client.ResultHandlingService.ResultHandlingCallback;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.GoogleLogger;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import dagger.hilt.android.AndroidEntryPoint;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -56,7 +59,7 @@ public class AstreaResultHandlingService extends Hilt_AstreaResultHandlingServic
   @Inject @GppsPackageName String gppsPackageName;
   @Inject @FlExecutorQualifier Executor flExecutor;
 
-  private ConnectionManager connectionManager;
+  @VisibleForTesting ConnectionManager connectionManager;
 
   @Override
   public void onCreate() {
@@ -93,8 +96,26 @@ public class AstreaResultHandlingService extends Hilt_AstreaResultHandlingServic
       return;
     }
 
+    ListenableFuture<IInterface> initializeServiceFuture =
+        connectionManager.initializeServiceConnection(clientName);
+    handleResultAfterConnection(
+        initializeServiceFuture,
+        trainerOptions,
+        success,
+        exampleConsumptionList,
+        callback,
+        clientName);
+  }
+
+  private void handleResultAfterConnection(
+      ListenableFuture<IInterface> initializeServiceFuture,
+      InAppTrainerOptions trainerOptions,
+      boolean success,
+      List<ExampleConsumption> exampleConsumptionList,
+      ResultHandlingCallback callback,
+      String clientName) {
     Futures.addCallback(
-        connectionManager.initializeServiceConnection(clientName),
+        initializeServiceFuture,
         new FutureCallback<IInterface>() {
           @Override
           public void onSuccess(IInterface result) {
@@ -110,7 +131,7 @@ public class AstreaResultHandlingService extends Hilt_AstreaResultHandlingServic
               // We don't expect client to actually throw any RemoteExceptions.
               // If it does happen for some reason then all we can do now is log the exception
               // and swallow it.
-              logger.atWarning().withCause(e).log("Failed to delegate startQuery.");
+              logger.atWarning().withCause(e).log("Failed to delegate handleResult.");
               callback.onResult(Status.RESULT_INTERNAL_ERROR);
             }
           }

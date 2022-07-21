@@ -27,6 +27,7 @@ import com.google.android.as.oss.fl.api.proto.TrainingServiceGrpc;
 import com.google.fcp.client.InAppTrainer;
 import com.google.fcp.client.InAppTrainerOptions;
 import com.google.fcp.client.InAppTrainerOptions.AttestationMode;
+import com.google.fcp.client.InAppTrainingConstraints;
 import com.google.fcp.client.TrainingInterval;
 import com.google.fcp.client.TrainingInterval.SchedulingMode;
 import com.google.fcp.client.tasks.Task;
@@ -73,9 +74,9 @@ public class TrainerGrpcBindableService extends TrainingServiceGrpc.TrainingServ
 
     if (trainerOptions.hasTrainingMode()
         && trainerOptions.getTrainingMode() == TrainingMode.TRAINING_MODE_LOCAL_COMPUTATION) {
-      Uri localComputationPlanUri = Uri.parse(trainerOptions.getLocalComputationPlanUri());
-      Uri inputDirectoryUri = Uri.parse(trainerOptions.getInputDirectoryUri());
-      Uri outputDirectoryUri = Uri.parse(trainerOptions.getOutputDirectoryUri());
+      final Uri localComputationPlanUri = Uri.parse(trainerOptions.getLocalComputationPlanUri());
+      final Uri inputDirectoryUri = Uri.parse(trainerOptions.getInputDirectoryUri());
+      final Uri outputDirectoryUri = Uri.parse(trainerOptions.getOutputDirectoryUri());
       inAppTrainerOptionsBuilder.setLocalComputationOptions(
           localComputationPlanUri, inputDirectoryUri, outputDirectoryUri);
     } else {
@@ -91,6 +92,7 @@ public class TrainerGrpcBindableService extends TrainingServiceGrpc.TrainingServ
               .setMinimumIntervalMillis(trainerOptions.getTrainingIntervalMs())
               .build());
     }
+
     return inAppTrainerOptionsBuilder;
   }
 

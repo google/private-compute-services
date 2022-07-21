@@ -36,7 +36,6 @@ import com.google.android.as.oss.networkusage.ui.content.UnrecognizedNetworkRequ
 import com.google.android.as.oss.proto.AstreaProtos.AstreaQuery;
 import com.google.fcp.client.ExampleStoreService;
 import com.google.android.as.oss.policies.api.Policy;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import com.google.common.flogger.GoogleLogger;
@@ -112,7 +111,7 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
       return;
     }
     PolicyProto queryPolicy = query.getPolicy();
-    Optional<Policy> installedPolicy =
+    com.google.common.base.Optional<Policy> installedPolicy =
         PolicyFinder.findCompatiblePolicy(queryPolicy, installedPolicies);
     if (!installedPolicy.isPresent()) {
       callback.onStartQueryFailure(

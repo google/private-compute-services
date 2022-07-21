@@ -22,6 +22,7 @@ import com.google.android.as.oss.fl.api.proto.TrainingServiceGrpc;
 import com.google.android.as.oss.grpc.Annotations.GrpcService;
 import com.google.android.as.oss.grpc.Annotations.GrpcServiceName;
 import com.google.fcp.client.InAppTraining;
+import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
