@@ -171,4 +171,19 @@ val LiveTranslatePolicy_FederatedCompute =
       }
       "status" { rawUsage(UsageType.ANY) }
     }
+
+    target(
+      PERSISTED_LIVE_TRANSLATE_TRANSLATOR_CREATION_EVENT_GENERATED_DTD,
+      maxAge = Duration.ofDays(28)
+    ) {
+      retention(StorageMedium.RAM)
+      retention(StorageMedium.DISK)
+
+      "id" { rawUsage(UsageType.JOIN) }
+      "timestampMillis" {
+        ConditionalUsage.TruncatedToDays.whenever(UsageType.ANY)
+        rawUsage(UsageType.JOIN)
+      }
+      "status" { rawUsage(UsageType.ANY) }
+    }
   }
