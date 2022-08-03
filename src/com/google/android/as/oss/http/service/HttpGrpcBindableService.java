@@ -89,6 +89,15 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
     ((ServerCallStreamObserver<HttpDownloadResponse>) responseObserver)
         .setOnCancelHandler(() -> {});
 
+    // Reject plain HTTP URLs from downloader.
+    if (!isValidHttpsUrl(request.getUrl())) {
+      logger.atWarning().log("Rejected non HTTPS url request to PCS");
+      responseObserver.onError(
+          new IllegalArgumentException(
+              String.format("Rejecting non HTTPS url: '%s'", request.getUrl())));
+      return;
+    }
+
     if (networkUsageLogRepository.shouldRejectRequest(ConnectionType.HTTP, request.getUrl())) {
       logger.atWarning().withCause(UnrecognizedNetworkRequestException.forUrl(request.getUrl()))
           .log("Rejected unknown HTTPS request to PCS");
@@ -218,6 +227,10 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
             }
           });
     }
+  }
+
+  private boolean isValidHttpsUrl(String url) {
+    return url.startsWith("https://");
   }
 
   private static void logCallCancelledByClient(
