@@ -136,6 +136,11 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
 
     String featureName = query.getFeatureName().name();
 
+    // Log Unrecognized requests
+    if (!networkUsageLogRepository.isKnownConnection(FC_TRAINING_START_QUERY, featureName)) {
+      logger.atInfo().log("Network usage log unrecognised FC request for %s", featureName);
+    }
+
     if (networkUsageLogRepository.shouldRejectRequest(FC_TRAINING_START_QUERY, featureName)) {
       logger.atWarning().withCause(UnrecognizedNetworkRequestException.forFeatureName(featureName))
           .log("Rejected unknown FC request to PCS");
