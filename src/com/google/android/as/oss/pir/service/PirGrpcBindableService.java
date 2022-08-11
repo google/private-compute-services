@@ -87,6 +87,11 @@ public class PirGrpcBindableService extends PirServiceGrpc.PirServiceImplBase {
   @Override
   public void download(
       PirDownloadRequest request, StreamObserver<PirDownloadResponse> responseObserver) {
+    // Log Unrecognized requests
+    if (!networkUsageLogRepository.isKnownConnection(ConnectionType.PIR, request.getUrl())) {
+      baseLogger.atInfo().log(
+          "Network usage log unrecognised PIR request for %s", request.getUrl());
+    }
     if (networkUsageLogRepository.shouldRejectRequest(ConnectionType.PIR, request.getUrl())) {
       pirLogger.logWarn(
           UnrecognizedNetworkRequestException.forUrl(request.getUrl()),

@@ -98,6 +98,11 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
       return;
     }
 
+    // Log Unrecognized requests
+    if (!networkUsageLogRepository.isKnownConnection(ConnectionType.HTTP, request.getUrl())) {
+      logger.atInfo().log("Network usage log unrecognised HTTPS request for %s", request.getUrl());
+    }
+
     if (networkUsageLogRepository.shouldRejectRequest(ConnectionType.HTTP, request.getUrl())) {
       logger.atWarning().withCause(UnrecognizedNetworkRequestException.forUrl(request.getUrl()))
           .log("Rejected unknown HTTPS request to PCS");
