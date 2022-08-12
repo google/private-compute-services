@@ -25,12 +25,14 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import com.google.android.as.oss.common.ExecutorAnnotations.IoExecutorQualifier;
 import com.google.android.as.oss.common.config.ConfigReader;
+import com.google.android.as.oss.grpc.GrpcStatusProto;
 import com.google.android.as.oss.http.api.proto.HttpDownloadRequest;
 import com.google.android.as.oss.http.api.proto.HttpDownloadResponse;
 import com.google.android.as.oss.http.api.proto.HttpProperty;
 import com.google.android.as.oss.http.api.proto.HttpServiceGrpc;
 import com.google.android.as.oss.http.api.proto.ResponseBodyChunk;
 import com.google.android.as.oss.http.api.proto.ResponseHeaders;
+import com.google.android.as.oss.http.api.proto.UnrecognizedUrlException;
 import com.google.android.as.oss.http.config.PcsHttpConfig;
 import com.google.android.as.oss.networkusage.db.ConnectionDetails;
 import com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType;
@@ -41,6 +43,7 @@ import com.google.android.as.oss.networkusage.db.Status;
 import com.google.android.as.oss.networkusage.ui.content.UnrecognizedNetworkRequestException;
 import com.google.common.flogger.GoogleLogger;
 import com.google.protobuf.ByteString;
+import io.grpc.Status.Code;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
@@ -104,9 +107,19 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
     }
 
     if (networkUsageLogRepository.shouldRejectRequest(ConnectionType.HTTP, request.getUrl())) {
-      logger.atWarning().withCause(UnrecognizedNetworkRequestException.forUrl(request.getUrl()))
-          .log("Rejected unknown HTTPS request to PCS");
-      responseObserver.onError(UnrecognizedNetworkRequestException.forUrl(request.getUrl()));
+      UnrecognizedNetworkRequestException exception =
+          UnrecognizedNetworkRequestException.forUrl(request.getUrl());
+      logger.atWarning().withCause(exception).log("Rejected unknown HTTPS request to PCS");
+
+      com.google.rpc.Status statusProto =
+          com.google.rpc.Status.newBuilder()
+              .setCode(Code.INVALID_ARGUMENT.value())
+              .setMessage(exception.getMessage())
+              .addDetails(
+                  GrpcStatusProto.packIntoAny(
+                      UnrecognizedUrlException.newBuilder().setUrl(request.getUrl()).build()))
+              .build();
+      responseObserver.onError(GrpcStatusProto.toStatusRuntimeException(statusProto));
       return;
     }
 

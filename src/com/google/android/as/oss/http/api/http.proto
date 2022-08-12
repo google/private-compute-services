@@ -47,6 +47,10 @@ message HttpDownloadResponse {
   }
 }
 
+message UnrecognizedUrlException {
+  optional string url = 1;
+}
+
 service HttpService {
   // Download a resource through HTTP/HTTPS.
   rpc Download(HttpDownloadRequest) returns (stream HttpDownloadResponse);
