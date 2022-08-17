@@ -53,6 +53,7 @@ val SmartSelectAnalyticsPolicy_FederatedCompute =
       "rightContext" { rawUsage(UsageType.ANY) }
       "numOfEntityTokens" { rawUsage(UsageType.ANY) }
       "userAction" { rawUsage(UsageType.ANY) }
+      "widgetType" { rawUsage(UsageType.ANY) }
       "originApp" {
         ConditionalUsage.Top2000PackageNamesWith2000Wau.whenever(UsageType.ANY)
         rawUsage(UsageType.JOIN)
