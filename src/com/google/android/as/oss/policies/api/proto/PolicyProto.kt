@@ -39,6 +39,7 @@ import com.google.android.`as`.oss.policies.api.PolicyRetention
 import com.google.android.`as`.oss.policies.api.PolicyTarget
 import com.google.android.`as`.oss.policies.api.StorageMedium
 import com.google.android.`as`.oss.policies.api.UsageType
+import com.google.android.`as`.oss.policies.api.contextrules.AllowAllContextsRule
 
 fun PolicyProto.decode(): Policy {
   require(name.isNotEmpty()) { "Policy name is missing." }
@@ -55,6 +56,7 @@ fun PolicyProto.decode(): Policy {
 }
 
 fun Policy.encode(): PolicyProto {
+  require(allowedContext is AllowAllContextsRule) { "allowedContext must be AllowAllContextsRule." }
   return PolicyProto.newBuilder()
     .setName(name)
     .setDescription(description)

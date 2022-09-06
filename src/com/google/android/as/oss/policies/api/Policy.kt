@@ -38,7 +38,6 @@ typealias FieldName = String
 
 /** Defines a data usage policy. See [PolicyProto] for the canonical definition of a policy. */
 // TODO: Serialize allowedContext in Chronicle ledger
-// TODO: Handle serialization for FedEx Policy encoding
 data class Policy(
   val name: String,
   val egressType: String,
