@@ -21,5 +21,5 @@
     package="com.google.android.as.oss.common">
   <uses-sdk
       android:minSdkVersion="31"
-      android:targetSdkVersion="31"/>
+      android:targetSdkVersion="33"/>
 </manifest>

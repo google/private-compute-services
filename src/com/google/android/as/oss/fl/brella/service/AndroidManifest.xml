@@ -22,7 +22,7 @@
 
   <uses-sdk
       android:minSdkVersion="28"
-      android:targetSdkVersion="31"/>
+      android:targetSdkVersion="33"/>
 
   <application>
     <service
