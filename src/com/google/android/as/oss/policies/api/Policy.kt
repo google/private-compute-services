@@ -30,7 +30,7 @@ package com.google.android.`as`.oss.policies.api
 import com.google.android.`as`.oss.policies.api.annotation.Annotation
 import com.google.android.`as`.oss.policies.api.capabilities.Capabilities
 import com.google.android.`as`.oss.policies.api.capabilities.Capability
-import com.google.android.`as`.oss.policies.api.contextrules.AllowAllContextsRule
+import com.google.android.`as`.oss.policies.api.contextrules.All
 import com.google.android.`as`.oss.policies.api.contextrules.PolicyContextRule
 
 /** The name of a field within an entity. */
@@ -44,7 +44,7 @@ data class Policy(
   val targets: List<PolicyTarget> = emptyList(),
   val configs: Map<String, PolicyConfig> = emptyMap(),
   val annotations: List<Annotation> = emptyList(),
-  val allowedContext: PolicyContextRule = AllowAllContextsRule
+  val allowedContext: PolicyContextRule = All
 ) {
   /** All fields mentioned the policy (includes nested fields). */
   val allFields: List<PolicyField> = collectAllFields()
