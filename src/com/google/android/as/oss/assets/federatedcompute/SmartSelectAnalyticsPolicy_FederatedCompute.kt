@@ -28,7 +28,8 @@ val SmartSelectAnalyticsPolicy_FederatedCompute =
 
       ALLOWED EGRESSES: FederatedCompute.
       ALLOWED USAGES: Federated analytics.
-    """.trimIndent()
+    """
+        .trimIndent()
 
     flavors(Flavor.ASI_PROD) { minRoundSize(minRoundSize = 2000, minSecAggRoundSize = 500) }
     consentRequiredForCollectionOrStorage(Consent.UsageAndDiagnosticsCheckbox)

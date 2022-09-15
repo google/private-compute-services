@@ -28,7 +28,8 @@ val SmartSelectLearningPolicy_FederatedCompute =
 
       ALLOWED EGRESSES: FederatedCompute.
       ALLOWED USAGES: Federated learning.
-    """.trimIndent()
+    """
+        .trimIndent()
 
     // Smart select needs a smaller round size due to:
     // 1) The population size is small because only users with entity selections

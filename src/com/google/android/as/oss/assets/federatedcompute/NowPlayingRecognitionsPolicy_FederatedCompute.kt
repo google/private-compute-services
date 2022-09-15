@@ -29,7 +29,8 @@ val NowPlayingRecognitionsPolicy_FederatedCompute =
       ALLOWED EGRESSES: FederatedCompute.
       ALLOWED USAGES: Federated analytics, federated learning.
       ALLOWED USAGES: Federated analytics.
-    """.trimIndent()
+    """
+        .trimIndent()
 
     // The population is defined for Pixel 4+ devices per country. Most
     // countries (besides the US) have a smaller population and hence the min

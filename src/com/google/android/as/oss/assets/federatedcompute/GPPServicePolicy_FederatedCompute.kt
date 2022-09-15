@@ -28,7 +28,8 @@ val GPPServicePolicy_FederatedCompute =
 
       ALLOWED EGRESSES: FederatedCompute.
       ALLOWED USAGES: Federated analytics, federated learning.
-    """.trimIndent()
+    """
+        .trimIndent()
 
     flavors(Flavor.GPPS_PROD) { minRoundSize(minRoundSize = 500, minSecAggRoundSize = 500) }
     consentRequiredForCollectionOrStorage(Consent.UsageAndDiagnosticsCheckbox)

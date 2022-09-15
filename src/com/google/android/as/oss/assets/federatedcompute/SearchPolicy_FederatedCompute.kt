@@ -29,7 +29,8 @@ val SearchPolicy_FederatedCompute =
 
       ALLOWED EGRESSES: FederatedCompute.
       ALLOWED USAGES: Federated analytics, federated learning.
-    """.trimIndent()
+    """
+        .trimIndent()
 
     consentRequiredForCollectionOrStorage(Consent.UsageAndDiagnosticsCheckbox)
     presubmitReviewRequired(OwnersApprovalOnly)

@@ -28,7 +28,8 @@ val AutofillPolicy_FederatedCompute =
 
       ALLOWED EGRESSES: FederatedCompute.
       ALLOWED USAGES: Federated analytics, federated learning.
-    """.trimIndent()
+    """
+        .trimIndent()
 
     flavors(Flavor.ASI_PROD) { minRoundSize(minRoundSize = 1000, minSecAggRoundSize = 0) }
     consentRequiredForCollectionOrStorage(Consent.UsageAndDiagnosticsCheckbox)
