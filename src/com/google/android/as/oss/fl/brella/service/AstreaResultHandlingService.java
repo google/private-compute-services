@@ -57,7 +57,7 @@ public class AstreaResultHandlingService extends Hilt_AstreaResultHandlingServic
   @Inject @ResultHandlingClientsInfo ImmutableMap<String, String> packageToActionMap;
   @Inject @AsiPackageName String asiPackageName;
   @Inject @GppsPackageName String gppsPackageName;
-  @Inject @FlExecutorQualifier Executor flExecutor;
+  @VisibleForTesting @Inject @FlExecutorQualifier Executor flExecutor;
 
   @VisibleForTesting ConnectionManager connectionManager;
 
