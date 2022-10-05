@@ -23,7 +23,6 @@ import com.google.fcp.client.FCInit;
 import com.google.fcp.client.DynamicFlags;
 import com.google.fcp.client.LogManager;
 import com.google.common.flogger.GoogleLogger;
-import java.util.Optional;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -34,21 +33,18 @@ public final class PcsFcInit {
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
 
   private static final String CLIENT_NAME = "astrea";
+  // Name of the custom TensorFlow native lib that contains a selection of regular TensorFlow and
+  // custom ops necessary for local computation tasks.
+  private static final String TENSORFLOW_NATIVE_LIB = "pcs_tensorflow_jni";
 
-  public static void init(
-      PcsFcFlags pcsFcFlags, FcLogManager fcLogManager, Optional<String> customLibName) {
+  public static void init(PcsFcFlags pcsFcFlags, FcLogManager fcLogManager) {
     logger.atInfo().log("Calling FCInit for PCS.");
     FCInit.setFatSdkConfig(
         new FCFatSdkConfig() {
           @Override
           public boolean loadCustomNativeLibrary() {
-            if (customLibName.isPresent()) {
-              System.loadLibrary(customLibName.get());
-              return true;
-            } else {
-              // fallback to the default load fashion if the custom lib is not compiled in.
-              return false;
-            }
+            System.loadLibrary(TENSORFLOW_NATIVE_LIB);
+            return true;
           }
 
           @Override

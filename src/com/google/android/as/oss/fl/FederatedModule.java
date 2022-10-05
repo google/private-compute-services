@@ -18,7 +18,6 @@ package com.google.android.as.oss.fl;
 
 import com.google.android.as.oss.common.initializer.PcsInitializer;
 import com.google.android.as.oss.fl.Annotations.AsiPackageName;
-import com.google.android.as.oss.fl.Annotations.CustomTFLibName;
 import com.google.android.as.oss.fl.Annotations.ExampleStoreClientsInfo;
 import com.google.android.as.oss.fl.Annotations.GppsPackageName;
 import com.google.android.as.oss.fl.Annotations.ResultHandlingClientsInfo;
@@ -26,13 +25,11 @@ import com.google.android.as.oss.fl.federatedcompute.config.PcsFcFlags;
 import com.google.android.as.oss.fl.federatedcompute.init.PcsFcInit;
 import com.google.android.as.oss.fl.federatedcompute.logging.FcLogManager;
 import com.google.common.collect.ImmutableMap;
-import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
 import dagger.hilt.components.SingletonComponent;
 import dagger.multibindings.IntoSet;
-import java.util.Optional;
 
 @Module
 @InstallIn(SingletonComponent.class)
@@ -74,16 +71,9 @@ abstract class FederatedModule {
     return GPPS_CLIENT_NAME;
   }
 
-  @BindsOptionalOf
-  @CustomTFLibName
-  abstract String bindCustomTFLibName();
-
   @Provides
   @IntoSet
-  static PcsInitializer provideFcInitializer(
-      PcsFcFlags pcsFcFlags,
-      FcLogManager logManager,
-      @CustomTFLibName Optional<String> customTFLibName) {
-    return () -> PcsFcInit.init(pcsFcFlags, logManager, customTFLibName);
+  static PcsInitializer provideFcInitializer(PcsFcFlags pcsFcFlags, FcLogManager logManager) {
+    return () -> PcsFcInit.init(pcsFcFlags, logManager);
   }
 }
