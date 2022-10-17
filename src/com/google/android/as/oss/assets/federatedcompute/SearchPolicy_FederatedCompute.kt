@@ -39,7 +39,6 @@ val SearchPolicy_FederatedCompute =
     target(PERSISTED_SEARCH_ACTION_EVENT_GENERATED_DTD, maxAge = Duration.ofDays(2)) {
       retention(StorageMedium.DISK)
 
-      "id" { rawUsage(UsageType.JOIN) }
       "timestampMillis" {
         ConditionalUsage.TruncatedToDays.whenever(UsageType.ANY)
         rawUsage(UsageType.JOIN)
