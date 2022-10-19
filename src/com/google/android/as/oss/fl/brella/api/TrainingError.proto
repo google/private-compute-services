@@ -50,6 +50,8 @@ enum TrainingError {
   TRAINING_ERROR_PCC_TRAINING_DELEGATION_TO_CLIENT_FAILED = 6;
   /** Training failed while validating configs. */
   TRAINING_ERROR_PCC_CONFIG_VALIDATION_FAILED = 7;
+  /** Training failed while copying local compute resources. */
+  TRAINING_ERROR_PCC_COPY_LOCAL_COMPUTE_RESOURCE_FAILED = 8;
 
   /** Generic error codes. */
   /** The specified policy has an invalid egress type. */
