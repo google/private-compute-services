@@ -28,7 +28,7 @@ import javax.inject.Singleton
 @Suppress("EXPERIMENTAL_API_USAGE")
 @Module
 @InstallIn(SingletonComponent::class)
-object ProdPoliciesModule {
+internal object ProdPoliciesModule {
   @Provides
   @Singleton
   @JvmStatic
@@ -49,6 +49,7 @@ object ProdPoliciesModule {
       "PecanScrollingEventPolicy_FederatedCompute_ASI_PROD.binarypb",
       "PecanLatencyAnalyticsEventPolicy_FederatedCompute_ASI_PROD.binarypb",
       "AppLaunchPredictionMetricsPolicy_FederatedCompute_ASI_PROD.binarypb",
+      "PecanConversationFragmentEventPolicy_FederatedCompute_ASI_PROD.binarypb",
       "PecanConversationThreadEventPolicy_FederatedCompute_ASI_PROD.binarypb",
       "PecanMessageEventPolicy_FederatedCompute_ASI_PROD.binarypb",
     )
