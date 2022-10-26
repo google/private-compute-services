@@ -17,6 +17,7 @@
 package com.google.android.as.oss.common.config;
 
 import androidx.annotation.GuardedBy;
+import com.google.errorprone.annotations.ResultIgnorabilityUnspecified;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -67,6 +68,7 @@ public class ListenableValue<T extends Object> {
    * @return stored value after the operation (either the original non-null value or the passed
    *     default).
    */
+  @ResultIgnorabilityUnspecified
   public synchronized T putIfAbsent(T defaultValue) {
     if (value == null) {
       value = defaultValue;
@@ -82,6 +84,7 @@ public class ListenableValue<T extends Object> {
    * @return stored value after the operation (either the original non-null value or the passed
    *     default).
    */
+  @ResultIgnorabilityUnspecified
   public synchronized T putIfAbsent(ValueComputer<T> defaultComputer) {
     if (value == null) {
       value = defaultComputer.compute();
@@ -98,6 +101,7 @@ public class ListenableValue<T extends Object> {
    *     previous call to either {@link putIfAbsent} or {@link refresh}), the listeners will not be
    *     called.
    */
+  @ResultIgnorabilityUnspecified
   public boolean refresh(T newValue) {
     T previous;
     synchronized (this) {
