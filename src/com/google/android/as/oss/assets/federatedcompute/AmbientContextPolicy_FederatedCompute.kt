@@ -73,4 +73,22 @@ val AmbientContextPolicy_FederatedCompute =
       }
       "systemInfoId" { rawUsage(UsageType.JOIN) }
     }
+    target(PERSISTED_AMBIENT_CONTEXT_INTERNAL_EVENT_GENERATED_DTD, maxAge = Duration.ofDays(28)) {
+      retention(StorageMedium.RAM)
+      retention(StorageMedium.DISK)
+
+      "id" { rawUsage(UsageType.JOIN) }
+      "timestampMillis" {
+        ConditionalUsage.TruncatedToDays.whenever(UsageType.ANY)
+        rawUsage(UsageType.JOIN)
+      }
+      "eventType" { rawUsage(UsageType.ANY) }
+      "durationMillis" { ConditionalUsage.Bucketed.whenever(UsageType.ANY) }
+      "modelId" { rawUsage(UsageType.ANY) }
+      "packageName" {
+        ConditionalUsage.Top2000PackageNamesWith2000Wau.whenever(UsageType.ANY)
+        rawUsage(UsageType.JOIN)
+      }
+      "systemInfoId" { rawUsage(UsageType.JOIN) }
+    }
   }
