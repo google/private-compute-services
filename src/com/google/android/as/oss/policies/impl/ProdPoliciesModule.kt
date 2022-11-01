@@ -41,7 +41,6 @@ internal object ProdPoliciesModule {
       "LiveTranslatePolicy_FederatedCompute_ASI_PROD.binarypb",
       "SmartSelectAnalyticsPolicy_FederatedCompute_ASI_PROD.binarypb",
       "SmartSelectLearningPolicy_FederatedCompute_ASI_PROD.binarypb",
-      "SmartSelectPolicy_FederatedCompute_ASI_PROD.binarypb",
       "ContentCapturePerformanceDataPolicy_FederatedCompute_ASI_PROD.binarypb",
       "GPPServicePolicy_FederatedCompute_GPPS_PROD.binarypb",
       "NowPlayingUsagePolicy_FederatedCompute_ASI_PROD.binarypb",
