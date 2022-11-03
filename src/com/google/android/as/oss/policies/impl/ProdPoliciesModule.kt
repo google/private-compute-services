@@ -51,6 +51,7 @@ internal object ProdPoliciesModule {
       "PecanConversationFragmentEventPolicy_FederatedCompute_ASI_PROD.binarypb",
       "PecanConversationThreadEventPolicy_FederatedCompute_ASI_PROD.binarypb",
       "PecanMessageEventPolicy_FederatedCompute_ASI_PROD.binarypb",
+      "SearchPolicy_FederatedCompute_ASI_PROD.binarypb",
     )
   }
 }
