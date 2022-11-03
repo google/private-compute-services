@@ -20,6 +20,7 @@ import static com.google.android.as.oss.networkusage.db.ConnectionDetails.Connec
 
 import android.os.IInterface;
 import android.os.RemoteException;
+import androidx.annotation.VisibleForTesting;
 import arcs.core.data.proto.PolicyProto;
 import com.google.android.as.oss.common.ExecutorAnnotations.FlExecutorQualifier;
 import com.google.android.as.oss.fl.Annotations.AsiPackageName;
@@ -36,6 +37,7 @@ import com.google.android.as.oss.networkusage.ui.content.UnrecognizedNetworkRequ
 import com.google.android.as.oss.proto.AstreaProtos.AstreaQuery;
 import com.google.fcp.client.ExampleStoreService;
 import com.google.android.as.oss.policies.api.Policy;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import com.google.common.flogger.GoogleLogger;
@@ -68,6 +70,13 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
   @Inject @FlExecutorQualifier Executor flExecutor;
 
   private ConnectionManager connectionManager;
+
+  public AstreaExampleStoreService() {}
+
+  @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+  AstreaExampleStoreService(ConnectionManager connectionManager) {
+    this.connectionManager = connectionManager;
+  }
 
   @Override
   public void onCreate() {
@@ -103,20 +112,8 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
       return;
     }
 
-    if (!query.hasPolicy()) {
-      logger.atWarning().log("No policy provided in the query.");
-      callback.onStartQueryFailure(
-          TrainingError.TRAINING_ERROR_PCC_POLICY_NOT_PRESENT_VALUE,
-          "Query does not specify a policy");
-      return;
-    }
-    PolicyProto queryPolicy = query.getPolicy();
-    com.google.common.base.Optional<Policy> installedPolicy =
-        PolicyFinder.findCompatiblePolicy(queryPolicy, installedPolicies);
+    Optional<Policy> installedPolicy = extractInstalledPolicyOptional(callback, query);
     if (!installedPolicy.isPresent()) {
-      callback.onStartQueryFailure(
-          TrainingError.TRAINING_ERROR_PCC_POLICY_NOT_PRESENT_VALUE,
-          "Query specified policy is not installed, or the installed version is incompatible.");
       return;
     }
 
@@ -138,7 +135,7 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
 
     // Log Unrecognized requests
     if (!networkUsageLogRepository.isKnownConnection(FC_TRAINING_START_QUERY, featureName)) {
-      logger.atInfo().log("Network usage log unrecognised FC request for %s", featureName);
+      logUnknownConnection(featureName);
     }
 
     if (networkUsageLogRepository.shouldRejectRequest(FC_TRAINING_START_QUERY, featureName)) {
@@ -149,17 +146,41 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
           String.format("Unknown PCS request for feature %s", featureName));
       return;
     }
+    insertNetworkUsageLogRowForTrainingEvent(
+        query, selectorContext.getComputationProperties().getRunId());
 
-    if (networkUsageLogRepository.getDbExecutor().isPresent()) {
-      networkUsageLogRepository
-          .getDbExecutor()
-          .get()
-          .execute(
-              () ->
-                  insertNetworkUsageLogRowForTrainingEvent(
-                      query, selectorContext.getComputationProperties().getRunId()));
+    initializeConnectionAndStartQuery(collection, criteria, resumptionToken, callback, query);
+  }
+
+  private Optional<Policy> extractInstalledPolicyOptional(
+      @Nonnull QueryCallback callback, @Nonnull AstreaQuery query) {
+    if (!query.hasPolicy()) {
+      logger.atWarning().log("No policy provided in the query.");
+      callback.onStartQueryFailure(
+          TrainingError.TRAINING_ERROR_PCC_POLICY_NOT_PRESENT_VALUE,
+          "Query does not specify a policy");
+      return Optional.absent();
     }
 
+    PolicyProto queryPolicy = query.getPolicy();
+    Optional<Policy> installedPolicy =
+        PolicyFinder.findCompatiblePolicy(queryPolicy, installedPolicies);
+    if (!installedPolicy.isPresent()) {
+      callback.onStartQueryFailure(
+          TrainingError.TRAINING_ERROR_PCC_POLICY_NOT_PRESENT_VALUE,
+          "Query specified policy is not installed, or the installed version is incompatible.");
+      return Optional.absent();
+    }
+
+    return installedPolicy;
+  }
+
+  private void initializeConnectionAndStartQuery(
+      @Nonnull String collection,
+      byte[] criteria,
+      byte[] resumptionToken,
+      @Nonnull QueryCallback callback,
+      AstreaQuery query) {
     Futures.addCallback(
         connectionManager.initializeServiceConnection(query.getClientName()),
         new FutureCallback<IInterface>() {
@@ -193,12 +214,12 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
         flExecutor);
   }
 
+  private void logUnknownConnection(String featureName) {
+    logger.atInfo().log("Network usage log unrecognised FC request for %s", featureName);
+  }
+
   static boolean checkFederatedConfigs(
       AstreaQuery query, SelectorContext selectorContext, Policy installedPolicy) {
-    if (selectorContext.getComputationProperties().hasLocalCompute()) {
-      return true;
-    }
-
     if (!installedPolicy.getConfigs().containsKey("federatedCompute")) {
       logger.atWarning().log("Policy provided doesn't have configs.");
       return false;
@@ -278,14 +299,19 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
   // Note: The success/failure status and the upload size in bytes, are reported in another row
   // when we receive a LogEvent of kind TRAIN_RESULT_UPLOADED or TRAIN_FAILURE_UPLOADED.
   private void insertNetworkUsageLogRowForTrainingEvent(AstreaQuery query, long runId) {
-    if (!networkUsageLogRepository.isNetworkUsageLogEnabled()) {
-      return;
+    if (networkUsageLogRepository.isNetworkUsageLogEnabled()
+        && networkUsageLogRepository.getDbExecutor().isPresent()) {
+      networkUsageLogRepository
+          .getDbExecutor()
+          .get()
+          .execute(
+              () ->
+                  networkUsageLogRepository.insertNetworkUsageEntity(
+                      NetworkUsageLogUtils.createFcTrainingStartQueryNetworkUsageEntity(
+                          NetworkUsageLogUtils.createFcTrainingStartQueryConnectionDetails(
+                              query.getFeatureName().name(), query.getClientName()),
+                          runId,
+                          query.getPolicy())));
     }
-    networkUsageLogRepository.insertNetworkUsageEntity(
-        NetworkUsageLogUtils.createFcTrainingStartQueryNetworkUsageEntity(
-            NetworkUsageLogUtils.createFcTrainingStartQueryConnectionDetails(
-                query.getFeatureName().name(), query.getClientName()),
-            runId,
-            query.getPolicy()));
   }
 }
