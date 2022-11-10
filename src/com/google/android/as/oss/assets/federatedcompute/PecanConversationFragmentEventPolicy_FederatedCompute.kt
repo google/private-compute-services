@@ -40,7 +40,7 @@ val PecanConversationFragmentEventPolicy_FederatedCompute =
       retention(StorageMedium.RAM)
       retention(StorageMedium.DISK)
 
-      "id" { rawUsage(UsageType.JOIN) }
+      "id" { rawUsage(UsageType.ANY) }
       "packageName" {
         conditionalUsage("top2000PackageNamesWith2000Wau", UsageType.ANY)
         rawUsage(UsageType.JOIN)
