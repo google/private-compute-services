@@ -74,8 +74,10 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
   public AstreaExampleStoreService() {}
 
   @VisibleForTesting(otherwise = VisibleForTesting.NONE)
-  AstreaExampleStoreService(ConnectionManager connectionManager) {
+  AstreaExampleStoreService(
+      ConnectionManager connectionManager, NetworkUsageLogRepository networkUsageLogRepository) {
     this.connectionManager = connectionManager;
+    this.networkUsageLogRepository = networkUsageLogRepository;
   }
 
   @Override

@@ -33,7 +33,6 @@ import com.google.fcp.client.common.api.Status;
 import com.google.fcp.client.ExampleConsumption;
 import com.google.fcp.client.InAppTrainerOptions;
 import com.google.fcp.client.ResultHandlingService;
-import com.google.fcp.client.ResultHandlingService.ResultHandlingCallback;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.GoogleLogger;
 import com.google.common.util.concurrent.FutureCallback;

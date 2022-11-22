@@ -82,6 +82,8 @@ message TrainerResponse {
     RESPONSE_CODE_SUCCESS = 1;
     // Requested JobType not supported.
     RESPONSE_CODE_UNSUPPORTED_JOB_TYPE = 2;
+    // Trainer is not enabled.
+    RESPONSE_CODE_TRAINER_NOT_ENABLED = 3;
   }
 
   optional ResponseCode response_code = 1;
