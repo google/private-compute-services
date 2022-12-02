@@ -17,7 +17,7 @@
 package com.google.android.as.oss.fl.brella.api;
 
 import android.os.RemoteException;
-import com.google.fcp.client.common.api.CommonStatusCodes;
+import com.google.android.as.oss.fl.brella.api.proto.TrainingError;
 import com.google.fcp.client.ExampleStoreIterator;
 import com.google.fcp.client.ExampleStoreService.QueryCallback;
 import com.google.common.flogger.GoogleLogger;
@@ -43,7 +43,8 @@ public class StartQueryCallback extends IStartQueryCallback.Stub {
 
   @Override
   public void onFailure() {
-    queryCallback.onStartQueryFailure(CommonStatusCodes.ERROR, "StartQuery failure reported");
+    queryCallback.onStartQueryFailure(
+        TrainingError.TRAINING_ERROR_START_QUERY_FAILED_VALUE, "StartQuery failure reported");
   }
 
   @Override

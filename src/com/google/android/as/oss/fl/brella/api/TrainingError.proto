@@ -86,6 +86,12 @@ enum TrainingError {
   TRAINING_ERROR_NO_ELIGIBLE_EXAMPLES = 24;
   /** The SmartSelect preprocessor failed. */
   TRAINING_ERROR_PREPROCESSING_FAILED = 25;
+  /** The query failed to start. */
+  TRAINING_ERROR_START_QUERY_FAILED = 26;
+  /** The query failed to start due to a runtime exception. */
+  TRAINING_ERROR_START_QUERY_RUNTIME_EXCEPTION = 27;
+  /** The specified example store is not present. */
+  TRAINING_ERROR_EXAMPLE_STORE_NOT_PRESENT = 28;
 
   /** Client specific error codes. Use numbers greater than or equal to 40 and
    * smaller than 50.
