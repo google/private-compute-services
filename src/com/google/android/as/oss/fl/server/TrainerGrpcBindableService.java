@@ -93,6 +93,10 @@ public class TrainerGrpcBindableService extends TrainingServiceGrpc.TrainingServ
               .build());
     }
 
+    if (trainerOptions.hasContextData()) {
+      inAppTrainerOptionsBuilder.setContextData(trainerOptions.getContextData().toByteArray());
+    }
+
     return inAppTrainerOptionsBuilder;
   }
 

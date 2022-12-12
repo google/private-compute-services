@@ -72,6 +72,8 @@ public final class ClassConversionUtils {
               .setSchedulingMode(interval.getSchedulingMode())
               .build());
     }
+
+    builder.setContextData(options.getContextData());
     return builder.build();
   }
 
@@ -123,6 +125,7 @@ public final class ClassConversionUtils {
               .setSchedulingMode(interval.getSchedulingMode())
               .build());
     }
+    builder.setContextData(options.getContextData());
     return builder.build();
   }
 

@@ -72,6 +72,10 @@ message TrainerOptions {
    * Training mode: server side (federation) or local (personalization).
    */
   optional TrainingMode training_mode = 9;
+  /**
+   * Client context data passed back to result handling callback.
+   */
+  optional bytes context_data = 10;
 }
 
 // A TrainerResponse represents the response returned by the service.
