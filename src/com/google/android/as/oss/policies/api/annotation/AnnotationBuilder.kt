@@ -30,7 +30,6 @@ package com.google.android.`as`.oss.policies.api.annotation
  * Builds an [Annotation] with the supplied [name], using an [AnnotationBuilder] [block].
  *
  * Example:
- *
  * ```kotlin
  * val foo = annotation("ttl") {
  *   param("duration", "15 days")
