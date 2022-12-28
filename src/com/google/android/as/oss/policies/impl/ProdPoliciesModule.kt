@@ -35,23 +35,26 @@ internal object ProdPoliciesModule {
   fun providePolicies(@ApplicationContext context: Context): PolicyMap {
     return AssetLoader.loadPolicyMapFromAssets(
       context,
+      // [redacted] start
       "AmbientContextPolicy_FederatedCompute_ASI_PROD.binarypb",
+      "AppLaunchPredictionMetricsPolicy_FederatedCompute_ASI_PROD.binarypb",
       "AutofillPolicy_FederatedCompute_ASI_PROD.binarypb",
-      "SafecommsPolicy_FederatedCompute_ASI_PROD.binarypb",
-      "LiveTranslatePolicy_FederatedCompute_ASI_PROD.binarypb",
-      "SmartSelectAnalyticsPolicy_FederatedCompute_ASI_PROD.binarypb",
-      "SmartSelectLearningPolicy_FederatedCompute_ASI_PROD.binarypb",
       "ContentCapturePerformanceDataPolicy_FederatedCompute_ASI_PROD.binarypb",
       "GPPServicePolicy_FederatedCompute_GPPS_PROD.binarypb",
+      "LiveTranslatePolicy_FederatedCompute_ASI_PROD.binarypb",
       "NowPlayingUsagePolicy_FederatedCompute_ASI_PROD.binarypb",
-      "PecanUsageEventPolicy_FederatedCompute_ASI_PROD.binarypb",
-      "PecanScrollingEventPolicy_FederatedCompute_ASI_PROD.binarypb",
-      "PecanLatencyAnalyticsEventPolicy_FederatedCompute_ASI_PROD.binarypb",
-      "AppLaunchPredictionMetricsPolicy_FederatedCompute_ASI_PROD.binarypb",
+      "PecanContextPolicy_FederatedCompute_ASI_PROD.binarypb",
       "PecanConversationFragmentEventPolicy_FederatedCompute_ASI_PROD.binarypb",
       "PecanConversationThreadEventPolicy_FederatedCompute_ASI_PROD.binarypb",
+      "PecanLatencyAnalyticsEventPolicy_FederatedCompute_ASI_PROD.binarypb",
       "PecanMessageEventPolicy_FederatedCompute_ASI_PROD.binarypb",
+      "PecanScrollingEventPolicy_FederatedCompute_ASI_PROD.binarypb",
+      "PecanUsageEventPolicy_FederatedCompute_ASI_PROD.binarypb",
+      "SafecommsPolicy_FederatedCompute_ASI_PROD.binarypb",
       "SearchPolicy_FederatedCompute_ASI_PROD.binarypb",
+      "SmartSelectAnalyticsPolicy_FederatedCompute_ASI_PROD.binarypb",
+      "SmartSelectLearningPolicy_FederatedCompute_ASI_PROD.binarypb",
+      // [redacted] end
     )
   }
 }
