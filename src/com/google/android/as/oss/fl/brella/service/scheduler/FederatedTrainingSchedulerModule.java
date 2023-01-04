@@ -14,40 +14,28 @@
  * limitations under the License.
  */
 
-package com.google.android.as.oss.fl.server;
+package com.google.android.as.oss.fl.brella.service.scheduler;
 
+import android.content.Context;
 import com.google.android.as.oss.common.ExecutorAnnotations.FlExecutorQualifier;
-import com.google.android.as.oss.fl.api.proto.TrainingServiceGrpc;
-import com.google.android.as.oss.fl.brella.service.scheduler.TrainingScheduler;
-import com.google.android.as.oss.grpc.Annotations.GrpcService;
-import com.google.android.as.oss.grpc.Annotations.GrpcServiceName;
+import com.google.android.as.oss.fl.federatedcompute.config.PcsFcDebugFlags;
+import com.google.fcp.client.InAppTraining;
+import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
-import dagger.multibindings.IntoSet;
-import io.grpc.BindableService;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
-/** Module to provide GRPC Service used for scheduling/canceling federated jobs. */
 @Module
 @InstallIn(SingletonComponent.class)
-abstract class TrainerGrpcModule {
-  @Provides
-  @IntoSet
-  @GrpcService
-  static BindableService provideBindableService(
-      TrainingScheduler trainingScheduler, @FlExecutorQualifier Executor executor) {
-    return new TrainerGrpcBindableService(trainingScheduler, executor);
-  }
+abstract class FederatedTrainingSchedulerModule {
 
   @Provides
-  @IntoSet
-  @GrpcServiceName
-  static String provideServiceName() {
-    return TrainingServiceGrpc.SERVICE_NAME;
+  static TrainingScheduler provideTrainingScheduler(
+      @ApplicationContext Context context, @FlExecutorQualifier Executor executor) {
+    return new FederatedTrainingScheduler(executor, context, InAppTraining::getInAppTrainer);
   }
-
-  private TrainerGrpcModule() {}
 }
