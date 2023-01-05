@@ -48,7 +48,6 @@ internal object ProdPoliciesModule {
       "PecanConversationThreadEventPolicy_FederatedCompute_ASI_PROD.binarypb",
       "PecanLatencyAnalyticsEventPolicy_FederatedCompute_ASI_PROD.binarypb",
       "PecanMessageEventPolicy_FederatedCompute_ASI_PROD.binarypb",
-      "PecanScrollingEventPolicy_FederatedCompute_ASI_PROD.binarypb",
       "PecanUsageEventPolicy_FederatedCompute_ASI_PROD.binarypb",
       "SafecommsPolicy_FederatedCompute_ASI_PROD.binarypb",
       "SearchPolicy_FederatedCompute_ASI_PROD.binarypb",
