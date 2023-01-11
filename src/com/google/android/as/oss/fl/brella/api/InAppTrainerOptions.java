@@ -39,7 +39,7 @@ public final class InAppTrainerOptions extends BaseOptions {
   public static final String APP_FILES_SCHEME = "appfiles";
   public static final String APP_CACHE_SCHEME = "appcache";
 
-  /** Indicates the kind of attestation federated compute will use for abuse deterrence. */
+  /** Indicates the kind of attestation federated compute will use. */
   @IntDef({
     AttestationMode.DEFAULT,
   })
