@@ -16,8 +16,6 @@
 
 package com.google.android.as.oss.common.config;
 
-import com.google.errorprone.annotations.ResultIgnorabilityUnspecified;
-
 /**
  * Configuration reader. Merges information from both the settings page for a feature and the
  * experiment flags from the server. Updates its state when settings or flags are changed and
@@ -25,7 +23,6 @@ import com.google.errorprone.annotations.ResultIgnorabilityUnspecified;
  */
 public interface ConfigReader<ConfigT> {
   /** Returns the current configuration values. */
-  @ResultIgnorabilityUnspecified
   ConfigT getConfig();
 
   /** Adds a listener to be notified when config are updated. */

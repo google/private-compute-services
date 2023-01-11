@@ -16,8 +16,6 @@
 
 package com.google.android.as.oss.common.config;
 
-import com.google.errorprone.annotations.ResultIgnorabilityUnspecified;
-
 /** An abstract base implementation of a {@link ConfigReader} providing some common facilities. */
 // Note that ConfigT extends Object explicitly to make the null checker not accept @Nullable.
 // See [redacted]
@@ -45,7 +43,6 @@ public abstract class AbstractConfigReader<ConfigT extends Object>
    * disk files, in which case you might want to move such initialization to a more suitable time
    * and thread.
    */
-  @ResultIgnorabilityUnspecified
   @Override
   public synchronized ConfigT getConfig() {
     return config.putIfAbsent(() -> computeConfig());

@@ -16,8 +16,6 @@
 
 package com.google.android.as.oss.common.config;
 
-import com.google.errorprone.annotations.ResultIgnorabilityUnspecified;
-
 /**
  * Implemented by classes that can be listened to.
  *
@@ -34,7 +32,6 @@ public interface Listenable<L> {
    *
    * @return true if the listener was successfully added.
    */
-  @ResultIgnorabilityUnspecified
   boolean addListener(L listener);
 
   /**
