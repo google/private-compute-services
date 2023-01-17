@@ -27,7 +27,7 @@ class PcsGrpcConfigReader extends AbstractConfigReader<PcsGrpcConfig> {
   private static final String FLAG_PREFIX = "PcsGrpc__";
 
   static final IntegerFlag IDLE_TIMEOUT_SECONDS =
-      IntegerFlag.create("PcsGrpc__idle_timeout_seconds", 30 * 60);
+      IntegerFlag.create("PcsGrpc__idle_timeout_seconds", 60);
 
   private final FlagManager flagManager;
 
