@@ -34,6 +34,11 @@ message TrainerOptions {
     // Training mode local (personalization).
     TRAINING_MODE_LOCAL_COMPUTATION = 2;
   }
+  enum SchedulingMode {
+    SCHEDULING_MODE_UNSPECIFIED = 0;
+    SCHEDULING_MODE_RECURRENT = 1;
+    SCHEDULING_MODE_ONE_TIME = 2;
+  }
 
   optional JobType job_type = 1;
   /**
@@ -76,6 +81,11 @@ message TrainerOptions {
    * Client context data passed back to result handling callback.
    */
   optional bytes context_data = 10;
+
+  /**
+   * The mode which the training job is scheduled.
+   */
+  optional SchedulingMode scheduling_mode = 11;
 }
 
 // A TrainerResponse represents the response returned by the service.

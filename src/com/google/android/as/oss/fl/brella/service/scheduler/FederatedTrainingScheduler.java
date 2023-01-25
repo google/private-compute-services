@@ -16,6 +16,8 @@
 
 package com.google.android.as.oss.fl.brella.service.scheduler;
 
+import static com.google.android.as.oss.fl.federatedcompute.util.ClassConversionUtils.schedulingModeEnumToIntDef;
+
 import android.content.Context;
 import android.net.Uri;
 import com.google.android.as.oss.fl.api.proto.TrainerOptions;
@@ -27,7 +29,6 @@ import com.google.fcp.client.InAppTrainerOptions;
 import com.google.fcp.client.InAppTrainerOptions.AttestationMode;
 import com.google.fcp.client.InAppTrainingConstraints;
 import com.google.fcp.client.TrainingInterval;
-import com.google.fcp.client.TrainingInterval.SchedulingMode;
 import com.google.fcp.client.tasks.OnFailureListener;
 import com.google.fcp.client.tasks.OnSuccessListener;
 import com.google.fcp.client.tasks.Task;
@@ -129,12 +130,15 @@ public class FederatedTrainingScheduler implements TrainingScheduler {
           .setAttestationMode(ATTESTATION_MODE);
     }
 
-    if (trainerOptions.hasTrainingIntervalMs()) {
-      inAppTrainerOptionsBuilder.setTrainingInterval(
-          TrainingInterval.newBuilder()
-              .setSchedulingMode(SchedulingMode.RECURRENT)
-              .setMinimumIntervalMillis(trainerOptions.getTrainingIntervalMs())
-              .build());
+    if (trainerOptions.hasSchedulingMode()) {
+      TrainingInterval.Builder trainingIntervalBuilder = TrainingInterval.newBuilder();
+      trainingIntervalBuilder.setSchedulingMode(
+          schedulingModeEnumToIntDef(trainerOptions.getSchedulingMode()));
+
+      if (trainerOptions.hasTrainingIntervalMs()) {
+        trainingIntervalBuilder.setMinimumIntervalMillis(trainerOptions.getTrainingIntervalMs());
+      }
+      inAppTrainerOptionsBuilder.setTrainingInterval(trainingIntervalBuilder.build());
     }
 
     if (trainerOptions.hasContextData()) {

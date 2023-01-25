@@ -16,11 +16,16 @@
 
 package com.google.android.as.oss.fl.federatedcompute.util;
 
+import static com.google.android.as.oss.fl.api.proto.TrainerOptions.SchedulingMode.SCHEDULING_MODE_ONE_TIME;
+import static com.google.android.as.oss.fl.api.proto.TrainerOptions.SchedulingMode.SCHEDULING_MODE_RECURRENT;
+
 import android.net.Uri;
+import com.google.android.as.oss.fl.api.proto.TrainerOptions;
 import com.google.android.as.oss.fl.brella.api.ExampleConsumption;
 import com.google.android.as.oss.fl.brella.api.InAppTrainerOptions;
 import com.google.android.as.oss.fl.brella.api.InAppTrainingConstraints;
 import com.google.android.as.oss.fl.brella.api.TrainingInterval;
+import com.google.android.as.oss.fl.brella.api.TrainingInterval.SchedulingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,6 +94,30 @@ public final class ClassConversionUtils {
         .setResumptionToken(exampleConsumption.getResumptionToken())
         .setSelectionCriteria(exampleConsumption.getSelectionCriteria())
         .build();
+  }
+
+  public static TrainerOptions.SchedulingMode schedulingModeIntDefToEnum(int schedulingMode) {
+    switch (schedulingMode) {
+      case SchedulingMode.RECURRENT:
+        return SCHEDULING_MODE_RECURRENT;
+      case SchedulingMode.ONE_TIME:
+        return SCHEDULING_MODE_ONE_TIME;
+      default:
+        throw new IllegalArgumentException(
+            String.format("Unknown Scheduling Mode: %d", schedulingMode));
+    }
+  }
+
+  public static int schedulingModeEnumToIntDef(TrainerOptions.SchedulingMode schedulingMode) {
+    switch (schedulingMode) {
+      case SCHEDULING_MODE_RECURRENT:
+        return SchedulingMode.RECURRENT;
+      case SCHEDULING_MODE_ONE_TIME:
+        return SchedulingMode.ONE_TIME;
+      default:
+        throw new IllegalArgumentException(
+            String.format("Unknown Scheduling Mode: %d", schedulingMode.getNumber()));
+    }
   }
 
   /**
