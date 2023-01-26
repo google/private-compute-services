@@ -18,7 +18,7 @@ package com.google.android.as.oss.fl.brella.service.scheduler;
 
 import android.content.Context;
 import com.google.android.as.oss.common.ExecutorAnnotations.FlExecutorQualifier;
-import com.google.android.as.oss.fl.federatedcompute.config.PcsFcDebugFlags;
+import com.google.android.as.oss.fl.federatedcompute.config.PcsFcFlags;
 import com.google.fcp.client.InAppTraining;
 import dagger.BindsOptionalOf;
 import dagger.Module;

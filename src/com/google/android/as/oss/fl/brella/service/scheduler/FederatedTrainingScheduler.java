@@ -22,7 +22,7 @@ import android.content.Context;
 import android.net.Uri;
 import com.google.android.as.oss.fl.api.proto.TrainerOptions;
 import com.google.android.as.oss.fl.api.proto.TrainerOptions.TrainingMode;
-import com.google.android.as.oss.fl.federatedcompute.config.PcsFcDebugFlags;
+import com.google.android.as.oss.fl.federatedcompute.config.PcsFcFlags;
 import com.google.android.as.oss.fl.localcompute.PathConversionUtils;
 import com.google.fcp.client.InAppTrainer;
 import com.google.fcp.client.InAppTrainerOptions;
