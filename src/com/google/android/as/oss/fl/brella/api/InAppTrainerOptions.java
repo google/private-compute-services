@@ -42,10 +42,14 @@ public final class InAppTrainerOptions extends BaseOptions {
   /** Indicates the kind of attestation federated compute will use. */
   @IntDef({
     AttestationMode.DEFAULT,
+    AttestationMode.NONE,
   })
   public @interface AttestationMode {
     /** Use federated compute's default attestation mode. */
     int DEFAULT = 0;
+
+    /** Indicates that no client-side attestation should be performed. */
+    int NONE = 3;
   }
 
   /** Returns a new {@link Builder} for {@link InAppTrainerOptions}. */
@@ -455,6 +459,7 @@ public final class InAppTrainerOptions extends BaseOptions {
   private static boolean isValidAttestationMode(@AttestationMode int attestationMode) {
     switch (attestationMode) {
       case AttestationMode.DEFAULT:
+      case AttestationMode.NONE:
         return true;
       default:
         return false;
