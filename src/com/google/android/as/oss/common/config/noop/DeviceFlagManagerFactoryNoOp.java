@@ -30,6 +30,6 @@ class DeviceFlagManagerFactoryNoOp implements FlagManagerFactory {
 
   @Override
   public FlagManager create(FlagNamespace namespace, Executor listenerExecutor) {
-    return DeviceFlagManagerNoOp.create(namespace);
+    return DeviceFlagManagerNoOp.create();
   }
 }

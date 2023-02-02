@@ -19,7 +19,6 @@ package com.google.android.as.oss.common.config.noop;
 import android.os.Binder;
 import com.google.android.as.oss.common.config.AbstractFlagManager;
 import com.google.android.as.oss.common.config.FlagListener;
-import com.google.android.as.oss.common.config.FlagNamespace;
 import com.google.android.as.oss.common.config.Listenable;
 import com.google.android.as.oss.common.config.MulticastListenable;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -28,16 +27,15 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 class DeviceFlagManagerNoOp extends AbstractFlagManager {
 
   private final MulticastListenable<FlagListener> listenable;
-  private final String namespace;
 
-  public static DeviceFlagManagerNoOp create(FlagNamespace namespace) {
+  public static DeviceFlagManagerNoOp create() {
     Binder.clearCallingIdentity();
-    return new DeviceFlagManagerNoOp(namespace);
+    return new DeviceFlagManagerNoOp();
   }
 
   @Override
   protected @Nullable String getProperty(String name) {
-    return namespace;
+    return null;
   }
 
   @Override
@@ -45,8 +43,7 @@ class DeviceFlagManagerNoOp extends AbstractFlagManager {
     return listenable;
   }
 
-  private DeviceFlagManagerNoOp(FlagNamespace namespace) {
-    this.namespace = namespace.toString();
+  private DeviceFlagManagerNoOp() {
     listenable = MulticastListenable.create();
   }
 }
