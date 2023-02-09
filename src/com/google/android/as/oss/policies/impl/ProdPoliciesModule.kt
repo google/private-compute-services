@@ -53,6 +53,7 @@ internal object ProdPoliciesModule {
       "SearchPolicy_FederatedCompute_ASI_PROD.binarypb",
       "SmartSelectAnalyticsPolicy_FederatedCompute_ASI_PROD.binarypb",
       "SmartSelectLearningPolicy_FederatedCompute_ASI_PROD.binarypb",
+      "ToastQueryPolicy_FederatedCompute_ASI_PROD.binarypb",
       // [redacted] end
     )
   }
