@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.google.android.as.oss.grpc;
+package com.google.android.apps.miphone.astrea.grpc;
 
-import com.google.android.as.oss.grpc.Annotations.AllowedPackageName;
-import com.google.android.as.oss.grpc.Annotations.GrpcService;
-import com.google.android.as.oss.grpc.Annotations.GrpcServiceName;
+import com.google.android.apps.miphone.astrea.grpc.Annotations.AllowedPackageName;
+import com.google.android.apps.miphone.astrea.grpc.Annotations.GrpcService;
+import com.google.android.apps.miphone.astrea.grpc.Annotations.GrpcServiceName;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;

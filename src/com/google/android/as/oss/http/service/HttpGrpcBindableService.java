@@ -16,7 +16,7 @@
 
 package com.google.android.as.oss.http.service;
 
-import static com.google.android.as.oss.grpc.ContextKeys.WRITEABLE_FILE_CONTEXT_KEY;
+import static com.google.android.apps.miphone.astrea.grpc.ContextKeys.WRITEABLE_FILE_CONTEXT_KEY;
 
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
@@ -25,7 +25,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import com.google.android.as.oss.common.ExecutorAnnotations.IoExecutorQualifier;
 import com.google.android.as.oss.common.config.ConfigReader;
-import com.google.android.as.oss.grpc.GrpcStatusProto;
+import com.google.android.apps.miphone.astrea.grpc.GrpcStatusProto;
 import com.google.android.as.oss.http.api.proto.HttpDownloadRequest;
 import com.google.android.as.oss.http.api.proto.HttpDownloadResponse;
 import com.google.android.as.oss.http.api.proto.HttpProperty;

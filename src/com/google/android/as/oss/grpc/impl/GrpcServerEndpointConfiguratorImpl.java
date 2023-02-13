@@ -22,8 +22,8 @@ import static com.google.android.as.oss.grpc.impl.PcsSecurityPolicies.untrustedP
 import android.content.Context;
 import android.os.IBinder;
 import androidx.annotation.Nullable;
-import com.google.android.as.oss.grpc.GrpcServerEndpointConfiguration;
-import com.google.android.as.oss.grpc.GrpcServerEndpointConfigurator;
+import com.google.android.apps.miphone.astrea.grpc.GrpcServerEndpointConfiguration;
+import com.google.android.apps.miphone.astrea.grpc.GrpcServerEndpointConfigurator;
 import dagger.Module;
 import dagger.hilt.InstallIn;
 import dagger.hilt.components.SingletonComponent;

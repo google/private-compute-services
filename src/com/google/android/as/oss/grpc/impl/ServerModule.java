@@ -16,7 +16,7 @@
 
 package com.google.android.as.oss.grpc.impl;
 
-import com.google.android.as.oss.grpc.GrpcServerEndpointConfigurator;
+import com.google.android.apps.miphone.astrea.grpc.GrpcServerEndpointConfigurator;
 import dagger.Binds;
 import dagger.Module;
 import dagger.hilt.InstallIn;

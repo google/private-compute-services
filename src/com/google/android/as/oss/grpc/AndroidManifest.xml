@@ -17,7 +17,7 @@
 
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.google.android.as.oss.grpc">
+    package="com.google.android.apps.miphone.astrea.grpc">
 
   <uses-sdk android:minSdkVersion="30" android:targetSdkVersion="33"/>
 

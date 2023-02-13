@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.as.oss.grpc;
+package com.google.android.apps.miphone.astrea.grpc;
 
 import static com.google.common.base.Strings.nullToEmpty;
 import static io.grpc.protobuf.lite.ProtoLiteUtils.metadataMarshaller;

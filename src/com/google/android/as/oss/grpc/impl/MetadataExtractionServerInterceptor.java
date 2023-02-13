@@ -16,8 +16,8 @@
 
 package com.google.android.as.oss.grpc.impl;
 
-import static com.google.android.as.oss.grpc.ContextKeys.WRITEABLE_FILE_CONTEXT_KEY;
-import static com.google.android.as.oss.grpc.ContextKeys.WRITEABLE_FILE_METADATA_KEY;
+import static com.google.android.apps.miphone.astrea.grpc.ContextKeys.WRITEABLE_FILE_CONTEXT_KEY;
+import static com.google.android.apps.miphone.astrea.grpc.ContextKeys.WRITEABLE_FILE_METADATA_KEY;
 
 import androidx.annotation.VisibleForTesting;
 import io.grpc.Context;

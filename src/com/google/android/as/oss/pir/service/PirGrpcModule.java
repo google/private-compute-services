@@ -16,8 +16,8 @@
 
 package com.google.android.as.oss.pir.service;
 
-import com.google.android.as.oss.grpc.Annotations.GrpcService;
-import com.google.android.as.oss.grpc.Annotations.GrpcServiceName;
+import com.google.android.apps.miphone.astrea.grpc.Annotations.GrpcService;
+import com.google.android.apps.miphone.astrea.grpc.Annotations.GrpcServiceName;
 import com.google.android.as.oss.pir.api.pir.proto.PirServiceGrpc;
 import com.google.private_retrieval.pir.AndroidLocalPirDownloadTaskBuilderFactory;
 import com.google.private_retrieval.pir.PirDownloadTask.Builder.PirDownloadTaskBuilderFactory;

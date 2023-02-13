@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.as.oss.grpc;
+package com.google.android.apps.miphone.astrea.grpc;
 
 import android.content.Context;
 import android.content.Intent;

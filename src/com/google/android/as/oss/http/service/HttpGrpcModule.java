@@ -16,8 +16,8 @@
 
 package com.google.android.as.oss.http.service;
 
-import com.google.android.as.oss.grpc.Annotations.GrpcService;
-import com.google.android.as.oss.grpc.Annotations.GrpcServiceName;
+import com.google.android.apps.miphone.astrea.grpc.Annotations.GrpcService;
+import com.google.android.apps.miphone.astrea.grpc.Annotations.GrpcServiceName;
 import com.google.android.as.oss.http.api.proto.HttpServiceGrpc;
 import dagger.Binds;
 import dagger.Module;

@@ -17,7 +17,7 @@
 package com.google.android.as.oss.grpc.impl;
 
 import android.content.Context;
-import com.google.android.as.oss.grpc.GrpcServerEndpointConfiguration;
+import com.google.android.apps.miphone.astrea.grpc.GrpcServerEndpointConfiguration;
 import io.grpc.Status;
 import io.grpc.binder.SecurityPolicy;
 import io.grpc.binder.ServerSecurityPolicy;
