@@ -1,0 +1,144 @@
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package com.google.android.as.oss.pd.api;
+
+option java_multiple_files = true;
+option java_package = "com.google.android.as.oss.pd.api.proto";
+option use_java_stubby_library = true;
+
+// Request to download a blob.
+message DownloadBlobRequest {
+  Metadata metadata = 1;
+
+  // The authentication key with Google server
+  string api_key = 1001;
+
+  reserved 2, 3, 4, 5, 6;
+}
+
+// Metadata is the wrapper of all the information to be sent to the *Guards for
+// content binding.
+message Metadata {
+  // Constraints placed on the blob in blob selection.
+  BlobConstraints blob_constraints = 1;
+
+  // The cryptographic keys to use for encrypting the blob.
+  CryptoKeys crypto_keys = 3;
+
+  reserved 2;
+}
+
+// BlobConstraints expresses the constraints placed on the blob during
+// blob selection.
+message BlobConstraints {
+  // The tier this device is in, which gives some hint about the HW capabilities
+  // of the device.
+  enum DeviceTier {
+    UNKNOWN = 0;
+    ULTRA_LOW = 1;
+    LOW = 2;
+    MID = 3;
+    HIGH = 4;
+    ULTRA = 5;
+  }
+  DeviceTier device_tier = 1001;
+
+  enum Client {
+    UNDEFINED = 0;
+    SUSPICIOUS_MESSAGE_ALERTS = 1;
+    PLAY_PROTECT_SERVICE = 2;
+  }
+  Client client = 1002;
+
+  enum ClientGroup {
+    ALL = 0;
+    BETA = 1;
+    ALPHA = 2;
+  }
+  ClientGroup client_group = 1003;
+
+  reserved 1, 2, 3, 4, 5;
+}
+
+// The cryptographic keys to use for encrypting the blob.
+message CryptoKeys {
+  // The device generated public key to encrypt the blob.
+  bytes public_key = 1;
+}
+
+// Response that has the downloaded blob.
+message DownloadBlobResponse {
+  // The blob for the client identified by 'client_id'.
+  // The blob is encrypted using 'crypto_keys' in DownloadBlobRequest.
+  bytes blob = 1;
+
+  // Opaque server side generated token for clients to pass back in their next
+  // DownloadBlobRequest.
+  bytes next_page_token = 2;
+
+  // Proof that can be verified to ensure the blob shipped to user devices
+  // has been included in a transparency log.
+  ProtectionProof protection_proof_v2 = 12;
+
+  reserved 3, 4, 5, 6, 7, 8, 9, 10, 11;
+}
+
+// LogEntryId identifies a specific entry in the transparency log.
+message LogEntryId {
+  // The leaf index in the Merkle tree which backs up the transparency log.
+  uint64 leaf_index = 1;
+
+  // The id of the Merkle tree which backs up the transparency log.
+  int64 tree_id = 2;
+}
+
+// InclusionProof is the proof that a transparency log contains a certain entry.
+message InclusionProof {
+  // hashes contains the inclusion proof hashes.
+  repeated bytes hashes = 1;
+}
+
+// LogCheckpoint is a checkpoint in the transparency log.
+message LogCheckpoint {
+  // checkpoint contains the bytes of log root
+  bytes checkpoint = 1;
+
+  // signature contains a signature over the bytes of checkpoint.
+  // The signature must be checked before relying on the contents of checkpoint.
+  bytes signature = 2;
+}
+
+// ProtectionProof is the proof that can be verified to ensure the blob
+// shipped to user devices has been included in transparency logs.
+message ProtectionProof {
+  // The id of the entry in the transparency log that contains the
+  // blob hash.
+  LogEntryId log_entry_id = 1;
+
+  // A checkpoint of the transparency log taken at the time of serving the
+  // blob.
+  LogCheckpoint log_checkpoint = 2;
+
+  // Proof that the blob is included in the transparency log.
+  InclusionProof inclusion_proof = 3;
+}
+
+// Service API for downloading blobs.
+service ProtectedDownloadService {
+  // Downloads a blob to the device
+  rpc Download(DownloadBlobRequest) returns (DownloadBlobResponse);
+}
