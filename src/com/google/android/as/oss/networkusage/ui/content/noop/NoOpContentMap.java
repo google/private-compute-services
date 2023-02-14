@@ -40,6 +40,11 @@ public class NoOpContentMap implements NetworkUsageLogContentMap {
   }
 
   @Override
+  public Optional<ConnectionDetails> getPdConnectionDetails(String clientId) {
+    return Optional.empty();
+  }
+
+  @Override
   public Optional<ConnectionDetails> getFcStartQueryConnectionDetails(String featureName) {
     return Optional.empty();
   }

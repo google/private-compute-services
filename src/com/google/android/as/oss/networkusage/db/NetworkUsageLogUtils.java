@@ -50,6 +50,19 @@ public final class NetworkUsageLogUtils {
         .build();
   }
 
+  public static ConnectionDetails createPdConnectionDetails(String clientId, String packageName) {
+    checkArgument(!Strings.isNullOrEmpty(clientId));
+    return getDefaultConnectionDetailsBuilder(ConnectionType.PD, packageName)
+        .setConnectionKey(
+            ConnectionKey.newBuilder()
+                .setPdConnectionKey(
+                    com.google.android.as.oss.networkusage.api.proto.PdConnectionKey.newBuilder()
+                        .setClientId(clientId)
+                        .build())
+                .build())
+        .build();
+  }
+
   public static ConnectionDetails createFcCheckInConnectionDetails() {
     return getDefaultConnectionDetailsBuilder(ConnectionType.FC_CHECK_IN).build();
   }
@@ -111,6 +124,15 @@ public final class NetworkUsageLogUtils {
         .setFcRunId(runId)
         .setPolicyProto(policyProto)
         .build();
+  }
+
+  public static NetworkUsageEntity createPdNetworkUsageEntry(
+      ConnectionDetails connectionDetails, Status status, long size, String clientId) {
+    checkArgument(connectionDetails.type() == ConnectionType.PD);
+    checkArgument(connectionDetails.connectionKey().hasPdConnectionKey());
+    checkArgument(
+        clientId.equals(connectionDetails.connectionKey().getPdConnectionKey().getClientId()));
+    return getNetworkUsageEntityBuilder(connectionDetails, status, size).build();
   }
 
   private static NetworkUsageEntity getNetworkUsageEntityForUrl(

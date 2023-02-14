@@ -87,7 +87,9 @@ public abstract class ConnectionDetails implements Parcelable {
     /** A download using HTTPS. */
     HTTP,
     /** A download using Private Information Retrieval. */
-    PIR
+    PIR,
+    /** A protected download using a GRPC-based protocol. */
+    PD
   }
 
   /**
