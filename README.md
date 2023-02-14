@@ -48,9 +48,10 @@ You can learn more about Private Compute Services in this
 *   Federated compute: Enables privacy-preserving aggregate machine learning and
     analytics across many devices, without any raw data leaving the device.
 *   HTTP download: Enables access to static resources like updated ML models.
-*   [Protected Download](pd/README.md): enables downloading of resources to the
-    device with support for a binary transparency log based verification,
-    ensuring these are the official resources provided by Google.
+*   [Protected Download](src/com/google/android/as/oss/pd/README.md): enables
+    downloading of resources to the device with support for a binary
+    transparency log based verification, ensuring these are the official
+    resources provided by Google.
 
 ## Note on dependencies
 
