@@ -16,7 +16,6 @@
 
 package com.google.android.as.oss.common;
 
-import com.google.android.as.oss.common.ExecutorAnnotations.AttestationExecutorQualifier;
 import com.google.android.as.oss.common.ExecutorAnnotations.FlExecutorQualifier;
 import com.google.android.as.oss.common.ExecutorAnnotations.GeneralExecutorQualifier;
 import com.google.android.as.oss.common.ExecutorAnnotations.IoExecutorQualifier;
