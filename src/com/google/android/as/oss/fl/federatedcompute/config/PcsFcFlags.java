@@ -41,4 +41,10 @@ public abstract class PcsFcFlags {
   public boolean allowLoggingSecAggClientEvent() {
     return false;
   }
+
+  /** Enables the {@link AttestationClient} to be set in the federated compute library. */
+  @Override
+  public boolean allowAttestationClientOverride() {
+    return true;
+  }
 }
