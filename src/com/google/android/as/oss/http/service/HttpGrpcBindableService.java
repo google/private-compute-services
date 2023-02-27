@@ -223,7 +223,8 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
                 }
 
                 logger.atInfo().log(
-                    "Responding with fetch_completed for URL '%s'", request.getUrl());
+                    "[pfd-write] DOWNLOAD COMPLETE: Downloaded %d bytes from URL [%s].",
+                    totalBytesRead, request.getUrl());
                 responseObserver.onCompleted();
                 insertNetworkUsageLogRow(
                     networkUsageLogRepository, request, Status.SUCCEEDED, totalBytesRead);
@@ -371,7 +372,9 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
           }
         }
 
-        logger.atInfo().log("Responding with fetch_completed for URL [%s].", request.getUrl());
+        logger.atInfo().log(
+            "[onReadyHandler] DOWNLOAD COMPLETE: Downloaded %d bytes from URL [%s].",
+            totalBytesRead.get(), request.getUrl());
         responseObserver.onCompleted();
         backgroundExecutor.execute(
             () ->
