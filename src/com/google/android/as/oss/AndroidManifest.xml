@@ -31,7 +31,7 @@
 
   <application
       android:name="com.google.android.as.oss.PrivateComputeServicesApplication"
-      android:label="Private Compute Services">
+      android:label="@string/pcs_app_name">
   </application>
 
 </manifest>
