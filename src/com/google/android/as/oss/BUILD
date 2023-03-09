@@ -21,6 +21,7 @@ android_binary(
     srcs = ["PrivateComputeServicesApplication.java"],
     manifest = "AndroidManifest.xml",
     multidex = "native",
+    resource_files = glob(["res/**"]),
     deps = [
         "//src/com/google/android/as/oss/common/config/noop:flags_impl_noop",
         "//src/com/google/android/as/oss/common/initializer",
