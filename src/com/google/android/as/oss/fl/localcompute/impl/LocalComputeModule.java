@@ -14,33 +14,35 @@
  * limitations under the License.
  */
 
-package com.google.android.as.oss.fl.brella.service.scheduler;
+package com.google.android.as.oss.fl.localcompute.impl;
 
 import android.content.Context;
-import com.google.android.as.oss.common.ExecutorAnnotations.FlExecutorQualifier;
-import com.google.android.as.oss.fl.federatedcompute.config.PcsFcFlags;
-import com.google.fcp.client.InAppTraining;
-import dagger.BindsOptionalOf;
+import com.google.android.as.oss.common.initializer.PcsInitializer;
+import com.google.android.as.oss.fl.localcompute.FileCopyStartQuery;
+import com.google.android.as.oss.fl.localcompute.LocalComputeResourceManager;
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
-import java.util.Optional;
-import java.util.concurrent.Executor;
+import dagger.multibindings.IntoSet;
 
+/** Provides a resource manager and filecopy startquery for local compute tasks. */
 @Module
 @InstallIn(SingletonComponent.class)
-abstract class FederatedTrainingSchedulerModule {
-  @BindsOptionalOf
-  abstract PcsFcFlags bindPcsFcFlags();
+abstract class LocalComputeModule {
+
+  @Binds
+  abstract LocalComputeResourceManager bindLocalComputeResourceManager(
+      LocalComputeResourceManagerImpl impl);
+
+  @Binds
+  abstract FileCopyStartQuery bindFileCopyStartQuery(FileCopyStartQueryImpl impl);
 
   @Provides
-  static TrainingScheduler provideTrainingScheduler(
-      Optional<PcsFcFlags> fcFlags,
-      @ApplicationContext Context context,
-      @FlExecutorQualifier Executor executor) {
-    return new FederatedTrainingScheduler(
-        executor, context, fcFlags, InAppTraining::getInAppTrainer);
+  @IntoSet
+  static PcsInitializer providePcsInitializer(@ApplicationContext Context context) {
+    return () -> LocalComputeResourceTtlService.scheduleCleanUpRoutineJob(context);
   }
 }

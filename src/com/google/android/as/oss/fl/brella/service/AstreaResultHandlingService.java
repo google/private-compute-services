@@ -29,6 +29,9 @@ import com.google.android.as.oss.fl.Annotations.ResultHandlingClientsInfo;
 import com.google.android.as.oss.fl.brella.api.IInAppResultHandler;
 import com.google.android.as.oss.fl.brella.api.StatusCallback;
 import com.google.android.as.oss.fl.brella.service.ConnectionManager.ConnectionType;
+import com.google.android.as.oss.fl.localcompute.LocalComputeResourceManager;
+import com.google.android.as.oss.fl.localcompute.LocalComputeUtils;
+import com.google.android.as.oss.fl.localcompute.PathConversionUtils;
 import com.google.fcp.client.common.api.Status;
 import com.google.fcp.client.ExampleConsumption;
 import com.google.fcp.client.InAppTrainerOptions;
@@ -40,6 +43,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import dagger.hilt.android.AndroidEntryPoint;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -57,6 +61,7 @@ public class AstreaResultHandlingService extends Hilt_AstreaResultHandlingServic
   @Inject @AsiPackageName String asiPackageName;
   @Inject @GppsPackageName String gppsPackageName;
   @VisibleForTesting @Inject @FlExecutorQualifier Executor flExecutor;
+  @Inject Optional<LocalComputeResourceManager> resourceManager;
 
   @VisibleForTesting ConnectionManager connectionManager;
 
@@ -95,15 +100,34 @@ public class AstreaResultHandlingService extends Hilt_AstreaResultHandlingServic
       return;
     }
 
-    ListenableFuture<IInterface> initializeServiceFuture =
-        connectionManager.initializeServiceConnection(clientName);
-    handleResultAfterConnection(
-        initializeServiceFuture,
-        trainerOptions,
-        success,
-        exampleConsumptionList,
-        callback,
-        clientName);
+    if (trainerOptions.getPersonalizationPlan() != null) {
+      // If it's a local computation task, copy the output files back to ASI then handle the result.
+      ListenableFuture<IInterface> initializeServiceFuture =
+          Futures.transformAsync(
+              LocalComputeUtils.handleLocalComputeOutput(
+                  trainerOptions, clientName, resourceManager),
+              unused -> connectionManager.initializeServiceConnection(clientName),
+              flExecutor);
+      InAppTrainerOptions convertedTrainerOptions =
+          PathConversionUtils.trimLocalComputePathPrefix(trainerOptions);
+      handleResultAfterConnection(
+          initializeServiceFuture,
+          convertedTrainerOptions,
+          success,
+          exampleConsumptionList,
+          callback,
+          clientName);
+    } else {
+      ListenableFuture<IInterface> initializeServiceFuture =
+          connectionManager.initializeServiceConnection(clientName);
+      handleResultAfterConnection(
+          initializeServiceFuture,
+          trainerOptions,
+          success,
+          exampleConsumptionList,
+          callback,
+          clientName);
+    }
   }
 
   private void handleResultAfterConnection(

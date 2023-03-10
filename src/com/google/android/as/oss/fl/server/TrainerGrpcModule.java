@@ -19,6 +19,7 @@ package com.google.android.as.oss.fl.server;
 import com.google.android.as.oss.common.ExecutorAnnotations.FlExecutorQualifier;
 import com.google.android.as.oss.fl.api.proto.TrainingServiceGrpc;
 import com.google.android.as.oss.fl.brella.service.scheduler.TrainingScheduler;
+import com.google.android.as.oss.fl.localcompute.LocalComputeResourceManager;
 import com.google.android.apps.miphone.astrea.grpc.Annotations.GrpcService;
 import com.google.android.apps.miphone.astrea.grpc.Annotations.GrpcServiceName;
 import dagger.Module;
@@ -38,8 +39,10 @@ abstract class TrainerGrpcModule {
   @IntoSet
   @GrpcService
   static BindableService provideBindableService(
-      TrainingScheduler trainingScheduler, @FlExecutorQualifier Executor executor) {
-    return new TrainerGrpcBindableService(trainingScheduler, executor);
+      TrainingScheduler trainingScheduler,
+      Optional<LocalComputeResourceManager> localComputeResourceManager,
+      @FlExecutorQualifier Executor executor) {
+    return new TrainerGrpcBindableService(trainingScheduler, localComputeResourceManager, executor);
   }
 
   @Provides

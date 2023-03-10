@@ -43,11 +43,17 @@ public class FederatedTrainingScheduler implements TrainingScheduler {
 
   private final Executor executor;
   private final Context context;
+  private final Optional<PcsFcFlags> fcFlags;
   private final TrainerSupplier trainerSupplier;
 
-  FederatedTrainingScheduler(Executor executor, Context context, TrainerSupplier trainerSupplier) {
+  public FederatedTrainingScheduler(
+      Executor executor,
+      Context context,
+      Optional<PcsFcFlags> fcFlags,
+      TrainerSupplier trainerSupplier) {
     this.executor = executor;
     this.context = context;
+    this.fcFlags = fcFlags;
     this.trainerSupplier = trainerSupplier;
   }
 
@@ -119,9 +125,16 @@ public class FederatedTrainingScheduler implements TrainingScheduler {
 
     if (trainerOptions.hasTrainingMode()
         && trainerOptions.getTrainingMode() == TrainingMode.TRAINING_MODE_LOCAL_COMPUTATION) {
-      final Uri localComputationPlanUri = Uri.parse(trainerOptions.getLocalComputationPlanUri());
-      final Uri inputDirectoryUri = Uri.parse(trainerOptions.getInputDirectoryUri());
-      final Uri outputDirectoryUri = Uri.parse(trainerOptions.getOutputDirectoryUri());
+      String sessionName = trainerOptions.getSessionName();
+      final Uri localComputationPlanUri =
+          PathConversionUtils.addPlanPathPrefix(
+              Uri.parse(trainerOptions.getLocalComputationPlanUri()), sessionName);
+      final Uri inputDirectoryUri =
+          PathConversionUtils.addInputPathPrefix(
+              Uri.parse(trainerOptions.getInputDirectoryUri()), sessionName);
+      final Uri outputDirectoryUri =
+          PathConversionUtils.addOutputPathPrefix(
+              Uri.parse(trainerOptions.getOutputDirectoryUri()), sessionName);
       inAppTrainerOptionsBuilder.setLocalComputationOptions(
           localComputationPlanUri, inputDirectoryUri, outputDirectoryUri);
     } else {
@@ -143,6 +156,20 @@ public class FederatedTrainingScheduler implements TrainingScheduler {
 
     if (trainerOptions.hasContextData()) {
       inAppTrainerOptionsBuilder.setContextData(trainerOptions.getContextData().toByteArray());
+    }
+
+    if (fcFlags.isPresent()) {
+      String prefixForOverride = fcFlags.get().sessionNamePrefixForDebugOverride();
+      if (!prefixForOverride.isEmpty()
+          && trainerOptions.getSessionName().startsWith(prefixForOverride)) {
+        inAppTrainerOptionsBuilder.setTrainingConstraints(
+            InAppTrainingConstraints.newBuilder()
+                .setRequiresNonInteractive(true)
+                .setRequiresCharging(false)
+                .setRequiresUnmeteredNetwork(false)
+                .build());
+        inAppTrainerOptionsBuilder.setOverrideDeadlineMillis(5000L);
+      }
     }
 
     return inAppTrainerOptionsBuilder;

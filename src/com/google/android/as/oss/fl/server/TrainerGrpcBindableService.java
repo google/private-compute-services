@@ -23,6 +23,8 @@ import com.google.android.as.oss.fl.api.proto.TrainerResponse;
 import com.google.android.as.oss.fl.api.proto.TrainerResponse.ResponseCode;
 import com.google.android.as.oss.fl.api.proto.TrainingServiceGrpc;
 import com.google.android.as.oss.fl.brella.service.scheduler.TrainingScheduler;
+import com.google.android.as.oss.fl.localcompute.LocalComputeResourceManager;
+import com.google.android.as.oss.fl.localcompute.LocalComputeUtils;
 import com.google.fcp.client.tasks.OnFailureListener;
 import com.google.fcp.client.tasks.OnSuccessListener;
 import com.google.common.flogger.GoogleLogger;
@@ -63,6 +65,12 @@ public class TrainerGrpcBindableService extends TrainingServiceGrpc.TrainingServ
                 "Scheduling training succeeded [population=%s, session=%s]",
                 trainerOptions.getPopulationName(), trainerOptions.getSessionName());
 
+            // prepare training resources if it's a local compute task.
+            if (isLocalComputeTraining(trainerOptions)) {
+              LocalComputeUtils.prepareLocalComputeResourcesAtScheduling(
+                  trainerOptions, resourceManager, executor);
+            }
+
             responseStreamObserver.onNext(
                 TrainerResponse.newBuilder()
                     .setResponseCode(ResponseCode.RESPONSE_CODE_SUCCESS)
@@ -84,6 +92,11 @@ public class TrainerGrpcBindableService extends TrainingServiceGrpc.TrainingServ
             logger.atInfo().log(
                 "Cancelling training succeeded [population=%s, session=%s]",
                 trainerOptions.getPopulationName(), trainerOptions.getSessionName());
+            // prepare training resources if it's a local compute task.
+            if (isLocalComputeTraining(trainerOptions)) {
+              LocalComputeUtils.cleanLocalComputationResourcesAtCancellation(
+                  trainerOptions, resourceManager, executor);
+            }
 
             responseStreamObserver.onNext(
                 TrainerResponse.newBuilder()
@@ -100,5 +113,11 @@ public class TrainerGrpcBindableService extends TrainingServiceGrpc.TrainingServ
               .build());
       responseStreamObserver.onCompleted();
     }
+  }
+
+  private boolean isLocalComputeTraining(TrainerOptions trainerOptions) {
+    return trainerOptions.hasTrainingMode()
+        && trainerOptions.getTrainingMode() == TrainingMode.TRAINING_MODE_LOCAL_COMPUTATION
+        && resourceManager.isPresent();
   }
 }

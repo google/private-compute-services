@@ -1,0 +1,76 @@
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto2";
+
+package java.com.google.android.as.oss.fl.localcompute.api;
+
+option java_multiple_files = true;
+option java_package = "com.google.android.as.oss.fl.localcompute.api.proto";
+option go_api_flag = "OPAQUE_V0";  // see http://[redacted]
+
+message UriQueryRequest {
+  // The session name of the Local Compute task.
+  optional string session_name = 1;
+
+  // A string key mapping to a file's {@link android.net.Uri} in the server app.
+  optional string file_key = 2;
+}
+
+message UriQueryResponse {
+  // A {@link android.net.Uri} of the file queried.
+  optional string result_file_uri = 1;
+
+  // If the queried file is a directory or not.
+  optional bool is_directory = 2;
+}
+
+message TraverseDirRequest {
+  // A {@link android.net.Uri} of the directory to traverse in server app.
+  optional string dir_uri = 1;
+}
+
+message TraverseDirResponse {
+  // List of {@link android.net.Uri} of the child files traversed.
+  repeated string child_file_uri = 1;
+}
+
+message FileCopyRequest {
+  // The destination or source file Uri depending on if it's a copy-to or
+  // copy-from request.
+  optional string file_uri = 2;
+}
+
+message FileCopyResponse {
+  optional bool success = 1;
+}
+
+service FileCopyService {
+  // Query the Uri of a certain file by a string key in the server app.
+  rpc QueryFileUri(UriQueryRequest) returns (UriQueryResponse);
+
+  // Traverse the directory in the server app and return the list of Uris of
+  // child files.
+  rpc TraverseDir(TraverseDirRequest) returns (TraverseDirResponse);
+
+  // Copy the content of the readable {@link ParcelFileDescriptor} that is
+  // wrapped in the request's metadata header, to the destination file provided
+  // in {@link FileCopyRequest}.
+  rpc CopyFromFileDescriptor(FileCopyRequest) returns (FileCopyResponse);
+
+  // Copy the content of the source file provided in the {@link FileCopyRequest}
+  // to the writable {@link ParcelFileDescriptor} that is wrapped in the
+  // request's metadata header.
+  rpc CopyToFileDescriptor(FileCopyRequest) returns (FileCopyResponse);
+}
