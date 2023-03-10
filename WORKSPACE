@@ -127,7 +127,7 @@ grpc_java_repositories()
 
 android_sdk_repository(
     name = "androidsdk",
-    api_level = 31,
+    api_level = 33,
 )
 
 # Allows us to use android_library and android_binary rules.
