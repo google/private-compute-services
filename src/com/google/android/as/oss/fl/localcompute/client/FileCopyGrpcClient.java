@@ -159,7 +159,7 @@ public class FileCopyGrpcClient {
       return false;
     }
 
-    boolean copySuccess;
+    boolean copySuccess = false;
     try (ParcelFileDescriptor destFileDescriptor =
         ParcelFileDescriptor.open(destFile, ParcelFileDescriptor.MODE_WRITE_ONLY)) {
       Metadata headers = new Metadata();
@@ -173,10 +173,10 @@ public class FileCopyGrpcClient {
       copySuccess = response.getSuccess();
     } catch (IOException e) {
       logger.atWarning().withCause(e).log("Failed to close the file descriptor.");
-      copySuccess = false;
-    }
-    if (!copySuccess) {
-      destFile.delete();
+    } finally {
+      if (!copySuccess) {
+        destFile.delete();
+      }
     }
     return copySuccess;
   }
