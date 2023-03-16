@@ -36,11 +36,10 @@ val AmbientContextPolicy_FederatedCompute =
     presubmitReviewRequired(OwnersApprovalOnly)
     checkpointMaxTtlDays(720)
 
-    target(PERSISTED_AMBIENT_CONTEXT_STATUS_GENERATED_DTD, maxAge = Duration.ofDays(28)) {
+    target(AMBIENT_CONTEXT_STATUS_GENERATED_DTD, maxAge = Duration.ofDays(28)) {
       retention(StorageMedium.RAM)
       retention(StorageMedium.DISK)
 
-      "id" { rawUsage(UsageType.JOIN) }
       "timestampMillis" {
         ConditionalUsage.TruncatedToDays.whenever(UsageType.ANY)
         rawUsage(UsageType.JOIN)
@@ -50,20 +49,18 @@ val AmbientContextPolicy_FederatedCompute =
         ConditionalUsage.Top2000PackageNamesWith2000Wau.whenever(UsageType.ANY)
         rawUsage(UsageType.JOIN)
       }
-      "systemInfoId" { rawUsage(UsageType.JOIN) }
     }
 
-    target(PERSISTED_AMBIENT_CONTEXT_RESULT_GENERATED_DTD, maxAge = Duration.ofDays(28)) {
+    target(AMBIENT_CONTEXT_RESULT_GENERATED_DTD, maxAge = Duration.ofDays(28)) {
       retention(StorageMedium.RAM)
       retention(StorageMedium.DISK)
 
-      "id" { rawUsage(UsageType.JOIN) }
       "timestampMillis" {
         ConditionalUsage.TruncatedToDays.whenever(UsageType.ANY)
         rawUsage(UsageType.JOIN)
       }
       "resultType" { rawUsage(UsageType.ANY) }
-      "bucketizedDurationMillis" { ConditionalUsage.Bucketed.whenever(UsageType.ANY) }
+      "durationMillis" { ConditionalUsage.Bucketed.whenever(UsageType.ANY) }
       "confidenceBucket" { rawUsage(UsageType.ANY) }
       "densityBucket" { rawUsage(UsageType.ANY) }
       "modelId" { rawUsage(UsageType.ANY) }
@@ -71,13 +68,11 @@ val AmbientContextPolicy_FederatedCompute =
         ConditionalUsage.Top2000PackageNamesWith2000Wau.whenever(UsageType.ANY)
         rawUsage(UsageType.JOIN)
       }
-      "systemInfoId" { rawUsage(UsageType.JOIN) }
     }
-    target(PERSISTED_AMBIENT_CONTEXT_INTERNAL_EVENT_GENERATED_DTD, maxAge = Duration.ofDays(28)) {
+    target(AMBIENT_CONTEXT_INTERNAL_EVENT_GENERATED_DTD, maxAge = Duration.ofDays(28)) {
       retention(StorageMedium.RAM)
       retention(StorageMedium.DISK)
 
-      "id" { rawUsage(UsageType.JOIN) }
       "timestampMillis" {
         ConditionalUsage.TruncatedToDays.whenever(UsageType.ANY)
         rawUsage(UsageType.JOIN)
@@ -89,6 +84,5 @@ val AmbientContextPolicy_FederatedCompute =
         ConditionalUsage.Top2000PackageNamesWith2000Wau.whenever(UsageType.ANY)
         rawUsage(UsageType.JOIN)
       }
-      "systemInfoId" { rawUsage(UsageType.JOIN) }
     }
   }
