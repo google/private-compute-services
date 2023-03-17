@@ -22,6 +22,7 @@ import com.google.android.as.oss.common.initializer.PcsInitializer;
 import com.google.common.flogger.GoogleLogger;
 import dagger.hilt.android.HiltAndroidApp;
 import dagger.hilt.android.qualifiers.ApplicationContext;
+import java.util.Comparator;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.inject.Inject;
@@ -39,8 +40,9 @@ public class PrivateComputeServicesApplication extends Hilt_PrivateComputeServic
 
     logger.atInfo().log("PrivateComputeServicesApplication#onCreate");
 
-    for (PcsInitializer initializer : initializers) {
-      initializer.run();
-    }
+    // Run initializers in order of their priorities.
+    initializers.stream()
+        .sorted(Comparator.comparing(PcsInitializer::getPriority).reversed())
+        .forEach(PcsInitializer::run);
   }
 }

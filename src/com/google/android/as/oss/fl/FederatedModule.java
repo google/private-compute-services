@@ -74,6 +74,16 @@ abstract class FederatedModule {
   @Provides
   @IntoSet
   static PcsInitializer provideFcInitializer(PcsFcFlags pcsFcFlags, FcLogManager logManager) {
-    return () -> PcsFcInit.init(pcsFcFlags, logManager);
+    return new PcsInitializer() {
+      @Override
+      public void run() {
+        PcsFcInit.init(pcsFcFlags, logManager);
+      }
+
+      @Override
+      public int getPriority() {
+        return PRIORITY_HIGH;
+      }
+    };
   }
 }
