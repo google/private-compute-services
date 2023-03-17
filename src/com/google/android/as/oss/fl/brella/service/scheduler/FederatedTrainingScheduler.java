@@ -140,7 +140,7 @@ public class FederatedTrainingScheduler implements TrainingScheduler {
     } else {
       inAppTrainerOptionsBuilder
           .setFederatedOptions(trainerOptions.getPopulationName())
-          .setAttestationMode(ATTESTATION_MODE);
+          .setAttestationMode(fcFlags.map(PcsFcFlags::attestationMode).orElse(ATTESTATION_MODE));
     }
 
     if (trainerOptions.hasSchedulingMode()) {
