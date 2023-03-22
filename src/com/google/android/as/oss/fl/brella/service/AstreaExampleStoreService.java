@@ -20,7 +20,6 @@ import static com.google.android.as.oss.networkusage.db.ConnectionDetails.Connec
 
 import android.os.IInterface;
 import android.os.RemoteException;
-import androidx.annotation.VisibleForTesting;
 import arcs.core.data.proto.PolicyProto;
 import com.google.android.as.oss.common.ExecutorAnnotations.FlExecutorQualifier;
 import com.google.android.as.oss.fl.Annotations.AsiPackageName;
@@ -63,6 +62,7 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
 
   @Inject @ExampleStoreClientsInfo ImmutableMap<String, String> packageToActionMap;
+
   @Inject Multimap<String, PolicyProto> installedPolicies;
   @Inject @AsiPackageName String asiPackageName;
   @Inject @GppsPackageName String gppsPackageName;
@@ -70,15 +70,6 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
   @Inject @FlExecutorQualifier Executor flExecutor;
 
   private ConnectionManager connectionManager;
-
-  public AstreaExampleStoreService() {}
-
-  @VisibleForTesting(otherwise = VisibleForTesting.NONE)
-  AstreaExampleStoreService(
-      ConnectionManager connectionManager, NetworkUsageLogRepository networkUsageLogRepository) {
-    this.connectionManager = connectionManager;
-    this.networkUsageLogRepository = networkUsageLogRepository;
-  }
 
   @Override
   public void onCreate() {
@@ -116,13 +107,6 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
 
     Optional<Policy> installedPolicy = extractInstalledPolicyOptional(callback, query);
     if (!installedPolicy.isPresent()) {
-      return;
-    }
-
-    if (!connectionManager.isClientSupported(query.getClientName())) {
-      callback.onStartQueryFailure(
-          TrainingError.TRAINING_ERROR_PCC_CLIENT_NOT_SUPPORTED_VALUE,
-          "Incorrect client name provided in the query.");
       return;
     }
 
@@ -183,6 +167,13 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
       byte[] resumptionToken,
       @Nonnull QueryCallback callback,
       AstreaQuery query) {
+    if (!connectionManager.isClientSupported(query.getClientName())) {
+      callback.onStartQueryFailure(
+          TrainingError.TRAINING_ERROR_PCC_CLIENT_NOT_SUPPORTED_VALUE,
+          "Incorrect client name provided in the query.");
+      return;
+    }
+
     Futures.addCallback(
         connectionManager.initializeServiceConnection(query.getClientName()),
         new FutureCallback<IInterface>() {
