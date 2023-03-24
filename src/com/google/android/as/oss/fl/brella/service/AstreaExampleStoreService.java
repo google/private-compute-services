@@ -30,6 +30,7 @@ import com.google.android.as.oss.fl.brella.api.StartQueryCallback;
 import com.google.android.as.oss.fl.brella.api.proto.TrainingError;
 import com.google.android.as.oss.fl.brella.service.ConnectionManager.ConnectionType;
 import com.google.android.as.oss.fl.brella.service.util.PolicyFinder;
+import com.google.android.as.oss.fl.localcompute.FileCopyStartQuery;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogUtils;
 import com.google.android.as.oss.networkusage.ui.content.UnrecognizedNetworkRequestException;
@@ -60,6 +61,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @AndroidEntryPoint(ExampleStoreService.class)
 public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreService {
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
+  private static final String FILECOPY_COLLECTION_PREFIX = "/filecopy";
 
   @Inject @ExampleStoreClientsInfo ImmutableMap<String, String> packageToActionMap;
 
@@ -68,6 +70,7 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
   @Inject @GppsPackageName String gppsPackageName;
   @Inject NetworkUsageLogRepository networkUsageLogRepository;
   @Inject @FlExecutorQualifier Executor flExecutor;
+  @Inject java.util.Optional<FileCopyStartQuery> fileCopyStartQuery;
 
   private ConnectionManager connectionManager;
 
@@ -110,32 +113,49 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
       return;
     }
 
-    if (!checkFederatedConfigs(query, selectorContext, installedPolicy.get())) {
-      callback.onStartQueryFailure(
-          TrainingError.TRAINING_ERROR_PCC_CONFIG_VALIDATION_FAILED_VALUE,
-          "Training configs don't match federation configs defined in the policy.");
-      return;
-    }
+    // If local computation task, can skip network and federation-policy validations
+    if (hasOnlyLocalCompute(selectorContext)) {
+      if (collection.startsWith(FILECOPY_COLLECTION_PREFIX) && fileCopyStartQuery.isPresent()) {
+        fileCopyStartQuery
+            .get()
+            .startQuery(collection, criteria, resumptionToken, callback, selectorContext);
+        return;
+      }
+    } else {
+      if (!checkFederatedConfigs(query, selectorContext, installedPolicy.get())) {
+        callback.onStartQueryFailure(
+            TrainingError.TRAINING_ERROR_PCC_CONFIG_VALIDATION_FAILED_VALUE,
+            "Training configs don't match federation configs defined in the policy.");
+        return;
+      }
 
-    String featureName = query.getFeatureName().name();
+      String featureName = query.getFeatureName().name();
 
-    // Log Unrecognized requests
-    if (!networkUsageLogRepository.isKnownConnection(FC_TRAINING_START_QUERY, featureName)) {
-      logUnknownConnection(featureName);
-    }
+      // Log Unrecognized requests
+      if (!networkUsageLogRepository.isKnownConnection(FC_TRAINING_START_QUERY, featureName)) {
+        logUnknownConnection(featureName);
+      }
 
-    if (networkUsageLogRepository.shouldRejectRequest(FC_TRAINING_START_QUERY, featureName)) {
-      logger.atWarning().withCause(UnrecognizedNetworkRequestException.forFeatureName(featureName))
-          .log("Rejected unknown FC request to PCS");
-      callback.onStartQueryFailure(
-          TrainingError.TRAINING_ERROR_PCC_CLIENT_NOT_SUPPORTED_VALUE,
-          String.format("Unknown PCS request for feature %s", featureName));
-      return;
+      if (networkUsageLogRepository.shouldRejectRequest(FC_TRAINING_START_QUERY, featureName)) {
+        logger.atWarning()
+            .withCause(UnrecognizedNetworkRequestException.forFeatureName(featureName)).log(
+            "Rejected unknown FC request to PCS");
+        callback.onStartQueryFailure(
+            TrainingError.TRAINING_ERROR_PCC_CLIENT_NOT_SUPPORTED_VALUE,
+            String.format("Unknown PCS request for feature %s", featureName));
+        return;
+      }
+      insertNetworkUsageLogRowForTrainingEvent(
+          query, selectorContext.getComputationProperties().getRunId());
     }
-    insertNetworkUsageLogRowForTrainingEvent(
-        query, selectorContext.getComputationProperties().getRunId());
 
     initializeConnectionAndStartQuery(collection, criteria, resumptionToken, callback, query);
+  }
+
+  private boolean hasOnlyLocalCompute(@Nonnull SelectorContext selectorContext) {
+    return selectorContext.getComputationProperties().hasLocalCompute()
+        && !selectorContext.getComputationProperties().hasFederated()
+        && !selectorContext.getComputationProperties().hasEligibilityEval();
   }
 
   private Optional<Policy> extractInstalledPolicyOptional(
