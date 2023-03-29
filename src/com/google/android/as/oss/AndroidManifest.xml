@@ -28,6 +28,8 @@
   <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <!-- Required for querying restricted metrics from statsd -->
+  <uses-permission android:name="android.permission.READ_RESTRICTED_STATS" />
 
   <application
       android:name="com.google.android.as.oss.PrivateComputeServicesApplication"
