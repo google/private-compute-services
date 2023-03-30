@@ -31,6 +31,9 @@
   <!-- Required for querying restricted metrics from statsd -->
   <uses-permission android:name="android.permission.READ_RESTRICTED_STATS" />
 
+  <!-- This permission is for PCS to use pKVM for protected model downloads. -->
+  <uses-permission android:name="android.permission.MANAGE_VIRTUAL_MACHINE" />
+
   <application
       android:name="com.google.android.as.oss.PrivateComputeServicesApplication"
       android:label="@string/pcs_app_name">
