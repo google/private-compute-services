@@ -84,23 +84,24 @@ public final class NetworkUsageLogUtils {
   }
 
   public static NetworkUsageEntity createHttpNetworkUsageEntity(
-      ConnectionDetails connectionDetails, Status status, long size, String url) {
+      ConnectionDetails connectionDetails, Status status, long downloadSize, String url) {
     checkArgument(connectionDetails.connectionKey().hasHttpConnectionKey());
     checkArgument(
         url.matches(connectionDetails.connectionKey().getHttpConnectionKey().getUrlRegex()));
     checkArgument(connectionDetails.type() == ConnectionType.HTTP);
-    return getNetworkUsageEntityForUrl(connectionDetails, status, size, url);
+    return getNetworkUsageEntityForUrl(connectionDetails, status, downloadSize, url);
   }
 
   public static NetworkUsageEntity createPirNetworkUsageEntity(
-      ConnectionDetails connectionDetails, Status status, long size, String url) {
+      ConnectionDetails connectionDetails, Status status, long downloadSize, String url) {
     checkArgument(connectionDetails.type() == ConnectionType.PIR);
     checkArgument(connectionDetails.connectionKey().hasPirConnectionKey());
     checkArgument(
         url.matches(connectionDetails.connectionKey().getPirConnectionKey().getUrlRegex()));
-    return getNetworkUsageEntityForUrl(connectionDetails, status, size, url);
+    return getNetworkUsageEntityForUrl(connectionDetails, status, downloadSize, url);
   }
 
+  // TODO: Modify to ensure FC items can contain upload and download sizes.
   public static NetworkUsageEntity createFcCheckInNetworkUsageEntity(long size) {
     return getNetworkUsageEntityBuilder(createFcCheckInConnectionDetails(), Status.SUCCEEDED, size)
         .build();
@@ -127,12 +128,12 @@ public final class NetworkUsageLogUtils {
   }
 
   public static NetworkUsageEntity createPdNetworkUsageEntry(
-      ConnectionDetails connectionDetails, Status status, long size, String clientId) {
+      ConnectionDetails connectionDetails, Status status, long downloadSize, String clientId) {
     checkArgument(connectionDetails.type() == ConnectionType.PD);
     checkArgument(connectionDetails.connectionKey().hasPdConnectionKey());
     checkArgument(
         clientId.equals(connectionDetails.connectionKey().getPdConnectionKey().getClientId()));
-    return getNetworkUsageEntityBuilder(connectionDetails, status, size).build();
+    return getNetworkUsageEntityBuilder(connectionDetails, status, downloadSize).build();
   }
 
   private static NetworkUsageEntity getNetworkUsageEntityForUrl(
@@ -150,7 +151,7 @@ public final class NetworkUsageLogUtils {
     return NetworkUsageEntity.defaultBuilder()
         .setConnectionDetails(connectionDetails)
         .setStatus(status)
-        .setSize(size);
+        .setDownloadSize(size);
   }
 
   private static ConnectionDetails.Builder getDefaultConnectionDetailsBuilder(
