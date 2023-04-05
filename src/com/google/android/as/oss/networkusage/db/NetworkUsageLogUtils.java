@@ -101,17 +101,19 @@ public final class NetworkUsageLogUtils {
     return getNetworkUsageEntityForUrl(connectionDetails, status, downloadSize, url);
   }
 
-  // TODO: Modify to ensure FC items can contain upload and download sizes.
   public static NetworkUsageEntity createFcCheckInNetworkUsageEntity(long size) {
     return getNetworkUsageEntityBuilder(createFcCheckInConnectionDetails(), Status.SUCCEEDED, size)
         .build();
   }
 
-  public static NetworkUsageEntity createFcTrainingResultUploadNetworkUsageEntity(
-      long runId, long size) {
-    return getNetworkUsageEntityBuilder(
-            createFcTrainingResultUploadConnectionDetails(), Status.SUCCEEDED, size)
+  public static NetworkUsageEntity createFcTrainingResultNetworkUsageEntity(
+      long runId, long downloadSize, long uploadSize) {
+    return NetworkUsageEntity.defaultBuilder()
+        .setConnectionDetails(createFcTrainingResultUploadConnectionDetails())
+        .setStatus(Status.SUCCEEDED)
         .setFcRunId(runId)
+        .setDownloadSize(downloadSize)
+        .setUploadSize(uploadSize)
         .build();
   }
 
@@ -121,7 +123,7 @@ public final class NetworkUsageLogUtils {
     checkArgument(connectionDetails.connectionKey().hasFlConnectionKey());
     checkNotNull(policyProto);
     checkArgument(policyProto.isInitialized());
-    return getNetworkUsageEntityBuilder(connectionDetails, Status.SUCCEEDED, /* size= */ 0)
+    return getNetworkUsageEntityBuilder(connectionDetails, Status.SUCCEEDED, /* downloadSize= */ 0)
         .setFcRunId(runId)
         .setPolicyProto(policyProto)
         .build();
@@ -137,21 +139,23 @@ public final class NetworkUsageLogUtils {
   }
 
   private static NetworkUsageEntity getNetworkUsageEntityForUrl(
-      ConnectionDetails connectionDetails, Status status, long size, String url) {
+      ConnectionDetails connectionDetails, Status status, long downloadSize, String url) {
     checkArgument(!Strings.isNullOrEmpty(url));
-    return getNetworkUsageEntityBuilder(connectionDetails, status, size).setUrl(url).build();
+    return getNetworkUsageEntityBuilder(connectionDetails, status, downloadSize)
+        .setUrl(url)
+        .build();
   }
 
   private static NetworkUsageEntity.Builder getNetworkUsageEntityBuilder(
-      ConnectionDetails connectionDetails, Status status, long size) {
+      ConnectionDetails connectionDetails, Status status, long downloadSize) {
     checkNotNull(connectionDetails);
     checkNotNull(status);
-    checkArgument(size >= 0);
+    checkArgument(downloadSize >= 0);
 
     return NetworkUsageEntity.defaultBuilder()
         .setConnectionDetails(connectionDetails)
         .setStatus(status)
-        .setDownloadSize(size);
+        .setDownloadSize(downloadSize);
   }
 
   private static ConnectionDetails.Builder getDefaultConnectionDetailsBuilder(
