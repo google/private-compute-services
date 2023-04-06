@@ -101,8 +101,13 @@ public final class NetworkUsageLogUtils {
     return getNetworkUsageEntityForUrl(connectionDetails, status, downloadSize, url);
   }
 
-  public static NetworkUsageEntity createFcCheckInNetworkUsageEntity(long size) {
-    return getNetworkUsageEntityBuilder(createFcCheckInConnectionDetails(), Status.SUCCEEDED, size)
+  public static NetworkUsageEntity createFcCheckInNetworkUsageEntity(
+      long downloadSize, long uploadSize) {
+    return NetworkUsageEntity.defaultBuilder()
+        .setConnectionDetails(createFcCheckInConnectionDetails())
+        .setStatus(Status.SUCCEEDED)
+        .setDownloadSize(downloadSize)
+        .setUploadSize(uploadSize)
         .build();
   }
 
