@@ -52,5 +52,9 @@ val ToastQueryPolicy_FederatedCompute =
       "actionType" { rawUsage(UsageType.ANY) }
       "blockRank" { rawUsage(UsageType.ANY) }
       "positionInBlock" { rawUsage(UsageType.ANY) }
+      "querySimilarity" { rawUsage(UsageType.ANY) }
+      "adjustedPnbScore" { rawUsage(UsageType.ANY) }
+      "confidenceScore" { rawUsage(UsageType.ANY) }
+      "appUsageScore" { rawUsage(UsageType.ANY) }
     }
   }
