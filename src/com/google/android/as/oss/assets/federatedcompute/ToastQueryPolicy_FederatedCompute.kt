@@ -56,5 +56,7 @@ val ToastQueryPolicy_FederatedCompute =
       "adjustedPnbScore" { rawUsage(UsageType.ANY) }
       "confidenceScore" { rawUsage(UsageType.ANY) }
       "appUsageScore" { rawUsage(UsageType.ANY) }
+      "pnbScore" { rawUsage(UsageType.ANY) }
+      "score" { rawUsage(UsageType.ANY) }
     }
   }
