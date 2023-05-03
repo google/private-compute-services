@@ -88,8 +88,7 @@ public class DeviceFlagManager extends AbstractFlagManager {
             }
 
             if (!poisonedState.getIsPoisoned().get()) {
-              logger.atSevere().log(
-                  "Device Config not available for com.google.android.as: relying on defaults");
+              logger.atSevere().log("Device Config not available: relying on defaults");
             }
             return poisonedState.getIsPoisoned().get();
           }

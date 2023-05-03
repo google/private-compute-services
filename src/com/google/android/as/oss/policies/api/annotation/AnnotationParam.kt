@@ -30,6 +30,8 @@ package com.google.android.`as`.oss.policies.api.annotation
 /** [Annotation] parameter's value: may be string, numeric or boolean. */
 sealed class AnnotationParam {
   data class Str(val value: String) : AnnotationParam()
+
   data class Num(val value: Int) : AnnotationParam()
+
   data class Bool(val value: Boolean) : AnnotationParam()
 }

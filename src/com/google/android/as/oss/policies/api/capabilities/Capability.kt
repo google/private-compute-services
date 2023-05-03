@@ -50,9 +50,13 @@ sealed class Capability(val tag: String) {
       else -> isEquivalent(other)
     }
   }
+
   fun isLessStrict(other: Capability) = compare(other) == Comparison.LessStrict
+
   fun isSameOrLessStrict(other: Capability) = compare(other) != Comparison.Stricter
+
   fun isStricter(other: Capability) = compare(other) == Comparison.Stricter
+
   fun isSameOrStricter(other: Capability) = compare(other) != Comparison.LessStrict
 
   fun compare(other: Capability): Comparison {
@@ -181,8 +185,11 @@ sealed class Capability(val tag: String) {
     }
 
     data class Minutes(val count: Int) : Ttl(count)
+
     data class Hours(val count: Int) : Ttl(count)
+
     data class Days(val count: Int) : Ttl(count)
+
     data class Infinite(val count: Int = TTL_INFINITE) : Ttl(count, true)
 
     companion object {
