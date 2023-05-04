@@ -30,6 +30,6 @@ val PlatformLoggingPolicy_FederatedCompute =
       ALLOWED USAGES: Federated analytics.
     """
         .trimIndent()
-    flavors(Flavor.PCS_RELEASE) { minRoundSize(minRoundSize = 250, minSecAggRoundSize = 250) }
+    flavors(Flavor.PCS_RELEASE) { minRoundSize(minRoundSize = 25, minSecAggRoundSize = 25) }
     // No targets because no data is stored in PCC for this feature.
   }
