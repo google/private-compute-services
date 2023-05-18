@@ -1,0 +1,40 @@
+// Copyright 2023 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package com.google.android.as.oss.proto;
+
+option java_package = "com.google.android.as.oss.proto";
+
+// Feature names for which Federated Training can be requested.
+enum FeatureName {
+  UNDEFINED_FEATURE_NAME = 0;
+  SMART_TEXT_SELECTION = 1;
+  LIVE_CAPTION = 2;
+  SMART_COPY_PASTE = 3;
+  SUSPICIOUS_MESSAGE_ALERT = 4;
+  NOW_PLAYING = 5;
+  GPPS_FEATURE_NAME = 6;
+  LIVE_TRANSLATE = 7;
+  AUTOFILL = 8;
+  CONTENT_CAPTURE = 9;
+  ECHO = 10;
+  NEXT_CONVERSATION = 11;
+  PECAN = 12;
+  SPEECH_PERSONALIZATION = 13;
+  AMBIENT_CONTEXT = 14;
+  TOAST_SEARCH = 15;
+  PLATFORM_LOGGING = 16;
+}
