@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright 2023 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <!-- Title of the network usage log activity. [CHAR_LIMIT=NONE] -->
+  <string name="network_usage_log_activity_title">Network usage log</string>
+
+  <!-- Name of the HTTP protocol, which is used to download data in Private Compute Services. [CHAR_LIMIT=NONE] -->
+  <string name="connection_type_http">HTTPS</string>
+  <!-- Name of the PIR protocol, which is used to download data in Private Compute Services. [CHAR_LIMIT=NONE] -->
+  <string name="connection_type_pir">Private Information Retrieval</string>
+  <!-- Name of the privacy-preserving mechanism which encompasses machine learning and analytics. [CHAR_LIMIT=NONE] -->
+  <string name="connection_type_fc">Federated Computation</string>
+  <!-- Name of the Protected Download protocol, which is used to download data with additional encryption and verification layers. [CHAR_LIMIT=NONE] -->
+  <string name="connection_type_ap">Protected Download</string>
+
+  <!-- Feature names and descriptions -->
+
+  <!-- Name of the lightweight download events representing attempts to participate in federated computation. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_fc_check_in">Federated Computation Check-in</string>
+  <!-- Description of the lightweight download events representing attempts to participate in federated computation. [CHAR_LIMIT=NONE] -->
+  <string name="description_fc_check_in">The device attempted to participate in a federated computation</string>
+
+  <!-- Speech Recognition -->
+  <!-- Name of the Speech Recognition feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_speech_recognition">Speech Recognition Service</string>
+  <!-- Description of downloads consisting of Speech Recognition models, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_speech_recognition">Updated the on-device speech recognition model to improve recognition of spoken words</string>
+  <string name="url_regex_speech_recognition" translatable="false">https://dl.google.com/android/voice/.*</string>
+
+  <!-- Suspicious Message Alerts -->
+  <!-- Name of the Suspicious Message Alerts feature which is part of Private Compute Core, displayed in the network usage log. "Suspicious Message Alerts" is the product name. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_suspicious_message_alert">Suspicious Message Alerts</string>
+  <!-- Description of downloads consisting of Suspicious Message Alerts models, displayed in the network usage log. "Suspicious Message Alerts" is the product name. [CHAR_LIMIT=NONE] -->
+  <string name="description_suspicious_message_alert_http">Updated the on-device Suspicious Message Alerts model</string>
+  <!-- Description of the upload events of federated analytics results for Suspicious Message Alerts, displayed in the network usage log. "Suspicious Message Alerts" is the product name. [CHAR_LIMIT=NONE] -->
+  <string name="description_suspicious_message_alert_fa">Contributed to privacy-preserving analytics to improve Suspicious Message Alerts</string>
+  <string name="url_regex_suspicious_message_alert" translatable="false">https://(www.)?gstatic.com/safecomms/.*</string>
+
+  <!--Content Capture Service -->
+  <!-- Name of the Content Capture Service feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_content_capture_service">Content Capture Service</string>
+  <!-- Description of the upload events of federated analytics results for Content Capture Service, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_content_capture_service_fa">Contributed to privacy-preserving analytics to improve Content Capture Service</string>
+
+  <!-- Smart Copy/Paste -->
+  <!-- Name of the Smart Copy / Paste feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_smart_copy_paste">Smart Copy / Paste</string>
+  <!-- Description of downloads consisting of Smart Copy / Paste models, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_smart_copy_paste_http">Updated the on-device Smart Copy / Paste model</string>
+  <!-- Description of the upload events of federated analytics results for Smart Copy / Paste, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_smart_copy_paste_fa">Contributed to privacy-preserving analytics to improve Smart Copy / Paste</string>
+  <string name="url_regex_smart_copy_paste" translatable="false">https://(www.)?gstatic.com/device_personalization_services/models/.*</string>
+
+  <!-- Now Playing -->
+  <!-- Name of the Now Playing feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_nowplaying">Now Playing</string>
+  <!-- Description of downloads consisting of Now Playing database, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_nowplaying_http">Updated the on-device song database for Now Playing</string>
+  <!-- Description of the upload events of federated analytics results for Now Playing, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_nowplaying_fa">Contributed to privacy-preserving analytics to improve Now Playing</string>
+  <string name="url_regex_nowplaying" translatable="false">https://storage.googleapis.com/music-iq-db(-dogfood)?/.*</string>
+
+  <!-- Text Classification -->
+  <!-- Name of the Text Classification feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_tc">Text Classification</string>
+  <!-- Description of downloads consisting of text classification models, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_tc_actions">Updated the on-device text classification model</string>
+  <string name="url_regex_tc_actions" translatable="false">https://(www.)?gstatic.com/matchmaker/tclib_models/actions/.*</string>
+
+  <!-- Description of downloads consisting of text classification models, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_tc_annotator">Updated the on-device text classification model</string>
+  <string name="url_regex_tc_annotator">https://(www.)?gstatic.com/matchmaker/tclib_models/annotator/.*</string>
+
+  <!-- Description of downloads consisting of text classification database, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_tc_dynamic_collections_table">Updated the on-device Knowledge Graph database for Text Classification</string>
+  <string name="url_regex_tc_dynamic_collections_table" translatable="false">https://(www.)?gstatic.com/matchmaker/kg_collections_table/.*</string>
+
+  <!-- Description of downloads consisting of text classification database, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_tc_weekly_webref">Updated the on-device Knowledge Graph database for Text Classification</string>
+  <string name="url_regex_tc_weekly_webref" translatable="false">https://(www.)?gstatic.com/webref-ondevice/aiai/.*</string>
+
+  <!-- Smart Text Selection -->
+  <!-- Name of the Smart Text Selection feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_smart_text_selection">Smart Text Selection</string>
+  <!-- Description of downloads consisting of Smart Text Selection language models, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_tc_langid">Updated the on-device language detection model for Smart Text Selection</string>
+  <string name="url_regex_tc_langid" translatable="false">https://(www.)?gstatic.com/matchmaker/tclib_models/langid/.*</string>
+
+  <!-- Description of downloads consisting of Smart Text Selection database, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_tc_dynamic_action_ranking">Updated the on-device database for Smart Text Selection, used for ranking the actions available for a given entity</string>
+  <string name="url_regex_tc_dynamic_action_ranking" translatable="false">https://(www.)?gstatic.com/matchmaker/kg_actions_ranking(_table)?/.*</string>
+
+  <!-- Description of downloads consisting of Smart Text Selection templates, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_tc_template_table">Updated the on-device templates for Smart Text Selection, used for detecting entities such as addresses</string>
+  <string name="url_regex_tc_template_table" translatable="false">https://(www.)?gstatic.com/matchmaker/template_table/.*</string>
+
+  <!-- Description of the upload events of federated analytics/federated learning results for Smart Text Selection, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_smart_text_selection_fa_fl">Contributed to privacy-preserving analytics and model training to improve Smart Text Selection</string>
+
+  <!-- Description of downloads consisting of federated analytics/federated learning components for Smart Text Selection, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_tc_fa_fl_component">Contributed to privacy-preserving analytics and model training to improve Smart Text Selection</string>
+  <string name="url_regex_tc_fa_fl_component" translatable="false">https://(www.)?gstatic.com/android/text_classifier/artifact/.*/.*</string>
+
+  <!-- Live Caption -->
+  <!-- Name of the Live Caption feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_live_caption">Live Caption</string>
+  <!-- Description of downloads consisting of Live Caption models, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_live_caption">Updated the on-device Live Caption model</string>
+  <string name="url_regex_live_caption" translatable="false">https://storage.googleapis.com/captions/.*</string>
+
+  <!-- Live Translate -->
+  <!-- Name of the Live Translate feature which is part of Private Compute Core, displayed in the network usage log. "Live Translate" is the product name. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_live_translate">Live Translate</string>
+  <!-- Description of downloads consisting of Live Translate language models, displayed in the network usage log. "Live Translate" is the product name. [CHAR_LIMIT=NONE] -->
+  <string name="description_live_translate_http">Updated the on-device Language model for Live Translate</string>
+  <!-- Description of the upload events of federated analytics results for Live Translate, displayed in the network usage log. "Live Translate" is the product name. [CHAR_LIMIT=NONE] -->
+  <string name="description_live_translate_fa">Contributed to privacy-preserving analytics to improve Live Translate</string>
+  <string name="url_regex_live_translate" translatable="false">https://dl.google.com/translate/offline/.*</string>
+
+  <!-- Google Play Protect Service -->
+  <!-- Name of the Google Play Protect Service feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_gpps">Google Play Protect Service</string>
+  <!-- Description of the upload events of federated analytics results for Google Play Protect Service, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_gpps_fa">Uploaded privacy-preserving analytics to improve Google Play Protect Service</string>
+
+  <!-- People and Conversations Service -->
+  <!-- Name of the People and Conversations Service feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_people_conversations_service">People and Conversations Service</string>
+  <!-- Description of downloads consisting of People and Conversations Service models, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_people_conversations_service_http">Updated the on-device People and Conversations Service model</string>
+  <!-- Description of the upload events of federated analytics results for People and Conversations Service, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_people_conversations_service_fa">Contributed to privacy-preserving analytics to improve People and Conversations Service</string>
+  <string name="url_regex_people_conversations_service" translatable="false">https://(www.)?gstatic.com/pecan/.*</string>
+
+    <!-- Universal Search -->
+  <!-- Name of the Search feature which is part of Private Compute Core, displayed in the network usage log. "Search your phone" is the product name. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_universal_search">Search your phone</string>
+  <!-- Description of downloads consisting of spell checker models for the Search feature, displayed in the network usage log. "Search your phone" is the product name. [CHAR_LIMIT=NONE] -->
+  <string name="description_universal_search_spelling_checker">Updated the on-device Spell Checker model for searching your phone</string>
+  <string name="url_regex_universal_search_spelling_checker" translatable="false">https://(www.)?gstatic.com/nasa/apps/pack_spelling_checker_.*</string>
+
+  <!-- Universal Search -->
+  <!-- Brand Name of the Toast Search feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_toast_search">Search</string>
+  <!-- Description of the upload events of federated analytics results for Toast Search, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_toast_search">Contributed to privacy-preserving analytics to improve Search</string>
+
+  <!-- Description of downloads consisting of databases for the Search feature, displayed in the network usage log. "Search your phone" is the product name. [CHAR_LIMIT=NONE] -->
+  <string name="description_universal_search_corpora">Updated the on-device database used for searching your phone</string>
+  <string name="url_regex_universal_search_corpora" translatable="false">https://(www.)?gstatic.com/nasa/apps/(non_en_)?pack_(?!spelling_checker)(?!notification).*</string>
+  <string name="url_regex_universal_search_corpora_mdd" translatable="false">https://dl.google.com/mdi-serving/aiai-echo-toast-config/.*</string>
+
+  <!-- Notification Auto Expiration -->
+  <!-- Name of the Notification Auto Expiration feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_notification_auto_expiration">Notification Auto Expiration</string>
+  <!-- Description of downloads consisting of Notification Auto Expiration databases, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_notification_auto_expiration">Updated the on-device app category database for Notification Auto Expiration</string>
+  <string name="url_regex_name_notification_auto_expiration" translatable="false">https://(www.)?gstatic.com/nasa/apps/pack_notification_.*.zip</string>
+
+  <!-- App Suggestions  -->
+  <!-- Name of the App Suggestions feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_app_suggestions">App Suggestions</string>
+  <!-- Description of downloads consisting of app suggestions models, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_app_suggestions_refraction">Updated the on-device model to suggest the next apps</string>
+  <string name="url_regex_app_suggestions_refraction" translatable="false">https://dl.google.com/mdi-serving/aiai-echo-refraction-config/.*</string>
+
+  <!-- Log item details page -->
+  <!-- The creation time field of an entry in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="details_page_time">CREATED</string>
+  <!-- The application name field of an entry in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="details_page_apk_name">APK NAME</string>
+  <!-- The description field of an entry in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="details_page_description">DESCRIPTION</string>
+  <!-- The download/upload mechanism field of an entry in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="details_page_method">MECHANISM</string>
+  <!-- The URL field of an entry in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="details_page_url">URL</string>
+  <!-- The upload size field of an entry in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="details_page_upload_size">ESTIMATED TOTAL UPLOAD</string>
+  <!-- The download size field of an entry in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="details_page_download_size">ESTIMATED TOTAL DOWNLOAD</string>
+  <!-- The field showing Federated Computation policies of an entry in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="details_page_policies">ENFORCED DATA POLICIES</string>
+  <!-- The field showing success/failure status of an entry in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="details_page_status">STATUS</string>
+  <!-- Indicates that the download was completed successfully. [CHAR_LIMIT=NONE] -->
+  <string name="details_page_status_success">Completed</string>
+  <!-- Indicates that the download failed. [CHAR_LIMIT=NONE] -->
+  <string name="details_page_status_failure">Interrupted</string>
+
+  <!-- TODO: This should be set dynamically based on the age of the database. -->
+  <string name="summary_banner_title" translatable="false">In the last 2 weeks</string>
+
+  <!-- Ambient Context -->
+  <!-- Name of the Ambient Context Service which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_ambient_context">Ambient Context</string>
+  <!-- Description of the upload events of federated analytics results for Ambient Context Service, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_ambient_context">Contributed to privacy-preserving analytics to improve ambient context</string>
+
+  <!-- Quick Tap  -->
+  <!-- Name of the Quick Tap feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_quick_tap">Quick Tap</string>
+  <!-- Description of downloads consisting of Quick Tap models and related configs, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_quick_tap">Updated the on-device model to detect the Quick Tap gesture</string>
+  <string name="url_regex_quick_tap" translatable="false">https://dl.google.com/mdi-serving/aiai-quicktap-config/.*</string>
+
+  <!-- Speech Recognizer Personalization -->
+  <!-- Name of the Speech Recognizer Personalization feature which is used for setting the configuration of the interests model interactions. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_speech_recognizer_personalization">Speech Recognizer Personalization</string>
+  <!-- Description of Speech Recognizer Personalization feature which is used for setting the configuration of the interests model interactions [CHAR_LIMIT=NONE] -->
+  <string name="description_speech_recognizer_personalization">Updated the on-device model for Speech Recognizer Personalization</string>
+  <string name="url_regex_speech_recognizer_personalization"  translatable="false">https://(www.)?gstatic.com/matchmaker/interests_model/(interactions_scoring_table|config)/.*</string>
+
+  <!-- Binary Transparency Log Root Signature -->
+  <!-- Description of the HTTP download of the binary transparency log root signature, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_bt_log_root_signature">Updated the Protected Download verification signature</string>
+
+  <!-- Description of downloads consisting of Google Play Protect Service models using Protected Download protocol, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_gpps_ap">Updated the on-device protections of Google Play Protect Service</string>
+  <string name="ap_client_id_gpps" translatable="false">com.google.android.odad</string>
+  <string name="url_regex_gpps_bt_signature" translatable="false">https://www.gstatic.com/on-device-safety/bt_log_signature_key.txt\\?c=tnAbOw</string>
+
+  <!-- Cinematic Wallpaper  -->
+  <!-- Name of the Cinematic Wallpaper feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_cinematic_wallpaper">Cinematic Wallpaper</string>
+  <!-- Description of downloads consisting of Cinematic Wallpaper models, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_cinematic_wallpaper">Updated the on-device ML models for generating cinematic wallpapers</string>
+  <string name="url_regex_cinematic_wallpaper" translatable="false">https://dl.google.com/mdi-serving/aiai-wallpapereffects-cinematic-models/.*</string>
+
+  <plurals name="summary_banner_updates">
+    <item quantity="one">%1$d update</item>
+    <item quantity="other">%1$d updates</item>
+  </plurals>
+
+</resources>
