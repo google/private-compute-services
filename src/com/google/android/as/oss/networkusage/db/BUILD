@@ -38,6 +38,7 @@ android_library(
         "@maven//:androidx_lifecycle_lifecycle_livedata",
         "@maven//:androidx_lifecycle_lifecycle_livedata_core",
         "@maven//:androidx_room_room_common",
+        "@maven//:androidx_room_room_runtime",
         "@maven//:com_google_flogger_google_extensions",
         "@maven//:com_google_guava_guava",
         "@maven//:com_google_protobuf_protobuf_lite",

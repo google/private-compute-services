@@ -23,7 +23,6 @@ android_library(
     ],
     deps = [
         "//src/com/google/android/as/oss/common/futures",
-        "//third_party/java/android_libs/guava_jdk5:annotations",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_guava_guava",
     ],

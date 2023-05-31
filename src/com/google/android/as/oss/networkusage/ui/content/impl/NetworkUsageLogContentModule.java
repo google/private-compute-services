@@ -52,7 +52,7 @@ abstract class NetworkUsageLogContentModule {
 
   @Provides
   static ImmutableMap<ConnectionDetails, ConnectionResources> provideEntryContentMap(
-      @ApplicationContext Context context ) {
+      @ApplicationContext Context context) {
     ContentMapEntryBuilder asiHttpEntryBuilder =
         new ContentMapEntryBuilder(context).packageName(ASI_PACKAGE_NAME).connectionType(HTTP);
     ContentMapEntryBuilder gppsHttpEntryBuilder =
@@ -244,10 +244,8 @@ abstract class NetworkUsageLogContentModule {
                 .connectionKeyStringId(R.string.url_regex_cinematic_wallpaper)
                 .featureNameId(R.string.feature_name_cinematic_wallpaper)
                 .descriptionId(R.string.description_cinematic_wallpaper)
-                .build(),
-            );
-    ImmutableMap<ConnectionDetails, ConnectionResources> finalImmutableMap =
-        entries;
+                .build());
+    ImmutableMap<ConnectionDetails, ConnectionResources> finalImmutableMap = entries;
 
     if (!verifyUniqueKeysAcrossPackages(finalImmutableMap)) {
       throw new UnsupportedOperationException("Connection key should be unique across packages.");
