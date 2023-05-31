@@ -22,7 +22,7 @@ android_library(
     exports_manifest = 1,
     manifest = "AndroidManifest.xml",
     deps = [
-        "//java/com/google/common/annotations",
+        "@maven//:androidx_annotation_annotation",
         "@maven//:com_google_flogger_google_extensions",
     ],
 )

@@ -19,7 +19,7 @@ package com.google.android.as.oss.common.broadcastreceivers;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import com.google.common.annotations.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 import com.google.common.flogger.GoogleLogger;
 
 /**
