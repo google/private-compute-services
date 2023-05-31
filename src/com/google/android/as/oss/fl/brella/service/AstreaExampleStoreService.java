@@ -34,7 +34,7 @@ import com.google.android.as.oss.fl.localcompute.FileCopyStartQuery;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogUtils;
 import com.google.android.as.oss.networkusage.ui.content.UnrecognizedNetworkRequestException;
-import com.google.android.as.oss.proto.AstreaProtos.AstreaQuery;
+import com.google.android.as.oss.proto.PcsProtos.AstreaQuery;
 import com.google.fcp.client.ExampleStoreService;
 import com.google.android.as.oss.policies.api.Policy;
 import com.google.common.base.Optional;
