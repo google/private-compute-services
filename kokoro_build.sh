@@ -9,4 +9,4 @@ echo "build:linux --sandbox_tmpfs_path=/tmp" >> ".bazelrc"
 # Install Bazel
 use_bazel.sh 6.1.0
 
-bazel build //src/com/google/android/as/oss:pcs
+bazel build ...
