@@ -16,6 +16,7 @@
 
 package com.google.android.as.oss.common;
 
+import com.google.android.as.oss.common.ExecutorAnnotations.AttestationExecutorQualifier;
 import com.google.android.as.oss.common.ExecutorAnnotations.FlExecutorQualifier;
 import com.google.android.as.oss.common.ExecutorAnnotations.GeneralExecutorQualifier;
 import com.google.android.as.oss.common.ExecutorAnnotations.IoExecutorQualifier;
@@ -60,6 +61,13 @@ abstract class ExecutorsModule {
   @IoExecutorQualifier
   static Executor ioExecutor() {
     return Executors.IO_EXECUTOR;
+  }
+
+  @Provides
+  @Singleton
+  @AttestationExecutorQualifier
+  static Executor attestationExecutor() {
+    return Executors.ATTESTATION_EXECUTOR;
   }
 
   @Provides

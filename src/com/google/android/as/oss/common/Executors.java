@@ -28,6 +28,8 @@ public class Executors {
   public static final Executor GENERAL_SINGLE_THREAD_EXECUTOR =
       java.util.concurrent.Executors.newSingleThreadExecutor();
   public static final Executor PIR_EXECUTOR = java.util.concurrent.Executors.newCachedThreadPool();
+  public static final Executor ATTESTATION_EXECUTOR =
+      java.util.concurrent.Executors.newSingleThreadExecutor();
 
   public static final ListeningScheduledExecutorService PROTECTED_DOWNLOAD_EXECUTOR =
       MoreExecutors.listeningDecorator(

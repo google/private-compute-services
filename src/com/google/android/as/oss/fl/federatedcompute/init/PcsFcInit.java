@@ -18,6 +18,7 @@ package com.google.android.as.oss.fl.federatedcompute.init;
 
 import com.google.android.as.oss.fl.federatedcompute.config.PcsFcFlags;
 import com.google.android.as.oss.fl.federatedcompute.logging.FcLogManager;
+import com.google.fcp.client.AttestationClient;
 import com.google.fcp.client.FCFatSdkConfig;
 import com.google.fcp.client.FCInit;
 import com.google.fcp.client.DynamicFlags;
@@ -37,7 +38,10 @@ public final class PcsFcInit {
   // custom ops necessary for local computation tasks.
   private static final String TENSORFLOW_NATIVE_LIB = "pcs_tensorflow_jni";
 
-  public static void init(PcsFcFlags pcsFcFlags, FcLogManager fcLogManager) {
+  public static void init(
+      PcsFcFlags pcsFcFlags,
+      FcLogManager fcLogManager,
+      @Nullable AttestationClient fcAttestationClient) {
     logger.atInfo().log("Calling FCInit for PCS.");
     FCInit.setFatSdkConfig(
         new FCFatSdkConfig() {
@@ -66,6 +70,11 @@ public final class PcsFcInit {
               return fcLogManager;
             }
             return null;
+          }
+
+          @Override
+          public @Nullable AttestationClient getAttestationClientOverride() {
+            return fcAttestationClient;
           }
         });
     FCInit.myAppCanHandleMultipleProcesses();

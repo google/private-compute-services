@@ -16,10 +16,12 @@
 
 package com.google.android.as.oss.networkusage.db;
 
+import static com.google.android.as.oss.attestation.PccAttestationMeasurementClient.ATTESTATION_FEATURE_NAME;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import arcs.core.data.proto.PolicyProto;
+import com.google.android.as.oss.networkusage.api.proto.AttestationConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.ConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.FlConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.HttpConnectionKey;
@@ -36,6 +38,19 @@ public final class NetworkUsageLogUtils {
         .setConnectionKey(
             ConnectionKey.newBuilder()
                 .setHttpConnectionKey(HttpConnectionKey.newBuilder().setUrlRegex(urlRegex).build())
+                .build())
+        .build();
+  }
+
+  public static ConnectionDetails createAttestationConnectionDetails(
+      String featureName, String packageName) {
+    checkArgument(!Strings.isNullOrEmpty(featureName));
+    checkArgument(!Strings.isNullOrEmpty(packageName));
+    return getDefaultConnectionDetailsBuilder(ConnectionType.ATTESTATION_REQUEST, packageName)
+        .setConnectionKey(
+            ConnectionKey.newBuilder()
+                .setAttestationConnectionKey(
+                    AttestationConnectionKey.newBuilder().setFeatureName(featureName).build())
                 .build())
         .build();
   }
@@ -90,6 +105,15 @@ public final class NetworkUsageLogUtils {
         url.matches(connectionDetails.connectionKey().getHttpConnectionKey().getUrlRegex()));
     checkArgument(connectionDetails.type() == ConnectionType.HTTP);
     return getNetworkUsageEntityForUrl(connectionDetails, status, downloadSize, url);
+  }
+
+  public static NetworkUsageEntity createAttestationNetworkUsageEntity(
+      String packageName, long downloadSize) {
+    checkArgument(!Strings.isNullOrEmpty(packageName));
+    ConnectionDetails connectionDetails =
+        createAttestationConnectionDetails(ATTESTATION_FEATURE_NAME, packageName);
+
+    return getNetworkUsageEntityBuilder(connectionDetails, Status.SUCCEEDED, downloadSize).build();
   }
 
   public static NetworkUsageEntity createPirNetworkUsageEntity(

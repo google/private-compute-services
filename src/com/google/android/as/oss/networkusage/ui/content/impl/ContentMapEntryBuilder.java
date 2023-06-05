@@ -23,6 +23,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import android.content.Context;
 import android.content.res.Resources;
 import androidx.annotation.StringRes;
+import com.google.android.as.oss.networkusage.api.proto.AttestationConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.ConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.FlConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.HttpConnectionKey;
@@ -158,6 +159,10 @@ final class ContentMapEntryBuilder {
       case PD:
         connectionKeyBuilder.setPdConnectionKey(
             PdConnectionKey.newBuilder().setClientId(connectionKeyString).build());
+        break;
+      case ATTESTATION_REQUEST:
+        connectionKeyBuilder.setAttestationConnectionKey(
+            AttestationConnectionKey.newBuilder().setFeatureName(connectionKeyString).build());
         break;
       default:
         throw new UnsupportedOperationException(

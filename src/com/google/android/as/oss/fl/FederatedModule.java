@@ -24,12 +24,14 @@ import com.google.android.as.oss.fl.Annotations.ResultHandlingClientsInfo;
 import com.google.android.as.oss.fl.federatedcompute.config.PcsFcFlags;
 import com.google.android.as.oss.fl.federatedcompute.init.PcsFcInit;
 import com.google.android.as.oss.fl.federatedcompute.logging.FcLogManager;
+import com.google.fcp.client.AttestationClient;
 import com.google.common.collect.ImmutableMap;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
 import dagger.hilt.components.SingletonComponent;
 import dagger.multibindings.IntoSet;
+import javax.annotation.Nullable;
 
 @Module
 @InstallIn(SingletonComponent.class)
@@ -73,11 +75,14 @@ abstract class FederatedModule {
 
   @Provides
   @IntoSet
-  static PcsInitializer provideFcInitializer(PcsFcFlags pcsFcFlags, FcLogManager logManager) {
+  static PcsInitializer provideFcInitializer(
+      PcsFcFlags pcsFcFlags,
+      FcLogManager logManager,
+      @Nullable AttestationClient fcAttestationClient) {
     return new PcsInitializer() {
       @Override
       public void run() {
-        PcsFcInit.init(pcsFcFlags, logManager);
+        PcsFcInit.init(pcsFcFlags, logManager, fcAttestationClient);
       }
 
       @Override

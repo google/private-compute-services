@@ -65,6 +65,19 @@ public final class NetworkUsageLogContentMapImpl implements NetworkUsageLogConte
   }
 
   @Override
+  public Optional<ConnectionDetails> getAttestationConnectionDetails(String featureName) {
+    for (ConnectionDetails details : entryContentMap.keySet()) {
+      if (details.connectionKey().hasAttestationConnectionKey()
+          && featureName.equals(
+              details.connectionKey().getAttestationConnectionKey().getFeatureName())) {
+        return Optional.of(details);
+      }
+    }
+    logger.atWarning().log("Unauthorized Attestation request for feature name '%s'", featureName);
+    return Optional.empty();
+  }
+
+  @Override
   public Optional<ConnectionDetails> getPirConnectionDetails(String url) {
     for (ConnectionDetails details : entryContentMap.keySet()) {
       if (details.connectionKey().hasPirConnectionKey()

@@ -47,6 +47,7 @@ android_library(
     manifest = "//src/com/google/android/as/oss/common:AndroidManifest.xml",
     deps = [
         ":impl",
+        "//src/com/google/android/as/oss/attestation",
         "//src/com/google/android/as/oss/networkusage/db",
         "//src/com/google/android/as/oss/networkusage/ui/content",
         "//src/com/google/android/as/oss/networkusage/ui/user:res_lib",

@@ -213,6 +213,8 @@ class NetworkUsageItemUtils {
         return createFcResultUploadInstanceInfo(context, networkUsageItem);
       case FC_CHECK_IN:
         return createFcCheckInInstanceInfo(context, networkUsageItem);
+      case ATTESTATION_REQUEST:
+        return createAttestationRequestInstanceInfo(context, networkUsageItem);
       default:
         logger.atWarning().log(
             "WARNING: Unknown ConnectionType %s", networkUsageItem.connectionDetails().type());
@@ -249,6 +251,11 @@ class NetworkUsageItemUtils {
           });
     }
     return builder.build();
+  }
+
+  private static ImmutableList<LogItemWrapper> createAttestationRequestInstanceInfo(
+      Context context, NetworkUsageItemWrapper networkUsageItem) {
+    return addUploadAndDownloadItems(context, networkUsageItem);
   }
 
   private static ImmutableList<LogItemWrapper> createPdDownloadInstanceInfo(

@@ -16,6 +16,8 @@
 
 package com.google.android.as.oss.networkusage.ui.content.impl;
 
+import static com.google.android.as.oss.attestation.PccAttestationMeasurementClient.ATTESTATION_FEATURE_NAME;
+import static com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType.ATTESTATION_REQUEST;
 import static com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType.FC_TRAINING_START_QUERY;
 import static com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType.HTTP;
 import static com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType.PD;
@@ -66,6 +68,10 @@ abstract class NetworkUsageLogContentModule {
             .packageName(GPPS_PACKAGE_NAME)
             .connectionType(FC_TRAINING_START_QUERY);
     ContentMapEntryBuilder pdEntryBuilder = new ContentMapEntryBuilder(context).connectionType(PD);
+    ContentMapEntryBuilder attestationEntryBuilder =
+        new ContentMapEntryBuilder(context)
+            .packageName(ASI_PACKAGE_NAME)
+            .connectionType(ATTESTATION_REQUEST);
 
     ImmutableMap<ConnectionDetails, ConnectionResources> entries =
         ImmutableMap.ofEntries(
@@ -244,6 +250,11 @@ abstract class NetworkUsageLogContentModule {
                 .connectionKeyStringId(R.string.url_regex_cinematic_wallpaper)
                 .featureNameId(R.string.feature_name_cinematic_wallpaper)
                 .descriptionId(R.string.description_cinematic_wallpaper)
+                .build(),
+            attestationEntryBuilder
+                .connectionKeyString(ATTESTATION_FEATURE_NAME)
+                .featureNameId(R.string.feature_name_android_key_attestation)
+                .descriptionId(R.string.description_android_key_attestation)
                 .build());
     ImmutableMap<ConnectionDetails, ConnectionResources> finalImmutableMap = entries;
 
@@ -277,6 +288,9 @@ abstract class NetworkUsageLogContentModule {
           break;
         case PD:
           connectionKey = details.connectionKey().getPdConnectionKey().getClientId();
+          break;
+        case ATTESTATION_REQUEST:
+          connectionKey = details.connectionKey().getAttestationConnectionKey().getFeatureName();
           break;
         default:
           // Should never be reached.

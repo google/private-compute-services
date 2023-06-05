@@ -31,6 +31,7 @@ android_library(
         "//third_party/java/auto:auto_value_parcel",
     ],
     deps = [
+        "//src/com/google/android/as/oss/attestation",
         "//src/com/google/android/as/oss/networkusage/api:connection_key_java_proto_lite",
         "//third_party/java/auto:auto_value",
         "//third_party/java/auto:auto_value_parcel_adapter",

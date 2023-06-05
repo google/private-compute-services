@@ -35,11 +35,16 @@ message PdConnectionKey {
   optional string client_id = 1;
 }
 
+message AttestationConnectionKey {
+  optional string feature_name = 1;
+}
+
 message ConnectionKey {
   oneof connection_key {
     FlConnectionKey fl_connection_key = 1;
     HttpConnectionKey http_connection_key = 2;
     PirConnectionKey pir_connection_key = 3;
     PdConnectionKey pd_connection_key = 4;
+    AttestationConnectionKey attestation_connection_key = 5;
   }
 }

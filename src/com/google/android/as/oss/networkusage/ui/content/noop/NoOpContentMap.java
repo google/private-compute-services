@@ -35,6 +35,11 @@ public class NoOpContentMap implements NetworkUsageLogContentMap {
   }
 
   @Override
+  public Optional<ConnectionDetails> getAttestationConnectionDetails(String featureName) {
+    return Optional.empty();
+  }
+
+  @Override
   public Optional<ConnectionDetails> getPirConnectionDetails(String url) {
     return Optional.empty();
   }

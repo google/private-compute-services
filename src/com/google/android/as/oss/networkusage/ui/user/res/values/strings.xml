@@ -29,6 +29,9 @@
   <!-- Name of the Protected Download protocol, which is used to download data with additional encryption and verification layers. [CHAR_LIMIT=NONE] -->
   <string name="connection_type_ap">Protected Download</string>
 
+  <!-- Name of the Attestation request protocol, which is used to download a nonce challenge from the Key Attestation Validation Service. [CHAR_LIMIT=NONE] -->
+  <string name="connection_type_attestation">Key Attestation</string>
+
   <!-- Feature names and descriptions -->
 
   <!-- Name of the lightweight download events representing attempts to participate in federated computation. [CHAR_LIMIT=NONE] -->
@@ -248,4 +251,9 @@
     <item quantity="other">%1$d updates</item>
   </plurals>
 
+  <!-- Android Key Attestation -->
+  <!-- Name of the Android Key Attestation feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_android_key_attestation">Android Key Attestation</string>
+  <!-- Description of downloads related to Android Key Attestation, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_android_key_attestation">Requested a nonce challenge for Android Key Attestation</string>
 </resources>
