@@ -36,4 +36,10 @@ public class PcsSettingsActivity extends Hilt_PcsSettingsActivity {
       actionBar.setDisplayHomeAsUpEnabled(true);
     }
   }
+
+  @Override
+  public boolean onSupportNavigateUp() {
+    getOnBackPressedDispatcher().onBackPressed();
+    return true;
+  }
 }
