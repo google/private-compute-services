@@ -1,0 +1,44 @@
+// Copyright 2023 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package com.google.android.as.oss.proto;
+
+import "google/protobuf/any.proto";
+import "src/com/google/android/as/oss/protos/pcs_feature-enum.proto";
+import "third_party/java/arcs/policy.proto";
+
+option java_package = "com.google.android.as.oss.proto";
+option java_outer_classname = "PcsProtos";
+
+// Federated compute plans (task groups) must use this protocol buffer as
+// selection criteria.
+message AstreaQuery {
+  // Client to which the query needs to be routed (Google Play Protect
+  // Service/ASI/StatsD).
+  string client_name = 1;
+
+  // Policy the query is compliant with.
+  arcs.PolicyProto policy = 2;
+
+  // Population name used to check-in with federated training scheduler.
+  string population_name = 3;
+
+  // Feature specific selection criteria.
+  .google.protobuf.Any data_selection_criteria = 4;
+
+  // Feature name for which the federated training is requested.
+  FeatureName feature_name = 5;
+}

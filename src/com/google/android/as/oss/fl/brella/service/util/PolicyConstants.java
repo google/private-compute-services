@@ -23,5 +23,8 @@ public class PolicyConstants {
   /** The key for the policy config section encoding user consent requirements.. */
   public static final String REQUIRED_USER_CONSENT_CONFIG_KEY = "requiredUserConsent";
 
+  /** The key for the Android-wide OS Usage And Diagnostics Checkbox. */
+  public static final String USAGE_AND_DIAGNOSTIC_CHECKBOX = "UsageAndDiagnosticsCheckbox";
+
   private PolicyConstants() {}
 }

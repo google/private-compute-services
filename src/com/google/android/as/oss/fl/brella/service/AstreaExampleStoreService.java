@@ -20,8 +20,13 @@ import static com.google.android.as.oss.networkusage.db.ConnectionDetails.Connec
 
 import android.os.IInterface;
 import android.os.RemoteException;
+import androidx.core.os.BuildCompat;
 import arcs.core.data.proto.PolicyProto;
 import com.google.android.as.oss.common.ExecutorAnnotations.FlExecutorQualifier;
+import com.google.android.as.oss.common.config.ConfigReader;
+import com.google.android.as.oss.common.consent.UsageReportingOptedInState;
+import com.google.android.as.oss.common.consent.config.PolicyConfig;
+import com.google.android.as.oss.common.flavor.BuildFlavor;
 import com.google.android.as.oss.fl.Annotations.AsiPackageName;
 import com.google.android.as.oss.fl.Annotations.ExampleStoreClientsInfo;
 import com.google.android.as.oss.fl.Annotations.GppsPackageName;
@@ -29,7 +34,10 @@ import com.google.android.as.oss.fl.brella.api.IExampleStore;
 import com.google.android.as.oss.fl.brella.api.StartQueryCallback;
 import com.google.android.as.oss.fl.brella.api.proto.TrainingError;
 import com.google.android.as.oss.fl.brella.service.ConnectionManager.ConnectionType;
+import com.google.android.as.oss.fl.brella.service.util.PolicyConstants;
 import com.google.android.as.oss.fl.brella.service.util.PolicyFinder;
+import com.google.android.as.oss.fl.federatedcompute.statsd.ExampleStoreConnector;
+import com.google.android.as.oss.fl.federatedcompute.statsd.config.StatsdConfig;
 import com.google.android.as.oss.fl.localcompute.FileCopyStartQuery;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogUtils;
@@ -65,12 +73,17 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
 
   @Inject @ExampleStoreClientsInfo ImmutableMap<String, String> packageToActionMap;
 
+  @Inject ExampleStoreConnector statsdConnector;
+  @Inject ConfigReader<StatsdConfig> statsdConfigReader;
+  @Inject ConfigReader<PolicyConfig> policyConfigReader;
   @Inject Multimap<String, PolicyProto> installedPolicies;
   @Inject @AsiPackageName String asiPackageName;
   @Inject @GppsPackageName String gppsPackageName;
   @Inject NetworkUsageLogRepository networkUsageLogRepository;
+  @Inject UsageReportingOptedInState usageReportingState;
   @Inject @FlExecutorQualifier Executor flExecutor;
   @Inject java.util.Optional<FileCopyStartQuery> fileCopyStartQuery;
+  @Inject BuildFlavor buildFlavor;
 
   private ConnectionManager connectionManager;
 
@@ -129,6 +142,10 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
         return;
       }
 
+      if (!consentPolicyValid(installedPolicy.get(), callback)) {
+        return;
+      }
+
       String featureName = query.getFeatureName().name();
 
       // Log Unrecognized requests
@@ -149,7 +166,47 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
           query, selectorContext.getComputationProperties().getRunId());
     }
 
+    if (isValidStatsdQuery(collection)) {
+      statsdConnector.startQuery(collection, criteria, resumptionToken, callback, selectorContext);
+      return;
+    }
+
     initializeConnectionAndStartQuery(collection, criteria, resumptionToken, callback, query);
+  }
+
+  private boolean consentPolicyValid(Policy installedPolicy, QueryCallback callback) {
+    if (!policyConfigReader.getConfig().enableConsentCheckInPcs()) {
+      return true;
+    }
+
+    Map<String, String> installedConfig =
+        installedPolicy
+            .getConfigs()
+            .getOrDefault(PolicyConstants.REQUIRED_USER_CONSENT_CONFIG_KEY, ImmutableMap.of());
+    if (installedConfig.containsKey("value")
+        && Objects.equals(
+            installedConfig.get("value"), PolicyConstants.USAGE_AND_DIAGNOSTIC_CHECKBOX)) {
+      if (!usageReportingState.isOptedIn()) {
+        callback.onStartQueryFailure(
+            TrainingError.TRAINING_ERROR_POLICY_MISMATCH_VALUE,
+            PolicyConstants.REQUIRED_USER_CONSENT_CONFIG_KEY + ": policy section not valid.");
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private boolean isValidStatsdQuery(@Nonnull String collection) {
+    return statsdConnector != null
+        && Ascii.equalsIgnoreCase(collection, STATSD_COLLECTION_NAME)
+        && BuildCompat.isAtLeastU()
+        && isPlatformLoggingEnabled();
+  }
+
+  private boolean isPlatformLoggingEnabled() {
+    return statsdConfigReader.getConfig().enablePlatformLogging()
+        || (buildFlavor.isInternal()
+            && statsdConfigReader.getConfig().enablePlatformLoggingTesting());
   }
 
   private boolean hasOnlyLocalCompute(@Nonnull SelectorContext selectorContext) {

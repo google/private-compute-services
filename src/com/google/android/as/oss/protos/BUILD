@@ -25,3 +25,33 @@ java_lite_proto_library(
     name = "pcs_feature_enum_java_proto_lite",
     deps = [":pcs_feature_enum_proto"],
 )
+
+proto_library(
+    name = "pcs_statsquery_proto",
+    srcs = [
+        "pcs_statsquery.proto",
+    ],
+)
+
+java_lite_proto_library(
+    name = "pcs_statsquery_java_proto_lite",
+    deps = [":pcs_statsquery_proto"],
+)
+
+proto_library(
+    name = "pcs_query_proto",
+    srcs = [
+        "pcs_query.proto",
+    ],
+    deps = [
+        ":pcs_feature_enum_proto",
+        "@com_google_protobuf//:any_proto",
+        "@com_google_protobuf//:descriptor_proto",
+        "@private_compute_libraries//java/com/google/android/libraries/pcc/chronicle/api/policy/proto:policy_proto",
+    ],
+)
+
+java_lite_proto_library(
+    name = "pcs_query_java_proto_lite",
+    deps = [":pcs_query_proto"],
+)
