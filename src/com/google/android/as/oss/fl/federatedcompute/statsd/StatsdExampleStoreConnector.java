@@ -24,6 +24,7 @@ import android.app.StatsQuery;
 import android.content.Context;
 import android.os.Build.VERSION_CODES;
 import android.os.OutcomeReceiver;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import com.android.internal.os.StatsPolicyConfigProto.StatsPolicyConfig;
