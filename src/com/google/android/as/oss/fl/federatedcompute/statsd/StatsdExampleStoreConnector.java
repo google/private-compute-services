@@ -28,6 +28,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import com.android.internal.os.StatsPolicyConfigProto.StatsPolicyConfig;
+import com.google.android.as.oss.fl.brella.api.EmptyExampleStoreIterator;
 import com.google.android.as.oss.fl.brella.api.proto.TrainingError;
 import com.google.android.as.oss.proto.PcsProtos.AstreaQuery;
 import com.google.android.as.oss.proto.PcsStatsquery.AstreaStatsQuery;
@@ -52,6 +53,8 @@ public class StatsdExampleStoreConnector implements ExampleStoreConnector {
       "type.googleapis.com/com.google.android.as.oss.proto.AstreaStatsQuery";
   public static final int CONFIG_KEY = 175747355; // [redacted]
   public static final String CONFIG_PACKAGE = "com.google.fcp.client";
+
+  private static final String NO_TABLE_PRESENT_ERROR = "no such table: metric_";
 
   private final Executor executor;
   private final Context context;
@@ -103,9 +106,16 @@ public class StatsdExampleStoreConnector implements ExampleStoreConnector {
 
             @Override
             public void onError(StatsQueryException error) {
-              callback.onStartQueryFailure(
-                  TrainingError.TRAINING_ERROR_START_QUERY_RUNTIME_EXCEPTION_VALUE,
-                  "Statsd query failed: " + error.getLocalizedMessage());
+              if (error.getMessage() != null
+                  && error.getMessage().contains(NO_TABLE_PRESENT_ERROR)) {
+                // TODO: Replace with proper checks using status code when API is
+                // available.
+                callback.onStartQuerySuccess(EmptyExampleStoreIterator.create());
+              } else {
+                callback.onStartQueryFailure(
+                    TrainingError.TRAINING_ERROR_START_QUERY_RUNTIME_EXCEPTION_VALUE,
+                    "Statsd query failed: " + error.getLocalizedMessage());
+              }
             }
           });
     } catch (StatsUnavailableException | RuntimeException e) {
