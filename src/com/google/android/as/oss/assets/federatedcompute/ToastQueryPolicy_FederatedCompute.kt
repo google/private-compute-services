@@ -60,5 +60,6 @@ val ToastQueryPolicy_FederatedCompute =
       "score" { rawUsage(UsageType.ANY) }
       "baseScore" { rawUsage(UsageType.ANY) }
       "targetScore" { rawUsage(UsageType.ANY) }
+      "faScore" { rawUsage(UsageType.ANY) }
     }
   }
