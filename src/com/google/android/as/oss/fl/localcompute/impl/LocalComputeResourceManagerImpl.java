@@ -49,6 +49,7 @@ import org.apache.commons.io.FileUtils;
 @Singleton
 class LocalComputeResourceManagerImpl implements LocalComputeResourceManager {
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
+
   /**
    * The marker file is located in each session's resource root folder, the same layer as
    * inputs|plans|outputs. The marker file will track the start time of the most recent training and

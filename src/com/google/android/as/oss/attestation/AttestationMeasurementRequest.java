@@ -26,6 +26,7 @@ public abstract class AttestationMeasurementRequest {
   public static Builder builder() {
     return new AutoValue_AttestationMeasurementRequest.Builder();
   }
+
   /**
    * The ttl is used to set how long the requested challenge should be valid. After the set ttl, the
    * challenge cannot be used to generate a valid {@link

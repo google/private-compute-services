@@ -20,6 +20,7 @@ package com.google.android.as.oss.fl.brella.service.util;
 public class PolicyConstants {
   /** The key for the policy config section encoding Federated Compute requirements. */
   public static final String FEDERATED_COMPUTE_CONFIG_KEY = "federatedCompute";
+
   /** The key for the policy config section encoding user consent requirements.. */
   public static final String REQUIRED_USER_CONSENT_CONFIG_KEY = "requiredUserConsent";
 
