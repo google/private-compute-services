@@ -49,6 +49,7 @@ val AmbientContextPolicy_FederatedCompute =
         ConditionalUsage.Top2000PackageNamesWith2000Wau.whenever(UsageType.ANY)
         rawUsage(UsageType.JOIN)
       }
+      "eventTypes" { rawUsage(UsageType.ANY) }
     }
 
     target(AMBIENT_CONTEXT_RESULT_GENERATED_DTD, maxAge = Duration.ofDays(28)) {
