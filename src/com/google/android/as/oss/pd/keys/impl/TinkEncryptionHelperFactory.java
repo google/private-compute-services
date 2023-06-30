@@ -21,6 +21,7 @@ import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.hybrid.HybridConfig;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -69,7 +70,9 @@ final class TinkEncryptionHelperFactory implements EncryptionHelperFactory {
       throws GeneralSecurityException, IOException {
     initializeIfNeeded();
     return new TinkEncryptionHelper(
-        masterKeyProvider, KeysetHandle.readNoSecret(publicKey), /* hasPrivateKey= */ false);
+        masterKeyProvider,
+        TinkProtoKeysetFormat.parseKeysetWithoutSecret(publicKey),
+        /* hasPrivateKey= */ false);
   }
 
   private void initializeIfNeeded() throws GeneralSecurityException {
