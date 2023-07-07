@@ -18,8 +18,8 @@ package com.google.android.as.oss.settings.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import com.google.android.as.oss.settings.licenses.LicenseMenuActivity;
