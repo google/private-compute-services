@@ -16,8 +16,6 @@
 
 package com.google.android.as.oss.pd.processor.impl;
 
-import static com.google.android.as.oss.pd.processor.impl.BlobProtoUtils.getClientId;
-import static com.google.android.as.oss.pd.processor.impl.BlobProtoUtils.toExternalRequest;
 import static com.google.android.as.oss.pd.processor.impl.BlobProtoUtils.toInternalResponse;
 import static com.google.android.as.oss.pd.processor.impl.SanityChecks.validateRequest;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -78,6 +76,7 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
   private final PersistentStateManager persistenceManager;
   private final EncryptionHelperFactory encryptionHelperFactory;
   private final PDNetworkUsageLogHelper networkLogHelper;
+  private final BlobProtoUtils blobProtoUtils;
 
   @Inject
   ProtectedDownloadProcessorImpl(
@@ -87,7 +86,8 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
       TimeSource timeSource,
       PersistentStateManager persistenceManager,
       EncryptionHelperFactory encryptionHelperFactory,
-      PDNetworkUsageLogHelper networkLogHelper) {
+      PDNetworkUsageLogHelper networkLogHelper,
+      BlobProtoUtils blobProtoUtils) {
     this.channelProvider = channelProvider;
     this.pdExecutor = pdExecutor;
     this.ioExecutor = ioExecutor;
@@ -95,6 +95,7 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
     this.persistenceManager = persistenceManager;
     this.encryptionHelperFactory = encryptionHelperFactory;
     this.networkLogHelper = networkLogHelper;
+    this.blobProtoUtils = blobProtoUtils;
   }
 
   @Override
@@ -105,7 +106,7 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
       return Futures.immediateFailedFuture(e);
     }
 
-    String clientId = getClientId(request.getMetadata());
+    String clientId = blobProtoUtils.getClientId(request.getMetadata());
     try {
       networkLogHelper.checkAllowedRequest(clientId);
     } catch (UnrecognizedNetworkRequestException e) {
@@ -165,7 +166,7 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
     ClientPersistentState finalClientPersistentState = clientPersistentState;
     return FluentFuture.from(
             serviceStub.downloadBlob(
-                toExternalRequest(
+                blobProtoUtils.toExternalRequest(
                     request,
                     externalEncryption.publicKey(),
                     clientPersistentState.getPageToken().toByteArray())))
@@ -185,7 +186,7 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
                     replaceEncryption(
                         externalEncryption,
                         internalEncryption,
-                        getClientId(request.getMetadata()).getBytes(UTF_8),
+                        blobProtoUtils.getClientId(request.getMetadata()).getBytes(UTF_8),
                         externalResponse.getBlob().toByteArray());
                 return Futures.immediateFuture(
                     DownloadResult.create(

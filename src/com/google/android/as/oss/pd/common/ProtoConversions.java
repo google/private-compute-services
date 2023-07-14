@@ -30,10 +30,11 @@ import java.util.Optional;
  */
 public final class ProtoConversions {
 
-  private static final ImmutableBiMap<Client, String> CLIENT_TO_CLIENT_ID =
-      ImmutableBiMap.of(
-          Client.PLAY_PROTECT_SERVICE, "com.google.android.odad",
-          Client.SUSPICIOUS_MESSAGE_ALERTS, "com.google.android.as");
+  private final ImmutableBiMap<Client, String> clientToClientId;
+
+  public ProtoConversions(ImmutableBiMap<Client, String> clientToClientId) {
+    this.clientToClientId = clientToClientId;
+  }
 
   private static final ImmutableBiMap<DeviceTier, String> DEVICE_TIER_TO_STRING =
       ImmutableBiMap.of(
@@ -50,12 +51,12 @@ public final class ProtoConversions {
           ClientGroup.BETA, "beta",
           ClientGroup.ALPHA, "alpha");
 
-  public static Optional<String> toClientIdString(Client client) {
-    return Optional.ofNullable(CLIENT_TO_CLIENT_ID.get(client));
+  public Optional<String> toClientIdString(Client client) {
+    return Optional.ofNullable(clientToClientId.get(client));
   }
 
-  public static Optional<Client> fromClientIdString(String clientId) {
-    return Optional.ofNullable(CLIENT_TO_CLIENT_ID.inverse().get(clientId));
+  public Optional<Client> fromClientIdString(String clientId) {
+    return Optional.ofNullable(clientToClientId.inverse().get(clientId));
   }
 
   public static Optional<String> toDeviceTierString(DeviceTier deviceTier) {
@@ -73,6 +74,4 @@ public final class ProtoConversions {
   public static Optional<ClientGroup> fromClientGroupString(String clientGroup) {
     return Optional.ofNullable(CLIENT_GROUP_TO_STRING.inverse().get(clientGroup));
   }
-
-  private ProtoConversions() {}
 }

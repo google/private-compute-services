@@ -46,7 +46,13 @@ import java.util.List;
  * Contains utility functions to translate between PCS-internal proto definitions and the external
  * proto API exposed by Google servers.
  */
-final class BlobProtoUtils {
+public final class BlobProtoUtils {
+  private final ProtoConversions protoConversions;
+
+  public BlobProtoUtils(ProtoConversions protoConversions) {
+    this.protoConversions = protoConversions;
+  }
+
   @VisibleForTesting
   static final ImmutableMap<String, String> DEFAULT_LABELS = ImmutableMap.of("language_code", "en");
 
@@ -54,8 +60,8 @@ final class BlobProtoUtils {
   @VisibleForTesting static final long CLIENT_VERSION = 1;
 
   /** Converts a blob download request from PCS to a server request to download a blob. */
-  public static com.google.android.as.oss.pd.service.api.proto.DownloadBlobRequest
-      toExternalRequest(DownloadBlobRequest request, byte[] publicKey, byte[] pageToken) {
+  public com.google.android.as.oss.pd.service.api.proto.DownloadBlobRequest toExternalRequest(
+      DownloadBlobRequest request, byte[] publicKey, byte[] pageToken) {
     return com.google.android.as.oss.pd.service.api.proto.DownloadBlobRequest.newBuilder()
         .setIntegrityResponse(IntegrityResponse.getDefaultInstance())
         .setMetadata(
@@ -79,9 +85,10 @@ final class BlobProtoUtils {
   }
 
   /** Retrieves the client identifier used by the server to select the blob to provide. */
-  public static String getClientId(Metadata metadata) {
+  public String getClientId(Metadata metadata) {
     Client client = metadata.getBlobConstraints().getClient();
-    return ProtoConversions.toClientIdString(client)
+    return protoConversions
+        .toClientIdString(client)
         .orElseThrow(
             () ->
                 new IllegalArgumentException(
@@ -89,7 +96,7 @@ final class BlobProtoUtils {
   }
 
   @VisibleForTesting
-  static com.google.android.as.oss.pd.service.api.proto.Metadata toExternalMetadata(
+  com.google.android.as.oss.pd.service.api.proto.Metadata toExternalMetadata(
       ByteString publicKey, Metadata metadata, ImmutableMap<String, String> labels) {
     return com.google.android.as.oss.pd.service.api.proto.Metadata.newBuilder()
         .setCryptoKeys(CryptoKeys.newBuilder().setPublicKey(publicKey).setUseClientIdSeed(true))
@@ -152,6 +159,4 @@ final class BlobProtoUtils {
   private static Label toLabel(String key, String value) {
     return Label.newBuilder().setAttribute(key).setValue(value).build();
   }
-
-  private BlobProtoUtils() {}
 }
