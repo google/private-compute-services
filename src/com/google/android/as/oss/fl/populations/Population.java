@@ -16,11 +16,11 @@
 
 package com.google.android.as.oss.fl.populations;
 
+import static com.google.common.collect.AndroidAccessToCollectors.toImmutableMap;
 import static java.util.Arrays.stream;
 
 import androidx.annotation.Nullable;
 import com.google.common.collect.ImmutableMap;
-import java.util.stream.Collectors;
 
 /**
  * This enum defines all of the Federated Analytics Populations that are approved to run inside of
@@ -32,13 +32,12 @@ public enum Population {
   /** Empty population to use as a placeholder when needed. */
   UNKNOWN_POPULATION(""),
 
+  /** FA populations to collect platform logs from Android. */
   PLATFORM_LOGGING("pcs/prod/platform_logging"),
 
   private final String populationName;
   private static final ImmutableMap<String, Population> POPULATION_MAP =
-      ImmutableMap.copyOf(
-          stream(values())
-              .collect(Collectors.toUnmodifiableMap(pop -> pop.populationName, pop -> pop)));
+      stream(values()).collect(toImmutableMap(pop -> pop.populationName, pop -> pop));
 
   @Nullable
   public static Population getPopulation(String populationName) {
