@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package com.google.android.as.oss.fl.federatedcompute.statsd.scheduler;
+package com.google.android.as.oss.fl.federatedcompute.training.noop;
 
 import androidx.core.os.BuildCompat;
-import com.google.android.as.oss.common.config.ConfigReader;
-import com.google.android.as.oss.common.flavor.BuildFlavor;
 import com.google.android.as.oss.fl.api.proto.TrainerOptions;
-import com.google.android.as.oss.fl.federatedcompute.statsd.config.StatsdConfig;
 import com.google.android.as.oss.fl.federatedcompute.training.PopulationTrainingScheduler;
 import com.google.android.as.oss.fl.federatedcompute.training.TrainingCriteria;
-import com.google.android.as.oss.fl.populations.Population;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
@@ -33,26 +29,21 @@ import java.util.Optional;
 
 @Module
 @InstallIn(SingletonComponent.class)
-abstract class StatsdTrainingSchedulerModule {
-
+abstract class NoOpTrainingCriteriaModule {
   @Provides
   @IntoSet
-  static Optional<TrainingCriteria> provideStatsdProdTrainingCriteria(
-      ConfigReader<StatsdConfig> statsdConfigReader, BuildFlavor buildFlavor) {
+  static Optional<TrainingCriteria> provideNoOpTrainingCriterionCanSchedule() {
     return BuildCompat.isAtLeastU()
         ? Optional.of(
             new TrainingCriteria() {
               @Override
               public TrainerOptions getTrainerOptions() {
-                return PopulationTrainingScheduler.buildTrainerOpts(
-                    Population.PLATFORM_LOGGING.populationName());
+                return PopulationTrainingScheduler.buildTrainerOpts("test");
               }
 
               @Override
               public boolean canScheduleTraining() {
-                return BuildCompat.isAtLeastU()
-                    && buildFlavor.isRelease()
-                    && statsdConfigReader.getConfig().enablePlatformLogging();
+                return true;
               }
             })
         : Optional.empty();
@@ -60,22 +51,18 @@ abstract class StatsdTrainingSchedulerModule {
 
   @Provides
   @IntoSet
-  static Optional<TrainingCriteria> provideStatsdDevTrainingCriteria(
-      ConfigReader<StatsdConfig> statsdConfigReader, BuildFlavor buildFlavor) {
+  static Optional<TrainingCriteria> provideNoOpTrainingCriterionCannotSchedule() {
     return BuildCompat.isAtLeastU()
         ? Optional.of(
             new TrainingCriteria() {
               @Override
               public TrainerOptions getTrainerOptions() {
-                return PopulationTrainingScheduler.buildTrainerOpts(
-                    Population.PLATFORM_LOGGING_DEV.populationName());
+                return PopulationTrainingScheduler.buildTrainerOpts("test2");
               }
 
               @Override
               public boolean canScheduleTraining() {
-                return BuildCompat.isAtLeastU()
-                    && buildFlavor.isInternal()
-                    && statsdConfigReader.getConfig().enablePlatformLoggingTesting();
+                return false;
               }
             })
         : Optional.empty();

@@ -34,6 +34,7 @@ public enum Population {
 
   /** FA populations to collect platform logs from Android. */
   PLATFORM_LOGGING("pcs/prod/platform_logging"),
+  PLATFORM_LOGGING_DEV("pcs/dev/platform_logging"),
 
   private final String populationName;
   private static final ImmutableMap<String, Population> POPULATION_MAP =

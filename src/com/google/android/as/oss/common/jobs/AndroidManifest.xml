@@ -17,15 +17,15 @@
 
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.google.android.as.oss.fl.federatedcompute.statsd.scheduler">
+    package="com.google.android.as.oss.common.jobs">
 
 <uses-sdk
-    android:minSdkVersion="31"
+    android:minSdkVersion="29"
     android:targetSdkVersion="33" />
 <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
   <application>
     <service
-        android:name=".StatsdTrainingSchedulerService"
+        android:name=".HeartbeatService"
         android:exported="true"
         android:permission="android.permission.BIND_JOB_SERVICE" />
   </application>

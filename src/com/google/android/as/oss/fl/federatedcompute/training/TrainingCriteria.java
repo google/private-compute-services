@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package com.google.android.as.oss.fl.federatedcompute.statsd.scheduler;
+package com.google.android.as.oss.fl.federatedcompute.training;
 
-/** Callback for scheduling training through InAppTrainer */
-public interface TrainingSchedulerCallback {
-  /** Called when training schedule has succeeded */
-  void onTrainingScheduleSuccess();
+import com.google.android.as.oss.fl.api.proto.TrainerOptions;
 
-  /** An error happened during the training schedule process. */
-  void onTrainingScheduleFailure(Throwable t);
+/** Interface to define conditions under which a population's training can be scheduled. */
+public interface TrainingCriteria {
+  /** Returns the {@link TrainerOptions} that should be used to schedule the training. */
+  public TrainerOptions getTrainerOptions();
+
+  /** Returns whether the training can be scheduled. */
+  public boolean canScheduleTraining();
 }

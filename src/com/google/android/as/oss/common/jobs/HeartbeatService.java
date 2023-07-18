@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.android.as.oss.fl.federatedcompute.statsd.scheduler;
+package com.google.android.as.oss.common.jobs;
+
+import static android.content.Context.JOB_SCHEDULER_SERVICE;
 
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
@@ -22,9 +24,11 @@ import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
-import android.os.Build.VERSION_CODES;
-import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
+import com.google.android.as.oss.common.config.ConfigReader;
+import com.google.android.as.oss.common.config.impl.PcsCommonConfig;
+import com.google.android.as.oss.fl.federatedcompute.training.PopulationTrainingScheduler;
+import com.google.android.as.oss.fl.federatedcompute.training.TrainingSchedulerCallback;
 import com.google.common.base.Preconditions;
 import com.google.common.flogger.GoogleLogger;
 import dagger.hilt.android.AndroidEntryPoint;
@@ -32,19 +36,26 @@ import java.time.Duration;
 import java.util.Optional;
 import javax.inject.Inject;
 
-/** Training heartbeat service which schedules statsd populations every 24 hours. */
+/**
+ * Heartbeat service which (re-)schedules pcs-managed components that need periodic rescheduling.
+ */
 @AndroidEntryPoint(JobService.class)
-@RequiresApi(VERSION_CODES.UPSIDE_DOWN_CAKE)
-public class StatsdTrainingSchedulerService extends Hilt_StatsdTrainingSchedulerService {
+public class HeartbeatService extends Hilt_HeartbeatService {
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
   private static final Duration JOB_INTERVAL = Duration.ofDays(1L);
-  @VisibleForTesting static final int JOB_ID = 512927718;
+  @VisibleForTesting static final int JOB_ID = 532808520;
 
-  @Inject StatsdTrainingPopulationScheduler populationScheduler;
+  @Inject PopulationTrainingScheduler populationScheduler;
+  @Inject ConfigReader<PcsCommonConfig> pcsCommonConfigReader;
 
   @Override
   public boolean onStartJob(JobParameters params) {
-    logger.atFine().log("Starting FA scheduler job for statsd.");
+    logger.atFine().log("Scheduling jobs for configured population criteria.");
+    if (!pcsCommonConfigReader.getConfig().enableHeartBeatJob()) {
+      JobScheduler jobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
+      jobScheduler.cancel(params.getJobId());
+      return false;
+    }
     populationScheduler.schedule(
         Optional.of(
             new TrainingSchedulerCallback() {
@@ -69,20 +80,19 @@ public class StatsdTrainingSchedulerService extends Hilt_StatsdTrainingScheduler
     return false; // Do not retry
   }
 
-  static void considerSchedule(Context context) {
+  /** Schedules the heartbeat service if it hasn't been scheduled already. */
+  public static void considerSchedule(Context context) {
     JobScheduler jobScheduler =
-        (JobScheduler)
-            Preconditions.checkNotNull(context.getSystemService(Context.JOB_SCHEDULER_SERVICE));
+        (JobScheduler) Preconditions.checkNotNull(context.getSystemService(JOB_SCHEDULER_SERVICE));
 
     if (jobScheduler.getPendingJob(JOB_ID) != null) {
-      logger.atFine().log("StatsdTrainingSchedulerService already scheduled.");
+      logger.atFine().log("HeartbeatService already scheduled.");
       return;
     }
 
     int resultCode =
         jobScheduler.schedule(
-            new JobInfo.Builder(
-                    JOB_ID, new ComponentName(context, StatsdTrainingSchedulerService.class))
+            new JobInfo.Builder(JOB_ID, new ComponentName(context, HeartbeatService.class))
                 .setPeriodic(JOB_INTERVAL.toMillis())
                 .setRequiresDeviceIdle(true)
                 .setRequiresCharging(true)
@@ -90,10 +100,10 @@ public class StatsdTrainingSchedulerService extends Hilt_StatsdTrainingScheduler
                 .build());
 
     if (resultCode == JobScheduler.RESULT_SUCCESS) {
-      logger.atInfo().log("Scheduled StatsdTrainingSchedulerService");
+      logger.atInfo().log("Scheduled HeartbeatService");
     } else {
       logger.atWarning().log(
-          "Failed to schedule StatsdTrainingSchedulerService with error code = %d", resultCode);
+          "Failed to schedule HeartbeatService with error code = %d", resultCode);
     }
   }
 }
