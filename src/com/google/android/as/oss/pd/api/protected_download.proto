@@ -61,6 +61,7 @@ message BlobConstraints {
     UNDEFINED = 0;
     SUSPICIOUS_MESSAGE_ALERTS = 1;
     PLAY_PROTECT_SERVICE = 2;
+    PLAY_PROTECT_SERVICE_CORE_DEFAULT = 3;
   }
   Client client = 1002;
 

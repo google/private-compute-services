@@ -33,7 +33,8 @@ abstract class ChannelProviderModule {
   private static final ImmutableMap<Client, String> HOST_NAMES =
       ImmutableMap.of(
           Client.SUSPICIOUS_MESSAGE_ALERTS, "ondevicesafety-pa.googleapis.com",
-          Client.PLAY_PROTECT_SERVICE, "ondevicesafety-pa.googleapis.com");
+          Client.PLAY_PROTECT_SERVICE, "ondevicesafety-pa.googleapis.com",
+          Client.PLAY_PROTECT_SERVICE_CORE_DEFAULT, "ondevicesafety-pa.googleapis.com");
 
   @Singleton
   @Provides

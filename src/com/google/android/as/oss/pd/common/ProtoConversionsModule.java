@@ -52,6 +52,13 @@ final class ProtoConversionsModule {
   }
 
   @Provides
+  @IntoMap
+  @ClientBiMapKey(Client.PLAY_PROTECT_SERVICE_CORE_DEFAULT)
+  static String providePlayProtectCoreDefaultClientId() {
+    return "com.google.android.odad:2793571637033546290";
+  }
+
+  @Provides
   @Singleton
   static ProtoConversions provideProtoConversions(Map<Client, String> clientToClientId) {
     return new ProtoConversions(ImmutableBiMap.copyOf(clientToClientId));
