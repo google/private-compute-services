@@ -72,9 +72,7 @@ public class HeartbeatService extends Hilt_HeartbeatService {
                 jobFinished(params, /* wantsReschedule= */ true);
               }
             }));
-    return true;
-  }
-
+    logScheduledJobsCount();
   @Override
   public boolean onStopJob(JobParameters params) {
     return false; // Do not retry
