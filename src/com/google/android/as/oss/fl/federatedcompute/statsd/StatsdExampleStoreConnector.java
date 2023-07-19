@@ -51,8 +51,8 @@ public class StatsdExampleStoreConnector implements ExampleStoreConnector {
       "type.googleapis.com/com.google.android.as.oss.proto.AstreaQuery";
   public static final String PCS_STATSQUERY_CRITERIA_TYPE_URL =
       "type.googleapis.com/com.google.android.as.oss.proto.AstreaStatsQuery";
-  public static final int CONFIG_KEY = 175747355; // [redacted]
-  public static final String CONFIG_PACKAGE = "com.google.fcp.client";
+  private static long configKey = 175747355; // [redacted]
+  private static String configPackage = "com.google.fcp.client";
 
   private static final String NO_TABLE_PRESENT_ERROR = "no such table: metric_";
 
@@ -83,6 +83,7 @@ public class StatsdExampleStoreConnector implements ExampleStoreConnector {
                     .getSecureAggregation()
                     .getMinimumClientsInServerVisibleAggregate())
             .build();
+    logger.atFine().log("Sql Query: %s", sqlQuery);
     StatsQuery query =
         new StatsQuery.Builder(sqlQuery)
             .setSqlDialect(StatsQuery.DIALECT_SQLITE)
@@ -93,8 +94,8 @@ public class StatsdExampleStoreConnector implements ExampleStoreConnector {
     try {
       StatsManager statsManager = context.getSystemService(StatsManager.class);
       statsManager.query(
-          CONFIG_KEY,
-          CONFIG_PACKAGE,
+          configKey,
+          configPackage,
           query,
           executor,
           new OutcomeReceiver<StatsCursor, StatsQueryException>() {
@@ -150,5 +151,23 @@ public class StatsdExampleStoreConnector implements ExampleStoreConnector {
       logger.atWarning().withCause(e).log("Couldn't parse criteria.");
     }
     return null;
+  }
+
+  public static String getConfigPackageName() {
+    return configPackage;
+  }
+
+  public static long getConfigId() {
+    return configKey;
+  }
+
+  @VisibleForTesting
+  static void setConfigPackageName(String packageName) {
+    configPackage = packageName;
+  }
+
+  @VisibleForTesting
+  static void setConfigId(long configId) {
+    configKey = configId;
   }
 }
