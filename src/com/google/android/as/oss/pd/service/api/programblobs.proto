@@ -163,6 +163,35 @@ message ProtectionProof {
   InclusionProof inclusion_proof = 3;
 }
 
+// The type of component.
+enum ProtectionType {
+  TYPE_UNKNOWN = 0;
+
+  TYPE_RULE = 1;
+
+  TYPE_MODEL = 2;
+
+  TYPE_BLM_BLOCK_LIST = 4;
+
+  reserved 3;
+}
+
+message ProtectionComponent {
+  // Component content.
+  bytes blob = 1;
+
+  ProtectionType type = 2;
+
+  // Optional: If set, it indicates this component is an update to a previous
+  // protection.
+  bool is_partial_update = 4;
+
+  // Optional: The index of the component.
+  int32 partial_update_index = 5;
+
+  reserved 3;
+}
+
 message DownloadBlobResponse {
   // The blob which contains the components for the request.
   bytes blob = 1;
@@ -178,5 +207,20 @@ message DownloadBlobResponse {
   // device has been included in a transparency log.
   ProtectionProof protection_proof_v2 = 12;
 
-  reserved 3, 4, 5, 7, 8, 9, 10, 11, 13, 14;
+  repeated ProtectionComponent protection_components = 13;
+
+  // This type specifies the status of the downloaded package.
+  DownloadStatus download_status = 14;
+
+  enum DownloadStatus {
+    STATUS_UNSPECIFIED = 0;
+
+    FULL_PACKAGE_DOWNLOADED = 1;
+
+    PARTIAL_PACKAGE_UPDATED = 2;
+
+    PARTIAL_UPDATE_EMPTY = 3;
+  }
+
+  reserved 3, 4, 5, 7, 8, 9, 10, 11, 15;
 }

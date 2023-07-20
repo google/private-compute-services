@@ -182,15 +182,13 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
             externalResponse -> {
               int approximatedSize = externalResponse.getSerializedSize();
               try {
-                byte[] newBlob =
-                    replaceEncryption(
-                        externalEncryption,
-                        internalEncryption,
-                        blobProtoUtils.getClientId(request.getMetadata()).getBytes(UTF_8),
-                        externalResponse.getBlob().toByteArray());
                 return Futures.immediateFuture(
                     DownloadResult.create(
-                        toInternalResponse(externalResponse, newBlob),
+                        toInternalResponse(
+                            externalResponse,
+                            externalEncryption,
+                            internalEncryption,
+                            blobProtoUtils.getClientId(request.getMetadata()).getBytes(UTF_8)),
                         finalClientPersistentState,
                         approximatedSize,
                         clientId));
@@ -237,16 +235,6 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
               return result.response();
             },
             pdExecutor);
-  }
-
-  private byte[] replaceEncryption(
-      EncryptionHelper externalEncryption,
-      EncryptionHelper internalEncryption,
-      byte[] associatedData,
-      byte[] encryptedData)
-      throws GeneralSecurityException {
-    byte[] decrypted = externalEncryption.decrypt(encryptedData, associatedData);
-    return internalEncryption.encrypt(decrypted, associatedData);
   }
 
   /** An internal data class passed between async operations during the blob download. */

@@ -28,8 +28,10 @@ import com.google.android.as.oss.pd.api.proto.InclusionProof;
 import com.google.android.as.oss.pd.api.proto.LogCheckpoint;
 import com.google.android.as.oss.pd.api.proto.LogEntryId;
 import com.google.android.as.oss.pd.api.proto.Metadata;
+import com.google.android.as.oss.pd.api.proto.ProtectionComponent;
 import com.google.android.as.oss.pd.api.proto.ProtectionProof;
 import com.google.android.as.oss.pd.common.ProtoConversions;
+import com.google.android.as.oss.pd.keys.EncryptionHelper;
 import com.google.android.as.oss.pd.service.api.proto.BlobConstraints;
 import com.google.android.as.oss.pd.service.api.proto.ClientVersion;
 import com.google.android.as.oss.pd.service.api.proto.Counters;
@@ -39,6 +41,7 @@ import com.google.android.as.oss.pd.service.api.proto.Label;
 import com.google.android.as.oss.pd.service.api.proto.ProtectionProofConfig;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,15 +76,64 @@ public final class BlobProtoUtils {
         .build();
   }
 
+  /** Decrypts with external encryption and applies internal encryption if requested. */
+  private static byte[] replaceEncryption(
+      byte[] encryptedData,
+      EncryptionHelper externalEncryption,
+      EncryptionHelper internalEncryption,
+      byte[] associatedData,
+      boolean reencryptData)
+      throws GeneralSecurityException {
+    byte[] decrypted = externalEncryption.decrypt(encryptedData, associatedData);
+    if (reencryptData) {
+      return internalEncryption.encrypt(decrypted, associatedData);
+    }
+    return decrypted;
+  }
+
   /** Converts a server download blob response to PCS download blob response. */
   public static DownloadBlobResponse toInternalResponse(
       com.google.android.as.oss.pd.service.api.proto.DownloadBlobResponse externalResponse,
-      byte[] blob) {
-    return DownloadBlobResponse.newBuilder()
-        .setBlob(ByteString.copyFrom(blob))
-        .setNextPageToken(externalResponse.getNextPageToken())
-        .setProtectionProofV2(toInternalProof(externalResponse.getProtectionProofV2()))
-        .build();
+      EncryptionHelper externalEncryption,
+      EncryptionHelper internalEncryption,
+      byte[] associatedData)
+      throws GeneralSecurityException {
+    DownloadBlobResponse.Builder builder =
+        DownloadBlobResponse.newBuilder()
+            .setProtectionProofV2(toInternalProof(externalResponse.getProtectionProofV2()))
+            .setNextPageToken(externalResponse.getNextPageToken())
+            .setDownloadStatusValue(externalResponse.getDownloadStatus().getNumber());
+
+    ByteString externalBlob = externalResponse.getBlob();
+    boolean reencrypt = !externalBlob.isEmpty();
+    if (reencrypt) {
+      builder.setBlob(
+          ByteString.copyFrom(
+              replaceEncryption(
+                  externalBlob.toByteArray(),
+                  externalEncryption,
+                  internalEncryption,
+                  associatedData,
+                  reencrypt)));
+    }
+    for (com.google.android.as.oss.pd.service.api.proto.ProtectionComponent externalComponent :
+        externalResponse.getProtectionComponentsList()) {
+      builder.addProtectionComponents(
+          ProtectionComponent.newBuilder()
+              .setTypeValue(externalComponent.getType().getNumber())
+              .setIsPartialUpdate(externalComponent.getIsPartialUpdate())
+              .setPartialUpdateIndex(externalComponent.getPartialUpdateIndex())
+              .setBlob(
+                  ByteString.copyFrom(
+                      replaceEncryption(
+                          externalComponent.getBlob().toByteArray(),
+                          externalEncryption,
+                          internalEncryption,
+                          associatedData,
+                          reencrypt)))
+              .build());
+    }
+    return builder.build();
   }
 
   /** Retrieves the client identifier used by the server to select the blob to provide. */
