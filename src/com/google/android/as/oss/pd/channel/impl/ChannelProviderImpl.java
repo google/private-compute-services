@@ -38,10 +38,10 @@ class ChannelProviderImpl implements ChannelProvider {
   private final LoadingCache<Client, Channel> channelCache;
 
   @Inject
-  ChannelProviderImpl(ImmutableMap<Client, String> hostNames) {
+  ChannelProviderImpl(ImmutableMap<Client, String> hostNames, String defaultHostName) {
     this.channelCache =
         CacheBuilder.newBuilder()
-            .build(CacheLoader.from(client -> buildChannelFor(hostNames, client)));
+            .build(CacheLoader.from(client -> buildChannelFor(hostNames, client, defaultHostName)));
   }
 
   @Override
@@ -52,12 +52,9 @@ class ChannelProviderImpl implements ChannelProvider {
 
   // Implemented as a static method instead of an instance method to avoid "under-initialization"
   // errors by the static analysis tools.
-  private static Channel buildChannelFor(ImmutableMap<Client, String> hostNames, Client client) {
-    String hostName = hostNames.get(client);
-    if (hostName == null) {
-      throw new IllegalStateException(
-          String.format("no host name defined for client %s", client.name()));
-    }
+  private static Channel buildChannelFor(
+      ImmutableMap<Client, String> hostNames, Client client, String defaultHostName) {
+    String hostName = hostNames.getOrDefault(client, defaultHostName);
     return ManagedChannelBuilder.forAddress(hostName, SERVER_PORT)
         .maxInboundMessageSize(MAX_RESPONSE_SIZE_IN_BYTES)
         .build();

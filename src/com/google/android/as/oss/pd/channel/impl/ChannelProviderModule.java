@@ -39,6 +39,7 @@ abstract class ChannelProviderModule {
   @Singleton
   @Provides
   static ChannelProvider provideChannelProvider() {
-    return new ChannelProviderImpl(HOST_NAMES);
+    return new ChannelProviderImpl(
+        HOST_NAMES, /* defaultHostName= */ "ondevicesafety-pa.googleapis.com");
   }
 }
