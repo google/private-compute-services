@@ -72,6 +72,26 @@ message BlobConstraints {
   }
   ClientGroup client_group = 1003;
 
+  // Client SDK Version to help server estimate SDK capabilities.
+  message ClientVersion {
+    enum Type {
+      TYPE_UNKNOWN = 0;
+
+      TYPE_ANDROID = 1;
+
+      TYPE_ANDROID_CORE = 2;
+    }
+
+    // Type of the SDK.
+    Type type = 1;
+
+    // Build CL for the SDK.
+    int64 version = 2;
+  }
+
+  // Version of SDK requesting new download.
+  ClientVersion client_version = 1004;
+
   reserved 1, 2, 3, 4, 5;
 }
 

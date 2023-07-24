@@ -46,6 +46,8 @@ message ClientVersion {
     TYPE_UNKNOWN = 0;
 
     TYPE_ANDROID = 1;
+
+    TYPE_ANDROID_CORE = 2;
   }
 
   // Type of the SDK.

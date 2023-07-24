@@ -60,7 +60,7 @@ public final class BlobProtoUtils {
   static final ImmutableMap<String, String> DEFAULT_LABELS = ImmutableMap.of("language_code", "en");
 
   @VisibleForTesting static final String CLIENT_GROUP_LABEL_KEY = "client_group";
-  @VisibleForTesting static final long CLIENT_VERSION = 1;
+  @VisibleForTesting static final long CLIENT_VERSION = 2;
 
   /** Converts a blob download request from PCS to a server request to download a blob. */
   public com.google.android.as.oss.pd.service.api.proto.DownloadBlobRequest toExternalRequest(
@@ -147,6 +147,19 @@ public final class BlobProtoUtils {
                     String.format("unable to convert %s to string", client.name())));
   }
 
+  /** Converts the ClientVersion.Type from PCS to a server format. */
+  public static ClientVersion.Type getClientVersionType(Metadata metadata) {
+    com.google.android.as.oss.pd.api.proto.BlobConstraints.ClientVersion.Type internalType =
+        metadata.getBlobConstraints().getClientVersion().getType();
+    ClientVersion.Type externalType = ClientVersion.Type.forNumber(internalType.getNumber());
+    if (externalType == null) {
+      throw new IllegalArgumentException(
+          String.format(
+              "unable to convert %d to internal ClientVersion.Type", internalType.getNumber()));
+    }
+    return externalType;
+  }
+
   @VisibleForTesting
   com.google.android.as.oss.pd.service.api.proto.Metadata toExternalMetadata(
       ByteString publicKey, Metadata metadata, ImmutableMap<String, String> labels) {
@@ -158,7 +171,7 @@ public final class BlobProtoUtils {
                 .setDeviceTier(getDeviceTier(metadata))
                 .setClientVersion(
                     ClientVersion.newBuilder()
-                        .setType(ClientVersion.Type.TYPE_ANDROID)
+                        .setType(getClientVersionType(metadata))
                         .setVersion(CLIENT_VERSION)
                         .build())
                 .addAllLabel(toLabels(labels))
