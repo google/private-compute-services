@@ -36,6 +36,7 @@ import com.google.android.as.oss.pd.service.api.proto.BlobConstraints;
 import com.google.android.as.oss.pd.service.api.proto.ClientVersion;
 import com.google.android.as.oss.pd.service.api.proto.Counters;
 import com.google.android.as.oss.pd.service.api.proto.CryptoKeys;
+import com.google.android.as.oss.pd.service.api.proto.DownloadBlobRequest.DownloadMode;
 import com.google.android.as.oss.pd.service.api.proto.IntegrityResponse;
 import com.google.android.as.oss.pd.service.api.proto.Label;
 import com.google.android.as.oss.pd.service.api.proto.ProtectionProofConfig;
@@ -62,6 +63,17 @@ public final class BlobProtoUtils {
   @VisibleForTesting static final String CLIENT_GROUP_LABEL_KEY = "client_group";
   @VisibleForTesting static final long CLIENT_VERSION = 2;
 
+  /** Converts the DownloadMode from PCS to a server format. */
+  public static DownloadMode getDownloadMode(DownloadBlobRequest request) {
+    DownloadBlobRequest.DownloadMode internalMode = request.getDownloadMode();
+    DownloadMode externalMode = DownloadMode.forNumber(internalMode.getNumber());
+    if (externalMode == null) {
+      throw new IllegalArgumentException(
+          String.format("unable to convert %d to external DownloadMode", internalMode.getNumber()));
+    }
+    return externalMode;
+  }
+
   /** Converts a blob download request from PCS to a server request to download a blob. */
   public com.google.android.as.oss.pd.service.api.proto.DownloadBlobRequest toExternalRequest(
       DownloadBlobRequest request, byte[] publicKey, byte[] pageToken) {
@@ -73,6 +85,7 @@ public final class BlobProtoUtils {
         .setPageToken(ByteString.copyFrom(pageToken))
         .setProtectionProofConfig(
             ProtectionProofConfig.newBuilder().setIncludeV2Proof(true).setExcludeV1Proof(true))
+        .setDownloadMode(getDownloadMode(request))
         .build();
   }
 

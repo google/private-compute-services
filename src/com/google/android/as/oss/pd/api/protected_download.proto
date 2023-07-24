@@ -27,6 +27,18 @@ message DownloadBlobRequest {
   // The authentication key with Google server
   string api_key = 1001;
 
+  // Define the download mode.
+  DownloadMode download_mode = 1002;
+  enum DownloadMode {
+    MODE_UNSPECIFIED = 0;
+
+    // Request partial updates, whenever it's possible.
+    PARTIAL_UPDATES_ENABLED = 1;
+
+    // Requests the full package.
+    FULL_PACKAGE_FORCED = 2;
+  }
+
   reserved 2, 3, 4, 5, 6;
 }
 

@@ -125,7 +125,19 @@ message DownloadBlobRequest {
   // Configuration that specifies which protection proofs are requested.
   ProtectionProofConfig protection_proof_config = 7;
 
-  reserved 2, 5, 6, 8;
+  // Define the download mode.
+  DownloadMode download_mode = 8;
+  enum DownloadMode {
+    MODE_UNSPECIFIED = 0;
+
+    // Request partial updates, whenever it's possible.
+    PARTIAL_UPDATES_ENABLED = 1;
+
+    // Requests the full protection package.
+    FULL_PACKAGE_FORCED = 2;
+  }
+
+  reserved 2, 5, 6;
 }
 
 // LogEntryId identifies a specific entry in the transparency log.
