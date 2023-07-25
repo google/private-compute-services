@@ -16,8 +16,6 @@
 
 package com.google.android.as.oss.fl.federatedcompute.training;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import android.os.Build.VERSION_CODES;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -26,13 +24,15 @@ import com.google.android.as.oss.fl.api.proto.TrainerOptions;
 import com.google.android.as.oss.fl.api.proto.TrainerOptions.JobType;
 import com.google.android.as.oss.fl.api.proto.TrainerOptions.TrainingMode;
 import com.google.android.as.oss.fl.brella.service.scheduler.TrainingScheduler;
+import com.google.android.as.oss.fl.populations.Population;
 import com.google.common.flogger.GoogleLogger;
-import com.google.common.hash.Hashing;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -122,7 +122,7 @@ public class PopulationTrainingScheduler {
    * @param populationName the name of the population to be trained.
    */
   public static TrainerOptions buildTrainerOpts(String populationName) {
-    int jobSchedulerId = Hashing.farmHashFingerprint64().hashString(populationName, UTF_8).asInt();
+    int jobSchedulerId = Population.getHashByPopulationName(populationName);
     if (jobSchedulerId > 0) {
       // Ensure the jobScheduleId is negative to reduce likelihood of colliding with
       // non-TrainingManager jobs.

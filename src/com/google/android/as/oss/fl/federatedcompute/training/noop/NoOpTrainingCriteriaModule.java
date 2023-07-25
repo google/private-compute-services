@@ -20,6 +20,7 @@ import androidx.core.os.BuildCompat;
 import com.google.android.as.oss.fl.api.proto.TrainerOptions;
 import com.google.android.as.oss.fl.federatedcompute.training.PopulationTrainingScheduler;
 import com.google.android.as.oss.fl.federatedcompute.training.TrainingCriteria;
+import com.google.android.as.oss.fl.populations.Population;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
@@ -38,7 +39,8 @@ abstract class NoOpTrainingCriteriaModule {
             new TrainingCriteria() {
               @Override
               public TrainerOptions getTrainerOptions() {
-                return PopulationTrainingScheduler.buildTrainerOpts("test");
+                return PopulationTrainingScheduler.buildTrainerOpts(
+                    Population.PLATFORM_LOGGING_DEV.populationName());
               }
 
               @Override
@@ -57,7 +59,8 @@ abstract class NoOpTrainingCriteriaModule {
             new TrainingCriteria() {
               @Override
               public TrainerOptions getTrainerOptions() {
-                return PopulationTrainingScheduler.buildTrainerOpts("test2");
+                return PopulationTrainingScheduler.buildTrainerOpts(
+                    Population.PLATFORM_LOGGING.populationName());
               }
 
               @Override

@@ -17,10 +17,12 @@
 package com.google.android.as.oss.fl.populations;
 
 import static com.google.common.collect.AndroidAccessToCollectors.toImmutableMap;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.stream;
 
 import androidx.annotation.Nullable;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.hash.Hashing;
 
 /**
  * This enum defines all of the Federated Analytics Populations that are approved to run inside of
@@ -39,6 +41,20 @@ public enum Population {
   private final String populationName;
   private static final ImmutableMap<String, Population> POPULATION_MAP =
       stream(values()).collect(toImmutableMap(pop -> pop.populationName, pop -> pop));
+  private static final ImmutableMap<Integer, Population> JOB_ID_HASH_POPULATION_MAP =
+      stream(values())
+          .collect(
+              toImmutableMap(
+                  pop -> Math.abs(getHashByPopulationName(pop.populationName)), pop -> pop));
+
+  @Nullable
+  public static Population getPopulationByHashFingerprint(int fingerprintHash) {
+    return JOB_ID_HASH_POPULATION_MAP.get(fingerprintHash);
+  }
+
+  public static int getHashByPopulationName(String populationName) {
+    return Hashing.farmHashFingerprint64().hashString(populationName, UTF_8).asInt();
+  }
 
   @Nullable
   public static Population getPopulation(String populationName) {
@@ -51,5 +67,9 @@ public enum Population {
 
   public String populationName() {
     return populationName;
+  }
+
+  public int hashFingerprint() {
+    return getHashByPopulationName(populationName);
   }
 }
