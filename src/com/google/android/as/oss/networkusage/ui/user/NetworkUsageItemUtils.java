@@ -31,6 +31,9 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.text.format.Formatter;
 import androidx.annotation.VisibleForTesting;
+import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceCountReported;
+import com.google.android.as.oss.logging.PcsStatsEnums.CountMetricId;
+import com.google.android.as.oss.logging.PcsStatsLog;
 import com.google.android.as.oss.networkusage.db.ConnectionDetails;
 import com.google.android.as.oss.networkusage.db.NetworkUsageEntity;
 import com.google.android.as.oss.networkusage.db.Status;
@@ -201,7 +204,7 @@ class NetworkUsageItemUtils {
    * time of the instance.
    */
   private static ImmutableList<LogItemWrapper> createTotalInstanceInfo(
-      Context context, NetworkUsageItemWrapper networkUsageItem) {
+      Context context, NetworkUsageItemWrapper networkUsageItem, PcsStatsLog pcsStatsLogger) {
     switch (networkUsageItem.connectionDetails().type()) {
       case PIR:
       case HTTP:
@@ -210,7 +213,7 @@ class NetworkUsageItemUtils {
         return createPdDownloadInstanceInfo(context, networkUsageItem);
       case FC_TRAINING_RESULT_UPLOAD:
       case FC_TRAINING_START_QUERY:
-        return createFcResultUploadInstanceInfo(context, networkUsageItem);
+        return createFcResultUploadInstanceInfo(context, networkUsageItem, pcsStatsLogger);
       case FC_CHECK_IN:
         return createFcCheckInInstanceInfo(context, networkUsageItem);
       case ATTESTATION_REQUEST:
@@ -278,7 +281,7 @@ class NetworkUsageItemUtils {
   }
 
   private static ImmutableList<LogItemWrapper> createFcResultUploadInstanceInfo(
-      Context context, NetworkUsageItemWrapper networkUsageItem) {
+      Context context, NetworkUsageItemWrapper networkUsageItem, PcsStatsLog pcsStatsLogger) {
     return Multimaps.index(networkUsageItem.networkUsageEntities(), NetworkUsageEntity::fcRunId)
         .asMap()
         .values()
@@ -287,13 +290,16 @@ class NetworkUsageItemUtils {
             sameFcRunIdEntities ->
                 createFcResultUploadSingleTaskInfo(
                     context,
-                    new NetworkUsageItemWrapper(ImmutableList.copyOf(sameFcRunIdEntities))))
+                    new NetworkUsageItemWrapper(ImmutableList.copyOf(sameFcRunIdEntities)),
+                    pcsStatsLogger))
         .flatMap(Collection::stream)
         .collect(toImmutableList());
   }
 
   private static ImmutableList<LogItemWrapper> createFcResultUploadSingleTaskInfo(
-      Context context, NetworkUsageItemWrapper networkUsageItemWrapper) {
+      Context context,
+      NetworkUsageItemWrapper networkUsageItemWrapper,
+      PcsStatsLog pcsStatsLogger) {
     long uploadSize = 0;
     long downloadSize = 0;
     StringJoiner policyStringJoiner = new StringJoiner("\n");
@@ -332,6 +338,11 @@ class NetworkUsageItemUtils {
               @Override
               void onItemClick(Context context) {
                 super.onItemClick(context);
+                pcsStatsLogger.logIntelligenceCountReported(
+                    // Network usage policy item inspected
+                    IntelligenceCountReported.newBuilder()
+                        .setCountMetricId(CountMetricId.PCS_NETWORK_USAGE_LOG_POLICY_INSPECTED)
+                        .build());
                 Intent intent = new Intent(Intent.ACTION_VIEW, GITHUB_URI);
                 context.startActivity(intent);
               }

@@ -26,6 +26,9 @@ import android.widget.Switch;
 import androidx.preference.PreferenceFragmentCompat;
 import com.android.settingslib.widget.MainSwitchPreference;
 import com.android.settingslib.widget.OnMainSwitchChangeListener;
+import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceCountReported;
+import com.google.android.as.oss.logging.PcsStatsEnums.CountMetricId;
+import com.google.android.as.oss.logging.PcsStatsLog;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
 import com.google.common.flogger.GoogleLogger;
 import com.google.common.util.concurrent.FutureCallback;
@@ -42,6 +45,7 @@ public class NetworkUsageLogPreferenceFragment extends Hilt_NetworkUsageLogPrefe
   private MainSwitchPreference mainSwitchPreference;
 
   @Inject NetworkUsageLogRepository repository;
+  @Inject PcsStatsLog pcsStatsLogger;
 
   // Incompatible parameter type for savedInstanceState.
   // Incompatible parameter type for rootKey.
@@ -83,6 +87,11 @@ public class NetworkUsageLogPreferenceFragment extends Hilt_NetworkUsageLogPrefe
   }
 
   private void onSwitchedOn() {
+    pcsStatsLogger.logIntelligenceCountReported(
+        // Network usage log opt-in.
+        IntelligenceCountReported.newBuilder()
+            .setCountMetricId(CountMetricId.PCS_NETWORK_USAGE_LOG_OPTED_IN)
+            .build());
     FragmentManager fragmentManager = getParentFragmentManager();
     Fragment logFragment = fragmentManager.findFragmentById(R.id.log_fragment_container);
     if (logFragment != null) {
@@ -95,6 +104,11 @@ public class NetworkUsageLogPreferenceFragment extends Hilt_NetworkUsageLogPrefe
   }
 
   private void onSwitchedOff() {
+    pcsStatsLogger.logIntelligenceCountReported(
+        // Network usage log opt-out.
+        IntelligenceCountReported.newBuilder()
+            .setCountMetricId(CountMetricId.PCS_NETWORK_USAGE_LOG_OPTED_OUT)
+            .build());
     logger.atInfo().log("NetworkUsageLog switched off by user.");
     mainSwitchPreference.updateStatus(false);
     removeNetworkUsageLogFragment();

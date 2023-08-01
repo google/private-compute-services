@@ -1,0 +1,122 @@
+// Copyright 2023 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+/**
+ * This file defines the structure of messages that get logged to
+ * statsd(https://source.android.com/docs/core/ota/modular-system/statsd)
+ * from PCS.
+ */
+syntax = "proto2";
+
+package com.google.android.as.oss.logging;
+
+import "src/com/google/android/as/oss/logging/enums.proto";
+
+option java_package = "com.google.android.as.oss.logging";
+option java_outer_classname = "PcsAtomsProto";
+
+message IntelligenceCountReported {
+  optional CountMetricId count_metric_id = 1;
+}
+
+message IntelligenceValueReported {
+  optional ValueMetricId value_metric_id = 1;
+  optional int32 value = 2;
+}
+
+message IntelligenceUnrecognisedNetworkRequestReported {
+  enum ConnectionType {
+    UNKNOWN_TYPE = 0;
+    FC_CHECK_IN = 1;
+    FC_TRAINING_START_QUERY = 2;
+    FC_TRAINING_RESULT_UPLOAD = 3;
+    HTTP = 4;
+    PIR = 5;
+  }
+  optional ConnectionType connection_type = 1;
+
+  optional string connection_key = 2;
+}
+
+message IntelligenceFederatedLearningTrainingLogReported {
+  optional int64 federated_compute_version = 1;
+
+  optional TrainingEventKind kind = 2;
+
+  optional string config_name = 3;
+
+  optional int64 duration_millis = 4;
+
+  optional int64 example_size = 5;
+
+  optional int64 run_id = 6;
+
+  optional TrainingErrorCode error_code = 7;
+
+  optional int64 native_heap_bytes_allocated = 8;
+
+  optional int64 java_heap_total_memory = 9;
+
+  optional int64 java_heap_free_memory = 10;
+
+  optional string model_identifier = 11;
+
+  optional int64 data_transfer_duration_millis = 12;
+
+  optional int64 bytes_uploaded = 13;
+
+  optional int64 bytes_downloaded = 14;
+
+  optional string error_message = 15;
+
+  optional TrainingDataSourceType data_source = 16;
+
+  optional int64 high_water_mark_memory_bytes = 17;
+}
+
+message IntelligenceFederatedLearningSecAggClientLogReported {
+  optional int64 federated_compute_version = 1;
+
+  optional int64 run_id = 2;
+
+  optional string config_name = 3;
+
+  optional string model_identifier = 4;
+
+  optional int64 client_session_id = 5;
+
+  optional int64 execution_session_id = 6;
+
+  optional SecAggClientEventKind kind = 7;
+
+  optional int64 duration_millis = 8;
+
+  optional SecAggClientRound round = 9;
+
+  optional SecAggClientCryptoOperationType crypto_type = 10;
+
+  optional int64 num_dropped_clients = 11;
+
+  optional int64 received_message_size = 12;
+
+  optional int64 sent_message_size = 13;
+
+  optional SecAggClientErrorCode error_code = 14;
+}
+
+message IntelligenceFederatedLearningDiagnosisLogReported {
+  optional int64 federated_compute_version = 1;
+
+  optional int64 diag_code = 2;
+}

@@ -21,6 +21,7 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 import com.google.android.as.oss.attestation.PccAttestationMeasurementClient;
 import com.google.android.as.oss.common.ExecutorAnnotations.AttestationExecutorQualifier;
 import com.google.android.as.oss.common.time.TimeSource;
+import com.google.android.as.oss.logging.PcsStatsLog;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
 import dagger.Module;
 import dagger.Provides;
@@ -47,14 +48,15 @@ final class PccAttestationMeasurementClientModule {
   static PccAttestationMeasurementClient providePccAttestationMeasurementClient(
       @AttestationExecutorQualifier Executor attestationExecutor,
       NetworkUsageLogRepository networkUsageLogRepository,
-      TimeSource timeSource) {
+      TimeSource timeSource,
+      PcsStatsLog pcsStatsLogger) {
     ManagedChannel managedChannel =
         OkHttpChannelBuilder.forAddress(ATTESTATION_API_HOST, ATTESTATION_API_PORT)
             .executor(Executors.newSingleThreadExecutor())
             .idleTimeout(1, MINUTES)
             .build();
     return new PccAttestationMeasurementClientImpl(
-        attestationExecutor, managedChannel, networkUsageLogRepository, timeSource);
+        attestationExecutor, managedChannel, networkUsageLogRepository, timeSource, pcsStatsLogger);
   }
 
   private PccAttestationMeasurementClientModule() {}

@@ -20,6 +20,9 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import com.android.settingslib.collapsingtoolbar.CollapsingToolbarBaseActivity;
+import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceCountReported;
+import com.google.android.as.oss.logging.PcsStatsEnums.CountMetricId;
+import com.google.android.as.oss.logging.PcsStatsLog;
 import com.google.android.as.oss.networkusage.ui.content.NetworkUsageLogContentMap;
 import com.google.common.base.Preconditions;
 import com.google.common.flogger.GoogleLogger;
@@ -35,11 +38,17 @@ public class NetworkUsageItemDetailsActivity extends Hilt_NetworkUsageItemDetail
   static final String NETWORK_USAGE_ITEM_EXTRA_KEY = "NETWORK_USAGE_ITEM_EXTRA_KEY";
 
   @Inject NetworkUsageLogContentMap contentMap;
+  @Inject PcsStatsLog pcsStatsLog;
 
   @Override
   public void onCreate(@Nullable Bundle bundle) {
     super.onCreate(bundle);
 
+    pcsStatsLog.logIntelligenceCountReported(
+        // Network usage log item inspected.
+        IntelligenceCountReported.newBuilder()
+            .setCountMetricId(CountMetricId.PCS_NETWORK_USAGE_LOG_ITEM_INSPECTED)
+            .build());
     logger.atInfo().log("Network usage log item inspected");
 
     NetworkUsageItemWrapper networkUsageItem =
@@ -61,6 +70,7 @@ public class NetworkUsageItemDetailsActivity extends Hilt_NetworkUsageItemDetail
     recyclerView.setAdapter(adapter);
     recyclerView.setLayoutManager(new LinearLayoutManager(this));
     adapter.submitList(
-        NetworkUsageItemUtils.createNetworkUsageItemInfo(this, contentMap, networkUsageItem));
+        NetworkUsageItemUtils.createNetworkUsageItemInfo(
+            this, contentMap, networkUsageItem, pcsStatsLog));
   }
 }

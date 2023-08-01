@@ -18,6 +18,11 @@ package com.google.android.as.oss.pir.service;
 
 import androidx.annotation.VisibleForTesting;
 import com.google.android.as.oss.common.ExecutorAnnotations.PirExecutorQualifier;
+import com.google.android.as.oss.common.flavor.BuildFlavor;
+import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceCountReported;
+import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceUnrecognisedNetworkRequestReported;
+import com.google.android.as.oss.logging.PcsStatsEnums.CountMetricId;
+import com.google.android.as.oss.logging.PcsStatsLog;
 import com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
 import com.google.android.as.oss.networkusage.ui.content.UnrecognizedNetworkRequestException;
@@ -71,6 +76,8 @@ public class PirGrpcBindableService extends PirServiceGrpc.PirServiceImplBase {
   private final PirDownloadTaskBuilderFactory pirDownloadTaskBuilderFactory;
   private final Executor executor;
   private final NetworkUsageLogRepository networkUsageLogRepository;
+  private final PcsStatsLog pcsStatsLogger;
+  private final BuildFlavor buildFlavor;
 
   @Inject
   @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
@@ -78,10 +85,14 @@ public class PirGrpcBindableService extends PirServiceGrpc.PirServiceImplBase {
       @PirDownloadTaskBuilderFactoryServerSide
           PirDownloadTaskBuilderFactory pirDownloadTaskBuilderFactory,
       @PirExecutorQualifier Executor executor,
-      NetworkUsageLogRepository networkUsageLogRepository) {
+      NetworkUsageLogRepository networkUsageLogRepository,
+      PcsStatsLog pcsStatsLogger,
+      BuildFlavor buildFlavor) {
     this.pirDownloadTaskBuilderFactory = pirDownloadTaskBuilderFactory;
     this.executor = executor;
     this.networkUsageLogRepository = networkUsageLogRepository;
+    this.pcsStatsLogger = pcsStatsLogger;
+    this.buildFlavor = buildFlavor;
   }
 
   @Override
@@ -89,6 +100,20 @@ public class PirGrpcBindableService extends PirServiceGrpc.PirServiceImplBase {
       PirDownloadRequest request, StreamObserver<PirDownloadResponse> responseObserver) {
     // Log Unrecognized requests
     if (!networkUsageLogRepository.isKnownConnection(ConnectionType.PIR, request.getUrl())) {
+      pcsStatsLogger.logIntelligenceCountReported(
+          // Unrecognised request
+          IntelligenceCountReported.newBuilder()
+              .setCountMetricId(CountMetricId.PCS_NETWORK_USAGE_LOG_UNRECOGNISED_REQUEST)
+              .build());
+      if (buildFlavor.isInternal()) {
+        // Log the exact key that is unrecognized
+        pcsStatsLogger.logIntelligenceUnrecognisedNetworkRequestReported(
+            IntelligenceUnrecognisedNetworkRequestReported.newBuilder()
+                .setConnectionType(
+                    IntelligenceUnrecognisedNetworkRequestReported.ConnectionType.PIR)
+                .setConnectionKey(request.getUrl())
+                .build());
+      }
       baseLogger.atInfo().log(
           "Network usage log unrecognised PIR request for %s", request.getUrl());
     }

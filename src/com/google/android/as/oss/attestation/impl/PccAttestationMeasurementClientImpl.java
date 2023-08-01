@@ -31,6 +31,9 @@ import com.google.android.as.oss.attestation.AttestationMeasurementRequest;
 import com.google.android.as.oss.attestation.PccAttestationMeasurementClient;
 import com.google.android.as.oss.attestation.api.proto.AttestationMeasurementResponse;
 import com.google.android.as.oss.common.time.TimeSource;
+import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceCountReported;
+import com.google.android.as.oss.logging.PcsStatsEnums.CountMetricId;
+import com.google.android.as.oss.logging.PcsStatsLog;
 import com.google.android.as.oss.networkusage.db.NetworkUsageEntity;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogUtils;
@@ -75,6 +78,8 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
   private final TimeSource timeSource;
   private final NetworkUsageLogRepository networkUsageLogRepository;
 
+  private final PcsStatsLog pcsStatsLogger;
+
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
   private static final String ANDROID_KEY_STORE = "AndroidKeyStore";
   private static final String ANDROID_KEY_STORE_ALIAS = "PcsAttestationKey";
@@ -85,11 +90,13 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
       Executor executor,
       ManagedChannel channel,
       NetworkUsageLogRepository networkUsageLogRepository,
-      TimeSource timeSource) {
+      TimeSource timeSource,
+      PcsStatsLog pcsStatsLogger) {
     this.executor = executor;
     this.managedChannel = channel;
     this.timeSource = timeSource;
     this.networkUsageLogRepository = networkUsageLogRepository;
+    this.pcsStatsLogger = pcsStatsLogger;
   }
 
   /** {@inheritDoc} */
@@ -104,6 +111,10 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
         attestationMeasurementRequest.ttl().compareTo(Duration.ofHours(24)) < 0,
         "TTl should be less than 24 hours.");
 
+    pcsStatsLogger.logIntelligenceCountReported(
+        IntelligenceCountReported.newBuilder()
+            .setCountMetricId(CountMetricId.PCC_ATTESTATION_MEASUREMENT_REQUEST)
+            .build());
     attestationMeasurementRequest
         .contentBinding()
         .ifPresent(
@@ -166,6 +177,10 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
           "Encountered an IO exception while performing attestation measurement.");
       return Futures.immediateFailedFuture(e);
     }
+    pcsStatsLogger.logIntelligenceCountReported(
+        IntelligenceCountReported.newBuilder()
+            .setCountMetricId(CountMetricId.PCC_ATTESTATION_RECORD_GENERATED)
+            .build());
     return Futures.immediateFuture(attestationResponseBuilder.build());
   }
 

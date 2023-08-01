@@ -20,6 +20,9 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import androidx.preference.PreferenceManager;
 import com.android.settingslib.collapsingtoolbar.CollapsingToolbarBaseActivity;
+import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceCountReported;
+import com.google.android.as.oss.logging.PcsStatsEnums.CountMetricId;
+import com.google.android.as.oss.logging.PcsStatsLog;
 import com.google.common.flogger.GoogleLogger;
 import dagger.hilt.android.AndroidEntryPoint;
 import javax.inject.Inject;
@@ -28,11 +31,17 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /** The activity showing PCS's Network Usage Log. */
 @AndroidEntryPoint(CollapsingToolbarBaseActivity.class)
 public class NetworkUsageLogActivity extends Hilt_NetworkUsageLogActivity {
+  @Inject PcsStatsLog pcsStatsLogger;
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
 
   @Override
   public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    pcsStatsLogger.logIntelligenceCountReported(
+        // Network Usage Log Opened.
+        IntelligenceCountReported.newBuilder()
+            .setCountMetricId(CountMetricId.PCS_NETWORK_USAGE_LOG_OPENED)
+            .build());
     logger.atInfo().log("Network usage log is opened");
 
     setContentView(R.layout.network_usage_log_activity);

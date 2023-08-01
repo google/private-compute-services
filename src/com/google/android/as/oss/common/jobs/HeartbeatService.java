@@ -29,6 +29,9 @@ import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.common.config.impl.PcsCommonConfig;
 import com.google.android.as.oss.fl.federatedcompute.training.PopulationTrainingScheduler;
 import com.google.android.as.oss.fl.federatedcompute.training.TrainingSchedulerCallback;
+import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceValueReported;
+import com.google.android.as.oss.logging.PcsStatsEnums.ValueMetricId;
+import com.google.android.as.oss.logging.PcsStatsLog;
 import com.google.common.base.Preconditions;
 import com.google.common.flogger.GoogleLogger;
 import dagger.hilt.android.AndroidEntryPoint;
@@ -46,6 +49,7 @@ public class HeartbeatService extends Hilt_HeartbeatService {
   @VisibleForTesting static final int JOB_ID = 532808520;
 
   @Inject PopulationTrainingScheduler populationScheduler;
+  @Inject PcsStatsLog pcsStatsLogger;
   @Inject ConfigReader<PcsCommonConfig> pcsCommonConfigReader;
 
   @Override
@@ -72,7 +76,17 @@ public class HeartbeatService extends Hilt_HeartbeatService {
                 jobFinished(params, /* wantsReschedule= */ true);
               }
             }));
+    logScheduledJobsCount();
     return true;
+  }
+
+  private void logScheduledJobsCount() {
+    JobScheduler jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
+    pcsStatsLogger.logIntelligenceValueReported(
+        IntelligenceValueReported.newBuilder()
+            .setValueMetricId(ValueMetricId.PCS_NUM_JOBS_SCHEDULED_COUNT)
+            .setValue(jobScheduler.getAllPendingJobs().size())
+            .build());
   }
 
   @Override

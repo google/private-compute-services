@@ -24,6 +24,7 @@ android_binary(
     resource_files = glob(["res/**"]),
     deps = [
         "//src/com/google/android/as/oss/common/config/noop:flags_impl_noop",
+        "//src/com/google/android/as/oss/common/flavor:release",
         "//src/com/google/android/as/oss/common/initializer",
         "//src/com/google/android/as/oss/common/time:system_module",
         "//src/com/google/android/as/oss/grpc:grpc_pcs",
@@ -32,6 +33,7 @@ android_binary(
         "//src/com/google/android/as/oss/grpc/perapp:pcs",
         "//src/com/google/android/as/oss/http/config/impl",
         "//src/com/google/android/as/oss/http/service",
+        "//src/com/google/android/as/oss/logging/noop:impl_module",
         "//src/com/google/android/as/oss/networkusage/db/noop",
         "//src/com/google/android/as/oss/networkusage/ui/content/noop",
         "//third_party/java/hilt:hilt-android",

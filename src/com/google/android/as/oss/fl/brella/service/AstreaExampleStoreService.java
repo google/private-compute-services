@@ -39,6 +39,10 @@ import com.google.android.as.oss.fl.brella.service.util.PolicyFinder;
 import com.google.android.as.oss.fl.federatedcompute.statsd.ExampleStoreConnector;
 import com.google.android.as.oss.fl.federatedcompute.statsd.config.StatsdConfig;
 import com.google.android.as.oss.fl.localcompute.FileCopyStartQuery;
+import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceCountReported;
+import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceUnrecognisedNetworkRequestReported;
+import com.google.android.as.oss.logging.PcsStatsEnums.CountMetricId;
+import com.google.android.as.oss.logging.PcsStatsLog;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogUtils;
 import com.google.android.as.oss.networkusage.ui.content.UnrecognizedNetworkRequestException;
@@ -82,6 +86,7 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
   @Inject NetworkUsageLogRepository networkUsageLogRepository;
   @Inject UsageReportingOptedInState usageReportingState;
   @Inject @FlExecutorQualifier Executor flExecutor;
+  @Inject PcsStatsLog pcsStatsLogger;
   @Inject java.util.Optional<FileCopyStartQuery> fileCopyStartQuery;
   @Inject BuildFlavor buildFlavor;
 
@@ -285,6 +290,21 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
   }
 
   private void logUnknownConnection(String featureName) {
+    pcsStatsLogger.logIntelligenceCountReported(
+        // Unrecognised request
+        IntelligenceCountReported.newBuilder()
+            .setCountMetricId(CountMetricId.PCS_NETWORK_USAGE_LOG_UNRECOGNISED_REQUEST)
+            .build());
+    if (buildFlavor.isInternal()) {
+      // Log the exact key that is unrecognized
+      pcsStatsLogger.logIntelligenceUnrecognisedNetworkRequestReported(
+          IntelligenceUnrecognisedNetworkRequestReported.newBuilder()
+              .setConnectionType(
+                  IntelligenceUnrecognisedNetworkRequestReported.ConnectionType
+                      .FC_TRAINING_START_QUERY)
+              .setConnectionKey(featureName)
+              .build());
+    }
     logger.atInfo().log("Network usage log unrecognised FC request for %s", featureName);
   }
 

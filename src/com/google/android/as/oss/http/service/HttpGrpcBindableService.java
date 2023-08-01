@@ -25,6 +25,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import com.google.android.as.oss.common.ExecutorAnnotations.IoExecutorQualifier;
 import com.google.android.as.oss.common.config.ConfigReader;
+import com.google.android.as.oss.common.flavor.BuildFlavor;
 import com.google.android.apps.miphone.astrea.grpc.GrpcStatusProto;
 import com.google.android.as.oss.http.api.proto.HttpDownloadRequest;
 import com.google.android.as.oss.http.api.proto.HttpDownloadResponse;
@@ -34,6 +35,10 @@ import com.google.android.as.oss.http.api.proto.ResponseBodyChunk;
 import com.google.android.as.oss.http.api.proto.ResponseHeaders;
 import com.google.android.as.oss.http.api.proto.UnrecognizedUrlException;
 import com.google.android.as.oss.http.config.PcsHttpConfig;
+import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceCountReported;
+import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceUnrecognisedNetworkRequestReported;
+import com.google.android.as.oss.logging.PcsStatsEnums.CountMetricId;
+import com.google.android.as.oss.logging.PcsStatsLog;
 import com.google.android.as.oss.networkusage.db.ConnectionDetails;
 import com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType;
 import com.google.android.as.oss.networkusage.db.NetworkUsageEntity;
@@ -68,17 +73,23 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
   private final Executor executor;
   private final NetworkUsageLogRepository networkUsageLogRepository;
   private final ConfigReader<PcsHttpConfig> configReader;
+  private final PcsStatsLog pcsStatsLogger;
+  private final BuildFlavor buildFlavor;
 
   @Inject
   HttpGrpcBindableService(
       OkHttpClient client,
       @IoExecutorQualifier Executor ioExecutor,
       NetworkUsageLogRepository networkUsageLogRepository,
-      ConfigReader<PcsHttpConfig> httpConfigReader) {
+      ConfigReader<PcsHttpConfig> httpConfigReader,
+      PcsStatsLog pcsStatsLogger,
+      BuildFlavor buildFlavor) {
     this.client = client;
     this.executor = ioExecutor;
     this.networkUsageLogRepository = networkUsageLogRepository;
     this.configReader = httpConfigReader;
+    this.pcsStatsLogger = pcsStatsLogger;
+    this.buildFlavor = buildFlavor;
   }
 
   @Override
@@ -103,6 +114,21 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
 
     // Log Unrecognized requests
     if (!networkUsageLogRepository.isKnownConnection(ConnectionType.HTTP, request.getUrl())) {
+      pcsStatsLogger.logIntelligenceCountReported(
+          // Unrecognised request
+          IntelligenceCountReported.newBuilder()
+              .setCountMetricId(CountMetricId.PCS_NETWORK_USAGE_LOG_UNRECOGNISED_REQUEST)
+              .build());
+
+      if (buildFlavor.isInternal()) {
+        // Log the exact key that is unrecognized
+        pcsStatsLogger.logIntelligenceUnrecognisedNetworkRequestReported(
+            IntelligenceUnrecognisedNetworkRequestReported.newBuilder()
+                .setConnectionType(
+                    IntelligenceUnrecognisedNetworkRequestReported.ConnectionType.HTTP)
+                .setConnectionKey(request.getUrl())
+                .build());
+      }
       logger.atInfo().log("Network usage log unrecognised HTTPS request for %s", request.getUrl());
     }
 

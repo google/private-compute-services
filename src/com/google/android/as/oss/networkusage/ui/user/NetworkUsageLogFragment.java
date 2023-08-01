@@ -26,6 +26,9 @@ import android.view.ViewGroup;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceCountReported;
+import com.google.android.as.oss.logging.PcsStatsEnums.CountMetricId;
+import com.google.android.as.oss.logging.PcsStatsLog;
 import com.google.android.as.oss.networkusage.db.NetworkUsageEntity;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
 import com.google.android.as.oss.networkusage.ui.content.NetworkUsageLogContentMap;
@@ -45,6 +48,7 @@ public class NetworkUsageLogFragment extends Hilt_NetworkUsageLogFragment
   private final NoItemInspectedCallback callback = new NoItemInspectedCallback();
 
   @Inject NetworkUsageLogRepository repository;
+  @Inject PcsStatsLog pcsStatsLogger;
   @Inject NetworkUsageLogContentMap contentMap;
   @Inject ImmutableList<EntityListProcessor> entityListProcessors;
 
@@ -86,6 +90,11 @@ public class NetworkUsageLogFragment extends Hilt_NetworkUsageLogFragment
   @Override
   public void onDestroy() {
     if (callback.getItemInspectionCounter() == 0) {
+      pcsStatsLogger.logIntelligenceCountReported(
+          // No log item inspected
+          IntelligenceCountReported.newBuilder()
+              .setCountMetricId(CountMetricId.PCS_NETWORK_USAGE_LOG_NO_ITEM_INSPECTED)
+              .build());
       logger.atInfo().log("No log item inspected.");
     }
     super.onDestroy();
