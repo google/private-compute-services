@@ -39,6 +39,7 @@ import com.google.android.as.oss.pd.service.api.proto.ProgramBlobServiceGrpc;
 import com.google.android.as.oss.pd.service.api.proto.ProgramBlobServiceGrpc.ProgramBlobServiceFutureStub;
 import com.google.auto.value.AutoValue;
 import com.google.common.flogger.GoogleLogger;
+import com.google.common.io.BaseEncoding;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -182,6 +183,11 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
             externalResponse -> {
               int approximatedSize = externalResponse.getSerializedSize();
               try {
+                logger.atFine().log(
+                    "received protection package with protection token %s",
+                    BaseEncoding.base16()
+                        .lowerCase()
+                        .encode(externalResponse.getProtectionToken().toByteArray()));
                 return Futures.immediateFuture(
                     DownloadResult.create(
                         toInternalResponse(
