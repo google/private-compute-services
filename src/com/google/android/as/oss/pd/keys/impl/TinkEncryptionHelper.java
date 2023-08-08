@@ -17,11 +17,10 @@
 package com.google.android.as.oss.pd.keys.impl;
 
 import com.google.android.as.oss.pd.keys.EncryptionHelper;
-import com.google.crypto.tink.BinaryKeysetWriter;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeysetHandle;
-import java.io.ByteArrayOutputStream;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
@@ -57,18 +56,13 @@ class TinkEncryptionHelper implements EncryptionHelper {
 
   @Override
   public byte[] publicKey() throws GeneralSecurityException, IOException {
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    getPublicKeysetHandle().writeNoSecret(BinaryKeysetWriter.withOutputStream(outputStream));
-    return outputStream.toByteArray();
+    return TinkProtoKeysetFormat.serializeKeysetWithoutSecret(getPublicKeysetHandle());
   }
 
   @Override
   public byte[] toEncryptedKeySet() throws GeneralSecurityException, IOException {
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    handle.write(
-        BinaryKeysetWriter.withOutputStream(outputStream),
-        masterKeyProvider.readOrGenerateMasterKey());
-    return outputStream.toByteArray();
+    return TinkProtoKeysetFormat.serializeEncryptedKeyset(
+        handle, masterKeyProvider.readOrGenerateMasterKey(), new byte[] {});
   }
 
   private KeysetHandle getPublicKeysetHandle() throws GeneralSecurityException {

@@ -17,7 +17,6 @@
 package com.google.android.as.oss.pd.keys.impl;
 
 import com.google.android.as.oss.pd.keys.EncryptionHelperFactory;
-import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
@@ -59,9 +58,8 @@ final class TinkEncryptionHelperFactory implements EncryptionHelperFactory {
     initializeIfNeeded();
     return new TinkEncryptionHelper(
         masterKeyProvider,
-        KeysetHandle.read(
-            BinaryKeysetReader.withBytes(encryptedKeyset),
-            masterKeyProvider.readOrGenerateMasterKey()),
+        TinkProtoKeysetFormat.parseEncryptedKeyset(
+            encryptedKeyset, masterKeyProvider.readOrGenerateMasterKey(), new byte[] {}),
         /* hasPrivateKey= */ true);
   }
 
