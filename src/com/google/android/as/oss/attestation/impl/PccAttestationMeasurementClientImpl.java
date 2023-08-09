@@ -60,6 +60,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -153,9 +154,14 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
       Pair<KeyPair, List<Certificate>> keyPairWithAttestation =
           generateKeyPairWithAttestation(attestationChallenge);
       KeyPair keyPair = keyPairWithAttestation.first;
+      // Add public key to response
+      attestationResponseBuilder.setPublicKey(
+          ByteString.copyFrom(Objects.requireNonNull(keyPair.getPublic().getEncoded())));
+
       List<Certificate> attestationRecord = keyPairWithAttestation.second;
       // Encode attestation record
       List<ByteString> encodedAttestationRecord = encodeCertificate(attestationRecord);
+      attestationResponseBuilder.addAllKeyAttestationCertificateChain(encodedAttestationRecord);
 
       // Sign content binding if it is provided.
       if (attestationMeasurementRequest.contentBinding().isPresent()) {
@@ -166,8 +172,6 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
             .setPayload(attestationMeasurementRequest.contentBinding().get())
             .setSignatureBytes(ByteString.copyFrom(signature));
       }
-
-      attestationResponseBuilder.addAllKeyAttestationCertificateChain(encodedAttestationRecord);
     } catch (GeneralSecurityException e) {
       logger.atWarning().withCause(e).log(
           "Encountered a security exception while performing attestation measurement.");
