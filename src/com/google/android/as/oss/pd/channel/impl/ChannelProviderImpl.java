@@ -24,7 +24,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
-import javax.inject.Inject;
+import java.util.Optional;
 
 /**
  * A simple {@link com.google.android.as.oss.pd.channel.ChannelProvider} that caches the returned
@@ -36,9 +36,13 @@ class ChannelProviderImpl implements ChannelProvider {
   private static final int MAX_RESPONSE_SIZE_IN_BYTES = 30 * 1024 * 1024; // Max download size: 30MB
 
   private final LoadingCache<Client, Channel> channelCache;
+  private final Optional<String> apiKeyOverride;
 
-  @Inject
-  ChannelProviderImpl(ImmutableMap<Client, String> hostNames, String defaultHostName) {
+  ChannelProviderImpl(
+      ImmutableMap<Client, String> hostNames,
+      String defaultHostName,
+      Optional<String> apiKeyOverride) {
+    this.apiKeyOverride = apiKeyOverride;
     this.channelCache =
         CacheBuilder.newBuilder()
             .build(CacheLoader.from(client -> buildChannelFor(hostNames, client, defaultHostName)));
@@ -48,6 +52,11 @@ class ChannelProviderImpl implements ChannelProvider {
   public Channel getChannel(Client client) {
     // Using getUnchecked since no checked exception is thrown from the loading function
     return channelCache.getUnchecked(client);
+  }
+
+  @Override
+  public Optional<String> getServiceApiKeyOverride() {
+    return apiKeyOverride;
   }
 
   // Implemented as a static method instead of an instance method to avoid "under-initialization"

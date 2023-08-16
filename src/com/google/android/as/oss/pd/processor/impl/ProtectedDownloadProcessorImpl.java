@@ -144,7 +144,8 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
       throws GeneralSecurityException, IOException {
 
     ClientPersistentState clientPersistentState = persistentState;
-    ProgramBlobServiceFutureStub serviceStub = createServiceStub(channel, request.getApiKey());
+    String apiKey = channelProvider.getServiceApiKeyOverride().orElse(request.getApiKey());
+    ProgramBlobServiceFutureStub serviceStub = createServiceStub(channel, apiKey);
 
     EncryptionHelper internalEncryption =
         encryptionHelperFactory.createFromPublicKey(

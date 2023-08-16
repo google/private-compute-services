@@ -18,8 +18,12 @@ package com.google.android.as.oss.pd.channel;
 
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.Client;
 import io.grpc.Channel;
+import java.util.Optional;
 
 /** Provides the GRPC channel for downloading blobs for a specific client. */
 public interface ChannelProvider {
   Channel getChannel(Client client);
+
+  // Optional override for API Key.
+  Optional<String> getServiceApiKeyOverride();
 }

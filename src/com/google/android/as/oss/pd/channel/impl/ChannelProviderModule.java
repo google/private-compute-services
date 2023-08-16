@@ -23,6 +23,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
 import dagger.hilt.components.SingletonComponent;
+import java.util.Optional;
 import javax.inject.Singleton;
 
 /** Registers a {@link ChannelProvider} using a predefined map of host names. */
@@ -30,16 +31,15 @@ import javax.inject.Singleton;
 @InstallIn(SingletonComponent.class)
 abstract class ChannelProviderModule {
 
-  private static final ImmutableMap<Client, String> HOST_NAMES =
-      ImmutableMap.of(
-          Client.SUSPICIOUS_MESSAGE_ALERTS, "ondevicesafety-pa.googleapis.com",
-          Client.PLAY_PROTECT_SERVICE, "ondevicesafety-pa.googleapis.com",
-          Client.PLAY_PROTECT_SERVICE_CORE_DEFAULT, "ondevicesafety-pa.googleapis.com");
+  private static final ImmutableMap<Client, String> HOST_NAMES = ImmutableMap.of();
+  private static final String DEFAULT_HOST_NAME = "ondevicesafety-pa.googleapis.com";
 
   @Singleton
   @Provides
   static ChannelProvider provideChannelProvider() {
     return new ChannelProviderImpl(
-        HOST_NAMES, /* defaultHostName= */ "ondevicesafety-pa.googleapis.com");
+        HOST_NAMES,
+        /* defaultHostName= */ DEFAULT_HOST_NAME,
+        /* apiKeyOverride= */ Optional.empty());
   }
 }
