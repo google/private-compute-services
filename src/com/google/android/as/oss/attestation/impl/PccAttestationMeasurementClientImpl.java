@@ -83,6 +83,8 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
 
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
   private static final String ANDROID_KEY_STORE = "AndroidKeyStore";
+  // Alias of the entry under which the generated key will appear in Android KeyStore. This alis is
+  // constant so, new keys will overwrite older keys on generation.
   private static final String ANDROID_KEY_STORE_ALIAS = "PcsAttestationKey";
   // TODO: Distinguish package names for Attestation request
   private static final String PACKAGE_NAME = "com.google.android.as";
@@ -205,11 +207,14 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
    * an RSA key pair. It also set the attestationChallenge provided by the validation server, to
    * indicate that attestation is requested.
    *
+   * <p>This is a synchronous method since we generate key pairs under the same alias
+   * (ANDROID_KEY_STORE_ALIAS).
+   *
    * <p>Once the generation request is complete, the {@link KeyPair} is obtained as well as the
    * attestation {@link Certificate}. The {@link Certificate} is stored in the AndroidKeyStore.
    */
   @SuppressLint("NewApi")
-  private Pair<KeyPair, List<Certificate>> generateKeyPairWithAttestation(
+  private synchronized Pair<KeyPair, List<Certificate>> generateKeyPairWithAttestation(
       byte[] attestationChallenge) throws GeneralSecurityException, IOException {
 
     KeyPairGenerator keyPairGenerator =
