@@ -16,6 +16,8 @@
 
 package com.google.android.as.oss.fl.federatedcompute.statsd.scheduler;
 
+import android.content.Context;
+import android.os.UserManager;
 import androidx.core.os.BuildCompat;
 import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.common.flavor.BuildFlavor;
@@ -27,6 +29,7 @@ import com.google.android.as.oss.fl.populations.Population;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
 import dagger.multibindings.IntoSet;
 import java.util.Optional;
@@ -38,7 +41,9 @@ abstract class StatsdTrainingSchedulerModule {
   @Provides
   @IntoSet
   static Optional<TrainingCriteria> provideStatsdProdTrainingCriteria(
-      ConfigReader<StatsdConfig> statsdConfigReader, BuildFlavor buildFlavor) {
+      ConfigReader<StatsdConfig> statsdConfigReader,
+      BuildFlavor buildFlavor,
+      @ApplicationContext Context context) {
     return BuildCompat.isAtLeastU()
         ? Optional.of(
             new TrainingCriteria() {
@@ -50,7 +55,9 @@ abstract class StatsdTrainingSchedulerModule {
 
               @Override
               public boolean canScheduleTraining() {
+                UserManager userManager = context.getSystemService(UserManager.class);
                 return BuildCompat.isAtLeastU()
+                    && userManager.isSystemUser()
                     && buildFlavor.isRelease()
                     && statsdConfigReader.getConfig().enablePlatformLogging();
               }
@@ -61,7 +68,9 @@ abstract class StatsdTrainingSchedulerModule {
   @Provides
   @IntoSet
   static Optional<TrainingCriteria> provideStatsdDevTrainingCriteria(
-      ConfigReader<StatsdConfig> statsdConfigReader, BuildFlavor buildFlavor) {
+      ConfigReader<StatsdConfig> statsdConfigReader,
+      BuildFlavor buildFlavor,
+      @ApplicationContext Context context) {
     return BuildCompat.isAtLeastU()
         ? Optional.of(
             new TrainingCriteria() {
@@ -73,7 +82,9 @@ abstract class StatsdTrainingSchedulerModule {
 
               @Override
               public boolean canScheduleTraining() {
+                UserManager userManager = context.getSystemService(UserManager.class);
                 return BuildCompat.isAtLeastU()
+                    && userManager.isSystemUser()
                     && buildFlavor.isInternal()
                     && statsdConfigReader.getConfig().enablePlatformLoggingTesting();
               }
