@@ -18,6 +18,7 @@ package com.google.android.as.oss.pd.service;
 
 import com.google.android.as.oss.common.ExecutorAnnotations.ProtectedDownloadExecutorQualifier;
 import com.google.android.as.oss.common.config.ConfigReader;
+import com.google.android.as.oss.common.flavor.BuildFlavor;
 import com.google.android.as.oss.pd.api.proto.DownloadBlobRequest;
 import com.google.android.as.oss.pd.api.proto.DownloadBlobResponse;
 import com.google.android.as.oss.pd.api.proto.ProtectedDownloadServiceGrpc;
@@ -43,21 +44,24 @@ class ProtectedDownloadGrpcBindableService
   private final ConfigReader<ProtectedDownloadConfig> configReader;
   private final ProtectedDownloadProcessor downloadProcessor;
   private final ListeningExecutorService executor;
+  private final BuildFlavor buildFlavor;
 
   @Inject
   ProtectedDownloadGrpcBindableService(
       ConfigReader<ProtectedDownloadConfig> configReader,
       ProtectedDownloadProcessor downloadProcessor,
-      @ProtectedDownloadExecutorQualifier ListeningExecutorService executor) {
+      @ProtectedDownloadExecutorQualifier ListeningExecutorService executor,
+      BuildFlavor buildFlavor) {
     this.configReader = configReader;
     this.downloadProcessor = downloadProcessor;
     this.executor = executor;
+    this.buildFlavor = buildFlavor;
   }
 
   @Override
   public void download(
       DownloadBlobRequest request, StreamObserver<DownloadBlobResponse> responseObserver) {
-    if (!configReader.getConfig().enabled()) {
+    if (!configReader.getConfig().enabled() && !buildFlavor.isInternal()) {
       logger.atFine().log("Rejecting request since the feature is disabled");
       responseObserver.onError(
           new StatusException(Status.FAILED_PRECONDITION.withDescription("feature disabled")));
