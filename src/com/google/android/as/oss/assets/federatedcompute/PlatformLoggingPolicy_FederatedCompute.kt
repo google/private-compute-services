@@ -31,5 +31,8 @@ val PlatformLoggingPolicy_FederatedCompute =
     """
         .trimIndent()
     flavors(Flavor.PCS_RELEASE) { minRoundSize(minRoundSize = 25, minSecAggRoundSize = 25) }
+    presubmitReviewRequired(OwnersApprovalOnly)
+    checkpointMaxTtlDays(30)
     // No targets because no data is stored in PCC for this feature.
+    noChronicleDataTarget()
   }
