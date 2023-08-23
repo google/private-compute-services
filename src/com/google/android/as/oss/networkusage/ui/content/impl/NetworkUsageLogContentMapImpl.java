@@ -93,7 +93,7 @@ public final class NetworkUsageLogContentMapImpl implements NetworkUsageLogConte
   public Optional<ConnectionDetails> getPdConnectionDetails(String clientId) {
     for (ConnectionDetails details : entryContentMap.keySet()) {
       if (details.connectionKey().hasPdConnectionKey()
-          && clientId.equals(details.connectionKey().getPdConnectionKey().getClientId())) {
+          && clientId.matches(details.connectionKey().getPdConnectionKey().getClientId())) {
         return Optional.of(details);
       }
     }
