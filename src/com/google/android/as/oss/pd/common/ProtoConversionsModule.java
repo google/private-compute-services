@@ -46,13 +46,6 @@ final class ProtoConversionsModule {
 
   @Provides
   @IntoMap
-  @ClientBiMapKey(Client.SUSPICIOUS_MESSAGE_ALERTS)
-  static String provideAsiClientId() {
-    return "com.google.android.as";
-  }
-
-  @Provides
-  @IntoMap
   @ClientBiMapKey(Client.PLAY_PROTECT_SERVICE_CORE_DEFAULT)
   static String providePlayProtectCoreDefaultClientId() {
     return "com.google.android.odad:2793571637033546290";

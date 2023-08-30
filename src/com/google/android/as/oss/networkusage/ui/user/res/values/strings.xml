@@ -236,7 +236,7 @@
 
   <!-- Description of downloads consisting of Google Play Protect Service models using Protected Download protocol, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
   <string name="description_gpps_ap">Updated the on-device protections of Google Play Protect Service</string>
-  <string name="ap_client_id_gpps" translatable="false">com.google.android.odad</string>
+  <string name="ap_client_id_gpps" translatable="false">com.google.android.odad(:.*)?</string>
   <string name="url_regex_gpps_bt_signature" translatable="false">https://www.gstatic.com/on-device-safety/bt_log_signature_key.txt\\?c=tnAbOw</string>
 
   <!-- Cinematic Wallpaper  -->
