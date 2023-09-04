@@ -30,6 +30,9 @@ class PcsAttestationMeasurementConfigReader
   static final BooleanFlag ENABLE_ATTESTATION_MEASUREMENT =
       BooleanFlag.create("PcsAttestationMeasurement__enable_attestation_measurement", false);
 
+  static final BooleanFlag SCHEDULE_ATTESTATION_JOB =
+      BooleanFlag.create("PcsAttestationMeasurement__schedule_attestation_job", false);
+
   private final FlagManager flagManager;
 
   static PcsAttestationMeasurementConfigReader create(FlagManager flagManager) {
@@ -53,6 +56,7 @@ class PcsAttestationMeasurementConfigReader
   protected PcsAttestationMeasurementConfig computeConfig() {
     return PcsAttestationMeasurementConfig.builder()
         .setEnableAttestationMeasurement(flagManager.get(ENABLE_ATTESTATION_MEASUREMENT))
+        .setScheduleAttestationJob(flagManager.get(SCHEDULE_ATTESTATION_JOB))
         .build();
   }
 

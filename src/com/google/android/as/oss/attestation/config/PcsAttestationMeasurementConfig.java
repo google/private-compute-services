@@ -24,15 +24,20 @@ public abstract class PcsAttestationMeasurementConfig {
 
   public static Builder builder() {
     return new AutoValue_PcsAttestationMeasurementConfig.Builder()
-        .setEnableAttestationMeasurement(false);
+        .setEnableAttestationMeasurement(false)
+        .setScheduleAttestationJob(false);
   }
 
   public abstract boolean enableAttestationMeasurement();
+
+  public abstract boolean scheduleAttestationJob();
 
   /** Builder for {@link PcsAttestationMeasurementConfig}. */
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder setEnableAttestationMeasurement(boolean value);
+
+    public abstract Builder setScheduleAttestationJob(boolean value);
 
     public abstract PcsAttestationMeasurementConfig build();
   }
