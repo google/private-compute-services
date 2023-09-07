@@ -246,6 +246,13 @@
   <string name="description_cinematic_wallpaper">Updated the on-device ML models for generating cinematic wallpapers</string>
   <string name="url_regex_cinematic_wallpaper" translatable="false">https://dl.google.com/mdi-serving/aiai-wallpapereffects-cinematic-models/.*</string>
 
+  <!-- Platform Logging -->
+  <!-- Name of the Platform logging feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_platform_logging">Platform Logging</string>
+  <!-- Description of querying of Android Platform metrics from device using federated analytics,
+  displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_platform_logging">Contributed to privacy-preserving analytics to improve Android Platform features.</string>
+
   <plurals name="summary_banner_updates">
     <item quantity="one">%1$d update</item>
     <item quantity="other">%1$d updates</item>

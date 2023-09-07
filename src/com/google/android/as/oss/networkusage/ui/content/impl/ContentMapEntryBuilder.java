@@ -38,6 +38,8 @@ import java.util.AbstractMap.SimpleImmutableEntry;
 /** Builder class for NetworkUsageContentMap entries. */
 final class ContentMapEntryBuilder {
   static final String ASI_PACKAGE_NAME = "com.google.android.as";
+  static final String STATSD_PACKAGE_NAME = "com.android.os.statsd";
+
   static final String GPPS_PACKAGE_NAME = "com.google.android.odad";
 
   private final Context context;

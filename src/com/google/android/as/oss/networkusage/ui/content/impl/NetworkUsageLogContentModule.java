@@ -23,6 +23,7 @@ import static com.google.android.as.oss.networkusage.db.ConnectionDetails.Connec
 import static com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType.PD;
 import static com.google.android.as.oss.networkusage.ui.content.impl.ContentMapEntryBuilder.ASI_PACKAGE_NAME;
 import static com.google.android.as.oss.networkusage.ui.content.impl.ContentMapEntryBuilder.GPPS_PACKAGE_NAME;
+import static com.google.android.as.oss.networkusage.ui.content.impl.ContentMapEntryBuilder.STATSD_PACKAGE_NAME;
 
 import android.content.Context;
 import com.google.android.as.oss.networkusage.db.ConnectionDetails;
@@ -255,6 +256,13 @@ abstract class NetworkUsageLogContentModule {
                 .connectionKeyString(ATTESTATION_FEATURE_NAME)
                 .featureNameId(R.string.feature_name_android_key_attestation)
                 .descriptionId(R.string.description_android_key_attestation)
+                .build(),
+            new ContentMapEntryBuilder(context)
+                .packageName(STATSD_PACKAGE_NAME)
+                .connectionType(FC_TRAINING_START_QUERY)
+                .connectionKeyString(FeatureName.PLATFORM_LOGGING.name())
+                .featureNameId(R.string.feature_name_platform_logging)
+                .descriptionId(R.string.description_platform_logging)
                 .build());
     ImmutableMap<ConnectionDetails, ConnectionResources> finalImmutableMap = entries;
 
