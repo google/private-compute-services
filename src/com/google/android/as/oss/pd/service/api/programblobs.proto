@@ -48,6 +48,8 @@ message ClientVersion {
     TYPE_ANDROID = 1;
 
     TYPE_ANDROID_CORE = 2;
+
+    TYPE_ANDROID_CORE_ATTESTED_PKVM = 3;
   }
 
   // Type of the SDK.
