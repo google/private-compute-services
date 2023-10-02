@@ -83,6 +83,13 @@ message IntelligenceFederatedLearningTrainingLogReported {
   optional TrainingDataSourceType data_source = 16;
 
   optional int64 high_water_mark_memory_bytes = 17;
+
+  optional int64 counter_value = 18;
+  optional CollectionName collection_name = 19;
+
+  // Counter enum for marking values/durations of various examplestore related
+  // events.
+  optional HistogramCounters histogram_counter = 20;
 }
 
 message IntelligenceFederatedLearningSecAggClientLogReported {

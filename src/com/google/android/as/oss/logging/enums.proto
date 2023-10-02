@@ -183,3 +183,303 @@ enum SecAggClientErrorCode {
   CLIENT_INTERNAL_ERROR = 6;
   CLIENT_INTERNAL_ERROR_RUNTIME_EXC = 7;
 }
+
+enum CollectionName {
+  COLLECTION_NAME_UNDEFINED = 0;
+  COLLECTION_NAME_SIMPLESTORAGE = 1;
+  COLLECTION_NAME_PLAY_PROTECT = 2;
+  COLLECTION_NAME_STATSD = 3;
+}
+
+/**
+ * Enumerations of timer and counter identifiers.
+ */
+enum HistogramCounters {
+  HISTOGRAM_COUNTER_UNDEFINED = 0;
+
+  /**
+   * How long it takes to run a plan on device, excluding downloading the plan
+   * and reporting results.
+   */
+  TRAINING_RUN_PHASE_LATENCY = 1;
+
+  /**
+   * The end time of running training for a whole plan, excluding downloading
+   * the plan and reporting results, relative to the start of the training
+   * session.
+   */
+  TRAINING_RUN_PHASE_END_TIME = 2;
+
+  /** How long running a "restore state op" takes. */
+  TRAINING_RESTORE_STATE_LATENCY = 3;
+
+  /**
+   * How long it takes to run training for a whole client execution (which may
+   * involve running multiple epochs). This includes connecting and fetching
+   * example from the example store, as well as training over them.
+   */
+  TRAINING_RUN_CLIENT_EXECUTION_LATENCY = 4;
+
+  /** How long running an "init op" takes. */
+  TRAINING_INIT_OP_LATENCY = 5;
+
+  /** How long running a "before op" takes. */
+  TRAINING_BEFORE_OP_LATENCY = 6;
+
+  /** How long running an "after op" takes. */
+  TRAINING_AFTER_OP_LATENCY = 7;
+
+  /**
+   * How long it takes to run training for a whole epoch. This includes
+   * connecting and fetching example from the example store, as well as training
+   * over them.
+   */
+  TRAINING_RUN_EPOCH_LATENCY = 8;
+
+  /**
+   * How long it takes to gather enough examples for a mini batch.
+   * This counter may be an average across minibatches and epochs.
+   */
+  TRAINING_GATHER_MINI_BATCH_LATENCY = 9;
+
+  /**
+   * How long it takes to run training on a mini batch.
+   * This counter may be an average across minibatches and epochs.
+   */
+  TRAINING_RUN_MINI_BATCH_LATENCY = 10;
+
+  /**
+   * How long it takes the TensorFlow session to terminate after it's been
+   * interrupted.
+   */
+  TRAINING_INTERRUPT_TERMINATION_LATENCY = 11;
+
+  /** How long it takes to commit the opstats message to the database. */
+  TRAINING_OPSTATS_COMMIT_LATENCY = 12;
+
+  /**
+   * How long it takes to receive the result to a {@link
+   * ExampleStoreIterator#next} call, incl. time spent in IPC, proxy, and client
+   * code.
+   *
+   * <p>Note: this used to be logged once per call to the {@code next()} method,
+   * but this was of limited usefulness and had the potential to generate too
+   * many logs. Instead, we now log this counter once per iterator, and log the
+   * average time taken over all examples.
+   */
+  EXAMPLE_STORE_ITERATOR_NEXT_LATENCY = 20;
+  /** The number of examples encountered by an example store iterator. */
+  EXAMPLE_STORE_ITERATOR_OVERALL_EXAMPLE_COUNT = 21;
+  /** The cumulative size of examples encountered by an example store iterator.
+   */
+  EXAMPLE_STORE_ITERATOR_OVERALL_EXAMPLE_SIZE = 22;
+  /**
+   * Cumulative time spent over the course of a single iteration to receive and
+   * return all examples. This includes the latency reported in {@link
+   * #EXAMPLE_STORE_ITERATOR_OVERALL_IPC_LATENCY}.
+   */
+  EXAMPLE_STORE_ITERATOR_OVERALL_LATENCY = 23;
+  /**
+   * Cumulative time spent over the course of a single iteration to receive data
+   * over the IPC boundary. This includes the latency reported in {@link
+   * #EXAMPLE_STORE_ITERATOR_OVERALL_IPC_LATENCY}.
+   */
+  EXAMPLE_STORE_ITERATOR_OVERALL_IPC_LATENCY = 24;
+  /**
+   * Cumulative time spent over the course of a single iteration for the proxy
+   * implementation to receive the data from the app and prepare it to be sent
+   * over the IPC boundary. This includes the latency reported in {@link
+   * #EXAMPLE_STORE_ITERATOR_OVERALL_CLIENT_LATENCY}.
+   */
+  EXAMPLE_STORE_ITERATOR_OVERALL_PROXY_LATENCY = 25;
+  /**
+   * Cumulative time spent over the course of a single iteration for the app's
+   * implementation to return its data.
+   */
+  EXAMPLE_STORE_ITERATOR_OVERALL_CLIENT_LATENCY = 26;
+  /** Example store errors. */
+  EXAMPLE_STORE_ERROR_COUNT = 27;
+  /**
+   * The total amount of memory available to the kernel on this device. Maps to
+   * {@code ActivityManager.MemoryInfo.totalMem}.
+   */
+  TRAINING_SYSTEM_TOTAL_MEM = 28;
+  /**
+   * The amount of memory available for allocations. Maps to {@code
+   * ActivityManager.MemoryInfo.availMem}.
+   *
+   * <p>The dimensions proto will include a TrainingEventKind enum to
+   * distinguish values logged before and after training.
+   */
+  TRAINING_SYSTEM_AVAILABLE_MEM = 29;
+  /**
+   * The threshold of available memory at which the system will start killing
+   * processes to free up more memory. Maps to {@code
+   * ActivityManager.MemoryInfo.threshold}.
+   *
+   * <p>The dimensions proto will include a TrainingEventKind enum to
+   * distinguish values logged before and after training.
+   */
+  TRAINING_SYSTEM_LOW_MEM_THRESHOLD = 30;
+  /**
+   * The amount of memory available for allocations without triggering the low
+   * memory killer. Maps to {@code ActivityManager.MemoryInfo.availMem -
+   * ActivityManager.MemoryInfo.threshold}.
+   *
+   * <p>The dimensions proto will include a TrainingEventKind enum to
+   * distinguish values logged before and after training.
+   */
+  TRAINING_SYSTEM_AVAILABLE_MEM_BEFORE_THRESHOLD = 31;
+  /**
+   * Whether the system is in a low-memory state at the time the counter is
+   * logged. Maps to {@code ActivityManager.MemoryInfo.lowMem}.
+   *
+   * <p>The dimensions proto will include a TrainingEventKind enum to
+   * distinguish values logged before and after training.
+   */
+  TRAINING_SYSTEM_LOW_MEM_STATE = 32;
+  /**
+   * The memory importance of the training process. Maps to {@code
+   * ActivityManager.RunningAppProcessInfo.importance}.
+   *
+   * <p>The dimensions proto will include a TrainingEventKind enum to
+   * distinguish values logged before and after training.
+   */
+  TRAINING_PROCESS_MEM_IMPORTANCE_STATE = 33;
+  /**
+   * The LRU status of the training process. Maps to {@code
+   * ActivityManager.RunningAppProcessInfo.lru}.
+   *
+   * <p>The dimensions proto will include a TrainingEventKind enum to
+   * distinguish values logged before and after training.
+   */
+  TRAINING_PROCESS_MEM_LRU_STATE = 34;
+  /**
+   * The Java heap memory usage of the training process.
+   *
+   * <p>The dimensions proto will include a TrainingEventKind enum to
+   * distinguish values logged before and after training.
+   */
+  TRAINING_PROCESS_MEM_USAGE_JAVA_HEAP = 35;
+  /**
+   * The native memory PSS of the training process.
+   *
+   * <p>The dimensions proto will include a TrainingEventKind enum to
+   * distinguish values logged before and after training.
+   */
+  TRAINING_PROCESS_MEM_USAGE_NATIVE_PSS = 36;
+
+  /**
+   * How long running training takes in total, including checking in, training,
+   * uploading the results.
+   */
+  TRAINING_OVERALL_LATENCY = 40;
+  /** How long running an "save checkpoint op" takes. */
+  TRAINING_SAVE_CHECKPOINT_LATENCY = 41;
+  /**
+   * How long it takes to receive the result to a {@link
+   * com.google.fcp.client.ExampleStoreService#startQuery} call, incl.
+   * time spent in IPC, proxy, and client code.
+   */
+  EXAMPLE_STORE_START_QUERY_LATENCY = 42;
+  /**
+   * How long it takes to wait for a {@link ExampleStoreIterator#close} call to
+   * finish, incl. time spent in IPC, proxy, and client code.
+   */
+  EXAMPLE_STORE_ITERATOR_CLOSE_LATENCY = 43;
+  /** How long the HTTP client initialization takes. */
+  HTTP_CLIENT_INITIALIZATION_LATENCY = 44;
+
+  /** The number of examples encountered during overall training, across all
+   * client executions. */
+  TRAINING_OVERALL_EXAMPLE_COUNT = 100001;
+
+  /**
+   * The sum of the size (in bytes) of all the examples encountered during
+   * overall training, across all client executions.
+   */
+  TRAINING_OVERALL_EXAMPLE_SIZE = 100002;
+
+  /**
+   * The number of examples encountered in a client execution, across all
+   * epochs.
+   */
+  TRAINING_CLIENT_EXECUTION_EXAMPLE_COUNT = 100003;
+
+  /**
+   * The sum of the size (in bytes) of all the examples encountered in a client
+   * execution, across all epoch.
+   */
+  TRAINING_CLIENT_EXECUTION_EXAMPLE_SIZE = 100004;
+
+  /**
+   * The number of examples encountered in an epoch.
+   * This counter may be an average from multiple epochs.
+   */
+  TRAINING_EPOCH_EXAMPLE_COUNT = 100005;
+
+  /**
+   * The sum of the size (in bytes) of all the examples encountered in an
+   * epoch. This counter may be an average from multiple epochs
+   */
+  TRAINING_EPOCH_EXAMPLE_SIZE = 100006;
+
+  /**
+   * The number of examples in a mini batch.
+   * This counter may be an average from multiple minibatches.
+   */
+  TRAINING_MINI_BATCH_EXAMPLE_COUNT = 100007;
+
+  /**
+   * The sum of the size (in bytes) of all the examples in a mini batch.
+   * This counter may be an average from multiple minibatches.
+   */
+  TRAINING_MINI_BATCH_EXAMPLE_SIZE = 100008;
+
+  /**
+   * The size (in bytes) of the OpStatsDb file.
+   */
+  OPSTATS_DB_SIZE_BYTES = 100009;
+
+  /**
+   * The number of entries in OpStatsDb.
+   */
+  OPSTATS_DB_NUM_ENTRIES = 100010;
+
+  /**
+   * The number of entries pruned from OpStatsDb due to exceeding max size.
+   */
+  OPSTATS_NUM_PRUNED_ENTRIES = 100011;
+
+  /**
+   * The tenure (in hours) of the oldest entry which has been pruned from the
+   * OpStatsDb due to exceeding max size.
+   */
+  OPSTATS_OLDEST_PRUNED_ENTRY_TENURE_HOURS = 100012;
+
+  /** How long checking in/downloading a plan takes (for FL plans only). */
+  TRAINING_FL_CHECKIN_LATENCY = 200001;
+
+  /**
+   * The end time of reporting results to the server, relative to the start
+   * of the training session.
+   */
+  TRAINING_FL_REPORT_RESULTS_END_TIME = 200002;
+
+  /** How long reporting results to the server takes. */
+  TRAINING_FL_REPORT_RESULTS_LATENCY = 200003;
+
+  /** The end time of checking in/downloading a plan from the server, relative
+  to the start of the training session. */
+  TRAINING_FL_CHECKIN_END_TIME = 200004;
+
+  /** How long reporting results to the server takes. */
+  TRAINING_FL_ELIGIBILITY_EVAL_CHECKIN_LATENCY = 200005;
+
+  /** The end time of multiple task assignments, relative to the start of the
+   * training session. */
+  TRAINING_FL_MULTIPLE_TASK_ASSIGNMENTS_END_TIME = 200006;
+
+  /** How long multiple task assignments takes. */
+  TRAINING_FL_MULTIPLE_TASK_ASSIGNMENTS_LATENCY = 200007;
+}
