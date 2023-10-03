@@ -27,6 +27,11 @@ public abstract class PcsFcFlags {
     return 0;
   }
 
+  /** Percentage of counters to be logged. */
+  public int logCounterSamplingPercentage() {
+    return 0;
+  }
+
   /** Maximum size of serialized atoms logged by PCS. */
   public int maxSerializedAtomSize() {
     return 0;

@@ -61,6 +61,11 @@ public final class PcsFcDeviceConfigFlags extends PcsFcFlags {
   }
 
   @Override
+  public int logCounterSamplingPercentage() {
+    return DeviceConfig.getInt(FLAG_NAMESPACE, FLAG_PREFIX + "log_counter_sampling_percentage", 0);
+  }
+
+  @Override
   public boolean allowLoggingSecAggClientEvent() {
     return DeviceConfig.getBoolean(
         FLAG_NAMESPACE, FLAG_PREFIX + "allow_logging_sec_agg_client_event", true);
