@@ -109,6 +109,9 @@ message Metadata {
 
 message IntegrityResponse {
   reserved 1;
+
+  // Response from content binding with Key Attestation.
+  bytes key_attestation_token = 2;
 }
 
 message ProtectionProofConfig {
