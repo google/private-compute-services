@@ -92,6 +92,8 @@ enum TrainingError {
   TRAINING_ERROR_START_QUERY_RUNTIME_EXCEPTION = 27;
   /** The specified example store is not present. */
   TRAINING_ERROR_EXAMPLE_STORE_NOT_PRESENT = 28;
+  /** The specified selectorContext is invalid. */
+  TRAINING_ERROR_INVALID_SELECTOR_CONTEXT = 29;
 
   /** Client specific error codes. Use numbers greater than or equal to 40 and
    * smaller than 50.

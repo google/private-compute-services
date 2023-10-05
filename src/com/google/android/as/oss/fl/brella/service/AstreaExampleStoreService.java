@@ -20,6 +20,7 @@ import static com.google.android.as.oss.networkusage.db.ConnectionDetails.Connec
 
 import android.os.IInterface;
 import android.os.RemoteException;
+import androidx.annotation.VisibleForTesting;
 import androidx.core.os.BuildCompat;
 import arcs.core.data.proto.PolicyProto;
 import com.google.android.as.oss.common.ExecutorAnnotations.FlExecutorQualifier;
@@ -90,7 +91,7 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
   @Inject java.util.Optional<FileCopyStartQuery> fileCopyStartQuery;
   @Inject BuildFlavor buildFlavor;
 
-  private ConnectionManager connectionManager;
+  @VisibleForTesting ConnectionManager connectionManager;
 
   @Override
   public void onCreate() {
@@ -176,7 +177,8 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
       return;
     }
 
-    initializeConnectionAndStartQuery(collection, criteria, resumptionToken, callback, query);
+    initializeConnectionAndStartQuery(
+        collection, criteria, resumptionToken, callback, query, selectorContext);
   }
 
   private boolean consentPolicyValid(Policy installedPolicy, QueryCallback callback) {
@@ -248,7 +250,8 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
       byte[] criteria,
       byte[] resumptionToken,
       @Nonnull QueryCallback callback,
-      AstreaQuery query) {
+      AstreaQuery query,
+      SelectorContext selectorContext) {
     if (!connectionManager.isClientSupported(query.getClientName())) {
       callback.onStartQueryFailure(
           TrainingError.TRAINING_ERROR_PCC_CLIENT_NOT_SUPPORTED_VALUE,
@@ -263,8 +266,19 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
           public void onSuccess(IInterface result) {
             try {
               IExampleStore binder = (IExampleStore) result;
-              binder.startQuery(
-                  collection, criteria, resumptionToken, new StartQueryCallback(callback));
+              if (binder.supportsSelectorContext()) {
+                binder.startQueryWithSelectorContext(
+                    collection,
+                    criteria,
+                    resumptionToken,
+                    new StartQueryCallback(callback),
+                    selectorContext.toByteArray());
+              } else {
+                // Note: binder returns false if method does not exist in the implementation passed
+                // i.e. if the example store was built before this change.
+                binder.startQuery(
+                    collection, criteria, resumptionToken, new StartQueryCallback(callback));
+              }
             } catch (RemoteException e) {
               connectionManager.resetClient(query.getClientName());
               // We don't expect client to actually throw any RemoteExceptions.
