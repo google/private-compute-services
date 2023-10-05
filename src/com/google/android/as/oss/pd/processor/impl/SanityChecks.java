@@ -44,5 +44,16 @@ final class SanityChecks {
         !request.getMetadata().getCryptoKeys().getPublicKey().isEmpty(), "missing public key");
   }
 
+  /**
+   * Runs a sanity check of the validity of request structure and throws {@link
+   * IllegalArgumentException} upon invalid requests.
+   */
+  public static void validateRequest(GetManifestConfigRequest request) {
+    checkArgument(request.getApiKey().length() == EXPECTED_API_KEY_SIZE, "unexpected api key size");
+    checkArgument(
+        API_KEY_PATTERN.matcher(request.getApiKey()).matches(),
+        "api key contains illegal characters");
+  }
+
   private SanityChecks() {}
 }

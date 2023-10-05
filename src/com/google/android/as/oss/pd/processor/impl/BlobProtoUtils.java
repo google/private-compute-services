@@ -151,7 +151,13 @@ public final class BlobProtoUtils {
 
   /** Retrieves the client identifier used by the server to select the blob to provide. */
   public String getClientId(Metadata metadata) {
-    Client client = metadata.getBlobConstraints().getClient();
+    return getClientId(metadata.getBlobConstraints());
+  }
+
+  /** Retrieves the client identifier used by the server to select the blob to provide. */
+  public String getClientId(
+      com.google.android.as.oss.pd.api.proto.BlobConstraints blobConstraints) {
+    Client client = blobConstraints.getClient();
     return protoConversions
         .toClientIdString(client)
         .orElseThrow(
@@ -220,7 +226,12 @@ public final class BlobProtoUtils {
   }
 
   private static String getClientGroup(Metadata metadata) {
-    ClientGroup group = metadata.getBlobConstraints().getClientGroup();
+    return getClientGroup(metadata.getBlobConstraints());
+  }
+
+  private static String getClientGroup(
+      com.google.android.as.oss.pd.api.proto.BlobConstraints blobConstraints) {
+    ClientGroup group = blobConstraints.getClientGroup();
     return ProtoConversions.toClientGroupString(group)
         .orElseThrow(
             () ->
