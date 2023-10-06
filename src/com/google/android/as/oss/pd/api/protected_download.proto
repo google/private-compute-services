@@ -217,8 +217,28 @@ message ProtectionProof {
   InclusionProof inclusion_proof = 3;
 }
 
+// Request to download a manifest.
+message GetManifestConfigRequest {
+  // Constraints placed on the resources that will be selected.
+  BlobConstraints constraints = 1;
+
+  // The authentication key with Google server
+  string api_key = 1001;
+}
+
+// Response from ProtectedDownloadService, which includes a ManifestConfig with
+// instructions on how to download protected bytes.
+message GetManifestConfigResponse {
+  // Serialized Manifest config proto.
+  bytes manifest_config = 1;
+}
+
 // Service API for downloading blobs.
 service ProtectedDownloadService {
   // Downloads a blob to the device
   rpc Download(DownloadBlobRequest) returns (DownloadBlobResponse);
+
+  // Downloads a manifest to the device
+  rpc GetManifestConfig(GetManifestConfigRequest)
+      returns (GetManifestConfigResponse);
 }

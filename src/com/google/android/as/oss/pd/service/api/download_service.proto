@@ -1,0 +1,83 @@
+// Copyright 2023 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package google.internal.abuse.ondevicesafety.v2;
+
+import "google/api/annotations.proto";
+import "storage/datapol/annotations/proto/semantic_annotations.proto";
+
+option java_multiple_files = true;
+option java_outer_classname = "ProtectedDownloadServiceProto";
+option java_package = "com.google.android.as.oss.pd.manifest.api.proto";
+option (datapol.file_vetting_status) = "latest";
+option use_java_stubby_library = true;
+
+// Service API for providing download manifests.
+service ProtectedDownloadService {
+  // Request server to provide manifest configuration.
+  rpc GetManifestConfig(GetManifestConfigRequest)
+      returns (GetManifestConfigResponse) {
+    option (google.api.http) = {
+      post: "/v2/download:getManifestConfig"
+      body: "*"
+    };
+  }
+}
+
+// Label expresses a generic constraint in config selection.
+message Label {
+  string attribute = 1 [(datapol.semantic_type) = ST_KEY];
+  string value = 2 [(datapol.semantic_type) = ST_VALUE];
+}
+
+// Constraints used to select the resources that will be downloaded.
+message ManifestConfigConstraints {
+  // Application identifier.
+  string client_id = 1 [(datapol.semantic_type) = ST_IDENTIFYING_ID];
+
+  // Additional labels that the requested resources should carry.
+  repeated Label label = 2;
+}
+
+// The cryptographic keys to use for encrypting the config.
+message CryptoKeys {
+  // The device generated public key to encrypt the manifest config.
+  bytes public_key = 1 [(datapol.semantic_type) = ST_SECURITY_KEY];
+}
+
+message IntegrityResponse {
+  // Response from content binding with Key Attestation.
+  bytes key_attestation_token = 2
+      [(datapol.semantic_type) = ST_SECURITY_MATERIAL];
+}
+
+// Request to fetch the ManifestConfig.
+message GetManifestConfigRequest {
+  // Constraints placed on the config selection.
+  ManifestConfigConstraints constraints = 1;
+
+  CryptoKeys crypto_keys = 2;
+
+  // Device attestation.
+  IntegrityResponse integrity_response = 3;
+}
+
+// Response from ProtectedDownloadService.
+message GetManifestConfigResponse {
+  // Contains the requested manifest.
+  bytes encrypted_manifest_config = 1
+      [(datapol.semantic_type) = ST_NOT_REQUIRED];
+}

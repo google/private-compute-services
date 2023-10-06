@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import androidx.annotation.VisibleForTesting;
 import com.google.android.as.oss.pd.api.proto.DownloadBlobRequest;
+import com.google.android.as.oss.pd.api.proto.GetManifestConfigRequest;
 import java.util.regex.Pattern;
 
 /** Contains some utilities to validate some fields of download requests/responses. */

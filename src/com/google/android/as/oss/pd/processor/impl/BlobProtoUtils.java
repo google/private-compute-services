@@ -24,6 +24,8 @@ import com.google.android.as.oss.pd.api.proto.BlobConstraints.ClientGroup;
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.DeviceTier;
 import com.google.android.as.oss.pd.api.proto.DownloadBlobRequest;
 import com.google.android.as.oss.pd.api.proto.DownloadBlobResponse;
+import com.google.android.as.oss.pd.api.proto.GetManifestConfigRequest;
+import com.google.android.as.oss.pd.api.proto.GetManifestConfigResponse;
 import com.google.android.as.oss.pd.api.proto.InclusionProof;
 import com.google.android.as.oss.pd.api.proto.LogCheckpoint;
 import com.google.android.as.oss.pd.api.proto.LogEntryId;
@@ -32,6 +34,7 @@ import com.google.android.as.oss.pd.api.proto.ProtectionComponent;
 import com.google.android.as.oss.pd.api.proto.ProtectionProof;
 import com.google.android.as.oss.pd.common.ProtoConversions;
 import com.google.android.as.oss.pd.keys.EncryptionHelper;
+import com.google.android.as.oss.pd.manifest.api.proto.ManifestConfigConstraints;
 import com.google.android.as.oss.pd.service.api.proto.BlobConstraints;
 import com.google.android.as.oss.pd.service.api.proto.ClientVersion;
 import com.google.android.as.oss.pd.service.api.proto.Counters;
@@ -86,6 +89,20 @@ public final class BlobProtoUtils {
         .setProtectionProofConfig(
             ProtectionProofConfig.newBuilder().setIncludeV2Proof(true).setExcludeV1Proof(true))
         .setDownloadMode(getDownloadMode(request))
+        .build();
+  }
+
+  /** Converts a manifest request from PCS to a server request to get a manifest. */
+  public com.google.android.as.oss.pd.manifest.api.proto.GetManifestConfigRequest toExternalRequest(
+      GetManifestConfigRequest request, byte[] publicKey) {
+    return com.google.android.as.oss.pd.manifest.api.proto.GetManifestConfigRequest.newBuilder()
+        .setConstraints(buildConstraints(request.getConstraints()))
+        // TODO: Fill this in with a proper attestation.
+        .setIntegrityResponse(
+            com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.getDefaultInstance())
+        .setCryptoKeys(
+            com.google.android.as.oss.pd.manifest.api.proto.CryptoKeys.newBuilder()
+                .setPublicKey(ByteString.copyFrom(publicKey)))
         .build();
   }
 
@@ -149,6 +166,20 @@ public final class BlobProtoUtils {
     return builder.build();
   }
 
+  /** Converts a server manifest config response to PCS manifest config response. */
+  public static GetManifestConfigResponse toInternalResponse(
+      com.google.android.as.oss.pd.manifest.api.proto.GetManifestConfigResponse externalResponse,
+      EncryptionHelper externalEncryption,
+      byte[] associatedData)
+      throws GeneralSecurityException {
+    return GetManifestConfigResponse.newBuilder()
+        .setManifestConfig(
+            ByteString.copyFrom(
+                externalEncryption.decrypt(
+                    externalResponse.getEncryptedManifestConfig().toByteArray(), associatedData)))
+        .build();
+  }
+
   /** Retrieves the client identifier used by the server to select the blob to provide. */
   public String getClientId(Metadata metadata) {
     return getClientId(metadata.getBlobConstraints());
@@ -196,6 +227,20 @@ public final class BlobProtoUtils {
                 .addAllLabel(toLabels(labels))
                 .addLabel(toLabel(CLIENT_GROUP_LABEL_KEY, getClientGroup(metadata))))
         .setCounters(Counters.getDefaultInstance())
+        .build();
+  }
+
+  @VisibleForTesting
+  ManifestConfigConstraints buildConstraints(
+      com.google.android.as.oss.pd.api.proto.BlobConstraints constraints) {
+    String value = getClientGroup(constraints);
+    return ManifestConfigConstraints.newBuilder()
+        .setClientId(getClientId(constraints))
+        .addLabel(
+            com.google.android.as.oss.pd.manifest.api.proto.Label.newBuilder()
+                .setAttribute(CLIENT_GROUP_LABEL_KEY)
+                .setValue(value)
+                .build())
         .build();
   }
 
