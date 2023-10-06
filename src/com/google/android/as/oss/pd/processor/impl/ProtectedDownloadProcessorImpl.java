@@ -28,6 +28,7 @@ import com.google.android.as.oss.networkusage.db.Status;
 import com.google.android.as.oss.networkusage.ui.content.UnrecognizedNetworkRequestException;
 import com.google.android.as.oss.pd.api.proto.DownloadBlobRequest;
 import com.google.android.as.oss.pd.api.proto.DownloadBlobResponse;
+import com.google.android.as.oss.pd.attestation.AttestationClient;
 import com.google.android.as.oss.pd.channel.ChannelProvider;
 import com.google.android.as.oss.pd.keys.EncryptionHelper;
 import com.google.android.as.oss.pd.keys.EncryptionHelperFactory;
@@ -50,6 +51,7 @@ import io.grpc.Metadata;
 import io.grpc.stub.MetadataUtils;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -78,6 +80,7 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
   private final EncryptionHelperFactory encryptionHelperFactory;
   private final PDNetworkUsageLogHelper networkLogHelper;
   private final BlobProtoUtils blobProtoUtils;
+  private final AttestationClient attestationClient;
 
   @Inject
   ProtectedDownloadProcessorImpl(
@@ -88,7 +91,8 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
       PersistentStateManager persistenceManager,
       EncryptionHelperFactory encryptionHelperFactory,
       PDNetworkUsageLogHelper networkLogHelper,
-      BlobProtoUtils blobProtoUtils) {
+      BlobProtoUtils blobProtoUtils,
+      AttestationClient attestationClient) {
     this.channelProvider = channelProvider;
     this.pdExecutor = pdExecutor;
     this.ioExecutor = ioExecutor;
@@ -97,6 +101,7 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
     this.encryptionHelperFactory = encryptionHelperFactory;
     this.networkLogHelper = networkLogHelper;
     this.blobProtoUtils = blobProtoUtils;
+    this.attestationClient = attestationClient;
   }
 
   @Override
@@ -118,8 +123,52 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
         channelProvider.getChannel(request.getMetadata().getBlobConstraints().getClient());
 
     return FluentFuture.from(readOrCreatePersistentState(clientId))
-        .transformAsync(state -> downloadBlob(channel, clientId, request, state), pdExecutor)
+        .transformAsync(state -> integrityCheck(request, state), pdExecutor)
+        .transformAsync(
+            integrityResponse -> downloadBlob(channel, clientId, request, integrityResponse),
+            pdExecutor)
         .transformAsync(this::finalizeDownload, pdExecutor);
+  }
+
+  private ListenableFuture<IntegrityResponse> integrityCheck(
+      DownloadBlobRequest request, ClientPersistentState persistentState)
+      throws GeneralSecurityException, IOException {
+    EncryptionHelper externalEncryption;
+    if (persistentState.hasExternalKeySet()) {
+      externalEncryption =
+          encryptionHelperFactory.createFromEncryptedKeySet(
+              persistentState.getExternalKeySet().toByteArray());
+    } else {
+      logger.atInfo().log("generating new key set for a new client persistent state");
+      externalEncryption = encryptionHelperFactory.generateEncryptedKeySet();
+      persistentState =
+          persistentState.toBuilder()
+              .setExternalKeySet(ByteString.copyFrom(externalEncryption.toEncryptedKeySet()))
+              .build();
+    }
+
+    String contentBinding =
+        blobProtoUtils.metadataHash(externalEncryption.publicKey(), request.getMetadata());
+
+    ClientPersistentState finalClientPersistentState = persistentState;
+    EncryptionHelper finalExternalEncryption = externalEncryption;
+
+    // NOTE: Even if attestation fails, we continue execution. Server will make a decision what to
+    // do with the download.
+    return FluentFuture.from(attestationClient.requestMeasurementWithContentBinding(contentBinding))
+        .transform(
+            attestationToken ->
+                IntegrityResponse.create(
+                    finalClientPersistentState,
+                    finalExternalEncryption,
+                    Optional.of(attestationToken)),
+            pdExecutor)
+        .catching(
+            Exception.class,
+            e ->
+                IntegrityResponse.create(
+                    finalClientPersistentState, finalExternalEncryption, Optional.empty()),
+            pdExecutor);
   }
 
   private ListenableFuture<ClientPersistentState> readOrCreatePersistentState(String clientId) {
@@ -140,10 +189,11 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
       Channel channel,
       String clientId,
       DownloadBlobRequest request,
-      ClientPersistentState persistentState)
+      IntegrityResponse integrityResponse)
       throws GeneralSecurityException, IOException {
+    ClientPersistentState finalClientPersistentState = integrityResponse.state();
+    EncryptionHelper externalEncryption = integrityResponse.externalEncryption();
 
-    ClientPersistentState clientPersistentState = persistentState;
     String apiKey = channelProvider.getServiceApiKeyOverride().orElse(request.getApiKey());
     ProgramBlobServiceFutureStub serviceStub = createServiceStub(channel, apiKey);
 
@@ -151,27 +201,13 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
         encryptionHelperFactory.createFromPublicKey(
             request.getMetadata().getCryptoKeys().getPublicKey().toByteArray());
 
-    EncryptionHelper externalEncryption;
-    if (clientPersistentState.hasExternalKeySet()) {
-      externalEncryption =
-          encryptionHelperFactory.createFromEncryptedKeySet(
-              persistentState.getExternalKeySet().toByteArray());
-    } else {
-      logger.atInfo().log("generating new key set for a new client persistent state");
-      externalEncryption = encryptionHelperFactory.generateEncryptedKeySet();
-      clientPersistentState =
-          clientPersistentState.toBuilder()
-              .setExternalKeySet(ByteString.copyFrom(externalEncryption.toEncryptedKeySet()))
-              .build();
-    }
-
-    ClientPersistentState finalClientPersistentState = clientPersistentState;
     return FluentFuture.from(
             serviceStub.downloadBlob(
                 blobProtoUtils.toExternalRequest(
                     request,
                     externalEncryption.publicKey(),
-                    clientPersistentState.getPageToken().toByteArray())))
+                    finalClientPersistentState.getPageToken().toByteArray(),
+                    integrityResponse.attestationToken())))
         .catchingAsync(
             Exception.class,
             error -> {
@@ -267,5 +303,25 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
 
     /** The client requested the blob. */
     public abstract String clientId();
+  }
+
+  @AutoValue
+  abstract static class IntegrityResponse {
+    public static IntegrityResponse create(
+        ClientPersistentState state,
+        EncryptionHelper externalEncryption,
+        Optional<ByteString> attestationToken) {
+      return new AutoValue_ProtectedDownloadProcessorImpl_IntegrityResponse(
+          state, externalEncryption, attestationToken);
+    }
+
+    /** The {@link ClientPersistentState} to store at the end of the download operation. */
+    public abstract ClientPersistentState state();
+
+    /** The {@link EncryptionHelper} to use for decrypting download response. */
+    public abstract EncryptionHelper externalEncryption();
+
+    /** An attestation token for download request. */
+    public abstract Optional<ByteString> attestationToken();
   }
 }

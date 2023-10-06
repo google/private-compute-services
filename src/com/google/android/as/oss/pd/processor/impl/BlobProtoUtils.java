@@ -44,10 +44,14 @@ import com.google.android.as.oss.pd.service.api.proto.IntegrityResponse;
 import com.google.android.as.oss.pd.service.api.proto.Label;
 import com.google.android.as.oss.pd.service.api.proto.ProtectionProofConfig;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.hash.Hasher;
+import com.google.common.hash.Hashing;
+import com.google.common.io.BaseEncoding;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Contains utility functions to translate between PCS-internal proto definitions and the external
@@ -79,9 +83,12 @@ public final class BlobProtoUtils {
 
   /** Converts a blob download request from PCS to a server request to download a blob. */
   public com.google.android.as.oss.pd.service.api.proto.DownloadBlobRequest toExternalRequest(
-      DownloadBlobRequest request, byte[] publicKey, byte[] pageToken) {
+      DownloadBlobRequest request,
+      byte[] publicKey,
+      byte[] pageToken,
+      Optional<ByteString> attestationToken) {
     return com.google.android.as.oss.pd.service.api.proto.DownloadBlobRequest.newBuilder()
-        .setIntegrityResponse(IntegrityResponse.getDefaultInstance())
+        .setIntegrityResponse(getIntegrityResponse(attestationToken))
         .setMetadata(
             toExternalMetadata(
                 ByteString.copyFrom(publicKey), request.getMetadata(), DEFAULT_LABELS))
@@ -104,6 +111,14 @@ public final class BlobProtoUtils {
             com.google.android.as.oss.pd.manifest.api.proto.CryptoKeys.newBuilder()
                 .setPublicKey(ByteString.copyFrom(publicKey)))
         .build();
+  }
+
+  private static IntegrityResponse getIntegrityResponse(Optional<ByteString> attestationToken) {
+    if (!attestationToken.isPresent()) {
+      return IntegrityResponse.getDefaultInstance();
+    } else {
+      return IntegrityResponse.newBuilder().setKeyAttestationToken(attestationToken.get()).build();
+    }
   }
 
   /** Decrypts with external encryption and applies internal encryption if requested. */
@@ -208,6 +223,23 @@ public final class BlobProtoUtils {
               "unable to convert %d to internal ClientVersion.Type", internalType.getNumber()));
     }
     return externalType;
+  }
+
+  /** Calculates metadata hash for Device integrity content binding. */
+  public String metadataHash(byte[] publicKey, Metadata metadata) {
+    com.google.android.as.oss.pd.service.api.proto.Metadata externalMetadata =
+        toExternalMetadata(ByteString.copyFrom(publicKey), metadata, DEFAULT_LABELS);
+
+    Hasher hasher = Hashing.sha256().newHasher();
+    hasher.putBytes(externalMetadata.getBlobConstraints().getDeviceTier().getBytes());
+    hasher.putBytes(externalMetadata.getBlobConstraints().getClientId().getBytes());
+    hasher.putBytes(publicKey);
+    for (Label label : externalMetadata.getBlobConstraints().getLabelList()) {
+      hasher.putBytes(label.getAttribute().getBytes());
+      hasher.putBytes(label.getValue().getBytes());
+    }
+
+    return BaseEncoding.base64().encode(hasher.hash().asBytes());
   }
 
   @VisibleForTesting

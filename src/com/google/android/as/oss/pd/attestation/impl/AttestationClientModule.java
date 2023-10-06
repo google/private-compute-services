@@ -17,9 +17,7 @@
 package com.google.android.as.oss.pd.attestation.impl;
 
 import com.google.android.as.oss.attestation.PccAttestationMeasurementClient;
-import com.google.android.as.oss.attestation.config.PcsAttestationMeasurementConfig;
 import com.google.android.as.oss.common.ExecutorAnnotations.AttestationExecutorQualifier;
-import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.common.flavor.BuildFlavor;
 import com.google.android.as.oss.pd.attestation.AttestationClient;
 import dagger.Module;
@@ -27,7 +25,6 @@ import dagger.Provides;
 import dagger.hilt.InstallIn;
 import dagger.hilt.components.SingletonComponent;
 import java.util.concurrent.Executor;
-import javax.annotation.Nullable;
 import javax.inject.Singleton;
 
 /** Convenience module to provide {@link AttestationClient}. */
@@ -36,15 +33,12 @@ import javax.inject.Singleton;
 interface AttestationClientModule {
   @Provides
   @Singleton
-  @Nullable
   static AttestationClient providePdAttestationClient(
       BuildFlavor buildFlavor,
-      ConfigReader<PcsAttestationMeasurementConfig> attestationMeasurementConfigReader,
       PccAttestationMeasurementClient attestationMeasurementClient,
       @AttestationExecutorQualifier Executor executor) {
     return buildFlavor.isInternal()
-            || attestationMeasurementConfigReader.getConfig().enableAttestationMeasurement()
         ? AttestationClientImpl.create(attestationMeasurementClient, executor)
-        : null;
+        : new AttestationClientNoopImpl();
   }
 }
