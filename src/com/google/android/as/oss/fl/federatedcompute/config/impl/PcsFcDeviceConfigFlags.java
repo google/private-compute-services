@@ -16,6 +16,7 @@
 
 package com.google.android.as.oss.fl.federatedcompute.config.impl;
 
+import android.content.ComponentCallbacks2;
 import android.provider.DeviceConfig;
 import android.util.Base64;
 import androidx.core.util.Supplier;
@@ -42,6 +43,14 @@ public final class PcsFcDeviceConfigFlags extends PcsFcFlags {
   public boolean enableDeviceConfigOverrides() {
     return DeviceConfig.getBoolean(
         FLAG_NAMESPACE, FLAG_PREFIX + "enable_device_config_overrides", true);
+  }
+
+  @Override
+  public int inappTrainingOnTrimMemoryInterruptLevel() {
+    return DeviceConfig.getInt(
+        FLAG_NAMESPACE,
+        FLAG_PREFIX + "inapp_training_on_trim_memory_interrupt_level",
+        ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW);
   }
 
   @Override
