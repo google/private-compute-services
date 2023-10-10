@@ -28,10 +28,14 @@ import com.google.android.as.oss.networkusage.db.Status;
 import com.google.android.as.oss.networkusage.ui.content.UnrecognizedNetworkRequestException;
 import com.google.android.as.oss.pd.api.proto.DownloadBlobRequest;
 import com.google.android.as.oss.pd.api.proto.DownloadBlobResponse;
+import com.google.android.as.oss.pd.api.proto.GetManifestConfigRequest;
+import com.google.android.as.oss.pd.api.proto.GetManifestConfigResponse;
 import com.google.android.as.oss.pd.attestation.AttestationClient;
 import com.google.android.as.oss.pd.channel.ChannelProvider;
 import com.google.android.as.oss.pd.keys.EncryptionHelper;
 import com.google.android.as.oss.pd.keys.EncryptionHelperFactory;
+import com.google.android.as.oss.pd.manifest.api.proto.ProtectedDownloadServiceGrpc;
+import com.google.android.as.oss.pd.manifest.api.proto.ProtectedDownloadServiceGrpc.ProtectedDownloadServiceFutureStub;
 import com.google.android.as.oss.pd.networkusage.PDNetworkUsageLogHelper;
 import com.google.android.as.oss.pd.persistence.ClientPersistentState;
 import com.google.android.as.oss.pd.persistence.PersistentStateManager;
@@ -41,11 +45,13 @@ import com.google.android.as.oss.pd.service.api.proto.ProgramBlobServiceGrpc.Pro
 import com.google.auto.value.AutoValue;
 import com.google.common.flogger.GoogleLogger;
 import com.google.common.io.BaseEncoding;
+import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.MessageLite;
 import io.grpc.Channel;
 import io.grpc.Metadata;
 import io.grpc.stub.MetadataUtils;
@@ -122,16 +128,45 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
     Channel channel =
         channelProvider.getChannel(request.getMetadata().getBlobConstraints().getClient());
 
+    ContentBindingHashFunction contentBindingHashFunction =
+        keyBytes -> blobProtoUtils.metadataHash(keyBytes, request.getMetadata());
     return FluentFuture.from(readOrCreatePersistentState(clientId))
-        .transformAsync(state -> integrityCheck(request, state), pdExecutor)
+        .transformAsync(state -> integrityCheck(state, contentBindingHashFunction), pdExecutor)
         .transformAsync(
             integrityResponse -> downloadBlob(channel, clientId, request, integrityResponse),
             pdExecutor)
         .transformAsync(this::finalizeDownload, pdExecutor);
   }
 
+  @Override
+  public ListenableFuture<GetManifestConfigResponse> getManifestConfig(
+      GetManifestConfigRequest request) {
+    try {
+      validateRequest(request);
+    } catch (RuntimeException e) {
+      return Futures.immediateFailedFuture(e);
+    }
+
+    String clientId = blobProtoUtils.getClientId(request.getConstraints());
+    try {
+      networkLogHelper.checkAllowedRequest(clientId);
+    } catch (UnrecognizedNetworkRequestException e) {
+      return Futures.immediateFailedFuture(e);
+    }
+
+    Channel channel = channelProvider.getChannel(request.getConstraints().getClient());
+
+    // TODO: - Add a proper content binding.
+    ContentBindingHashFunction contentBindingHashFunction = keyBytes -> "";
+    return FluentFuture.from(readOrCreatePersistentState(clientId))
+        .transformAsync(state -> integrityCheck(state, contentBindingHashFunction), pdExecutor)
+        .transformAsync(
+            state -> downloadManifestConfig(channel, clientId, request, state), pdExecutor)
+        .transformAsync(this::finalizeDownload, pdExecutor);
+  }
+
   private ListenableFuture<IntegrityResponse> integrityCheck(
-      DownloadBlobRequest request, ClientPersistentState persistentState)
+      ClientPersistentState persistentState, ContentBindingHashFunction contentBindingHashFunction)
       throws GeneralSecurityException, IOException {
     EncryptionHelper externalEncryption;
     if (persistentState.hasExternalKeySet()) {
@@ -147,8 +182,7 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
               .build();
     }
 
-    String contentBinding =
-        blobProtoUtils.metadataHash(externalEncryption.publicKey(), request.getMetadata());
+    String contentBinding = contentBindingHashFunction.apply(externalEncryption.publicKey());
 
     ClientPersistentState finalClientPersistentState = persistentState;
     EncryptionHelper finalExternalEncryption = externalEncryption;
@@ -185,7 +219,7 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
         pdExecutor);
   }
 
-  private ListenableFuture<DownloadResult> downloadBlob(
+  private ListenableFuture<DownloadResult<DownloadBlobResponse>> downloadBlob(
       Channel channel,
       String clientId,
       DownloadBlobRequest request,
@@ -208,14 +242,7 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
                     externalEncryption.publicKey(),
                     finalClientPersistentState.getPageToken().toByteArray(),
                     integrityResponse.attestationToken())))
-        .catchingAsync(
-            Exception.class,
-            error -> {
-              // The response message was not received, hence the size of the download is unknown
-              /* size= */ networkLogHelper.logDownloadIfNeeded(clientId, Status.FAILED, 0);
-              return Futures.immediateFailedFuture(error);
-            },
-            pdExecutor)
+        .catchingAsync(Exception.class, getFailureLoggingTransform(clientId), pdExecutor)
         .transformAsync(
             externalResponse -> {
               int approximatedSize = externalResponse.getSerializedSize();
@@ -243,6 +270,43 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
             pdExecutor);
   }
 
+  private ListenableFuture<DownloadResult<GetManifestConfigResponse>> downloadManifestConfig(
+      Channel channel,
+      String clientId,
+      GetManifestConfigRequest request,
+      IntegrityResponse integrityResponse)
+      throws GeneralSecurityException, IOException {
+    EncryptionHelper externalEncryption = integrityResponse.externalEncryption();
+
+    String apiKey = channelProvider.getServiceApiKeyOverride().orElse(request.getApiKey());
+    ProtectedDownloadServiceFutureStub serviceStub =
+        createProtectedDownloadServiceStub(channel, apiKey);
+
+    return FluentFuture.from(
+            serviceStub.getManifestConfig(
+                blobProtoUtils.toExternalRequest(request, externalEncryption.publicKey())))
+        .catchingAsync(Exception.class, getFailureLoggingTransform(clientId), pdExecutor)
+        .transformAsync(
+            externalResponse -> {
+              int approximatedSize = externalResponse.getSerializedSize();
+              try {
+                return Futures.immediateFuture(
+                    DownloadResult.create(
+                        toInternalResponse(
+                            externalResponse,
+                            externalEncryption,
+                            blobProtoUtils.getClientId(request.getConstraints()).getBytes(UTF_8)),
+                        integrityResponse.state(),
+                        approximatedSize,
+                        clientId));
+              } catch (GeneralSecurityException e) {
+                networkLogHelper.logDownloadIfNeeded(clientId, Status.FAILED, approximatedSize);
+                return Futures.immediateFailedFuture(e);
+              }
+            },
+            pdExecutor);
+  }
+
   private ProgramBlobServiceFutureStub createServiceStub(Channel channel, String apiKey) {
     Metadata metadata = new Metadata();
     metadata.put(GRPC_API_KEY, apiKey);
@@ -251,18 +315,39 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
         .withExecutor(ioExecutor);
   }
 
-  private ClientPersistentState updatePersistentState(
-      ClientPersistentState oldState, DownloadBlobResponse response) {
-    return oldState.toBuilder()
-        .setLastCompletionTimeMillis(timeSource.now().toEpochMilli())
-        .setPageToken(response.getNextPageToken())
-        .build();
+  private ProtectedDownloadServiceFutureStub createProtectedDownloadServiceStub(
+      Channel channel, String apiKey) {
+    Metadata metadata = new Metadata();
+    metadata.put(GRPC_API_KEY, apiKey);
+    return ProtectedDownloadServiceGrpc.newFutureStub(channel)
+        .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+        .withExecutor(ioExecutor);
   }
 
-  private ListenableFuture<DownloadBlobResponse> finalizeDownload(DownloadResult result) {
+  private <T> AsyncFunction<Exception, T> getFailureLoggingTransform(String clientId) {
+    return error -> {
+      // The response message was not received, hence the size of the download is unknown
+      /* size= */ networkLogHelper.logDownloadIfNeeded(clientId, Status.FAILED, 0);
+      return Futures.immediateFailedFuture(error);
+    };
+  }
+
+  private ClientPersistentState updatePersistentState(
+      ClientPersistentState oldState, Optional<ByteString> pageToken) {
+    ClientPersistentState.Builder builder =
+        oldState.toBuilder().setLastCompletionTimeMillis(timeSource.now().toEpochMilli());
+    pageToken.ifPresent(builder::setPageToken);
+    return builder.build();
+  }
+
+  private <T extends MessageLite> ListenableFuture<T> finalizeDownload(DownloadResult<T> result) {
+    Optional<ByteString> pageToken =
+        result.response() instanceof DownloadBlobResponse
+            ? Optional.of(((DownloadBlobResponse) result.response()).getNextPageToken())
+            : Optional.empty();
     return FluentFuture.from(
             persistenceManager.writeState(
-                result.clientId(), updatePersistentState(result.state(), result.response())))
+                result.clientId(), updatePersistentState(result.state(), pageToken)))
         .catchingAsync(
             Exception.class,
             error -> {
@@ -282,18 +367,15 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
 
   /** An internal data class passed between async operations during the blob download. */
   @AutoValue
-  abstract static class DownloadResult {
-    public static DownloadResult create(
-        DownloadBlobResponse response,
-        ClientPersistentState state,
-        int downloadSize,
-        String clientId) {
-      return new AutoValue_ProtectedDownloadProcessorImpl_DownloadResult(
+  abstract static class DownloadResult<T extends MessageLite> {
+    public static <T extends MessageLite> DownloadResult<T> create(
+        T response, ClientPersistentState state, int downloadSize, String clientId) {
+      return new AutoValue_ProtectedDownloadProcessorImpl_DownloadResult<T>(
           response, state, downloadSize, clientId);
     }
 
     /** The {@link DownloadBlobResponse} to return at the end of the download operation. */
-    public abstract DownloadBlobResponse response();
+    public abstract T response();
 
     /** The {@link ClientPersistentState} to store at the end of the download operation. */
     public abstract ClientPersistentState state();
@@ -323,5 +405,9 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
 
     /** An attestation token for download request. */
     public abstract Optional<ByteString> attestationToken();
+  }
+
+  private interface ContentBindingHashFunction {
+    String apply(byte[] publicKeyBytes);
   }
 }

@@ -18,10 +18,15 @@ package com.google.android.as.oss.pd.processor;
 
 import com.google.android.as.oss.pd.api.proto.DownloadBlobRequest;
 import com.google.android.as.oss.pd.api.proto.DownloadBlobResponse;
+import com.google.android.as.oss.pd.api.proto.GetManifestConfigRequest;
+import com.google.android.as.oss.pd.api.proto.GetManifestConfigResponse;
 import com.google.common.util.concurrent.ListenableFuture;
 
 /** An abstraction for the downloading operation of a blob. */
 public interface ProtectedDownloadProcessor {
   /** Runs a download process. */
   ListenableFuture<DownloadBlobResponse> download(DownloadBlobRequest request);
+
+  /** Runs a getManifestConfig process. */
+  ListenableFuture<GetManifestConfigResponse> getManifestConfig(GetManifestConfigRequest request);
 }
