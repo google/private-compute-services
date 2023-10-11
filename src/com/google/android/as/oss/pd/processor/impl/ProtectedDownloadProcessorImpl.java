@@ -156,8 +156,9 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
 
     Channel channel = channelProvider.getChannel(request.getConstraints().getClient());
 
-    // TODO: - Add a proper content binding.
-    ContentBindingHashFunction contentBindingHashFunction = keyBytes -> "";
+    ContentBindingHashFunction contentBindingHashFunction =
+        keyBytes ->
+            blobProtoUtils.getManifestConfigMetadataHash(keyBytes, request.getConstraints());
     return FluentFuture.from(readOrCreatePersistentState(clientId))
         .transformAsync(state -> integrityCheck(state, contentBindingHashFunction), pdExecutor)
         .transformAsync(
@@ -284,7 +285,8 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
 
     return FluentFuture.from(
             serviceStub.getManifestConfig(
-                blobProtoUtils.toExternalRequest(request, externalEncryption.publicKey())))
+                blobProtoUtils.toExternalRequest(
+                    request, externalEncryption.publicKey(), integrityResponse.attestationToken())))
         .catchingAsync(Exception.class, getFailureLoggingTransform(clientId), pdExecutor)
         .transformAsync(
             externalResponse -> {

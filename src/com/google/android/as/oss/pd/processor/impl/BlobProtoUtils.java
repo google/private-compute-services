@@ -68,6 +68,7 @@ public final class BlobProtoUtils {
   static final ImmutableMap<String, String> DEFAULT_LABELS = ImmutableMap.of("language_code", "en");
 
   @VisibleForTesting static final String CLIENT_GROUP_LABEL_KEY = "client_group";
+  @VisibleForTesting static final String DEVICE_TIER_LABEL_KEY = "device_tier";
   @VisibleForTesting static final long CLIENT_VERSION = 2;
 
   /** Converts the DownloadMode from PCS to a server format. */
@@ -101,12 +102,10 @@ public final class BlobProtoUtils {
 
   /** Converts a manifest request from PCS to a server request to get a manifest. */
   public com.google.android.as.oss.pd.manifest.api.proto.GetManifestConfigRequest toExternalRequest(
-      GetManifestConfigRequest request, byte[] publicKey) {
+      GetManifestConfigRequest request, byte[] publicKey, Optional<ByteString> attestationToken) {
     return com.google.android.as.oss.pd.manifest.api.proto.GetManifestConfigRequest.newBuilder()
         .setConstraints(buildConstraints(request.getConstraints()))
-        // TODO: Fill this in with a proper attestation.
-        .setIntegrityResponse(
-            com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.getDefaultInstance())
+        .setIntegrityResponse(getManifestIntegrityResponse(attestationToken))
         .setCryptoKeys(
             com.google.android.as.oss.pd.manifest.api.proto.CryptoKeys.newBuilder()
                 .setPublicKey(ByteString.copyFrom(publicKey)))
@@ -118,6 +117,17 @@ public final class BlobProtoUtils {
       return IntegrityResponse.getDefaultInstance();
     } else {
       return IntegrityResponse.newBuilder().setKeyAttestationToken(attestationToken.get()).build();
+    }
+  }
+
+  private static com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse
+      getManifestIntegrityResponse(Optional<ByteString> attestationToken) {
+    if (!attestationToken.isPresent()) {
+      return com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.getDefaultInstance();
+    } else {
+      return com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.newBuilder()
+          .setKeyAttestationToken(attestationToken.get())
+          .build();
     }
   }
 
@@ -242,6 +252,26 @@ public final class BlobProtoUtils {
     return BaseEncoding.base64().encode(hasher.hash().asBytes());
   }
 
+  /**
+   * Calculates metadata hash for Device integrity content binding used for GetManifestConfig
+   * requests.
+   */
+  public String getManifestConfigMetadataHash(
+      byte[] publicKey, com.google.android.as.oss.pd.api.proto.BlobConstraints blobConstraints) {
+    ManifestConfigConstraints externalConstraints = buildConstraints(blobConstraints);
+
+    Hasher hasher = Hashing.sha256().newHasher();
+    hasher.putBytes(externalConstraints.getClientId().getBytes());
+    hasher.putBytes(publicKey);
+    for (com.google.android.as.oss.pd.manifest.api.proto.Label label :
+        externalConstraints.getLabelList()) {
+      hasher.putBytes(label.getAttribute().getBytes());
+      hasher.putBytes(label.getValue().getBytes());
+    }
+
+    return BaseEncoding.base64().encode(hasher.hash().asBytes());
+  }
+
   @VisibleForTesting
   com.google.android.as.oss.pd.service.api.proto.Metadata toExternalMetadata(
       ByteString publicKey, Metadata metadata, ImmutableMap<String, String> labels) {
@@ -265,13 +295,17 @@ public final class BlobProtoUtils {
   @VisibleForTesting
   ManifestConfigConstraints buildConstraints(
       com.google.android.as.oss.pd.api.proto.BlobConstraints constraints) {
-    String value = getClientGroup(constraints);
     return ManifestConfigConstraints.newBuilder()
         .setClientId(getClientId(constraints))
         .addLabel(
             com.google.android.as.oss.pd.manifest.api.proto.Label.newBuilder()
                 .setAttribute(CLIENT_GROUP_LABEL_KEY)
-                .setValue(value)
+                .setValue(getClientGroup(constraints))
+                .build())
+        .addLabel(
+            com.google.android.as.oss.pd.manifest.api.proto.Label.newBuilder()
+                .setAttribute(DEVICE_TIER_LABEL_KEY)
+                .setValue(getDeviceTier(constraints))
                 .build())
         .build();
   }
@@ -294,7 +328,12 @@ public final class BlobProtoUtils {
   }
 
   private static String getDeviceTier(Metadata metadata) {
-    DeviceTier tier = metadata.getBlobConstraints().getDeviceTier();
+    return getDeviceTier(metadata.getBlobConstraints());
+  }
+
+  private static String getDeviceTier(
+      com.google.android.as.oss.pd.api.proto.BlobConstraints blobConstraints) {
+    DeviceTier tier = blobConstraints.getDeviceTier();
     return ProtoConversions.toDeviceTierString(tier)
         .orElseThrow(
             () ->
