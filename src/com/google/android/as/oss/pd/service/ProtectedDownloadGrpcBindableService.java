@@ -21,12 +21,16 @@ import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.common.flavor.BuildFlavor;
 import com.google.android.as.oss.pd.api.proto.DownloadBlobRequest;
 import com.google.android.as.oss.pd.api.proto.DownloadBlobResponse;
+import com.google.android.as.oss.pd.api.proto.GetManifestConfigRequest;
+import com.google.android.as.oss.pd.api.proto.GetManifestConfigResponse;
 import com.google.android.as.oss.pd.api.proto.ProtectedDownloadServiceGrpc;
 import com.google.android.as.oss.pd.config.ProtectedDownloadConfig;
 import com.google.android.as.oss.pd.processor.ProtectedDownloadProcessor;
+import com.google.common.base.Function;
 import com.google.common.flogger.GoogleLogger;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import io.grpc.Status;
 import io.grpc.StatusException;
@@ -61,6 +65,21 @@ class ProtectedDownloadGrpcBindableService
   @Override
   public void download(
       DownloadBlobRequest request, StreamObserver<DownloadBlobResponse> responseObserver) {
+    handleRpc(downloadProcessor::download, request, responseObserver, "Download");
+  }
+
+  @Override
+  public void getManifestConfig(
+      GetManifestConfigRequest request,
+      StreamObserver<GetManifestConfigResponse> responseObserver) {
+    handleRpc(downloadProcessor::getManifestConfig, request, responseObserver, "GetManifestConfig");
+  }
+
+  private <RequestT, ResponseT> void handleRpc(
+      Function<RequestT, ListenableFuture<ResponseT>> delegate,
+      RequestT request,
+      StreamObserver<ResponseT> responseObserver,
+      String rpcName) {
     if (!configReader.getConfig().enabled() && !buildFlavor.isInternal()) {
       logger.atFine().log("Rejecting request since the feature is disabled");
       responseObserver.onError(
@@ -68,13 +87,13 @@ class ProtectedDownloadGrpcBindableService
       return;
     }
 
-    logger.atInfo().log("Starting download blob request");
+    logger.atInfo().log("Starting %s request", rpcName);
     Futures.addCallback(
-        downloadProcessor.download(request),
-        new FutureCallback<DownloadBlobResponse>() {
+        delegate.apply(request),
+        new FutureCallback<ResponseT>() {
           @Override
-          public void onSuccess(DownloadBlobResponse result) {
-            logger.atInfo().log("Successfully downloaded blob response");
+          public void onSuccess(ResponseT result) {
+            logger.atInfo().log("Successfully handled %s", rpcName);
             responseObserver.onNext(result);
             responseObserver.onCompleted();
           }
@@ -84,7 +103,7 @@ class ProtectedDownloadGrpcBindableService
             // Logging the error in addition to "throwing" it, because the failure reason is
             // removed while sent to the client as part of the protocol and it is useful to have
             // it logged in a PCS process.
-            logger.atSevere().withCause(t).log("Failed to download blob");
+            logger.atSevere().withCause(t).log("Failed to handle %s", rpcName);
             responseObserver.onError(new StatusException(toGrpcStatus(t)));
           }
         },
