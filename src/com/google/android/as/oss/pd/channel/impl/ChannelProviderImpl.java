@@ -33,7 +33,7 @@ import java.util.Optional;
 class ChannelProviderImpl implements ChannelProvider {
 
   private static final int SERVER_PORT = 443;
-  private static final int MAX_RESPONSE_SIZE_IN_BYTES = 30 * 1024 * 1024; // Max download size: 30MB
+  private static final int MAX_RESPONSE_SIZE_IN_BYTES = 32 * 1024 * 1024; // Max download size: 32MB
 
   private final LoadingCache<Client, Channel> channelCache;
   private final Optional<String> apiKeyOverride;
