@@ -74,7 +74,7 @@ message BlobConstraints {
     SUSPICIOUS_MESSAGE_ALERTS = 1;
     PLAY_PROTECT_SERVICE = 2;
     PLAY_PROTECT_SERVICE_CORE_DEFAULT = 3;
-    reserved 10000 to 10004, 99998, 99999;
+    reserved 10000 to 10004, 99997 to 99999;
   }
   Client client = 1002;
 
