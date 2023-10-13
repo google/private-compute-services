@@ -263,4 +263,19 @@
   <string name="feature_name_android_key_attestation">Android Key Attestation</string>
   <!-- Description of downloads related to Android Key Attestation, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
   <string name="description_android_key_attestation">Requested a nonce challenge for Android Key Attestation</string>
+
+  <!--AICore -->
+  <!-- Name of the AICore Service feature, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_aicore_service">AICore</string>
+  <!-- Description of AICore Service data downloads, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_aicore_service">Updated the on-device models for Google AI Services</string>
+  <string name="url_regex_aicore_service" translatable="false">https://dl.google.com/mdi-serving/aicore-models/.*</string>
+
+  <string name="ap_client_id_aicore" translatable="false">com.google.android.aicore(:.*)?</string>
+  <!-- Description of downloads from Aicore using Protected Download protocol, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_aicore_ap">Updated the on-device protections of AICore</string>
+
+  <!-- Binary Transparency Log for Aicore -->
+  <!-- Description of the HTTP download of the binary transparency log root signature, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="url_regex_aicore_bt_signature" translatable="false">https://www.gstatic.com/on-device-safety/bt_log_signature_key.txt\\?c=GcYw_Q</string>
 </resources>

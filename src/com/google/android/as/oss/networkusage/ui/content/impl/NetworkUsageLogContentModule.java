@@ -21,6 +21,7 @@ import static com.google.android.as.oss.networkusage.db.ConnectionDetails.Connec
 import static com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType.FC_TRAINING_START_QUERY;
 import static com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType.HTTP;
 import static com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType.PD;
+import static com.google.android.as.oss.networkusage.ui.content.impl.ContentMapEntryBuilder.AICORE_PACKAGE_NAME;
 import static com.google.android.as.oss.networkusage.ui.content.impl.ContentMapEntryBuilder.ASI_PACKAGE_NAME;
 import static com.google.android.as.oss.networkusage.ui.content.impl.ContentMapEntryBuilder.GPPS_PACKAGE_NAME;
 import static com.google.android.as.oss.networkusage.ui.content.impl.ContentMapEntryBuilder.STATSD_PACKAGE_NAME;
@@ -60,6 +61,8 @@ abstract class NetworkUsageLogContentModule {
         new ContentMapEntryBuilder(context).packageName(ASI_PACKAGE_NAME).connectionType(HTTP);
     ContentMapEntryBuilder gppsHttpEntryBuilder =
         new ContentMapEntryBuilder(context).packageName(GPPS_PACKAGE_NAME).connectionType(HTTP);
+    ContentMapEntryBuilder aicoreHttpEntryBuilder =
+        new ContentMapEntryBuilder(context).packageName(AICORE_PACKAGE_NAME).connectionType(HTTP);
     ContentMapEntryBuilder asiFcEntryBuilder =
         new ContentMapEntryBuilder(context)
             .packageName(ASI_PACKAGE_NAME)
@@ -263,6 +266,22 @@ abstract class NetworkUsageLogContentModule {
                 .connectionKeyString(FeatureName.PLATFORM_LOGGING.name())
                 .featureNameId(R.string.feature_name_platform_logging)
                 .descriptionId(R.string.description_platform_logging)
+                .build(),
+            aicoreHttpEntryBuilder
+                .connectionKeyStringId(R.string.url_regex_aicore_service)
+                .featureNameId(R.string.feature_name_aicore_service)
+                .descriptionId(R.string.description_aicore_service)
+                .build(),
+            aicoreHttpEntryBuilder
+                .connectionKeyStringId(R.string.url_regex_aicore_bt_signature)
+                .featureNameId(R.string.feature_name_aicore_service)
+                .descriptionId(R.string.description_bt_log_root_signature)
+                .build(),
+            pdEntryBuilder
+                .connectionKeyStringId(R.string.ap_client_id_aicore)
+                .featureNameId(R.string.feature_name_aicore_service)
+                .descriptionId(R.string.description_aicore_ap)
+                .packageName(AICORE_PACKAGE_NAME)
                 .build());
     ImmutableMap<ConnectionDetails, ConnectionResources> finalImmutableMap = entries;
 
