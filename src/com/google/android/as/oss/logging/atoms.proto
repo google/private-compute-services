@@ -126,4 +126,5 @@ message IntelligenceFederatedLearningDiagnosisLogReported {
   optional int64 federated_compute_version = 1;
 
   optional int64 diag_code = 2;
+  optional int64 run_id = 3;
 }
