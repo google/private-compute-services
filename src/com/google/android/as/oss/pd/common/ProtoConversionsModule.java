@@ -52,6 +52,27 @@ final class ProtoConversionsModule {
   }
 
   @Provides
+  @IntoMap
+  @ClientBiMapKey(Client.AI_CORE_TEXT_INPUT)
+  static String provideAiCoreTextInputClientId() {
+    return "com.google.android.aicore:3649180271731021675";
+  }
+
+  @Provides
+  @IntoMap
+  @ClientBiMapKey(Client.AI_CORE_IMAGE_OUTPUT)
+  static String provideAiCoreImageOutputClientId() {
+    return "com.google.android.aicore:16223496253676012401";
+  }
+
+  @Provides
+  @IntoMap
+  @ClientBiMapKey(Client.AI_CORE_PROTECTED_DOWNLOAD)
+  static String provideAiCoreProtectedDownloadClientId() {
+    return "com.google.android.aicore:11791126134479005147";
+  }
+
+  @Provides
   @Singleton
   static ProtoConversions provideProtoConversions(Map<Client, String> clientToClientId) {
     return new ProtoConversions(ImmutableBiMap.copyOf(clientToClientId));
