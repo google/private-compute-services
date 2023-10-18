@@ -94,6 +94,8 @@ enum TrainingError {
   TRAINING_ERROR_EXAMPLE_STORE_NOT_PRESENT = 28;
   /** The specified selectorContext is invalid. */
   TRAINING_ERROR_INVALID_SELECTOR_CONTEXT = 29;
+  /** The binding connection timed out. */
+  TRAINING_ERROR_PCC_BINDING_TO_CLIENT_TIMED_OUT = 30;
 
   /** Client specific error codes. Use numbers greater than or equal to 40 and
    * smaller than 50.

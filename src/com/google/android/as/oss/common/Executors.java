@@ -24,12 +24,17 @@ import java.util.concurrent.Executor;
 /** Declares static Executors used in PCS. */
 public class Executors {
   public static final Executor IO_EXECUTOR = java.util.concurrent.Executors.newCachedThreadPool();
-  public static final Executor FL_EXECUTOR = java.util.concurrent.Executors.newCachedThreadPool();
   public static final Executor GENERAL_SINGLE_THREAD_EXECUTOR =
       java.util.concurrent.Executors.newSingleThreadExecutor();
   public static final Executor PIR_EXECUTOR = java.util.concurrent.Executors.newCachedThreadPool();
   public static final Executor ATTESTATION_EXECUTOR =
       java.util.concurrent.Executors.newSingleThreadExecutor();
+
+  public static final ListeningScheduledExecutorService FL_EXECUTOR_SERVICE =
+      MoreExecutors.listeningDecorator(
+          java.util.concurrent.Executors.newScheduledThreadPool(
+              /* corePoolSize= */ 1,
+              new ThreadFactoryBuilder().setNameFormat("pcs-fl-%d").build()));
 
   public static final ListeningScheduledExecutorService PROTECTED_DOWNLOAD_EXECUTOR =
       MoreExecutors.listeningDecorator(

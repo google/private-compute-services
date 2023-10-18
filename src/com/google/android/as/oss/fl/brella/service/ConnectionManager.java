@@ -164,17 +164,28 @@ class ConnectionManager {
             } else if (connectionType == ConnectionType.RESULT_HANDLER) {
               IInterface binding = IInAppResultHandler.Stub.asInterface(service);
               serviceBindingSettableFuture.set(binding);
+            } else {
+              serviceBindingSettableFuture.setException(
+                  new RuntimeException("Unsupported connection type"));
             }
           }
 
           @Override
           public void onServiceDisconnected(ComponentName name) {
             logger.atInfo().log("Disconnected from Service.");
-            synchronized (ConnectionManager.this) {
-              if (clientInitializerMap.get(clientName) != null) {
-                clientInitializerMap.get(clientName).reset();
-              }
-            }
+            markConnectionInvalid(clientName, serviceBindingSettableFuture);
+          }
+
+          @Override
+          public void onBindingDied(ComponentName name) {
+            logger.atInfo().log("Binding to %s died", name);
+            markConnectionInvalid(clientName, serviceBindingSettableFuture);
+          }
+
+          @Override
+          public void onNullBinding(ComponentName name) {
+            logger.atInfo().log("Received null binding for %s", name);
+            markConnectionInvalid(clientName, serviceBindingSettableFuture);
           }
         };
     clientActiveServiceConnectionMap.put(clientName, serviceConnection);
@@ -195,5 +206,16 @@ class ConnectionManager {
           new RuntimeException("Failed to bind AiAiFederatedDataService"));
     }
     return serviceBindingSettableFuture;
+  }
+
+  private void markConnectionInvalid(
+      String clientName, SettableFuture<IInterface> serviceBindingSettableFuture) {
+    synchronized (ConnectionManager.this) {
+      if (!serviceBindingSettableFuture.isDone()) {
+        serviceBindingSettableFuture.setException(
+            new RuntimeException(String.format("Failed to bind: %s", clientName)));
+      }
+      this.resetClient(clientName);
+    }
   }
 }

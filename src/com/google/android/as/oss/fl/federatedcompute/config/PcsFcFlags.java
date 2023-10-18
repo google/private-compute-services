@@ -38,6 +38,11 @@ public abstract class PcsFcFlags {
     return 0;
   }
 
+  /** Max duration before timing out a binder IPC connection. */
+  public int maxBinderDelaySeconds() {
+    return 100; // high, to default to simulate no timeout
+  }
+
   /** Maximum size of serialized atoms logged by PCS. */
   public int maxSerializedAtomSize() {
     return 0;

@@ -17,6 +17,7 @@
 package com.google.android.as.oss.fl.brella.service;
 
 import static com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType.FC_TRAINING_START_QUERY;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 import android.os.IInterface;
 import android.os.RemoteException;
@@ -37,6 +38,7 @@ import com.google.android.as.oss.fl.brella.api.proto.TrainingError;
 import com.google.android.as.oss.fl.brella.service.ConnectionManager.ConnectionType;
 import com.google.android.as.oss.fl.brella.service.util.PolicyConstants;
 import com.google.android.as.oss.fl.brella.service.util.PolicyFinder;
+import com.google.android.as.oss.fl.federatedcompute.config.PcsFcFlags;
 import com.google.android.as.oss.fl.federatedcompute.statsd.ExampleStoreConnector;
 import com.google.android.as.oss.fl.federatedcompute.statsd.config.StatsdConfig;
 import com.google.android.as.oss.fl.localcompute.FileCopyStartQuery;
@@ -56,6 +58,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.flogger.GoogleLogger;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.intelligence.fcp.client.SelectorContext;
 import com.google.protobuf.Any;
 import com.google.protobuf.ExtensionRegistryLite;
@@ -63,6 +66,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import dagger.hilt.android.AndroidEntryPoint;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeoutException;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -87,6 +91,8 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
   @Inject NetworkUsageLogRepository networkUsageLogRepository;
   @Inject UsageReportingOptedInState usageReportingState;
   @Inject @FlExecutorQualifier Executor flExecutor;
+  @Inject @FlExecutorQualifier ListeningScheduledExecutorService flExecutorService;
+  @Inject PcsFcFlags pcsFcFlags;
   @Inject PcsStatsLog pcsStatsLogger;
   @Inject java.util.Optional<FileCopyStartQuery> fileCopyStartQuery;
   @Inject BuildFlavor buildFlavor;
@@ -260,7 +266,11 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
     }
 
     Futures.addCallback(
-        connectionManager.initializeServiceConnection(query.getClientName()),
+        Futures.withTimeout(
+            connectionManager.initializeServiceConnection(query.getClientName()),
+            pcsFcFlags.maxBinderDelaySeconds(),
+            SECONDS,
+            flExecutorService),
         new FutureCallback<IInterface>() {
           @Override
           public void onSuccess(IInterface result) {
@@ -295,9 +305,15 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
           public void onFailure(Throwable t) {
             logger.atWarning().log("Failed to bind to service");
             connectionManager.resetClient(query.getClientName());
-            callback.onStartQueryFailure(
-                TrainingError.TRAINING_ERROR_PCC_BINDING_TO_CLIENT_FAILED_VALUE,
-                "Failed to bind to service.");
+            if (t instanceof TimeoutException) {
+              callback.onStartQueryFailure(
+                  TrainingError.TRAINING_ERROR_PCC_BINDING_TO_CLIENT_TIMED_OUT_VALUE,
+                  "Timed out while binding to service.");
+            } else {
+              callback.onStartQueryFailure(
+                  TrainingError.TRAINING_ERROR_PCC_BINDING_TO_CLIENT_FAILED_VALUE,
+                  "Failed to bind to service.");
+            }
           }
         },
         flExecutor);

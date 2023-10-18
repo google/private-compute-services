@@ -39,7 +39,7 @@ abstract class ExecutorsModule {
   @Singleton
   @FlExecutorQualifier
   static Executor flExecutor() {
-    return Executors.FL_EXECUTOR;
+    return Executors.FL_EXECUTOR_SERVICE;
   }
 
   @Provides
@@ -75,6 +75,13 @@ abstract class ExecutorsModule {
   @ProtectedDownloadExecutorQualifier
   static ListeningExecutorService protectedDownloadExecutor() {
     return Executors.PROTECTED_DOWNLOAD_EXECUTOR;
+  }
+
+  @Provides
+  @Singleton
+  @FlExecutorQualifier
+  static ListeningScheduledExecutorService flExecutorService() {
+    return Executors.FL_EXECUTOR_SERVICE;
   }
 
   private ExecutorsModule() {}
