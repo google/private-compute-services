@@ -18,8 +18,10 @@ package com.google.android.as.oss.pd.attestation.impl;
 
 import com.google.android.as.oss.attestation.PccAttestationMeasurementClient;
 import com.google.android.as.oss.common.ExecutorAnnotations.AttestationExecutorQualifier;
+import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.common.flavor.BuildFlavor;
 import com.google.android.as.oss.pd.attestation.AttestationClient;
+import com.google.android.as.oss.pd.config.ProtectedDownloadConfig;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
@@ -35,9 +37,10 @@ interface AttestationClientModule {
   @Singleton
   static AttestationClient providePdAttestationClient(
       BuildFlavor buildFlavor,
+      ConfigReader<ProtectedDownloadConfig> configReader,
       PccAttestationMeasurementClient attestationMeasurementClient,
       @AttestationExecutorQualifier Executor executor) {
-    return buildFlavor.isInternal()
+    return buildFlavor.isInternal() || configReader.getConfig().enableProtectedDownloadAttestation()
         ? AttestationClientImpl.create(attestationMeasurementClient, executor)
         : new AttestationClientNoopImpl();
   }

@@ -22,10 +22,14 @@ import com.google.auto.value.AutoValue;
 @AutoValue
 public abstract class ProtectedDownloadConfig {
 
-  public static ProtectedDownloadConfig create(boolean enabled) {
-    return new AutoValue_ProtectedDownloadConfig(enabled);
+  public static ProtectedDownloadConfig create(
+      boolean enabled, boolean enableProtectedDownloadAttestation) {
+    return new AutoValue_ProtectedDownloadConfig(enabled, enableProtectedDownloadAttestation);
   }
 
   /** Determines if support for protected downloads is enabled in PCS. */
   public abstract boolean enabled();
+
+  /** Determines if Key Attestation should be enabled. */
+  public abstract boolean enableProtectedDownloadAttestation();
 }
