@@ -43,6 +43,12 @@ message Label {
   string value = 2 [(datapol.semantic_type) = ST_VALUE];
 }
 
+// Client SDK Version to help server estimate client capabilities.
+message ClientVersion {
+  // Build CL for the SDK.
+  int64 version = 1 [(datapol.semantic_type) = ST_SOFTWARE_ID];
+}
+
 // Constraints used to select the resources that will be downloaded.
 message ManifestConfigConstraints {
   // Application identifier.
@@ -50,6 +56,10 @@ message ManifestConfigConstraints {
 
   // Additional labels that the requested resources should carry.
   repeated Label label = 2;
+
+  // Version of SDK requested new download.
+  // Different SDKs may receive different manifests.
+  ClientVersion client_version = 3;
 }
 
 // The cryptographic keys to use for encrypting the config.

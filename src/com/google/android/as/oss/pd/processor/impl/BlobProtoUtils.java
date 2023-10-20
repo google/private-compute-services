@@ -69,7 +69,7 @@ public final class BlobProtoUtils {
 
   @VisibleForTesting static final String CLIENT_GROUP_LABEL_KEY = "client_group";
   @VisibleForTesting static final String DEVICE_TIER_LABEL_KEY = "device_tier";
-  @VisibleForTesting static final long CLIENT_VERSION = 2;
+  @VisibleForTesting static final long CLIENT_VERSION = 3;
 
   /** Converts the DownloadMode from PCS to a server format. */
   public static DownloadMode getDownloadMode(DownloadBlobRequest request) {
@@ -297,6 +297,10 @@ public final class BlobProtoUtils {
       com.google.android.as.oss.pd.api.proto.BlobConstraints constraints) {
     return ManifestConfigConstraints.newBuilder()
         .setClientId(getClientId(constraints))
+        .setClientVersion(
+            com.google.android.as.oss.pd.manifest.api.proto.ClientVersion.newBuilder()
+                .setVersion(CLIENT_VERSION)
+                .build())
         .addLabel(
             com.google.android.as.oss.pd.manifest.api.proto.Label.newBuilder()
                 .setAttribute(CLIENT_GROUP_LABEL_KEY)
