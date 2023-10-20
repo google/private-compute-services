@@ -32,10 +32,12 @@ import com.google.android.as.oss.fl.brella.service.ConnectionManager.ConnectionT
 import com.google.android.as.oss.fl.localcompute.LocalComputeResourceManager;
 import com.google.android.as.oss.fl.localcompute.LocalComputeUtils;
 import com.google.android.as.oss.fl.localcompute.PathConversionUtils;
+import com.google.android.as.oss.logging.PcsStatsLog;
 import com.google.fcp.client.common.api.Status;
 import com.google.fcp.client.ExampleConsumption;
 import com.google.fcp.client.InAppTrainerOptions;
 import com.google.fcp.client.ResultHandlingService;
+import com.google.fcp.client.ResultHandlingService.ResultHandlingCallback;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.GoogleLogger;
 import com.google.common.util.concurrent.FutureCallback;
@@ -62,6 +64,7 @@ public class AstreaResultHandlingService extends Hilt_AstreaResultHandlingServic
   @Inject @GppsPackageName String gppsPackageName;
   @VisibleForTesting @Inject @FlExecutorQualifier Executor flExecutor;
   @Inject Optional<LocalComputeResourceManager> resourceManager;
+  @Inject PcsStatsLog pcsStatsLogger;
 
   @VisibleForTesting ConnectionManager connectionManager;
 
@@ -74,6 +77,7 @@ public class AstreaResultHandlingService extends Hilt_AstreaResultHandlingServic
             this,
             packageToActionMap,
             ConnectionType.RESULT_HANDLER,
+            pcsStatsLogger,
             asiPackageName,
             gppsPackageName);
   }

@@ -108,6 +108,7 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
             this,
             packageToActionMap,
             ConnectionType.EXAMPLE_STORE,
+            pcsStatsLogger,
             asiPackageName,
             gppsPackageName);
   }

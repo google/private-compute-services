@@ -27,6 +27,9 @@ import androidx.annotation.VisibleForTesting;
 import com.google.android.as.oss.common.base.SafeInitializer;
 import com.google.android.as.oss.fl.brella.api.IExampleStore;
 import com.google.android.as.oss.fl.brella.api.IInAppResultHandler;
+import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceCountReported;
+import com.google.android.as.oss.logging.PcsStatsEnums.CountMetricId;
+import com.google.android.as.oss.logging.PcsStatsLog;
 import com.google.fcp.client.InAppTrainerOptions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.GoogleLogger;
@@ -57,11 +60,13 @@ class ConnectionManager {
   private final ConnectionType connectionType;
   private final String asiPackageName;
   private final String gppsPackageName;
+  private final PcsStatsLog pcsStatsLogger;
 
   ConnectionManager(
       Context context,
       ImmutableMap<String, String> packageToActionMap,
       ConnectionType connectionType,
+      PcsStatsLog pcsStatsLogger,
       String asiPackageName,
       String gppsPackageName) {
     this.context = context;
@@ -71,6 +76,7 @@ class ConnectionManager {
     this.clientActiveServiceConnectionMap = new HashMap<>();
     this.clientInitializerMap = new HashMap<>();
     this.connectionType = connectionType;
+    this.pcsStatsLogger = pcsStatsLogger;
   }
 
   @VisibleForTesting
@@ -80,6 +86,7 @@ class ConnectionManager {
       Map<String, @Nullable ServiceConnection> clientActiveServiceConnectionMap,
       Map<String, SafeInitializer<IInterface>> clientInitializerMap,
       ConnectionType connectionType,
+      PcsStatsLog pcsStatsLogger,
       String asiPackageName,
       String gppsPackageName) {
     this.context = context;
@@ -87,6 +94,7 @@ class ConnectionManager {
     this.clientActiveServiceConnectionMap = clientActiveServiceConnectionMap;
     this.clientInitializerMap = clientInitializerMap;
     this.connectionType = connectionType;
+    this.pcsStatsLogger = pcsStatsLogger;
     this.asiPackageName = asiPackageName;
     this.gppsPackageName = gppsPackageName;
   }
@@ -158,6 +166,7 @@ class ConnectionManager {
           public void onServiceConnected(ComponentName name, IBinder service) {
             logger.atInfo().log(
                 "Connected to service: %s.%s", name.getPackageName(), name.getClassName());
+            logCounter(CountMetricId.PCS_TRAINING_BINDER_SERVICE_CONNECTED);
             if (connectionType == ConnectionType.EXAMPLE_STORE) {
               IInterface binding = IExampleStore.Stub.asInterface(service);
               serviceBindingSettableFuture.set(binding);
@@ -173,18 +182,21 @@ class ConnectionManager {
           @Override
           public void onServiceDisconnected(ComponentName name) {
             logger.atInfo().log("Disconnected from Service.");
+            logCounter(CountMetricId.PCS_TRAINING_BINDER_SERVICE_DISCONNECTED);
             markConnectionInvalid(clientName, serviceBindingSettableFuture);
           }
 
           @Override
           public void onBindingDied(ComponentName name) {
             logger.atInfo().log("Binding to %s died", name);
+            logCounter(CountMetricId.PCS_TRAINING_BINDER_DIED);
             markConnectionInvalid(clientName, serviceBindingSettableFuture);
           }
 
           @Override
           public void onNullBinding(ComponentName name) {
             logger.atInfo().log("Received null binding for %s", name);
+            logCounter(CountMetricId.PCS_TRAINING_BINDER_NULL);
             markConnectionInvalid(clientName, serviceBindingSettableFuture);
           }
         };
@@ -217,5 +229,10 @@ class ConnectionManager {
       }
       this.resetClient(clientName);
     }
+  }
+
+  private void logCounter(CountMetricId countMetricId) {
+    pcsStatsLogger.logIntelligenceCountReported(
+        IntelligenceCountReported.newBuilder().setCountMetricId(countMetricId).build());
   }
 }
