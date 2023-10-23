@@ -110,6 +110,14 @@ message BlobConstraints {
   // Version of SDK requesting new download.
   ClientVersion client_version = 1004;
 
+  // Variants that differentiate device types
+  enum Variant {
+    VARIANT_UNSPECIFIED = 0;
+  }
+
+  // Variant of the Android device requests a new download.
+  Variant variant = 1005;
+
   reserved 1, 2, 3, 4, 5;
 }
 

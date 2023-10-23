@@ -19,6 +19,7 @@ package com.google.android.as.oss.pd.common;
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.Client;
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.ClientGroup;
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.DeviceTier;
+import com.google.android.as.oss.pd.api.proto.BlobConstraints.Variant;
 import com.google.android.as.oss.pd.api.proto.DownloadBlobRequest;
 import com.google.android.as.oss.pd.api.proto.DownloadBlobResponse;
 import com.google.common.collect.ImmutableBiMap;
@@ -51,6 +52,9 @@ public final class ProtoConversions {
           ClientGroup.BETA, "beta",
           ClientGroup.ALPHA, "alpha");
 
+  private static final ImmutableBiMap<Variant, String> VARIANT_TO_STRING =
+      ImmutableBiMap.of(Variant.VARIANT_UNSPECIFIED, "");
+
   public Optional<String> toClientIdString(Client client) {
     return Optional.ofNullable(clientToClientId.get(client));
   }
@@ -73,5 +77,13 @@ public final class ProtoConversions {
 
   public static Optional<ClientGroup> fromClientGroupString(String clientGroup) {
     return Optional.ofNullable(CLIENT_GROUP_TO_STRING.inverse().get(clientGroup));
+  }
+
+  public static Optional<String> toVariantString(Variant variant) {
+    return Optional.ofNullable(VARIANT_TO_STRING.get(variant));
+  }
+
+  public static Optional<Variant> fromVariantString(String variant) {
+    return Optional.ofNullable(VARIANT_TO_STRING.inverse().get(variant));
   }
 }

@@ -22,6 +22,7 @@ import androidx.annotation.VisibleForTesting;
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.Client;
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.ClientGroup;
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.DeviceTier;
+import com.google.android.as.oss.pd.api.proto.BlobConstraints.Variant;
 import com.google.android.as.oss.pd.api.proto.DownloadBlobRequest;
 import com.google.android.as.oss.pd.api.proto.DownloadBlobResponse;
 import com.google.android.as.oss.pd.api.proto.GetManifestConfigRequest;
@@ -70,6 +71,7 @@ public final class BlobProtoUtils {
   @VisibleForTesting static final String CLIENT_GROUP_LABEL_KEY = "client_group";
   @VisibleForTesting static final String DEVICE_TIER_LABEL_KEY = "device_tier";
   @VisibleForTesting static final long CLIENT_VERSION = 3;
+  @VisibleForTesting static final String VARIANT_LABEL_KEY = "variant";
 
   /** Converts the DownloadMode from PCS to a server format. */
   public static DownloadMode getDownloadMode(DownloadBlobRequest request) {
@@ -275,19 +277,22 @@ public final class BlobProtoUtils {
   @VisibleForTesting
   com.google.android.as.oss.pd.service.api.proto.Metadata toExternalMetadata(
       ByteString publicKey, Metadata metadata, ImmutableMap<String, String> labels) {
+    BlobConstraints.Builder constraintsBuilder =
+        BlobConstraints.newBuilder()
+            .setClientId(getClientId(metadata))
+            .setDeviceTier(getDeviceTier(metadata))
+            .setClientVersion(
+                ClientVersion.newBuilder()
+                    .setType(getClientVersionType(metadata))
+                    .setVersion(CLIENT_VERSION)
+                    .build())
+            .addAllLabel(toLabels(labels))
+            .addLabel(toLabel(CLIENT_GROUP_LABEL_KEY, getClientGroup(metadata)));
+    getVariant(metadata)
+        .ifPresent(value -> constraintsBuilder.addLabel(toLabel(VARIANT_LABEL_KEY, value)));
     return com.google.android.as.oss.pd.service.api.proto.Metadata.newBuilder()
         .setCryptoKeys(CryptoKeys.newBuilder().setPublicKey(publicKey).setUseClientIdSeed(true))
-        .setBlobConstraints(
-            BlobConstraints.newBuilder()
-                .setClientId(getClientId(metadata))
-                .setDeviceTier(getDeviceTier(metadata))
-                .setClientVersion(
-                    ClientVersion.newBuilder()
-                        .setType(getClientVersionType(metadata))
-                        .setVersion(CLIENT_VERSION)
-                        .build())
-                .addAllLabel(toLabels(labels))
-                .addLabel(toLabel(CLIENT_GROUP_LABEL_KEY, getClientGroup(metadata))))
+        .setBlobConstraints(constraintsBuilder)
         .setCounters(Counters.getDefaultInstance())
         .build();
   }
@@ -295,23 +300,32 @@ public final class BlobProtoUtils {
   @VisibleForTesting
   ManifestConfigConstraints buildConstraints(
       com.google.android.as.oss.pd.api.proto.BlobConstraints constraints) {
-    return ManifestConfigConstraints.newBuilder()
-        .setClientId(getClientId(constraints))
-        .setClientVersion(
-            com.google.android.as.oss.pd.manifest.api.proto.ClientVersion.newBuilder()
-                .setVersion(CLIENT_VERSION)
-                .build())
-        .addLabel(
-            com.google.android.as.oss.pd.manifest.api.proto.Label.newBuilder()
-                .setAttribute(CLIENT_GROUP_LABEL_KEY)
-                .setValue(getClientGroup(constraints))
-                .build())
-        .addLabel(
-            com.google.android.as.oss.pd.manifest.api.proto.Label.newBuilder()
-                .setAttribute(DEVICE_TIER_LABEL_KEY)
-                .setValue(getDeviceTier(constraints))
-                .build())
-        .build();
+    ManifestConfigConstraints.Builder constraintsBuilder =
+        ManifestConfigConstraints.newBuilder()
+            .setClientId(getClientId(constraints))
+            .setClientVersion(
+                com.google.android.as.oss.pd.manifest.api.proto.ClientVersion.newBuilder()
+                    .setVersion(CLIENT_VERSION)
+                    .build())
+            .addLabel(
+                com.google.android.as.oss.pd.manifest.api.proto.Label.newBuilder()
+                    .setAttribute(CLIENT_GROUP_LABEL_KEY)
+                    .setValue(getClientGroup(constraints))
+                    .build())
+            .addLabel(
+                com.google.android.as.oss.pd.manifest.api.proto.Label.newBuilder()
+                    .setAttribute(DEVICE_TIER_LABEL_KEY)
+                    .setValue(getDeviceTier(constraints))
+                    .build());
+    getVariant(constraints)
+        .ifPresent(
+            value ->
+                constraintsBuilder.addLabel(
+                    com.google.android.as.oss.pd.manifest.api.proto.Label.newBuilder()
+                        .setAttribute(VARIANT_LABEL_KEY)
+                        .setValue(value)
+                        .build()));
+    return constraintsBuilder.build();
   }
 
   @VisibleForTesting
@@ -357,6 +371,24 @@ public final class BlobProtoUtils {
             () ->
                 new IllegalArgumentException(
                     String.format("unable to convert %s to string", group.name())));
+  }
+
+  private static Optional<String> getVariant(Metadata metadata) {
+    return getVariant(metadata.getBlobConstraints());
+  }
+
+  private static Optional<String> getVariant(
+      com.google.android.as.oss.pd.api.proto.BlobConstraints blobConstraints) {
+    Variant tag = blobConstraints.getVariant();
+    if (tag == Variant.VARIANT_UNSPECIFIED) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        ProtoConversions.toVariantString(tag)
+            .orElseThrow(
+                () ->
+                    new IllegalArgumentException(
+                        String.format("unable to convert %s to string", tag.name()))));
   }
 
   private static List<Label> toLabels(ImmutableMap<String, String> labels) {
