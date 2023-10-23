@@ -38,6 +38,13 @@ public abstract class AttestationMeasurementRequest {
   /** This is an optional non empty payload string sent alongside an attestation request. */
   public abstract Optional<String> contentBinding();
 
+  /**
+   * This is used to request Device ID attestation alongside the regular key attestation. For more
+   * details about ID attestation, see
+   * https://source.android.com/docs/security/features/keystore/attestation#id-attestation.
+   */
+  public abstract Optional<Boolean> includeIdAttestation();
+
   /** Attestation request builder. */
   @AutoValue.Builder
   public abstract static class Builder {
@@ -45,6 +52,8 @@ public abstract class AttestationMeasurementRequest {
     public abstract Builder setTtl(Duration value);
 
     public abstract Builder setContentBinding(String value);
+
+    public abstract Builder setIncludeIdAttestation(boolean value);
 
     public abstract AttestationMeasurementRequest build();
   }

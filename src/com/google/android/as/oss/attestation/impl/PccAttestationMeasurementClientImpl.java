@@ -24,6 +24,8 @@ import static com.google.protobuf.util.JavaTimeConversions.toJavaInstant;
 import static com.google.protobuf.util.JavaTimeConversions.toProtoDuration;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.os.Build;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Pair;
@@ -41,10 +43,12 @@ import com.google.common.flogger.GoogleLogger;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.internal.android.keyattestation.v1.Challenge;
+import com.google.internal.android.keyattestation.v1.DeviceId;
 import com.google.internal.android.keyattestation.v1.GenerateChallengeRequest;
 import com.google.internal.android.keyattestation.v1.KeyAttestationServiceGrpc;
 import com.google.internal.android.keyattestation.v1.KeyAttestationServiceGrpc.KeyAttestationServiceFutureStub;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.StringValue;
 import io.grpc.ManagedChannel;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -80,6 +84,7 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
   private final NetworkUsageLogRepository networkUsageLogRepository;
 
   private final PcsStatsLog pcsStatsLogger;
+  private final Context context;
 
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
   private static final String ANDROID_KEY_STORE = "AndroidKeyStore";
@@ -88,18 +93,21 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
   private static final String ANDROID_KEY_STORE_ALIAS = "PcsAttestationKey";
   // TODO: Distinguish package names for Attestation request
   private static final String PACKAGE_NAME = "com.google.android.as";
+  private static final String DEVICE_ID_FEATURE_NAME = "android.software.device_id_attestation";
 
   public PccAttestationMeasurementClientImpl(
       Executor executor,
       ManagedChannel channel,
       NetworkUsageLogRepository networkUsageLogRepository,
       TimeSource timeSource,
-      PcsStatsLog pcsStatsLogger) {
+      PcsStatsLog pcsStatsLogger,
+      Context context) {
     this.executor = executor;
     this.managedChannel = channel;
     this.timeSource = timeSource;
     this.networkUsageLogRepository = networkUsageLogRepository;
     this.pcsStatsLogger = pcsStatsLogger;
+    this.context = context;
   }
 
   /** {@inheritDoc} */
@@ -154,7 +162,7 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
     // Try to generate an attestation response
     try {
       Pair<KeyPair, List<Certificate>> keyPairWithAttestation =
-          generateKeyPairWithAttestation(attestationChallenge);
+          generateKeyPairWithAttestation(attestationMeasurementRequest, attestationChallenge);
       KeyPair keyPair = keyPairWithAttestation.first;
       // Add public key to response
       attestationResponseBuilder.setPublicKey(
@@ -193,13 +201,15 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
   /** Helper method to initiate a grpc request for an attestation challenge. */
   private ListenableFuture<Challenge> requestChallenge(
       AttestationMeasurementRequest attestationRequest) {
-    GenerateChallengeRequest generateChallengeRequest =
-        GenerateChallengeRequest.newBuilder()
-            .setTtl(toProtoDuration(attestationRequest.ttl()))
-            .build();
+    GenerateChallengeRequest.Builder generateChallengeRequest =
+        GenerateChallengeRequest.newBuilder().setTtl(toProtoDuration(attestationRequest.ttl()));
+    if (attestationRequest.includeIdAttestation().isPresent()
+        && attestationRequest.includeIdAttestation().get()) {
+      generateChallengeRequest.setDeviceId(getDeviceProperties());
+    }
     KeyAttestationServiceFutureStub futureStub =
         KeyAttestationServiceGrpc.newFutureStub(managedChannel);
-    return futureStub.generateChallenge(generateChallengeRequest);
+    return futureStub.generateChallenge(generateChallengeRequest.build());
   }
 
   /**
@@ -215,7 +225,12 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
    */
   @SuppressLint("NewApi")
   private synchronized Pair<KeyPair, List<Certificate>> generateKeyPairWithAttestation(
-      byte[] attestationChallenge) throws GeneralSecurityException, IOException {
+      AttestationMeasurementRequest attestationMeasurementRequest, byte[] attestationChallenge)
+      throws GeneralSecurityException, IOException {
+
+    boolean includeDeviceProperties =
+        (context.getPackageManager().hasSystemFeature(DEVICE_ID_FEATURE_NAME)
+            && attestationMeasurementRequest.includeIdAttestation().orElse(false));
 
     KeyPairGenerator keyPairGenerator =
         KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, ANDROID_KEY_STORE);
@@ -226,6 +241,8 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
             .setSignaturePaddings(
                 KeyProperties.SIGNATURE_PADDING_RSA_PSS, KeyProperties.SIGNATURE_PADDING_RSA_PKCS1)
             .setKeySize(2048)
+            // Request ID Attestation
+            .setDevicePropertiesAttestationIncluded(includeDeviceProperties)
             // Request an attestation with challenge
             .setAttestationChallenge(attestationChallenge)
             .build());
@@ -246,6 +263,17 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
     }
 
     return Pair.create(keyPair, attestationRecord);
+  }
+
+  /** Helper method to obtain device ID properties from the OS. */
+  private DeviceId getDeviceProperties() {
+    return DeviceId.newBuilder()
+        .setBrand(StringValue.of(Build.BRAND))
+        .setDevice(StringValue.of(Build.DEVICE))
+        .setManufacturer(StringValue.of(Build.MANUFACTURER))
+        .setModel(StringValue.of(Build.MODEL))
+        .setProduct(StringValue.of(Build.PRODUCT))
+        .build();
   }
 
   /**
