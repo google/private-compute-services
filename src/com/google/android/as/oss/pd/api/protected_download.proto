@@ -77,6 +77,7 @@ message BlobConstraints {
     AI_CORE_PROTECTED_DOWNLOAD = 4;
     AI_CORE_TEXT_INPUT = 5;
     AI_CORE_IMAGE_OUTPUT = 6;
+    PLAY_PROTECT_SERVICE_PVM_DEFAULT = 7;
     reserved 10000 to 10004, 99997 to 99999;
   }
   Client client = 1002;

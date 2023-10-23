@@ -53,6 +53,13 @@ final class ProtoConversionsModule {
 
   @Provides
   @IntoMap
+  @ClientBiMapKey(Client.PLAY_PROTECT_SERVICE_PVM_DEFAULT)
+  static String providePlayProtectPvmDefaultClientId() {
+    return "com.google.android.odad:2525461103339185322";
+  }
+
+  @Provides
+  @IntoMap
   @ClientBiMapKey(Client.AI_CORE_TEXT_INPUT)
   static String provideAiCoreTextInputClientId() {
     return "com.google.android.aicore:3649180271731021675";
