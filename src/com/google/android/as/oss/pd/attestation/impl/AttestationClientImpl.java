@@ -49,6 +49,7 @@ public class AttestationClientImpl implements AttestationClient {
         AttestationMeasurementRequest.builder()
             .setTtl(ATTESTATION_MEASUREMENT_TTL)
             .setContentBinding(contentBinding)
+            .setIncludeIdAttestation(true)
             .build();
 
     return FluentFuture.from(attestationMeasurementClient.requestAttestationMeasurement(request))
