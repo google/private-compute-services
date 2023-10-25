@@ -114,6 +114,10 @@ message BlobConstraints {
   // Variants that differentiate device types
   enum Variant {
     VARIANT_UNSPECIFIED = 0;
+    OEM = 1;
+    PIXEL = 2;
+    SAMSUNG_QC = 3;
+    SAMSUNG_SLSI = 4;
   }
 
   // Variant of the Android device requests a new download.

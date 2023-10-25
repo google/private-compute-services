@@ -53,7 +53,12 @@ public final class ProtoConversions {
           ClientGroup.ALPHA, "alpha");
 
   private static final ImmutableBiMap<Variant, String> VARIANT_TO_STRING =
-      ImmutableBiMap.of(Variant.VARIANT_UNSPECIFIED, "");
+      ImmutableBiMap.of(
+          Variant.VARIANT_UNSPECIFIED, "",
+          Variant.OEM, "OEM",
+          Variant.PIXEL, "PIXEL",
+          Variant.SAMSUNG_QC, "SAMSUNG_QC",
+          Variant.SAMSUNG_SLSI, "SAMSUNG_SLSI");
 
   public Optional<String> toClientIdString(Client client) {
     return Optional.ofNullable(clientToClientId.get(client));
