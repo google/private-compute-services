@@ -67,6 +67,20 @@ final class ProtoConversionsModule {
 
   @Provides
   @IntoMap
+  @ClientBiMapKey(Client.AI_CORE_TEXT_OUTPUT)
+  static String provideAiCoreTextOutputClientId() {
+    return "com.google.android.aicore:7923848966216590666";
+  }
+
+  @Provides
+  @IntoMap
+  @ClientBiMapKey(Client.AI_CORE_IMAGE_INPUT)
+  static String provideAiCoreImageInputClientId() {
+    return "com.google.android.aicore:6120135725815620389";
+  }
+
+  @Provides
+  @IntoMap
   @ClientBiMapKey(Client.AI_CORE_IMAGE_OUTPUT)
   static String provideAiCoreImageOutputClientId() {
     return "com.google.android.aicore:16223496253676012401";

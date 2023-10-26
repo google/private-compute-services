@@ -78,6 +78,8 @@ message BlobConstraints {
     AI_CORE_TEXT_INPUT = 5;
     AI_CORE_IMAGE_OUTPUT = 6;
     PLAY_PROTECT_SERVICE_PVM_DEFAULT = 7;
+    AI_CORE_TEXT_OUTPUT = 8;
+    AI_CORE_IMAGE_INPUT = 9;
     reserved 10000 to 10004, 99997 to 99999;
   }
   Client client = 1002;
