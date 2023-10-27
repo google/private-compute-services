@@ -29,8 +29,8 @@ import javax.annotation.Nullable;
 
 /**
  * A container for information regarding an example store access, including the collection name, the
- * selection criteria, the number of examples which has been used and the resumption token if
- * available.
+ * selection criteria, the number of examples which has been used, the resumption token if available
+ * and the selector context if available.
  */
 // TODO: Resolve nullness suppression.
 @SuppressWarnings("nullness")
@@ -42,6 +42,7 @@ public class ExampleConsumption extends AbstractSafeParcelable {
     private byte[] selectionCriteria;
     private int exampleCount;
     @Nullable private byte[] resumptionToken;
+    @Nullable private byte[] selectorContext;
 
     /** Specifies the collection Uri for the example store. */
     @CanIgnoreReturnValue
@@ -79,9 +80,16 @@ public class ExampleConsumption extends AbstractSafeParcelable {
       return this;
     }
 
+    /** Sets the SelectorContext for the query. */
+    @CanIgnoreReturnValue
+    public Builder setSelectorContext(@Nullable byte[] selectorContext) {
+      this.selectorContext = selectorContext;
+      return this;
+    }
+
     public ExampleConsumption build() {
       return new ExampleConsumption(
-          collectionName, selectionCriteria, exampleCount, resumptionToken);
+          collectionName, selectionCriteria, exampleCount, resumptionToken, selectorContext);
     }
   }
 
@@ -105,17 +113,23 @@ public class ExampleConsumption extends AbstractSafeParcelable {
   @Nullable
   private final byte[] resumptionToken;
 
+  @Field(id = 5, getter = "getSelectorContext")
+  @Nullable
+  private final byte[] selectorContext;
+
   @Constructor
   ExampleConsumption(
       @Param(id = 1) String collectionName,
       @Param(id = 2) byte[] selectionCriteria,
       @Param(id = 3) int exampleCount,
-      @Nullable @Param(id = 4) byte[] resumptionToken) {
+      @Nullable @Param(id = 4) byte[] resumptionToken,
+      @Nullable @Param(id = 5) byte[] selectorContext) {
     validate(collectionName, selectionCriteria);
     this.collectionName = collectionName;
     this.selectionCriteria = selectionCriteria;
     this.exampleCount = exampleCount;
     this.resumptionToken = resumptionToken;
+    this.selectorContext = selectorContext;
   }
 
   public String getCollectionName() {
@@ -133,6 +147,11 @@ public class ExampleConsumption extends AbstractSafeParcelable {
   @Nullable
   public byte[] getResumptionToken() {
     return resumptionToken;
+  }
+
+  @Nullable
+  public byte[] getSelectorContext() {
+    return selectorContext;
   }
 
   @SuppressWarnings("static-access")
@@ -155,7 +174,8 @@ public class ExampleConsumption extends AbstractSafeParcelable {
     return collectionName.equals(otherInstance.collectionName)
         && Arrays.equals(selectionCriteria, otherInstance.selectionCriteria)
         && exampleCount == otherInstance.exampleCount
-        && Arrays.equals(resumptionToken, otherInstance.resumptionToken);
+        && Arrays.equals(resumptionToken, otherInstance.resumptionToken)
+        && Arrays.equals(selectorContext, otherInstance.selectorContext);
   }
 
   @Override
@@ -164,7 +184,8 @@ public class ExampleConsumption extends AbstractSafeParcelable {
         collectionName,
         Arrays.hashCode(selectionCriteria),
         exampleCount,
-        Arrays.hashCode(resumptionToken));
+        Arrays.hashCode(resumptionToken),
+        Arrays.hashCode(selectorContext));
   }
 
   private static void validate(String collectionName, byte[] selectionCriteria) {
