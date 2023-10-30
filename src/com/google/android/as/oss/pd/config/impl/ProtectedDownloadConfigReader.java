@@ -31,6 +31,9 @@ class ProtectedDownloadConfigReader extends AbstractConfigReader<ProtectedDownlo
   static final BooleanFlag ENABLE_ATTESTATION =
       BooleanFlag.create(FLAG_PREFIX + "enable_attestation", false);
 
+  static final BooleanFlag ENABLE_VIRTUAL_MACHINES =
+      BooleanFlag.create(FLAG_PREFIX + "enable_virtual_machines", false);
+
   private final FlagManager flagManager;
 
   public static ProtectedDownloadConfigReader create(FlagManager flagManager) {
@@ -42,7 +45,9 @@ class ProtectedDownloadConfigReader extends AbstractConfigReader<ProtectedDownlo
   @Override
   protected ProtectedDownloadConfig computeConfig() {
     return ProtectedDownloadConfig.create(
-        flagManager.get(ENABLED_FLAG), flagManager.get(ENABLE_ATTESTATION));
+        flagManager.get(ENABLED_FLAG),
+        flagManager.get(ENABLE_ATTESTATION),
+        flagManager.get(ENABLE_VIRTUAL_MACHINES));
   }
 
   private void initialize() {

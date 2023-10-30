@@ -23,8 +23,11 @@ import com.google.auto.value.AutoValue;
 public abstract class ProtectedDownloadConfig {
 
   public static ProtectedDownloadConfig create(
-      boolean enabled, boolean enableProtectedDownloadAttestation) {
-    return new AutoValue_ProtectedDownloadConfig(enabled, enableProtectedDownloadAttestation);
+      boolean enabled,
+      boolean enableProtectedDownloadAttestation,
+      boolean enableProtectedDownloadVirtualMachines) {
+    return new AutoValue_ProtectedDownloadConfig(
+        enabled, enableProtectedDownloadAttestation, enableProtectedDownloadVirtualMachines);
   }
 
   /** Determines if support for protected downloads is enabled in PCS. */
@@ -32,4 +35,7 @@ public abstract class ProtectedDownloadConfig {
 
   /** Determines if Key Attestation should be enabled. */
   public abstract boolean enableProtectedDownloadAttestation();
+
+  /** Determines if virtual machines should be enabled. */
+  public abstract boolean enableProtectedDownloadVirtualMachines();
 }

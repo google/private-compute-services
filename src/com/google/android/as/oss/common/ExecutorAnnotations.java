@@ -49,6 +49,11 @@ public abstract class ExecutorAnnotations {
   @Retention(RetentionPolicy.RUNTIME)
   public @interface AttestationExecutorQualifier {}
 
+  /** Annotation to bind {@link Executor} used for virtual machine jobs. */
+  @Qualifier
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface VirtualMachineExecutorQualifier {}
+
   /** Annotation to bind {@link Executor} used for protected download. */
   @Qualifier
   @Retention(RetentionPolicy.RUNTIME)

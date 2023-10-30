@@ -29,6 +29,8 @@ public class Executors {
   public static final Executor PIR_EXECUTOR = java.util.concurrent.Executors.newCachedThreadPool();
   public static final Executor ATTESTATION_EXECUTOR =
       java.util.concurrent.Executors.newSingleThreadExecutor();
+  public static final Executor VIRTUAL_MACHINE_EXECUTOR =
+      java.util.concurrent.Executors.newSingleThreadExecutor();
 
   public static final ListeningScheduledExecutorService FL_EXECUTOR_SERVICE =
       MoreExecutors.listeningDecorator(
