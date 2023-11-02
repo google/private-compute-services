@@ -270,6 +270,7 @@
   <!-- Description of AICore Service data downloads, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
   <string name="description_aicore_service">Updated the on-device models for Google AI Services</string>
   <string name="url_regex_aicore_service" translatable="false">https://dl.google.com/mdi-serving/aicore-models/.*</string>
+  <string name="url_regex_aicore_service_edgedl" translatable="false">https://edgedl.me.gvt1.com/edgedl/mdi-serving/aicore-models/.*</string>
 
   <string name="ap_client_id_aicore" translatable="false">com.google.android.aicore(:.*)?</string>
   <!-- Description of downloads from Aicore using Protected Download protocol, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
