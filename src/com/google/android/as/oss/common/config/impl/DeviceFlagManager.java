@@ -121,7 +121,12 @@ public class DeviceFlagManager extends AbstractFlagManager {
 
   @Override
   public @Nullable String getProperty(String name) {
-    return deviceConfig.getProperty(namespace, name);
+    long binderIdentity = Binder.clearCallingIdentity();
+    try {
+      return deviceConfig.getProperty(namespace, name);
+    } finally {
+      Binder.restoreCallingIdentity(binderIdentity);
+    }
   }
 
   @Override
