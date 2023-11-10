@@ -16,6 +16,7 @@
 
 package com.google.android.as.oss.pd.attestation.impl;
 
+import android.os.SystemProperties;
 import com.google.android.as.oss.attestation.PccAttestationMeasurementClient;
 import com.google.android.as.oss.common.ExecutorAnnotations.AttestationExecutorQualifier;
 import com.google.android.as.oss.common.config.ConfigReader;
@@ -33,6 +34,10 @@ import javax.inject.Singleton;
 @Module
 @InstallIn(SingletonComponent.class)
 interface AttestationClientModule {
+
+  // The system property of hardware revision.
+  static final String HARDWARE_REVISION_SYSTEM_PROPERTY = "ro.boot.hardware.revision";
+
   @Provides
   @Singleton
   static AttestationClient providePdAttestationClient(
@@ -40,8 +45,18 @@ interface AttestationClientModule {
       ConfigReader<ProtectedDownloadConfig> configReader,
       PccAttestationMeasurementClient attestationMeasurementClient,
       @AttestationExecutorQualifier Executor executor) {
-    return buildFlavor.isInternal() || configReader.getConfig().enableProtectedDownloadAttestation()
+    return isEligibleForAttestation(buildFlavor, configReader)
         ? AttestationClientImpl.create(attestationMeasurementClient, executor)
         : new AttestationClientNoopImpl();
+  }
+
+  private static boolean isEligibleForAttestation(
+      BuildFlavor buildFlavor, ConfigReader<ProtectedDownloadConfig> configReader) {
+    // Attestation measurement generation is skipped for EVT devices because they are unable to
+    // generate a valid key pair.
+    boolean isEvt = SystemProperties.get(HARDWARE_REVISION_SYSTEM_PROPERTY).contains("EVT");
+    return !isEvt
+        && (buildFlavor.isInternal()
+            || configReader.getConfig().enableProtectedDownloadAttestation());
   }
 }
