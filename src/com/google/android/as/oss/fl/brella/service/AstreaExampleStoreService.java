@@ -59,6 +59,7 @@ import com.google.common.flogger.GoogleLogger;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
+import com.google.intelligence.fcp.client.QueryTimeComputationProperties.ExampleIteratorOutputFormat;
 import com.google.intelligence.fcp.client.SelectorContext;
 import com.google.protobuf.Any;
 import com.google.protobuf.ExtensionRegistryLite;
@@ -229,6 +230,11 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
         && !selectorContext.getComputationProperties().hasEligibilityEval();
   }
 
+  private boolean taskRequiresSelectorContext(SelectorContext selectorContext) {
+    return selectorContext.getComputationProperties().getExampleIteratorOutputFormat()
+        == ExampleIteratorOutputFormat.EXAMPLE_QUERY_RESULT;
+  }
+
   private Optional<Policy> extractInstalledPolicyOptional(
       @Nonnull QueryCallback callback, @Nonnull AstreaQuery query) {
     if (!query.hasPolicy()) {
@@ -287,6 +293,13 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
               } else {
                 // Note: binder returns false if method does not exist in the implementation passed
                 // i.e. if the example store was built before this change.
+                if (taskRequiresSelectorContext(selectorContext)) {
+                  callback.onStartQueryFailure(
+                      TrainingError.TRAINING_ERROR_PCC_TRAINING_DELEGATION_TO_CLIENT_FAILED_VALUE,
+                      "Example store does not support SelectorContext which is required for"
+                          + " lightweight client tasks.");
+                  return;
+                }
                 binder.startQuery(
                     collection, criteria, resumptionToken, new StartQueryCallback(callback));
               }
