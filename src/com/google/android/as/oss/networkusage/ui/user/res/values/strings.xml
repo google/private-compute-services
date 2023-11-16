@@ -279,4 +279,12 @@
   <!-- Binary Transparency Log for Aicore -->
   <!-- Description of the HTTP download of the binary transparency log root signature, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
   <string name="url_regex_aicore_bt_signature" translatable="false">https://www.gstatic.com/on-device-safety/bt_log_signature_key.txt\\?c=GcYw_Q</string>
+
+  <!-- Search engine customization  -->
+  <!-- Name of the search engine customization feature which is part of Pixel Launcher, displayed in the network usage log. The term `search engine` refers to a generic search functionality and is not a product name. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_search_engine_customization">Search engine customization</string>
+  <!-- Description of downloads consisting of search engine definition and icons, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_search_engine_customization">Updated the on-device search engine definitions</string>
+  <string name="url_regex_search_engine_customization" translatable="false">https://www.gstatic.com/android_search/search_providers/.*/.*</string>
+
 </resources>

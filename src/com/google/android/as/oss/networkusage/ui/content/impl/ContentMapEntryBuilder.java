@@ -41,6 +41,7 @@ final class ContentMapEntryBuilder {
   static final String STATSD_PACKAGE_NAME = "com.android.os.statsd";
   static final String AICORE_PACKAGE_NAME = "com.google.android.aicore";
   static final String GPPS_PACKAGE_NAME = "com.google.android.odad";
+  static final String LAUNCHER_PACKAGE_NAME = "com.google.android.apps.nexuslauncher";
 
   private final Context context;
 

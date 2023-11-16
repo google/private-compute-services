@@ -24,6 +24,7 @@ import static com.google.android.as.oss.networkusage.db.ConnectionDetails.Connec
 import static com.google.android.as.oss.networkusage.ui.content.impl.ContentMapEntryBuilder.AICORE_PACKAGE_NAME;
 import static com.google.android.as.oss.networkusage.ui.content.impl.ContentMapEntryBuilder.ASI_PACKAGE_NAME;
 import static com.google.android.as.oss.networkusage.ui.content.impl.ContentMapEntryBuilder.GPPS_PACKAGE_NAME;
+import static com.google.android.as.oss.networkusage.ui.content.impl.ContentMapEntryBuilder.LAUNCHER_PACKAGE_NAME;
 import static com.google.android.as.oss.networkusage.ui.content.impl.ContentMapEntryBuilder.STATSD_PACKAGE_NAME;
 
 import android.content.Context;
@@ -63,6 +64,8 @@ abstract class NetworkUsageLogContentModule {
         new ContentMapEntryBuilder(context).packageName(GPPS_PACKAGE_NAME).connectionType(HTTP);
     ContentMapEntryBuilder aicoreHttpEntryBuilder =
         new ContentMapEntryBuilder(context).packageName(AICORE_PACKAGE_NAME).connectionType(HTTP);
+    ContentMapEntryBuilder launcherHttpEntryBuilder =
+        new ContentMapEntryBuilder(context).packageName(LAUNCHER_PACKAGE_NAME).connectionType(HTTP);
     ContentMapEntryBuilder asiFcEntryBuilder =
         new ContentMapEntryBuilder(context)
             .packageName(ASI_PACKAGE_NAME)
@@ -287,6 +290,11 @@ abstract class NetworkUsageLogContentModule {
                 .featureNameId(R.string.feature_name_aicore_service)
                 .descriptionId(R.string.description_aicore_ap)
                 .packageName(AICORE_PACKAGE_NAME)
+                .build(),
+            launcherHttpEntryBuilder
+                .connectionKeyStringId(R.string.url_regex_search_engine_customization)
+                .featureNameId(R.string.feature_name_search_engine_customization)
+                .descriptionId(R.string.description_search_engine_customization)
                 .build());
     ImmutableMap<ConnectionDetails, ConnectionResources> finalImmutableMap = entries;
 
