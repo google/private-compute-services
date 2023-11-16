@@ -16,10 +16,12 @@
 
 package com.google.android.as.oss.pd.processor.impl;
 
+import android.content.Context;
 import com.google.android.as.oss.pd.common.ProtoConversions;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
 import javax.inject.Singleton;
 
@@ -29,8 +31,9 @@ import javax.inject.Singleton;
 final class BlobProtoUtilsModule {
   @Provides
   @Singleton
-  static BlobProtoUtils provideBlobProtoUtils(ProtoConversions protoConversions) {
-    return new BlobProtoUtils(protoConversions);
+  static BlobProtoUtils provideBlobProtoUtils(
+      ProtoConversions protoConversions, @ApplicationContext Context context) {
+    return new BlobProtoUtils(protoConversions, context);
   }
 
   private BlobProtoUtilsModule() {}

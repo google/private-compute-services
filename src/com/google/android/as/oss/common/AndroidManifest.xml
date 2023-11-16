@@ -20,6 +20,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.google.android.as.oss.common">
   <uses-sdk
-      android:minSdkVersion="31"
-      android:targetSdkVersion="33"/>
+      android:minSdkVersion="33"
+      android:targetSdkVersion="34"/>
 </manifest>

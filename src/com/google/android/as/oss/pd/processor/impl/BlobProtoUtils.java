@@ -18,6 +18,9 @@ package com.google.android.as.oss.pd.processor.impl;
 
 import static java.util.stream.Collectors.toCollection;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import androidx.annotation.VisibleForTesting;
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.Client;
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.ClientGroup;
@@ -59,10 +62,12 @@ import java.util.Optional;
  * proto API exposed by Google servers.
  */
 public final class BlobProtoUtils {
+  private final Context context;
   private final ProtoConversions protoConversions;
 
-  public BlobProtoUtils(ProtoConversions protoConversions) {
+  public BlobProtoUtils(ProtoConversions protoConversions, Context context) {
     this.protoConversions = protoConversions;
+    this.context = context;
   }
 
   @VisibleForTesting
@@ -237,6 +242,38 @@ public final class BlobProtoUtils {
     return externalType;
   }
 
+  public long getClientVersionVersion(Metadata metadata) {
+    if (metadata.getBlobConstraints().getClientVersion().getType()
+        == com.google.android.as.oss.pd.api.proto.BlobConstraints.ClientVersion.Type.TYPE_ANDROID) {
+      return CLIENT_VERSION;
+    }
+    // Query PackageManager for the client application's version code.
+    String packageName = getClientId(metadata).split(":", 2)[0];
+    String[] versionParts = null;
+    try {
+      // Attempt to extract version number from versionName of the form: %s.%s.<VERSION>.
+      String versionName =
+          context
+              .getPackageManager()
+              .getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(0))
+              .versionName;
+      if (versionName == null) {
+        // Fallback to hardcoded CLIENT_VERSION.
+        return CLIENT_VERSION;
+      }
+      versionParts = versionName.split("\\.", 0);
+    } catch (NameNotFoundException e) {
+      // Fallback to hardcoded CLIENT_VERSION.
+      return CLIENT_VERSION;
+    }
+    try {
+      return Long.parseLong(versionParts[versionParts.length - 1], 10);
+    } catch (NumberFormatException e) {
+      // Fallback to hardcoded CLIENT_VERSION.
+      return CLIENT_VERSION;
+    }
+  }
+
   /** Calculates metadata hash for Device integrity content binding. */
   public String metadataHash(byte[] publicKey, Metadata metadata) {
     com.google.android.as.oss.pd.service.api.proto.Metadata externalMetadata =
@@ -284,7 +321,7 @@ public final class BlobProtoUtils {
             .setClientVersion(
                 ClientVersion.newBuilder()
                     .setType(getClientVersionType(metadata))
-                    .setVersion(CLIENT_VERSION)
+                    .setVersion(getClientVersionVersion(metadata))
                     .build())
             .addAllLabel(toLabels(labels))
             .addLabel(toLabel(CLIENT_GROUP_LABEL_KEY, getClientGroup(metadata)));
