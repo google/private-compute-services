@@ -75,7 +75,7 @@ public final class BlobProtoUtils {
 
   @VisibleForTesting static final String CLIENT_GROUP_LABEL_KEY = "client_group";
   @VisibleForTesting static final String DEVICE_TIER_LABEL_KEY = "device_tier";
-  @VisibleForTesting static final long CLIENT_VERSION = 3;
+  @VisibleForTesting static final long CLIENT_VERSION = 4L;
   @VisibleForTesting static final String VARIANT_LABEL_KEY = "variant";
 
   /** Converts the DownloadMode from PCS to a server format. */
