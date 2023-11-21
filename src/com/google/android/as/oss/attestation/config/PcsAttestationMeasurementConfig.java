@@ -32,12 +32,24 @@ public abstract class PcsAttestationMeasurementConfig {
 
   public abstract boolean scheduleAttestationJob();
 
+  public abstract boolean enableRandomJitter();
+
+  public abstract long minDelaySeconds();
+
+  public abstract long maxDelaySeconds();
+
   /** Builder for {@link PcsAttestationMeasurementConfig}. */
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder setEnableAttestationMeasurement(boolean value);
 
     public abstract Builder setScheduleAttestationJob(boolean value);
+
+    public abstract Builder setEnableRandomJitter(boolean value);
+
+    public abstract Builder setMinDelaySeconds(long value);
+
+    public abstract Builder setMaxDelaySeconds(long value);
 
     public abstract PcsAttestationMeasurementConfig build();
   }

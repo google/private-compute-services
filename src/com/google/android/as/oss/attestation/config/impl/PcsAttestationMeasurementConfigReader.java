@@ -21,6 +21,7 @@ import com.google.android.as.oss.common.config.AbstractConfigReader;
 import com.google.android.as.oss.common.config.FlagListener;
 import com.google.android.as.oss.common.config.FlagManager;
 import com.google.android.as.oss.common.config.FlagManager.BooleanFlag;
+import com.google.android.as.oss.common.config.FlagManager.LongFlag;
 
 /** ConfigReader for {@link PcsAttestationMeasurementConfig}. */
 class PcsAttestationMeasurementConfigReader
@@ -32,6 +33,15 @@ class PcsAttestationMeasurementConfigReader
 
   static final BooleanFlag SCHEDULE_ATTESTATION_JOB =
       BooleanFlag.create("PcsAttestationMeasurement__schedule_attestation_job", false);
+
+  static final BooleanFlag ENABLE_RANDOM_JITTER =
+      BooleanFlag.create("PcsAttestationMeasurement__enable_random_jitter", false);
+
+  static final LongFlag MIN_DELAY_SECONDS =
+      LongFlag.create("PcsAttestationMeasurement__minimum_jitter_delay_s", 0L);
+
+  static final LongFlag MAX_DELAY_SECONDS =
+      LongFlag.create("PcsAttestationMeasurement__maximum_jitter_delay_s", 59L);
 
   private final FlagManager flagManager;
 
@@ -57,6 +67,9 @@ class PcsAttestationMeasurementConfigReader
     return PcsAttestationMeasurementConfig.builder()
         .setEnableAttestationMeasurement(flagManager.get(ENABLE_ATTESTATION_MEASUREMENT))
         .setScheduleAttestationJob(flagManager.get(SCHEDULE_ATTESTATION_JOB))
+        .setEnableRandomJitter(flagManager.get(ENABLE_RANDOM_JITTER))
+        .setMinDelaySeconds(flagManager.get(MIN_DELAY_SECONDS))
+        .setMaxDelaySeconds(flagManager.get(MAX_DELAY_SECONDS))
         .build();
   }
 
