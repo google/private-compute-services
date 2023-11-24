@@ -43,6 +43,9 @@ class PcsAttestationMeasurementConfigReader
   static final LongFlag MAX_DELAY_SECONDS =
       LongFlag.create("PcsAttestationMeasurement__maximum_jitter_delay_s", 59L);
 
+  static final LongFlag DELAY_SECONDS =
+      LongFlag.create("PcsAttestationMeasurement__delay_seconds_from_hour", 5L);
+
   private final FlagManager flagManager;
 
   static PcsAttestationMeasurementConfigReader create(FlagManager flagManager) {
@@ -70,6 +73,7 @@ class PcsAttestationMeasurementConfigReader
         .setEnableRandomJitter(flagManager.get(ENABLE_RANDOM_JITTER))
         .setMinDelaySeconds(flagManager.get(MIN_DELAY_SECONDS))
         .setMaxDelaySeconds(flagManager.get(MAX_DELAY_SECONDS))
+        .setDelaySeconds(flagManager.get(DELAY_SECONDS))
         .build();
   }
 

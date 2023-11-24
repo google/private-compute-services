@@ -38,6 +38,8 @@ public abstract class PcsAttestationMeasurementConfig {
 
   public abstract long maxDelaySeconds();
 
+  public abstract long delaySeconds();
+
   /** Builder for {@link PcsAttestationMeasurementConfig}. */
   @AutoValue.Builder
   public abstract static class Builder {
@@ -50,6 +52,8 @@ public abstract class PcsAttestationMeasurementConfig {
     public abstract Builder setMinDelaySeconds(long value);
 
     public abstract Builder setMaxDelaySeconds(long value);
+
+    public abstract Builder setDelaySeconds(long value);
 
     public abstract PcsAttestationMeasurementConfig build();
   }
