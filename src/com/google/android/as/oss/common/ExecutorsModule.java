@@ -18,6 +18,7 @@ package com.google.android.as.oss.common;
 
 import com.google.android.as.oss.common.ExecutorAnnotations.AttestationExecutorQualifier;
 import com.google.android.as.oss.common.ExecutorAnnotations.FlExecutorQualifier;
+import com.google.android.as.oss.common.ExecutorAnnotations.GenAiExecutorQualifier;
 import com.google.android.as.oss.common.ExecutorAnnotations.GeneralExecutorQualifier;
 import com.google.android.as.oss.common.ExecutorAnnotations.IoExecutorQualifier;
 import com.google.android.as.oss.common.ExecutorAnnotations.PirExecutorQualifier;
@@ -90,6 +91,13 @@ abstract class ExecutorsModule {
   @FlExecutorQualifier
   static ListeningScheduledExecutorService flExecutorService() {
     return Executors.FL_EXECUTOR_SERVICE;
+  }
+
+  @Provides
+  @Singleton
+  @GenAiExecutorQualifier
+  static ListeningScheduledExecutorService genAiExecutorService() {
+    return Executors.GENAI_EXECUTOR;
   }
 
   private ExecutorsModule() {}

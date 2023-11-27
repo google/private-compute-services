@@ -59,5 +59,10 @@ public abstract class ExecutorAnnotations {
   @Retention(RetentionPolicy.RUNTIME)
   public @interface ProtectedDownloadExecutorQualifier {}
 
+  /** Annotation to bind {@link Executor} used for GenAI operations. */
+  @Qualifier
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface GenAiExecutorQualifier {}
+
   private ExecutorAnnotations() {}
 }

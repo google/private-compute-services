@@ -44,5 +44,11 @@ public class Executors {
               /* corePoolSize= */ 1,
               new ThreadFactoryBuilder().setNameFormat("pcs-pd-%d").build()));
 
+  public static final ListeningScheduledExecutorService GENAI_EXECUTOR =
+      MoreExecutors.listeningDecorator(
+          java.util.concurrent.Executors.newScheduledThreadPool(
+              /* corePoolSize= */ 1,
+              new ThreadFactoryBuilder().setNameFormat("pcs-aic-%d").build()));
+
   private Executors() {}
 }
