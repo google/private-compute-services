@@ -19,7 +19,7 @@ package com.google.android.as.oss.networkusage.ui.user;
 import static com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType.FC_CHECK_IN;
 import static com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType.FC_TRAINING_RESULT_UPLOAD;
 import static com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType.FC_TRAINING_START_QUERY;
-import static com.google.common.collect.AndroidAccessToCollectors.toImmutableList;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;

@@ -16,7 +16,7 @@
 
 package com.google.android.as.oss.fl.populations;
 
-import static com.google.common.collect.AndroidAccessToCollectors.toImmutableMap;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.stream;
 

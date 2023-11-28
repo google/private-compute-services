@@ -18,7 +18,7 @@ package com.google.android.as.oss.networkusage.ui.user;
 
 import static com.google.android.as.oss.networkusage.db.ConnectionDetails.FC_CONNECTION_TYPES;
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.AndroidAccessToCollectors.toImmutableList;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import android.util.Pair;
 import com.google.android.as.oss.networkusage.api.proto.ConnectionKey;

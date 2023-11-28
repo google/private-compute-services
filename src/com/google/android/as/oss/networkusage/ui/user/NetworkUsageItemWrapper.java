@@ -17,7 +17,7 @@
 package com.google.android.as.oss.networkusage.ui.user;
 
 import static com.google.android.as.oss.networkusage.ui.user.NetworkUsageItemDetailsActivity.NETWORK_USAGE_ITEM_EXTRA_KEY;
-import static com.google.common.collect.AndroidAccessToCollectors.toImmutableList;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.Comparator.comparing;
 
 import android.content.ComponentName;

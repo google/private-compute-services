@@ -16,7 +16,7 @@
 
 package com.google.android.as.oss.fl.federatedcompute.statsd.examplegenerator;
 
-import static com.google.common.collect.AndroidAccessToCollectors.toImmutableList;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import com.google.protobuf.ByteString;
 import java.util.Collection;

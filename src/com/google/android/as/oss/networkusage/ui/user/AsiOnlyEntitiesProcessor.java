@@ -16,7 +16,7 @@
 
 package com.google.android.as.oss.networkusage.ui.user;
 
-import static com.google.common.collect.AndroidAccessToCollectors.toImmutableList;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import com.google.common.collect.ImmutableList;
 
