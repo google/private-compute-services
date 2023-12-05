@@ -88,6 +88,13 @@ final class ProtoConversionsModule {
 
   @Provides
   @IntoMap
+  @ClientBiMapKey(Client.AI_CORE_MESSAGES_TEXT)
+  static String provideAiCoreMessagesTextClientId() {
+    return "com.google.android.aicore:4970947506931743799";
+  }
+
+  @Provides
+  @IntoMap
   @ClientBiMapKey(Client.AI_CORE_PROTECTED_DOWNLOAD)
   static String provideAiCoreProtectedDownloadClientId() {
     return "com.google.android.aicore:11791126134479005147";
