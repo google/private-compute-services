@@ -169,6 +169,10 @@
   <string name="url_regex_universal_search_corpora" translatable="false">https://(www.)?gstatic.com/nasa/apps/(non_en_)?pack_(?!spelling_checker)(?!notification).*</string>
   <string name="url_regex_universal_search_corpora_mdd" translatable="false">https://dl.google.com/mdi-serving/aiai-echo-toast-config/.*</string>
 
+  <!-- Description of fa score download for the Search feature, displayed in the network usage log. "Search your phone" is the product name. [CHAR_LIMIT=NONE] -->
+  <string name="description_toast_search_fa_ranking">Updated the on-device search ranking model</string>
+  <string name="url_regex_toast_search_fa_mdd" translatable="false">https://dl.google.com/mdi-serving/aiai-echo-toast-fa/.*</string>
+
   <!-- Notification Auto Expiration -->
   <!-- Name of the Notification Auto Expiration feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
   <string name="feature_name_notification_auto_expiration">Notification Auto Expiration</string>

@@ -258,6 +258,11 @@ abstract class NetworkUsageLogContentModule {
                 .featureNameId(R.string.feature_name_cinematic_wallpaper)
                 .descriptionId(R.string.description_cinematic_wallpaper)
                 .build(),
+            asiHttpEntryBuilder
+                .connectionKeyString(FeatureName.TOAST_SEARCH.name())
+                .featureNameId(R.string.feature_name_toast_search)
+                .descriptionId(R.string.description_toast_search_fa_ranking)
+                .build(),
             attestationEntryBuilder
                 .connectionKeyString(ATTESTATION_FEATURE_NAME)
                 .featureNameId(R.string.feature_name_android_key_attestation)
