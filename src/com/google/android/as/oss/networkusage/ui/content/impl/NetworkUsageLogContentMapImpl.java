@@ -157,6 +157,8 @@ public final class NetworkUsageLogContentMapImpl implements NetworkUsageLogConte
         return context.getString(R.string.connection_type_fc);
       case PD:
         return context.getString(R.string.connection_type_ap);
+      case ATTESTATION_REQUEST:
+        return context.getString(R.string.connection_type_attestation);
       default:
         throw new UnsupportedOperationException(
             String.format("Unsupported connection type '%s'", connectionDetails.type().name()));
