@@ -19,7 +19,9 @@ package com.google.android.as.oss.pd.service;
 import com.google.android.apps.miphone.astrea.grpc.Annotations.GrpcService;
 import com.google.android.apps.miphone.astrea.grpc.Annotations.GrpcServiceName;
 import com.google.android.as.oss.pd.api.proto.ProtectedDownloadServiceGrpc;
+import com.google.android.as.oss.pd.virtualmachine.VirtualMachineRunner;
 import dagger.Binds;
+import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
@@ -42,4 +44,7 @@ interface ProtectedDownloadGrpcModule {
   static String provideServiceName() {
     return ProtectedDownloadServiceGrpc.SERVICE_NAME;
   }
+
+  @BindsOptionalOf
+  VirtualMachineRunner bindOptionalVirtualMachineRunner();
 }

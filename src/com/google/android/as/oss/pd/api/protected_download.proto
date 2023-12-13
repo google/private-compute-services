@@ -252,6 +252,16 @@ message GetManifestConfigResponse {
   bytes manifest_config = 1;
 }
 
+message GetVmRequest {
+  // Path to the APK that contains the VM payload.
+  string apk_path = 1;
+
+  // Path to the payload to be loaded into the VM.
+  string payload_path = 2;
+}
+
+message GetVmResponse {}
+
 // Service API for downloading blobs.
 service ProtectedDownloadService {
   // Downloads a blob to the device
@@ -260,4 +270,7 @@ service ProtectedDownloadService {
   // Downloads a manifest to the device
   rpc GetManifestConfig(GetManifestConfigRequest)
       returns (GetManifestConfigResponse);
+
+  // Start a VM and get its descriptor
+  rpc GetVmDescriptor(GetVmRequest) returns (GetVmResponse);
 }

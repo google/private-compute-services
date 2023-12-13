@@ -23,9 +23,12 @@ import com.google.android.as.oss.pd.api.proto.DownloadBlobRequest;
 import com.google.android.as.oss.pd.api.proto.DownloadBlobResponse;
 import com.google.android.as.oss.pd.api.proto.GetManifestConfigRequest;
 import com.google.android.as.oss.pd.api.proto.GetManifestConfigResponse;
+import com.google.android.as.oss.pd.api.proto.GetVmRequest;
+import com.google.android.as.oss.pd.api.proto.GetVmResponse;
 import com.google.android.as.oss.pd.api.proto.ProtectedDownloadServiceGrpc;
 import com.google.android.as.oss.pd.config.ProtectedDownloadConfig;
 import com.google.android.as.oss.pd.processor.ProtectedDownloadProcessor;
+import com.google.android.as.oss.pd.virtualmachine.VirtualMachineRunner;
 import com.google.common.base.Function;
 import com.google.common.flogger.GoogleLogger;
 import com.google.common.util.concurrent.FutureCallback;
@@ -36,7 +39,9 @@ import io.grpc.Status;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
+import java.util.Optional;
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 /** Implements the PCS protected download service by connecting to remote GRPC service. */
@@ -47,6 +52,7 @@ class ProtectedDownloadGrpcBindableService
 
   private final ConfigReader<ProtectedDownloadConfig> configReader;
   private final ProtectedDownloadProcessor downloadProcessor;
+  private final Optional<VirtualMachineRunner> vmRunner;
   private final ListeningExecutorService executor;
   private final BuildFlavor buildFlavor;
 
@@ -54,10 +60,12 @@ class ProtectedDownloadGrpcBindableService
   ProtectedDownloadGrpcBindableService(
       ConfigReader<ProtectedDownloadConfig> configReader,
       ProtectedDownloadProcessor downloadProcessor,
+      Optional<Provider<VirtualMachineRunner>> vmRunner,
       @ProtectedDownloadExecutorQualifier ListeningExecutorService executor,
       BuildFlavor buildFlavor) {
     this.configReader = configReader;
     this.downloadProcessor = downloadProcessor;
+    this.vmRunner = vmRunner.flatMap(p -> Optional.ofNullable(p.get()));
     this.executor = executor;
     this.buildFlavor = buildFlavor;
   }
@@ -110,6 +118,43 @@ class ProtectedDownloadGrpcBindableService
         executor);
   }
 
+  @Override
+  public void getVmDescriptor(
+      GetVmRequest request, StreamObserver<GetVmResponse> responseObserver) {
+    logger.atInfo().log("Starting getVmDescriptor request");
+    if (!vmRunner.isPresent()) {
+      logger.atFine().log(
+          "Cannot start VM since the feature is either disabled or VMs are not supported on this"
+              + " device");
+      responseObserver.onError(
+          new StatusException(
+              Status.FAILED_PRECONDITION.withDescription(
+                  "VM disabled or not supported on this device.")));
+      return;
+    }
+
+    // Provision a new VM on behalf of the caller. Save the VM public key,
+    // stop the VM, and return its VM descriptor.
+    ListenableFuture<GetVmResponse> future = vmRunner.get().provisionVirtualMachine(request);
+    Futures.addCallback(
+        future,
+        new FutureCallback<GetVmResponse>() {
+          @Override
+          public void onSuccess(GetVmResponse response) {
+            logger.atInfo().log("Successfully started a VM");
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+          }
+
+          @Override
+          public void onFailure(Throwable t) {
+            logger.atSevere().withCause(t).log("Failed to start a VM");
+            responseObserver.onError(new StatusException(toVmStatus(t)));
+          }
+        },
+        executor);
+  }
+
   private static Status toGrpcStatus(Throwable t) {
     if (t instanceof StatusException) {
       return ((StatusException) t).getStatus();
@@ -117,6 +162,15 @@ class ProtectedDownloadGrpcBindableService
       return ((StatusRuntimeException) t).getStatus();
     } else if (t instanceof IllegalArgumentException) {
       return Status.INVALID_ARGUMENT;
+    }
+    return Status.INTERNAL.withCause(t);
+  }
+
+  private static Status toVmStatus(Throwable t) {
+    if (t instanceof UnsupportedOperationException) {
+      return Status.FAILED_PRECONDITION.withDescription("vm disabled");
+    } else if (t instanceof RuntimeException) {
+      return Status.UNAVAILABLE.withCause(t);
     }
     return Status.INTERNAL.withCause(t);
   }
