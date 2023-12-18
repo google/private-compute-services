@@ -22,6 +22,7 @@ import androidx.annotation.Nullable;
 import com.google.android.as.oss.common.ExecutorAnnotations.VirtualMachineExecutorQualifier;
 import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.pd.config.ProtectedDownloadConfig;
+import com.google.android.as.oss.pd.persistence.PersistentStateManager;
 import com.google.android.as.oss.pd.virtualmachine.VirtualMachineRunner;
 import dagger.Module;
 import dagger.Provides;
@@ -43,12 +44,13 @@ interface VirtualMachineRunnerModule {
   @Singleton
   static VirtualMachineRunner provideVirtualMachineRunner(
       ConfigReader<ProtectedDownloadConfig> configReader,
+      PersistentStateManager persistenceManager,
       @VirtualMachineExecutorQualifier Executor executor,
       @ApplicationContext Context context) {
     // VirtualMachines are supported on U+.
     return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
             && configReader.getConfig().enableProtectedDownloadVirtualMachines()
-        ? new VirtualMachineRunnerImpl(executor, context)
+        ? new VirtualMachineRunnerImpl(persistenceManager, executor, context)
         : null;
   }
 }

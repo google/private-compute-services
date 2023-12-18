@@ -22,6 +22,9 @@ import java.util.Optional;
 /** A manager for handling the I/O of the state persisted for each client of protected download. */
 public interface PersistentStateManager {
 
+  /** Special client ID to persist state for the shared VM instance. */
+  String VM_CLIENT_ID = "VM_CLIENT";
+
   /**
    * Returns the state persisted for the given client, or {@link Optional#empty()} if no state is
    * persisted for this client.

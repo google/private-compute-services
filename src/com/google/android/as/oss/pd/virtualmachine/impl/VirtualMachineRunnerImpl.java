@@ -29,11 +29,15 @@ import androidx.annotation.NonNull;
 import androidx.concurrent.futures.CallbackToFutureAdapter;
 import com.google.android.as.oss.pd.api.proto.GetVmRequest;
 import com.google.android.as.oss.pd.api.proto.GetVmResponse;
+import com.google.android.as.oss.pd.persistence.ClientPersistentState;
+import com.google.android.as.oss.pd.persistence.PersistentStateManager;
 import com.google.android.as.oss.pd.virtualmachine.VirtualMachineRunner;
+import com.google.android.hades.tartarus.ITartarusService;
 import com.google.common.flogger.GoogleLogger;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.protobuf.ByteString;
 import java.util.concurrent.Executor;
 
 /** A {@link VirtualMachineRunner} that interacts with virtual machines. */
@@ -41,13 +45,23 @@ import java.util.concurrent.Executor;
 public class VirtualMachineRunnerImpl implements VirtualMachineRunner {
   private final Context context;
   private final Executor executor;
+  private final PersistentStateManager persistenceManager;
 
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
+
+  private static final ClientPersistentState DEFAULT_PERSISTENT_STATE =
+      ClientPersistentState.newBuilder()
+          .setExternalKeySet(ByteString.empty())
+          .setPageToken(ByteString.empty())
+          .build();
+
   private static final String VM_NAME = "pd_vm";
 
-  public VirtualMachineRunnerImpl(Executor executor, Context context) {
+  public VirtualMachineRunnerImpl(
+      PersistentStateManager persistenceManager, Executor executor, Context context) {
     this.executor = executor;
     this.context = context;
+    this.persistenceManager = persistenceManager;
   }
 
   @Override
@@ -67,8 +81,17 @@ public class VirtualMachineRunnerImpl implements VirtualMachineRunner {
     }
 
     return FluentFuture.from(runVm(virtualMachine))
-        // TODO: Request and persist the VM's public key before gracefully closing the
-        // VM.
+        .transformAsync(unused -> readOrCreatePersistentState(), executor)
+        .transformAsync(
+            previousState -> {
+              byte[] publicKey = runTartarusService(virtualMachine).getSerializedPublicKey();
+              ClientPersistentState newState =
+                  previousState.toBuilder()
+                      .setExternalKeySet(ByteString.copyFrom(publicKey))
+                      .build();
+              return persistenceManager.writeState(PersistentStateManager.VM_CLIENT_ID, newState);
+            },
+            executor)
         .<Void>transform(
             unused -> {
               virtualMachine.close();
@@ -182,6 +205,29 @@ public class VirtualMachineRunnerImpl implements VirtualMachineRunner {
         .setApkPath(apkPath)
         .setPayloadBinaryName(payloadPath)
         .build();
+  }
+
+  // TODO: Switch to an an open source version of this service definition.
+  private static ITartarusService runTartarusService(VirtualMachine vm)
+      throws VirtualMachineException {
+    return ITartarusService.Stub.asInterface(
+        vm.connectToVsockServer(ITartarusService.SERVICE_PORT));
+  }
+
+  private ListenableFuture<ClientPersistentState> readOrCreatePersistentState() {
+    return Futures.transform(
+        persistenceManager.readState(PersistentStateManager.VM_CLIENT_ID),
+        optionalState -> {
+          if (optionalState.isPresent()) {
+            logger.atInfo().log(
+                "found persistent state for client %s", PersistentStateManager.VM_CLIENT_ID);
+          } else {
+            logger.atInfo().log(
+                "creating new persistent state for client %s", PersistentStateManager.VM_CLIENT_ID);
+          }
+          return optionalState.orElse(DEFAULT_PERSISTENT_STATE);
+        },
+        executor);
   }
 
   /** Thrown if the VirtualMachine fails to start or stop properly. */
