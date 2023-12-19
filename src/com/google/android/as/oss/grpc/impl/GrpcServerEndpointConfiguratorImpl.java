@@ -20,6 +20,7 @@ import static com.google.android.as.oss.grpc.impl.PcsSecurityPolicies.buildServe
 import static com.google.android.as.oss.grpc.impl.PcsSecurityPolicies.untrustedPolicy;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.IBinder;
 import androidx.annotation.Nullable;
 import com.google.android.apps.miphone.astrea.grpc.GrpcServerEndpointConfiguration;
@@ -80,12 +81,14 @@ final class GrpcServerEndpointConfiguratorImpl implements GrpcServerEndpointConf
                 AndroidComponentAddress.forLocalComponent(context, cls), iBinderReceiver)
             .securityPolicy(serverSecurityPolicy)
             .inboundParcelablePolicy(buildInboundParcelablePolicy())
-            .intercept(new MetadataExtractionServerInterceptor())
-            // Disable compression by default, since there's little benefit when all communication
-            // is
-            // on-device, and it means sending supported-encoding headers with every call.
-            .decompressorRegistry(DecompressorRegistry.emptyInstance())
-            .compressorRegistry(CompressorRegistry.newEmptyInstance());
+            .intercept(new MetadataExtractionServerInterceptor());
+
+    // Disable compression by default, since there's little benefit when all communication
+    // is
+    // on-device, and it means sending supported-encoding headers with every call.
+    builder
+        .decompressorRegistry(DecompressorRegistry.emptyInstance())
+        .compressorRegistry(CompressorRegistry.newEmptyInstance());
 
     for (BindableService service : configuration.getServices()) {
       builder.addService(service);

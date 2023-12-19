@@ -16,6 +16,8 @@
 
 package com.google.android.as.oss.pd.virtualmachine.impl;
 
+import static com.google.android.apps.miphone.astrea.grpc.VirtualMachineContextKeys.VM_DESCRIPTOR_CONTEXT_KEY;
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
@@ -39,6 +41,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicReference;
 
 /** A {@link VirtualMachineRunner} that interacts with virtual machines. */
 @TargetApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
@@ -66,9 +69,14 @@ public class VirtualMachineRunnerImpl implements VirtualMachineRunner {
 
   @Override
   public ListenableFuture<GetVmResponse> provisionVirtualMachine(GetVmRequest request) {
+    AtomicReference<VirtualMachineDescriptor> descriptorRef = VM_DESCRIPTOR_CONTEXT_KEY.get();
     return FluentFuture.from(getVirtualMachineDescriptor(request))
-        // TODO Return descriptor in metadata via an interceptor.
-        .transform(descriptor -> GetVmResponse.getDefaultInstance(), executor);
+        .transform(
+            descriptor -> {
+              descriptorRef.set(descriptor);
+              return GetVmResponse.getDefaultInstance();
+            },
+            executor);
   }
 
   private ListenableFuture<VirtualMachineDescriptor> getVirtualMachineDescriptor(

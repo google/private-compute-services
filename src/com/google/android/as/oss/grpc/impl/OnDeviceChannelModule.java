@@ -33,6 +33,7 @@ import io.grpc.CompressorRegistry;
 import io.grpc.DecompressorRegistry;
 import io.grpc.binder.AndroidComponentAddress;
 import io.grpc.binder.BinderChannelBuilder;
+import io.grpc.binder.InboundParcelablePolicy;
 import javax.inject.Singleton;
 
 /** Provides a Singleton on-device GRPC channel for PCS connections. */
@@ -50,6 +51,8 @@ interface OnDeviceChannelModule {
             AndroidComponentAddress.forRemoteComponent(pcsPackageName, pcsGrpcServiceName),
             context.getApplicationContext())
         .securityPolicy(PcsSecurityPolicies.untrustedPolicy())
+        .inboundParcelablePolicy(
+            InboundParcelablePolicy.newBuilder().setAcceptParcelableMetadataValues(true).build())
         // Disable compression by default, since there's little benefit when all communication is
         // on-device, and it means sending supported-encoding headers with every call.
         .decompressorRegistry(DecompressorRegistry.emptyInstance())
