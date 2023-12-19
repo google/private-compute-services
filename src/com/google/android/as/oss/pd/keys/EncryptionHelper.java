@@ -25,6 +25,9 @@ import java.security.GeneralSecurityException;
  */
 public interface EncryptionHelper {
 
+  /** Whether this instance contains a private key and can be used for decryption. */
+  boolean hasPrivateKey();
+
   /** Encrypts the given data using the known key and parameters. */
   byte[] encrypt(byte[] plainData, byte[] associatedData) throws GeneralSecurityException;
 

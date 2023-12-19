@@ -138,26 +138,48 @@ public final class BlobProtoUtils {
     }
   }
 
-  /** Decrypts with external encryption and applies internal encryption if requested. */
-  private static byte[] replaceEncryption(
-      byte[] encryptedData,
+  /**
+   * Decrypts with external encryption and re-encrypts using internalEncryption, if re-encryption is
+   * requested and internal encryption is provided. If the externalEncryption does not have a
+   * private key then no encryption can be done and we just return the unmodified encryptedData.
+   */
+  private static ByteString replaceEncryption(
+      ByteString encryptedData,
       EncryptionHelper externalEncryption,
-      EncryptionHelper internalEncryption,
+      Optional<EncryptionHelper> internalEncryption,
       byte[] associatedData,
-      boolean reencryptData)
-      throws GeneralSecurityException {
-    byte[] decrypted = externalEncryption.decrypt(encryptedData, associatedData);
-    if (reencryptData) {
-      return internalEncryption.encrypt(decrypted, associatedData);
+      boolean reencryptData) {
+    if (!externalEncryption.hasPrivateKey()) {
+      return encryptedData;
     }
-    return decrypted;
+    byte[] decrypted;
+    try {
+      decrypted = externalEncryption.decrypt(encryptedData.toByteArray(), associatedData);
+    } catch (GeneralSecurityException e) {
+      throw new IllegalArgumentException(e);
+    }
+    if (!reencryptData) {
+      return ByteString.copyFrom(decrypted);
+    }
+    byte[] reencryptedBytes =
+        internalEncryption
+            .map(
+                enc -> {
+                  try {
+                    return enc.encrypt(decrypted, associatedData);
+                  } catch (GeneralSecurityException e) {
+                    throw new IllegalArgumentException(e);
+                  }
+                })
+            .orElse(decrypted);
+    return ByteString.copyFrom(reencryptedBytes);
   }
 
   /** Converts a server download blob response to PCS download blob response. */
   public static DownloadBlobResponse toInternalResponse(
       com.google.android.as.oss.pd.service.api.proto.DownloadBlobResponse externalResponse,
       EncryptionHelper externalEncryption,
-      EncryptionHelper internalEncryption,
+      Optional<EncryptionHelper> internalEncryption,
       byte[] associatedData)
       throws GeneralSecurityException {
     DownloadBlobResponse.Builder builder =
@@ -166,33 +188,36 @@ public final class BlobProtoUtils {
             .setNextPageToken(externalResponse.getNextPageToken())
             .setDownloadStatusValue(externalResponse.getDownloadStatus().getNumber());
 
-    ByteString externalBlob = externalResponse.getBlob();
-    boolean reencrypt = !externalBlob.isEmpty();
-    if (reencrypt) {
-      builder.setBlob(
-          ByteString.copyFrom(
-              replaceEncryption(
-                  externalBlob.toByteArray(),
-                  externalEncryption,
-                  internalEncryption,
-                  associatedData,
-                  reencrypt)));
+    ByteString outerBlob = externalResponse.getBlob();
+    boolean hasOuterBlob = !outerBlob.isEmpty();
+
+    if (hasOuterBlob) {
+      ByteString convertedOuterBlob =
+          replaceEncryption(
+              outerBlob,
+              externalEncryption,
+              internalEncryption,
+              associatedData,
+              /* reencryptData= */ true);
+      builder.setBlob(convertedOuterBlob);
     }
+
     for (com.google.android.as.oss.pd.service.api.proto.ProtectionComponent externalComponent :
         externalResponse.getProtectionComponentsList()) {
+      ByteString convertedBlob =
+          replaceEncryption(
+              externalComponent.getBlob(),
+              externalEncryption,
+              internalEncryption,
+              associatedData,
+              /* reencryptData= */ hasOuterBlob);
+
       builder.addProtectionComponents(
           ProtectionComponent.newBuilder()
               .setTypeValue(externalComponent.getType().getNumber())
               .setIsPartialUpdate(externalComponent.getIsPartialUpdate())
               .setPartialUpdateIndex(externalComponent.getPartialUpdateIndex())
-              .setBlob(
-                  ByteString.copyFrom(
-                      replaceEncryption(
-                          externalComponent.getBlob().toByteArray(),
-                          externalEncryption,
-                          internalEncryption,
-                          associatedData,
-                          reencrypt)))
+              .setBlob(convertedBlob)
               .build());
     }
     return builder.build();

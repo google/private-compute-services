@@ -26,6 +26,7 @@ import com.google.android.as.oss.common.ExecutorAnnotations.ProtectedDownloadExe
 import com.google.android.as.oss.common.time.TimeSource;
 import com.google.android.as.oss.networkusage.db.Status;
 import com.google.android.as.oss.networkusage.ui.content.UnrecognizedNetworkRequestException;
+import com.google.android.as.oss.pd.api.proto.BlobConstraints;
 import com.google.android.as.oss.pd.api.proto.DownloadBlobRequest;
 import com.google.android.as.oss.pd.api.proto.DownloadBlobResponse;
 import com.google.android.as.oss.pd.api.proto.GetManifestConfigRequest;
@@ -40,6 +41,7 @@ import com.google.android.as.oss.pd.networkusage.PDNetworkUsageLogHelper;
 import com.google.android.as.oss.pd.persistence.ClientPersistentState;
 import com.google.android.as.oss.pd.persistence.PersistentStateManager;
 import com.google.android.as.oss.pd.processor.ProtectedDownloadProcessor;
+import com.google.android.as.oss.pd.service.api.proto.ClientVersion;
 import com.google.android.as.oss.pd.service.api.proto.ProgramBlobServiceGrpc;
 import com.google.android.as.oss.pd.service.api.proto.ProgramBlobServiceGrpc.ProgramBlobServiceFutureStub;
 import com.google.auto.value.AutoValue;
@@ -130,8 +132,12 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
 
     ContentBindingHashFunction contentBindingHashFunction =
         keyBytes -> blobProtoUtils.metadataHash(keyBytes, request.getMetadata());
+    boolean useVmKey =
+        request.getMetadata().getBlobConstraints().getClientVersion().getType()
+            == BlobConstraints.ClientVersion.Type.TYPE_ANDROID_CORE_ATTESTED_PKVM;
     return FluentFuture.from(readOrCreatePersistentState(clientId))
-        .transformAsync(state -> integrityCheck(state, contentBindingHashFunction), pdExecutor)
+        .transformAsync(
+            state -> integrityCheck(state, contentBindingHashFunction, useVmKey), pdExecutor)
         .transformAsync(
             integrityResponse -> downloadBlob(channel, clientId, request, integrityResponse),
             pdExecutor)
@@ -160,49 +166,80 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
         keyBytes ->
             blobProtoUtils.getManifestConfigMetadataHash(keyBytes, request.getConstraints());
     return FluentFuture.from(readOrCreatePersistentState(clientId))
-        .transformAsync(state -> integrityCheck(state, contentBindingHashFunction), pdExecutor)
+        .transformAsync(
+            state -> integrityCheck(state, contentBindingHashFunction, /* useVmKey= */ false),
+            pdExecutor)
         .transformAsync(
             state -> downloadManifestConfig(channel, clientId, request, state), pdExecutor)
         .transformAsync(this::finalizeDownload, pdExecutor);
   }
 
   private ListenableFuture<IntegrityResponse> integrityCheck(
-      ClientPersistentState persistentState, ContentBindingHashFunction contentBindingHashFunction)
+      ClientPersistentState persistentState,
+      ContentBindingHashFunction contentBindingHashFunction,
+      boolean useVmKey)
       throws GeneralSecurityException, IOException {
-    EncryptionHelper externalEncryption;
-    if (persistentState.hasExternalKeySet()) {
-      externalEncryption =
-          encryptionHelperFactory.createFromEncryptedKeySet(
-              persistentState.getExternalKeySet().toByteArray());
+    ListenableFuture<EncryptionHelper> externalEncryptionFuture;
+    if (useVmKey) {
+      externalEncryptionFuture = readVmKey();
+    } else if (persistentState.hasExternalKeySet()) {
+      externalEncryptionFuture =
+          Futures.immediateFuture(
+              encryptionHelperFactory.createFromEncryptedKeySet(
+                  persistentState.getExternalKeySet().toByteArray()));
     } else {
       logger.atInfo().log("generating new key set for a new client persistent state");
-      externalEncryption = encryptionHelperFactory.generateEncryptedKeySet();
+      EncryptionHelper encryptionHelper = encryptionHelperFactory.generateEncryptedKeySet();
+      externalEncryptionFuture = Futures.immediateFuture(encryptionHelper);
       persistentState =
           persistentState.toBuilder()
-              .setExternalKeySet(ByteString.copyFrom(externalEncryption.toEncryptedKeySet()))
+              .setExternalKeySet(ByteString.copyFrom(encryptionHelper.toEncryptedKeySet()))
               .build();
     }
 
-    String contentBinding = contentBindingHashFunction.apply(externalEncryption.publicKey());
-
     ClientPersistentState finalClientPersistentState = persistentState;
-    EncryptionHelper finalExternalEncryption = externalEncryption;
 
     // NOTE: Even if attestation fails, we continue execution. Server will make a decision what to
     // do with the download.
-    return FluentFuture.from(attestationClient.requestMeasurementWithContentBinding(contentBinding))
+    return FluentFuture.from(externalEncryptionFuture)
+        .transformAsync(
+            externalEncryption -> {
+              String contentBinding =
+                  contentBindingHashFunction.apply(externalEncryption.publicKey());
+              ListenableFuture<ByteString> attestationFuture =
+                  attestationClient.requestMeasurementWithContentBinding(contentBinding);
+              return FluentFuture.from(attestationFuture)
+                  .transform(
+                      attestationToken ->
+                          IntegrityResponse.create(
+                              finalClientPersistentState,
+                              externalEncryption,
+                              Optional.of(attestationToken)),
+                      pdExecutor)
+                  .catching(
+                      Exception.class,
+                      e ->
+                          IntegrityResponse.create(
+                              finalClientPersistentState, externalEncryption, Optional.empty()),
+                      pdExecutor);
+            },
+            pdExecutor);
+  }
+
+  private ListenableFuture<EncryptionHelper> readVmKey() {
+    return FluentFuture.from(persistenceManager.readState(PersistentStateManager.VM_CLIENT_ID))
         .transform(
-            attestationToken ->
-                IntegrityResponse.create(
-                    finalClientPersistentState,
-                    finalExternalEncryption,
-                    Optional.of(attestationToken)),
-            pdExecutor)
-        .catching(
-            Exception.class,
-            e ->
-                IntegrityResponse.create(
-                    finalClientPersistentState, finalExternalEncryption, Optional.empty()),
+            state -> {
+              ByteString vmKeyBytes =
+                  state
+                      .orElseThrow(() -> new IllegalStateException("No key available for VM"))
+                      .getExternalKeySet();
+              try {
+                return encryptionHelperFactory.createFromPublicKey(vmKeyBytes.toByteArray());
+              } catch (GeneralSecurityException | IOException e) {
+                throw new IllegalStateException("Could not convert VM public key bytes", e);
+              }
+            },
             pdExecutor);
   }
 
@@ -220,6 +257,20 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
         pdExecutor);
   }
 
+  // Returns an EncryptionHelper using the public key from `metadata` if the client Type for the
+  // request is `TYPE_UNKNOWN` or `TYPE_ANDROID`.
+  private Optional<EncryptionHelper> getInternalEncryptionForInternalResponse(
+      com.google.android.as.oss.pd.api.proto.Metadata metadata)
+      throws GeneralSecurityException, IOException {
+    ClientVersion.Type type = BlobProtoUtils.getClientVersionType(metadata);
+    if (type == ClientVersion.Type.TYPE_UNKNOWN || type == ClientVersion.Type.TYPE_ANDROID) {
+      return Optional.of(
+          encryptionHelperFactory.createFromPublicKey(
+              metadata.getCryptoKeys().getPublicKey().toByteArray()));
+    }
+    return Optional.empty();
+  }
+
   private ListenableFuture<DownloadResult<DownloadBlobResponse>> downloadBlob(
       Channel channel,
       String clientId,
@@ -232,9 +283,7 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
     String apiKey = channelProvider.getServiceApiKeyOverride().orElse(request.getApiKey());
     ProgramBlobServiceFutureStub serviceStub = createServiceStub(channel, apiKey);
 
-    EncryptionHelper internalEncryption =
-        encryptionHelperFactory.createFromPublicKey(
-            request.getMetadata().getCryptoKeys().getPublicKey().toByteArray());
+    com.google.android.as.oss.pd.api.proto.Metadata metadata = request.getMetadata();
 
     return FluentFuture.from(
             serviceStub.downloadBlob(
@@ -258,8 +307,8 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
                         toInternalResponse(
                             externalResponse,
                             externalEncryption,
-                            internalEncryption,
-                            blobProtoUtils.getClientId(request.getMetadata()).getBytes(UTF_8)),
+                            getInternalEncryptionForInternalResponse(metadata),
+                            blobProtoUtils.getClientId(metadata).getBytes(UTF_8)),
                         finalClientPersistentState,
                         approximatedSize,
                         clientId));

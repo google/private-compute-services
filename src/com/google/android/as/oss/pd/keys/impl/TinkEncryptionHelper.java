@@ -39,6 +39,11 @@ class TinkEncryptionHelper implements EncryptionHelper {
   }
 
   @Override
+  public boolean hasPrivateKey() {
+    return hasPrivateKey;
+  }
+
+  @Override
   public byte[] decrypt(byte[] encryptedData, byte[] associatedData)
       throws GeneralSecurityException {
     if (!hasPrivateKey) {
