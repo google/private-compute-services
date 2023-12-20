@@ -46,7 +46,6 @@ proto_library(
     deps = [
         ":pcs_feature_enum_proto",
         "@com_google_protobuf//:any_proto",
-        "@com_google_protobuf//:descriptor_proto",
         "@private_compute_libraries//java/com/google/android/libraries/pcc/chronicle/api/policy/proto:policy_proto",
     ],
 )
