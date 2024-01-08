@@ -262,6 +262,10 @@ message GetVmRequest {
 
 message GetVmResponse {}
 
+message DeleteVmRequest {}
+
+message DeleteVmResponse {}
+
 // Service API for downloading blobs.
 service ProtectedDownloadService {
   // Downloads a blob to the device
@@ -273,4 +277,7 @@ service ProtectedDownloadService {
 
   // Start a VM and get its descriptor
   rpc GetVmDescriptor(GetVmRequest) returns (GetVmResponse);
+
+  // Delete a VM
+  rpc DeleteVm(DeleteVmRequest) returns (DeleteVmResponse);
 }

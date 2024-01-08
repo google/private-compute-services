@@ -19,6 +19,8 @@ package com.google.android.as.oss.pd.service;
 import com.google.android.as.oss.common.ExecutorAnnotations.ProtectedDownloadExecutorQualifier;
 import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.common.flavor.BuildFlavor;
+import com.google.android.as.oss.pd.api.proto.DeleteVmRequest;
+import com.google.android.as.oss.pd.api.proto.DeleteVmResponse;
 import com.google.android.as.oss.pd.api.proto.DownloadBlobRequest;
 import com.google.android.as.oss.pd.api.proto.DownloadBlobResponse;
 import com.google.android.as.oss.pd.api.proto.GetManifestConfigRequest;
@@ -149,6 +151,32 @@ class ProtectedDownloadGrpcBindableService
           @Override
           public void onFailure(Throwable t) {
             logger.atSevere().withCause(t).log("Failed to start a VM");
+            responseObserver.onError(new StatusException(toVmStatus(t)));
+          }
+        },
+        executor);
+  }
+
+  @Override
+  public void deleteVm(DeleteVmRequest request, StreamObserver<DeleteVmResponse> responseObserver) {
+    logger.atInfo().log("Starting deleteVm request");
+
+    // Provision a new VM on behalf of the caller. Save the VM public key,
+    // stop the VM, and return its VM descriptor.
+    ListenableFuture<DeleteVmResponse> future = vmRunner.get().deleteVirtualMachine(request);
+    Futures.addCallback(
+        future,
+        new FutureCallback<DeleteVmResponse>() {
+          @Override
+          public void onSuccess(DeleteVmResponse response) {
+            logger.atInfo().log("Successfully deleted the VM");
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+          }
+
+          @Override
+          public void onFailure(Throwable t) {
+            logger.atSevere().withCause(t).log("Failed to delete the VM");
             responseObserver.onError(new StatusException(toVmStatus(t)));
           }
         },

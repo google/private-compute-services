@@ -16,6 +16,8 @@
 
 package com.google.android.as.oss.pd.virtualmachine;
 
+import com.google.android.as.oss.pd.api.proto.DeleteVmRequest;
+import com.google.android.as.oss.pd.api.proto.DeleteVmResponse;
 import com.google.android.as.oss.pd.api.proto.GetVmRequest;
 import com.google.android.as.oss.pd.api.proto.GetVmResponse;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -24,4 +26,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 public interface VirtualMachineRunner {
   /** Create a new virtual machine. Save the VM public key and return the VM's descriptor . */
   ListenableFuture<GetVmResponse> provisionVirtualMachine(GetVmRequest request);
+
+  /** Delete an existing virtual machine. */
+  ListenableFuture<DeleteVmResponse> deleteVirtualMachine(DeleteVmRequest request);
 }

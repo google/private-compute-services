@@ -29,6 +29,8 @@ import android.system.virtualmachine.VirtualMachineException;
 import android.system.virtualmachine.VirtualMachineManager;
 import androidx.annotation.NonNull;
 import androidx.concurrent.futures.CallbackToFutureAdapter;
+import com.google.android.as.oss.pd.api.proto.DeleteVmRequest;
+import com.google.android.as.oss.pd.api.proto.DeleteVmResponse;
 import com.google.android.as.oss.pd.api.proto.GetVmRequest;
 import com.google.android.as.oss.pd.api.proto.GetVmResponse;
 import com.google.android.as.oss.pd.persistence.ClientPersistentState;
@@ -77,6 +79,25 @@ public class VirtualMachineRunnerImpl implements VirtualMachineRunner {
               return GetVmResponse.getDefaultInstance();
             },
             executor);
+  }
+
+  @Override
+  public ListenableFuture<DeleteVmResponse> deleteVirtualMachine(DeleteVmRequest request) {
+    VirtualMachineManager vmManager = context.getSystemService(VirtualMachineManager.class);
+    if (vmManager == null) {
+      throw new UnsupportedOperationException("VMs are unsupported on this device.");
+    }
+
+    return Futures.submit(
+        () -> {
+          try {
+            vmManager.delete(VM_NAME);
+            return DeleteVmResponse.getDefaultInstance();
+          } catch (VirtualMachineException e) {
+            throw new VmException("Failed to delete VM.", e);
+          }
+        },
+        this.executor);
   }
 
   private ListenableFuture<VirtualMachineDescriptor> getVirtualMachineDescriptor(
