@@ -50,7 +50,8 @@ public final class ProtoConversions {
       ImmutableBiMap.of(
           ClientGroup.ALL, "all",
           ClientGroup.BETA, "beta",
-          ClientGroup.ALPHA, "alpha");
+          ClientGroup.ALPHA, "alpha",
+          ClientGroup.THIRD_PARTY_EAP, "third_party_eap");
 
   private static final ImmutableBiMap<Variant, String> VARIANT_TO_STRING =
       ImmutableBiMap.of(
