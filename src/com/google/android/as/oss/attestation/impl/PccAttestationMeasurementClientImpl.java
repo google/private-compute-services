@@ -25,7 +25,6 @@ import static com.google.protobuf.util.JavaTimeConversions.toProtoDuration;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.os.Build;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Pair;
@@ -43,12 +42,10 @@ import com.google.common.flogger.GoogleLogger;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.internal.android.keyattestation.v1.Challenge;
-import com.google.internal.android.keyattestation.v1.DeviceId;
 import com.google.internal.android.keyattestation.v1.GenerateChallengeRequest;
 import com.google.internal.android.keyattestation.v1.KeyAttestationServiceGrpc;
 import com.google.internal.android.keyattestation.v1.KeyAttestationServiceGrpc.KeyAttestationServiceFutureStub;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.StringValue;
 import io.grpc.ManagedChannel;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -203,10 +200,6 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
       AttestationMeasurementRequest attestationRequest) {
     GenerateChallengeRequest.Builder generateChallengeRequest =
         GenerateChallengeRequest.newBuilder().setTtl(toProtoDuration(attestationRequest.ttl()));
-    if (attestationRequest.includeIdAttestation().isPresent()
-        && attestationRequest.includeIdAttestation().get()) {
-      generateChallengeRequest.setDeviceId(getDeviceProperties());
-    }
     KeyAttestationServiceFutureStub futureStub =
         KeyAttestationServiceGrpc.newFutureStub(managedChannel);
     return futureStub.generateChallenge(generateChallengeRequest.build());
@@ -263,17 +256,6 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
     }
 
     return Pair.create(keyPair, attestationRecord);
-  }
-
-  /** Helper method to obtain device ID properties from the OS. */
-  private DeviceId getDeviceProperties() {
-    return DeviceId.newBuilder()
-        .setBrand(StringValue.of(Build.BRAND))
-        .setDevice(StringValue.of(Build.DEVICE))
-        .setManufacturer(StringValue.of(Build.MANUFACTURER))
-        .setModel(StringValue.of(Build.MODEL))
-        .setProduct(StringValue.of(Build.PRODUCT))
-        .build();
   }
 
   /**
