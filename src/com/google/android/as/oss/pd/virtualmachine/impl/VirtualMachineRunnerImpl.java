@@ -36,7 +36,7 @@ import com.google.android.as.oss.pd.api.proto.GetVmResponse;
 import com.google.android.as.oss.pd.persistence.ClientPersistentState;
 import com.google.android.as.oss.pd.persistence.PersistentStateManager;
 import com.google.android.as.oss.pd.virtualmachine.VirtualMachineRunner;
-import com.google.android.hades.tartarus.ITartarusService;
+import com.google.android.pd.ISecureService;
 import com.google.common.flogger.GoogleLogger;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
@@ -236,11 +236,9 @@ public class VirtualMachineRunnerImpl implements VirtualMachineRunner {
         .build();
   }
 
-  // TODO: Switch to an an open source version of this service definition.
-  private static ITartarusService runTartarusService(VirtualMachine vm)
+  private static ISecureService runTartarusService(VirtualMachine vm)
       throws VirtualMachineException {
-    return ITartarusService.Stub.asInterface(
-        vm.connectToVsockServer(ITartarusService.SERVICE_PORT));
+    return ISecureService.Stub.asInterface(vm.connectToVsockServer(ISecureService.SERVICE_PORT));
   }
 
   private ListenableFuture<ClientPersistentState> readOrCreatePersistentState() {
