@@ -28,3 +28,9 @@ receiving the model or heuristics in an encrypted and verified manner.
 As a first use case, this API is used by Google Play Protect Service. As Google
 Play Protect Service keeps users safe from malware, the models and heuristics
 themselves need to be protected from malware authors.
+
+An extra layer of security that Protected Download provides is the ability to
+instantiate a Virtual Machine and use its public key for downloads. The virtual
+machine is then transferred to the client application. By having the VM
+instantiated within the Protected Download service, it demonstrates that the
+public key does not contain any sensitive data.
