@@ -124,7 +124,7 @@ class ProtectedDownloadGrpcBindableService
   public void getVmDescriptor(
       GetVmRequest request, StreamObserver<GetVmResponse> responseObserver) {
     logger.atInfo().log("Starting getVmDescriptor request");
-    if (!vmRunner.isPresent()) {
+    if (vmRunner.isEmpty()) {
       logger.atFine().log(
           "Cannot start VM since the feature is either disabled or VMs are not supported on this"
               + " device");

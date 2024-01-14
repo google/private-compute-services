@@ -113,7 +113,7 @@ class DelegatingDownloadListener implements PirDownloadListener {
 
   private void insertNetworkUsageLogRow(String url, long downloadedBytes, Status status) {
     if (!networkUsageLogRepository.shouldLogNetworkUsage(ConnectionType.PIR, url)
-        || !networkUsageLogRepository.getContentMap().isPresent()) {
+        || networkUsageLogRepository.getContentMap().isEmpty()) {
       return;
     }
     ConnectionDetails connectionDetails =
