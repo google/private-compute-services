@@ -57,14 +57,14 @@ final class PDNetworkUsageLogHelperImpl implements PDNetworkUsageLogHelper {
   @Override
   public void logDownloadIfNeeded(String clientId, Status status, int estimatedSize) {
     if (!repository.shouldLogNetworkUsage(ConnectionType.PD, clientId)
-        || !repository.getContentMap().isPresent()) {
+        || repository.getContentMap().isEmpty()) {
       return;
     }
 
     // The app package is not available, so we retrieve it from the content map
     Optional<ConnectionDetails> apConnectionDetails =
         repository.getContentMap().get().getPdConnectionDetails(clientId);
-    if (!apConnectionDetails.isPresent()) {
+    if (apConnectionDetails.isEmpty()) {
       // This should never happen since previous check 'shouldLogNetworkUsage' should return
       // false and return immediately.
       logger.atWarning().log("Unknown clientId '%s' for logging AP network usage", clientId);
