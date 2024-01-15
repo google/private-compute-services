@@ -120,7 +120,7 @@ public final class BlobProtoUtils {
   }
 
   private static IntegrityResponse getIntegrityResponse(Optional<ByteString> attestationToken) {
-    if (!attestationToken.isPresent()) {
+    if (attestationToken.isEmpty()) {
       return IntegrityResponse.getDefaultInstance();
     } else {
       return IntegrityResponse.newBuilder().setKeyAttestationToken(attestationToken.get()).build();
@@ -129,7 +129,7 @@ public final class BlobProtoUtils {
 
   private static com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse
       getManifestIntegrityResponse(Optional<ByteString> attestationToken) {
-    if (!attestationToken.isPresent()) {
+    if (attestationToken.isEmpty()) {
       return com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.getDefaultInstance();
     } else {
       return com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.newBuilder()
