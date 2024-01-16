@@ -125,7 +125,7 @@ public class PirGrpcBindableService extends PirServiceGrpc.PirServiceImplBase {
       return;
     }
     Optional<PirDownloadTask> task = setupTask(request, responseObserver);
-    if (!task.isPresent()) {
+    if (task.isEmpty()) {
       return;
     }
 
