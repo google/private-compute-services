@@ -294,7 +294,7 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
       Status status,
       long size) {
     if (!networkUsageLogRepository.shouldLogNetworkUsage(ConnectionType.HTTP, request.getUrl())
-        || !networkUsageLogRepository.getContentMap().isPresent()) {
+        || networkUsageLogRepository.getContentMap().isEmpty()) {
       return;
     }
 
