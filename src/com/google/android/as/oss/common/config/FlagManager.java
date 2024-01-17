@@ -18,6 +18,7 @@ package com.google.android.as.oss.common.config;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.MessageLite;
 import javax.annotation.concurrent.Immutable;
 
 /** Connector for system-configurable flags. */
@@ -84,6 +85,14 @@ public interface FlagManager {
    */
   ImmutableList<String> get(StringListFlag flag, ImmutableList<String> defaultOverride);
 
+  /**
+   * Returns a proto flag value.
+   *
+   * <p>If a non-null defaultOverride is provided it will be used instead of the default that is set
+   * within {@link ProtoFlag}.
+   */
+  <ResultT extends MessageLite> ResultT get(ProtoFlag<ResultT> flag, ResultT defaultOverride);
+
   /** Returns a boolean flag value. */
   default Boolean get(BooleanFlag flag) {
     return get(flag, flag.defaultValue());
@@ -116,6 +125,11 @@ public interface FlagManager {
 
   /** Returns a string list flag value. */
   default ImmutableList<String> get(StringListFlag flag) {
+    return get(flag, flag.defaultValue());
+  }
+
+  /** Returns a proto flag value. */
+  default <ResultT extends MessageLite> ResultT get(ProtoFlag<ResultT> flag) {
     return get(flag, flag.defaultValue());
   }
 
@@ -196,6 +210,21 @@ public interface FlagManager {
   abstract class StringListFlag extends Flag<ImmutableList<String>> {
     public static StringListFlag create(String name, ImmutableList<String> defaultValue) {
       return new AutoValue_FlagManager_StringListFlag(name, defaultValue);
+    }
+  }
+
+  /** {@link Flag} implementation for protos. */
+  @AutoValue
+  abstract class ProtoFlag<ResultT extends MessageLite> extends Flag<ResultT> {
+    abstract boolean merge();
+
+    /**
+     * If {@code merge} is true, this flag will merge the parsed values with the provided {@code
+     * defaultValue}.
+     */
+    public static <ResultT extends MessageLite> ProtoFlag<ResultT> create(
+        String name, ResultT defaultValue, boolean merge) {
+      return new AutoValue_FlagManager_ProtoFlag<>(name, defaultValue, merge);
     }
   }
 }

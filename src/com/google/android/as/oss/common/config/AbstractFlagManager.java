@@ -16,9 +16,15 @@
 
 package com.google.android.as.oss.common.config;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
+import android.util.Base64;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.GoogleLogger;
+import com.google.protobuf.ExtensionRegistryLite;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageLite;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /** Simple base implementation of a {@link FlagManager}. */
@@ -130,6 +136,35 @@ public abstract class AbstractFlagManager implements FlagManager {
       return defaultOverride;
     }
     return ImmutableList.copyOf(STRING_LIST_SPLITTER.split(property));
+  }
+
+  @Override
+  @SuppressWarnings("unchecked") // Guaranteed by runtime.
+  public <ResultT extends MessageLite> ResultT get(
+      ProtoFlag<ResultT> flag, ResultT defaultOverride) {
+    String base64Proto = getProperty(flag.name());
+    if (isNullOrEmpty(base64Proto)) {
+      return defaultOverride;
+    }
+    try {
+      byte[] decodedProto = Base64.decode(base64Proto, Base64.DEFAULT);
+      if (flag.merge()) {
+        return (ResultT)
+            defaultOverride.toBuilder()
+                .mergeFrom(decodedProto, ExtensionRegistryLite.getEmptyRegistry())
+                .build();
+      }
+      return (ResultT)
+          defaultOverride
+              .getParserForType()
+              .parseFrom(decodedProto, ExtensionRegistryLite.getEmptyRegistry());
+    } catch (InvalidProtocolBufferException | IllegalArgumentException e) {
+      LazyLogger.logger
+          .atSevere()
+          .withCause(e)
+          .log("Failed to parse proto. Flag name = %s.", flag.name());
+    }
+    return defaultOverride;
   }
 
   /** Returns the raw string value for a given flag name. */

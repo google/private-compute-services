@@ -26,6 +26,7 @@ android_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:com_google_flogger_google_extensions",
         "@maven//:com_google_guava_guava",
+        "@maven//:com_google_protobuf_protobuf_javalite",
         "@maven//:org_checkerframework_checker_qual",
     ],
 )
