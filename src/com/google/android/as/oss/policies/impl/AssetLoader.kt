@@ -36,7 +36,7 @@ object AssetLoader {
    */
   fun loadPolicyMapFromAssets(
     @ApplicationContext context: Context,
-    vararg fileNames: String
+    vararg fileNames: String,
   ): PolicyMap {
     val policyMap: Multimap<String, PolicyProto> = ArrayListMultimap.create()
     setOf(*fileNames).forEach {

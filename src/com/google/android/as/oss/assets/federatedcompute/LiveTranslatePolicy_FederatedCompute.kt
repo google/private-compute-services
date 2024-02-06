@@ -61,7 +61,7 @@ val LiveTranslatePolicy_FederatedCompute =
 
     target(
       PERSISTED_LIVE_TRANSLATE_CONFIG_CHANGED_EVENT_GENERATED_DTD,
-      maxAge = Duration.ofDays(28)
+      maxAge = Duration.ofDays(28),
     ) {
       retention(StorageMedium.RAM)
       retention(StorageMedium.DISK)
@@ -82,7 +82,7 @@ val LiveTranslatePolicy_FederatedCompute =
 
     target(
       PERSISTED_LIVE_TRANSLATE_COPY_TRANSLATE_EVENT_GENERATED_DTD,
-      maxAge = Duration.ofDays(28)
+      maxAge = Duration.ofDays(28),
     ) {
       retention(StorageMedium.RAM)
       retention(StorageMedium.DISK)
@@ -122,7 +122,7 @@ val LiveTranslatePolicy_FederatedCompute =
 
     target(
       PERSISTED_LIVE_TRANSLATE_PAGE_TRANSLATE_EVENT_GENERATED_DTD,
-      maxAge = Duration.ofDays(28)
+      maxAge = Duration.ofDays(28),
     ) {
       retention(StorageMedium.RAM)
       retention(StorageMedium.DISK)
@@ -175,7 +175,7 @@ val LiveTranslatePolicy_FederatedCompute =
 
     target(
       PERSISTED_LIVE_TRANSLATE_TRANSLATOR_CREATION_EVENT_GENERATED_DTD,
-      maxAge = Duration.ofDays(28)
+      maxAge = Duration.ofDays(28),
     ) {
       retention(StorageMedium.RAM)
       retention(StorageMedium.DISK)

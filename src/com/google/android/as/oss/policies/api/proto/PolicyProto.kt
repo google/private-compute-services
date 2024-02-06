@@ -51,7 +51,7 @@ fun PolicyProto.decode(): Policy {
     targets = targetsList.map { it.decode() },
     configs =
       configsList.associateBy(keySelector = { it.name }, valueTransform = { it.metadataMap }),
-    annotations = annotationsList.map { it.decode() }
+    annotations = annotationsList.map { it.decode() },
   )
 }
 
@@ -77,7 +77,7 @@ private fun PolicyTargetProto.decode(): PolicyTarget {
     maxAgeMs = maxAgeMs,
     retentions = retentionsList.map { it.decode() },
     fields = fieldsList.map { it.decode() },
-    annotations = annotationsList.map { it.decode() }
+    annotations = annotationsList.map { it.decode() },
   )
 }
 
@@ -107,7 +107,7 @@ private fun PolicyFieldProto.decode(parentFieldPath: List<FieldName> = emptyList
     rawUsages = rawUsages,
     redactedUsages = redactedUsages,
     subfields = subfieldsList.map { it.decode(fieldPath) },
-    annotations = annotationsList.map { it.decode() }
+    annotations = annotationsList.map { it.decode() },
   )
 }
 

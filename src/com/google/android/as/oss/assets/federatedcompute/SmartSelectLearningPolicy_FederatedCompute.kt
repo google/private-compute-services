@@ -43,7 +43,7 @@ val SmartSelectLearningPolicy_FederatedCompute =
 
     target(
       PERSISTED_SMART_SELECT_SELECTION_EVENT_ENTITY_GENERATED_DTD,
-      maxAge = Duration.ofDays(14)
+      maxAge = Duration.ofDays(14),
     ) {
       retention(StorageMedium.RAM)
       retention(StorageMedium.DISK)

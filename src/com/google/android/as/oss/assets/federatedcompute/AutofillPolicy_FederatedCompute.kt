@@ -54,7 +54,7 @@ val AutofillPolicy_FederatedCompute =
 
     target(
       IN_MEMORY_AUTOFILL_CANDIDATE_TEMPLATE_IDX_ENTITY_GENERATED_DTD,
-      maxAge = Duration.ofDays(14)
+      maxAge = Duration.ofDays(14),
     ) {
       retention(StorageMedium.RAM)
 

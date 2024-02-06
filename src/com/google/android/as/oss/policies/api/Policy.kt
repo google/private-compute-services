@@ -44,7 +44,7 @@ data class Policy(
   val targets: List<PolicyTarget> = emptyList(),
   val configs: Map<String, PolicyConfig> = emptyMap(),
   val annotations: List<Annotation> = emptyList(),
-  val allowedContext: PolicyContextRule = All
+  val allowedContext: PolicyContextRule = All,
 ) {
   /** All fields mentioned the policy (includes nested fields). */
   val allFields: List<PolicyField> = collectAllFields()
@@ -66,7 +66,7 @@ data class PolicyTarget(
   val maxAgeMs: Long = 0,
   val retentions: List<PolicyRetention> = emptyList(),
   val fields: List<PolicyField> = emptyList(),
-  val annotations: List<Annotation> = emptyList()
+  val annotations: List<Annotation> = emptyList(),
 ) {
 
   fun toCapabilities(): List<Capabilities> {
@@ -96,7 +96,7 @@ data class PolicyField(
   /** Valid usages of this field with redaction first. Maps from redaction label to usages. */
   val redactedUsages: Map<String, Set<UsageType>> = emptyMap(),
   val subfields: List<PolicyField> = emptyList(),
-  val annotations: List<Annotation> = emptyList()
+  val annotations: List<Annotation> = emptyList(),
 ) {
   init {
     subfields.forEach { subfield ->

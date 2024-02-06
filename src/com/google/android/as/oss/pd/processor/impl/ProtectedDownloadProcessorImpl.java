@@ -297,7 +297,7 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
             externalResponse -> {
               int approximatedSize = externalResponse.getSerializedSize();
               try {
-                logger.atFine().log(
+                logger.atInfo().log(
                     "received protection package with protection token %s",
                     BaseEncoding.base16()
                         .lowerCase()

@@ -39,7 +39,7 @@ val ContentCapturePerformanceDataPolicy_FederatedCompute =
 
     target(
       PERSISTED_CONTENT_CAPTURE_PERFORMANCE_ENTITY_GENERATED_DTD,
-      maxAge = Duration.ofDays(14)
+      maxAge = Duration.ofDays(14),
     ) {
       retention(StorageMedium.RAM)
       retention(StorageMedium.DISK)
