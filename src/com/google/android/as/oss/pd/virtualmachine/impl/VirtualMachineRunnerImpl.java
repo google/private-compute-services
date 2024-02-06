@@ -20,6 +20,7 @@ import static com.google.android.apps.miphone.astrea.grpc.VirtualMachineContextK
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
 import android.system.virtualmachine.VirtualMachine;
 import android.system.virtualmachine.VirtualMachineCallback;
@@ -206,7 +207,7 @@ public class VirtualMachineRunnerImpl implements VirtualMachineRunner {
     }
 
     VirtualMachineConfig config =
-        buildVmConfig(context, request.getApkPath(), request.getPayloadPath());
+        buildVmConfig(context, request.getPackageName(), request.getPayloadPath());
     try {
       VirtualMachine virtualMachine = vmManager.getOrCreate(VM_NAME, config);
       try {
@@ -225,15 +226,19 @@ public class VirtualMachineRunnerImpl implements VirtualMachineRunner {
   }
 
   private static VirtualMachineConfig buildVmConfig(
-      Context context, String apkPath, String payloadPath) {
-    // TODO Support split APKs.
+      Context context, String clientAppPackageName, String payloadPath) {
     // See [redacted] to enable debug logs.
     // TODO: Use a locally overridable flag to permit local VM debugging.
-    return new VirtualMachineConfig.Builder(context)
-        .setProtectedVm(true)
-        .setApkPath(apkPath)
-        .setPayloadBinaryName(payloadPath)
-        .build();
+    try {
+      Context clientAppContext =
+          context.createPackageContext(clientAppPackageName, Context.CONTEXT_RESTRICTED);
+      return new VirtualMachineConfig.Builder(clientAppContext)
+          .setProtectedVm(true)
+          .setPayloadBinaryName(payloadPath)
+          .build();
+    } catch (NameNotFoundException e) {
+      throw new VmException("Invalid configuration - package name not found", e);
+    }
   }
 
   private static ISecureService runTartarusService(VirtualMachine vm)

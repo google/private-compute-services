@@ -255,10 +255,13 @@ message GetManifestConfigResponse {
 
 message GetVmRequest {
   // Path to the APK that contains the VM payload.
-  string apk_path = 1;
+  string apk_path = 1 [deprecated = true];
 
   // Path to the payload to be loaded into the VM.
   string payload_path = 2;
+
+  // Package name of the app making the request
+  string package_name = 3;
 }
 
 message GetVmResponse {}
