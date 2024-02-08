@@ -32,7 +32,6 @@ val GPPServicePolicy_FederatedCompute =
         .trimIndent()
 
     flavors(Flavor.GPPS_PROD) { minRoundSize(minRoundSize = 500, minSecAggRoundSize = 500) }
-    consentRequiredForCollectionOrStorage(Consent.UsageAndDiagnosticsCheckbox)
     presubmitReviewRequired(OwnersApprovalOnly)
     checkpointMaxTtlDays(720)
 
