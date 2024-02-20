@@ -284,7 +284,8 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
     ProgramBlobServiceFutureStub serviceStub = createServiceStub(channel, apiKey);
 
     com.google.android.as.oss.pd.api.proto.Metadata metadata = request.getMetadata();
-
+    logger.atInfo().log(
+        "downloading blob with public key hash %s.", externalEncryption.publicKeyHashForLogging());
     return FluentFuture.from(
             serviceStub.downloadBlob(
                 blobProtoUtils.toExternalRequest(
@@ -331,7 +332,9 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
     String apiKey = channelProvider.getServiceApiKeyOverride().orElse(request.getApiKey());
     ProtectedDownloadServiceFutureStub serviceStub =
         createProtectedDownloadServiceStub(channel, apiKey);
-
+    logger.atInfo().log(
+        "downloading manifest with public key hash %s.",
+        externalEncryption.publicKeyHashForLogging());
     return FluentFuture.from(
             serviceStub.getManifestConfig(
                 blobProtoUtils.toExternalRequest(

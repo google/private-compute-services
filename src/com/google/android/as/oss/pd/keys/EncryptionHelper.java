@@ -44,4 +44,7 @@ public interface EncryptionHelper {
 
   /** Serializes the keys used for encryption/decryption in an encrypted form. */
   byte[] toEncryptedKeySet() throws GeneralSecurityException, IOException;
+
+  /** Returns a hash of the public key used for logging. */
+  String publicKeyHashForLogging() throws GeneralSecurityException, IOException;
 }
