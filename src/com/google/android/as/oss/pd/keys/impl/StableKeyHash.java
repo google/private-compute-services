@@ -16,53 +16,68 @@
 
 package com.google.android.as.oss.pd.keys.impl;
 
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.hybrid.EciesPublicKey;
 import com.google.crypto.tink.hybrid.HpkePublicKey;
-import com.google.protobuf.ByteString;
-import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.security.spec.ECPoint;
 
-/** StableKeyHash provides stable byte sequence for hashing. */
+/** StableKeyHash provides stable hash for public key. */
 public class StableKeyHash {
 
   private StableKeyHash() {}
 
+  /** Calculates a stable hash of public key. */
+  public static HashCode hashKey(KeysetHandle publicKeysetHandle) {
+    ByteBuffer hashInput = ByteBuffer.allocate(128);
+    putKeyset(hashInput, publicKeysetHandle);
+    hashInput.flip(); // Flip to read.
+    return Hashing.sha256().hashBytes(hashInput);
+  }
+
   /** Derives a stable byte sequence to be used for hashing. */
   @AccessesPartialKey
-  public static ByteString getHashInput(KeysetHandle publicKeysetHandle) {
+  static void putKeyset(ByteBuffer hashInput, KeysetHandle publicKeysetHandle) {
     if (publicKeysetHandle.size() != 1) {
       throw new IllegalArgumentException("Expected exactly 1 key.");
     }
+    // Format as RFC 8422/ANSI.X9-62.2005 specified key
+    hashInput.put((byte) 0x04);
 
     Key key = publicKeysetHandle.getPrimary().getKey();
     if (key instanceof HpkePublicKey) {
-      return ByteString.copyFrom(((HpkePublicKey) key).getPublicKeyBytes().toByteArray());
+      hashInput.put(((HpkePublicKey) key).getPublicKeyBytes().toByteArray());
     } else if (key instanceof EciesPublicKey) {
-      return eciesAeadHkdfPublicKeyToBytes((EciesPublicKey) key);
+      putEciesAeadHkdfPublicKey(hashInput, (EciesPublicKey) key);
     } else {
       throw new IllegalArgumentException("Unexpected key type: " + key.getClass());
     }
   }
 
   @AccessesPartialKey
-  private static ByteString eciesAeadHkdfPublicKeyToBytes(EciesPublicKey eciesPublicKey) {
-    ByteString.Output output = ByteString.newOutput();
-    try {
-      // Format as RFC 8422/ANSI.X9-62.2005 specified key
-      output.write(0x04);
-      ECPoint nistCurvePoint = eciesPublicKey.getNistCurvePoint();
-      if (nistCurvePoint == null) {
-        throw new IllegalArgumentException("Invalid eciesPublicKey. ECPoint is null.");
-      }
-      output.write(nistCurvePoint.getAffineX().toByteArray());
-      output.write(nistCurvePoint.getAffineY().toByteArray());
-    } catch (IOException e) {
-      throw new AssertionError("Unexpected failure building ByteString.", e);
+  private static void putEciesAeadHkdfPublicKey(
+      ByteBuffer hashInput, EciesPublicKey eciesPublicKey) {
+    ECPoint nistCurvePoint = eciesPublicKey.getNistCurvePoint();
+    if (nistCurvePoint == null) {
+      throw new IllegalArgumentException("Invalid eciesPublicKey. ECPoint is null.");
     }
+    putBigInteger(hashInput, nistCurvePoint.getAffineX());
+    putBigInteger(hashInput, nistCurvePoint.getAffineY());
+  }
 
-    return output.toByteString();
+  private static void putBigInteger(ByteBuffer hashInput, BigInteger bigInteger) {
+    byte[] buffer = bigInteger.toByteArray();
+    // BigInteger may produce output with additional leading zero. Strip leading 0
+    // to produce stable hash.
+    if (buffer.length > 0 && buffer[0] == 0) {
+      hashInput.put(buffer, 1, buffer.length - 1);
+    } else {
+      hashInput.put(buffer);
+    }
   }
 }

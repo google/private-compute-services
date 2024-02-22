@@ -17,7 +17,6 @@
 package com.google.android.as.oss.pd.keys.impl;
 
 import com.google.android.as.oss.pd.keys.EncryptionHelper;
-import com.google.common.hash.Hashing;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeysetHandle;
@@ -73,8 +72,7 @@ class TinkEncryptionHelper implements EncryptionHelper {
 
   @Override
   public String publicKeyHashForLogging() throws GeneralSecurityException, IOException {
-    byte[] hashInput = StableKeyHash.getHashInput(getPublicKeysetHandle()).toByteArray();
-    return Hashing.sha256().hashBytes(hashInput).toString();
+    return StableKeyHash.hashKey(getPublicKeysetHandle()).toString();
   }
 
   private KeysetHandle getPublicKeysetHandle() throws GeneralSecurityException {
