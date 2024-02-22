@@ -17,9 +17,9 @@
 package com.google.android.libraries.pcc.policies.federatedcompute
 
 /** Google Play Protect Harmful app detection policy. */
-val GPPServicePolicy_FederatedCompute =
+val GPPServicePolicyV2_FederatedCompute =
   flavoredPolicies(
-    name = "GPPServicePolicy_FederatedCompute",
+    name = "GPPServicePolicyV2_FederatedCompute",
     policyType = MonitorOrImproveUserExperienceWithFederatedCompute,
   ) {
     description =
@@ -32,25 +32,11 @@ val GPPServicePolicy_FederatedCompute =
         .trimIndent()
 
     flavors(Flavor.GPPS_PROD) { minRoundSize(minRoundSize = 500, minSecAggRoundSize = 500) }
-    consentRequiredForCollectionOrStorage(Consent.UsageAndDiagnosticsCheckbox)
     presubmitReviewRequired(OwnersApprovalOnly)
     checkpointMaxTtlDays(720)
 
     target(CLASSIFICATION_RESULT_GENERATED_DTD, maxAge = Duration.ofDays(14)) {
       retention(StorageMedium.RAM)
       retention(StorageMedium.DISK)
-
-      "rowId" { rawUsage(UsageType.JOIN) }
-      "modelId" { rawUsage(UsageType.ANY) }
-      "timestamp" {
-        ConditionalUsage.TruncatedToDays.whenever(UsageType.ANY)
-        rawUsage(UsageType.JOIN)
-      }
-      "sha256Digest" { rawUsage(UsageType.ANY) }
-      "packageName" {
-        ConditionalUsage.Top2000PackageNamesWith2000Wau.whenever(UsageType.ANY)
-        rawUsage(UsageType.JOIN)
-      }
-      "verdict" { rawUsage(UsageType.ANY) }
     }
   }
