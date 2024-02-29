@@ -95,6 +95,13 @@ final class ProtoConversionsModule {
 
   @Provides
   @IntoMap
+  @ClientBiMapKey(Client.AI_CORE_CHROME_SUMMARIZATION_OUTPUT)
+  static String provideAiCoreChromeSummarizationOutputClientId() {
+    return "com.google.android.aicore:8519285862245230442";
+  }
+
+  @Provides
+  @IntoMap
   @ClientBiMapKey(Client.AI_CORE_PROTECTED_DOWNLOAD)
   static String provideAiCoreProtectedDownloadClientId() {
     return "com.google.android.aicore:11791126134479005147";
