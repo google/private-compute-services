@@ -17,7 +17,7 @@
 package com.google.android.as.oss.pd.common;
 
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.Client;
-import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableMap;
 import dagger.MapKey;
 import dagger.Module;
 import dagger.Provides;
@@ -33,84 +33,84 @@ import javax.inject.Singleton;
 final class ProtoConversionsModule {
 
   @MapKey
-  @interface ClientBiMapKey {
+  @interface ClientMapKey {
     Client value();
   }
 
   @Provides
   @IntoMap
-  @ClientBiMapKey(Client.PLAY_PROTECT_SERVICE)
-  static String providePlayProtectClientId() {
-    return "com.google.android.odad";
+  @ClientMapKey(Client.PLAY_PROTECT_SERVICE)
+  static ClientConfig providePlayProtectClientConfig() {
+    return ClientConfig.create("com.google.android.odad");
   }
 
   @Provides
   @IntoMap
-  @ClientBiMapKey(Client.PLAY_PROTECT_SERVICE_CORE_DEFAULT)
-  static String providePlayProtectCoreDefaultClientId() {
-    return "com.google.android.odad:2793571637033546290";
+  @ClientMapKey(Client.PLAY_PROTECT_SERVICE_CORE_DEFAULT)
+  static ClientConfig providePlayProtectCoreDefaultClientConfig() {
+    return ClientConfig.create("com.google.android.odad:2793571637033546290");
   }
 
   @Provides
   @IntoMap
-  @ClientBiMapKey(Client.PLAY_PROTECT_SERVICE_PVM_DEFAULT)
-  static String providePlayProtectPvmDefaultClientId() {
-    return "com.google.android.odad:2525461103339185322";
+  @ClientMapKey(Client.PLAY_PROTECT_SERVICE_PVM_DEFAULT)
+  static ClientConfig providePlayProtectPvmDefaultClientConfig() {
+    return ClientConfig.create("com.google.android.odad:2525461103339185322");
   }
 
   @Provides
   @IntoMap
-  @ClientBiMapKey(Client.AI_CORE_TEXT_INPUT)
-  static String provideAiCoreTextInputClientId() {
-    return "com.google.android.aicore:3649180271731021675";
+  @ClientMapKey(Client.AI_CORE_TEXT_INPUT)
+  static ClientConfig provideAiCoreTextInputClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:3649180271731021675");
   }
 
   @Provides
   @IntoMap
-  @ClientBiMapKey(Client.AI_CORE_TEXT_OUTPUT)
-  static String provideAiCoreTextOutputClientId() {
-    return "com.google.android.aicore:7923848966216590666";
+  @ClientMapKey(Client.AI_CORE_TEXT_OUTPUT)
+  static ClientConfig provideAiCoreTextOutputClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:7923848966216590666");
   }
 
   @Provides
   @IntoMap
-  @ClientBiMapKey(Client.AI_CORE_IMAGE_INPUT)
-  static String provideAiCoreImageInputClientId() {
-    return "com.google.android.aicore:6120135725815620389";
+  @ClientMapKey(Client.AI_CORE_IMAGE_INPUT)
+  static ClientConfig provideAiCoreImageInputClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:6120135725815620389");
   }
 
   @Provides
   @IntoMap
-  @ClientBiMapKey(Client.AI_CORE_IMAGE_OUTPUT)
-  static String provideAiCoreImageOutputClientId() {
-    return "com.google.android.aicore:16223496253676012401";
+  @ClientMapKey(Client.AI_CORE_IMAGE_OUTPUT)
+  static ClientConfig provideAiCoreImageOutputClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:16223496253676012401");
   }
 
   @Provides
   @IntoMap
-  @ClientBiMapKey(Client.AI_CORE_MESSAGES_TEXT)
-  static String provideAiCoreMessagesTextClientId() {
-    return "com.google.android.aicore:4970947506931743799";
+  @ClientMapKey(Client.AI_CORE_MESSAGES_TEXT)
+  static ClientConfig provideAiCoreMessagesTextClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:4970947506931743799");
   }
 
   @Provides
   @IntoMap
-  @ClientBiMapKey(Client.AI_CORE_CHROME_SUMMARIZATION_OUTPUT)
-  static String provideAiCoreChromeSummarizationOutputClientId() {
-    return "com.google.android.aicore:8519285862245230442";
+  @ClientMapKey(Client.AI_CORE_CHROME_SUMMARIZATION_OUTPUT)
+  static ClientConfig provideAiCoreChromeSummarizationOutputClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:8519285862245230442");
   }
 
   @Provides
   @IntoMap
-  @ClientBiMapKey(Client.AI_CORE_PROTECTED_DOWNLOAD)
-  static String provideAiCoreProtectedDownloadClientId() {
-    return "com.google.android.aicore:11791126134479005147";
+  @ClientMapKey(Client.AI_CORE_PROTECTED_DOWNLOAD)
+  static ClientConfig provideAiCoreProtectedDownloadClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:11791126134479005147");
   }
 
   @Provides
   @Singleton
-  static ProtoConversions provideProtoConversions(Map<Client, String> clientToClientId) {
-    return new ProtoConversions(ImmutableBiMap.copyOf(clientToClientId));
+  static ProtoConversions provideProtoConversions(Map<Client, ClientConfig> clientToClientId) {
+    return new ProtoConversions(ImmutableMap.copyOf(clientToClientId));
   }
 
   private ProtoConversionsModule() {}

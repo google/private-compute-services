@@ -16,13 +16,16 @@
 
 package com.google.android.as.oss.pd.common;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
+
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.Client;
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.ClientGroup;
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.DeviceTier;
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.Variant;
-import com.google.android.as.oss.pd.api.proto.DownloadBlobRequest;
-import com.google.android.as.oss.pd.api.proto.DownloadBlobResponse;
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -31,10 +34,18 @@ import java.util.Optional;
  */
 public final class ProtoConversions {
 
-  private final ImmutableBiMap<Client, String> clientToClientId;
+  private final ImmutableMap<Client, ClientConfig> clientToClientConfig;
+  private final ImmutableMap<String, Client> clientIdToClient;
 
-  public ProtoConversions(ImmutableBiMap<Client, String> clientToClientId) {
-    this.clientToClientId = clientToClientId;
+  public ProtoConversions(ImmutableMap<Client, ClientConfig> clientToClientConfig) {
+    this.clientToClientConfig = clientToClientConfig;
+
+    this.clientIdToClient =
+        clientToClientConfig.entrySet().stream()
+            .collect(toImmutableMap(entity -> entity.getValue().clientId(), Map.Entry::getKey));
+    checkArgument(
+        clientToClientConfig.size() == this.clientIdToClient.size(),
+        "All ClientIds should be unique.");
   }
 
   private static final ImmutableBiMap<DeviceTier, String> DEVICE_TIER_TO_STRING =
@@ -62,11 +73,11 @@ public final class ProtoConversions {
           Variant.SAMSUNG_SLSI, "SAMSUNG_SLSI");
 
   public Optional<String> toClientIdString(Client client) {
-    return Optional.ofNullable(clientToClientId.get(client));
+    return Optional.ofNullable(clientToClientConfig.get(client)).map(ClientConfig::clientId);
   }
 
   public Optional<Client> fromClientIdString(String clientId) {
-    return Optional.ofNullable(clientToClientId.inverse().get(clientId));
+    return Optional.ofNullable(clientIdToClient.get(clientId));
   }
 
   public static Optional<String> toDeviceTierString(DeviceTier deviceTier) {
