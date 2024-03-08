@@ -176,6 +176,10 @@ message DownloadBlobResponse {
   // DownloadBlobRequest.
   bytes next_page_token = 2;
 
+  // Opaque server generated token that identifies the download requested by the
+  // given BlobConstraints. This token is only used for debugging purposes.
+  bytes protection_token = 6;
+
   // Proof that can be verified to ensure the blob shipped to user devices
   // has been included in a transparency log.
   ProtectionProof protection_proof_v2 = 12;
@@ -195,7 +199,7 @@ message DownloadBlobResponse {
     PARTIAL_UPDATE_EMPTY = 3;
   }
 
-  reserved 3, 4, 5, 6, 7, 8, 9, 10, 11, 15;
+  reserved 3, 4, 5, 7, 8, 9, 10, 11, 15;
 }
 
 // LogEntryId identifies a specific entry in the transparency log.

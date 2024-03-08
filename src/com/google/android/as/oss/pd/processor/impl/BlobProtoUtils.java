@@ -186,7 +186,8 @@ public final class BlobProtoUtils {
         DownloadBlobResponse.newBuilder()
             .setProtectionProofV2(toInternalProof(externalResponse.getProtectionProofV2()))
             .setNextPageToken(externalResponse.getNextPageToken())
-            .setDownloadStatusValue(externalResponse.getDownloadStatus().getNumber());
+            .setDownloadStatusValue(externalResponse.getDownloadStatus().getNumber())
+            .setProtectionToken(externalResponse.getProtectionToken());
 
     ByteString outerBlob = externalResponse.getBlob();
     boolean hasOuterBlob = !outerBlob.isEmpty();
