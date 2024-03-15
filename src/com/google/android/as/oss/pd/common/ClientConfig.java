@@ -16,15 +16,46 @@
 
 package com.google.android.as.oss.pd.common;
 
+import com.google.android.as.oss.common.config.FlagNamespace;
 import com.google.auto.value.AutoValue;
+import java.util.Optional;
 
 /** A Client details corresponded to Client enum. */
 @AutoValue
 public abstract class ClientConfig {
-
+  /** The client id string representation. */
   public abstract String clientId();
 
+  /** Optional build id flag if client supports versioned downloads. */
+  public abstract Optional<BuildIdFlag> buildIdFlag();
+
   public static ClientConfig create(String clientId) {
-    return new AutoValue_ClientConfig(clientId);
+    return builder().setClientId(clientId).build();
+  }
+
+  public static Builder builder() {
+    return new AutoValue_ClientConfig.Builder();
+  }
+
+  /** Builder for creating new instances. */
+  @AutoValue.Builder
+  public abstract static class Builder {
+    public abstract Builder setClientId(String clientId);
+
+    public abstract Builder setBuildIdFlag(BuildIdFlag buildIdFlag);
+
+    public abstract ClientConfig build();
+  }
+
+  /** BuildId flag specification. */
+  @AutoValue
+  public abstract static class BuildIdFlag {
+    public abstract FlagNamespace flagNamespace();
+
+    public abstract String flagName();
+
+    public static BuildIdFlag create(FlagNamespace flagNamespace, String flagName) {
+      return new AutoValue_ClientConfig_BuildIdFlag(flagNamespace, flagName);
+    }
   }
 }

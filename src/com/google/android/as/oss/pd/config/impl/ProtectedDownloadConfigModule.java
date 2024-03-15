@@ -20,12 +20,16 @@ import com.google.android.as.oss.common.ExecutorAnnotations.GeneralExecutorQuali
 import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.common.config.FlagManagerFactory;
 import com.google.android.as.oss.common.config.FlagNamespace;
+import com.google.android.as.oss.pd.api.proto.BlobConstraints.Client;
+import com.google.android.as.oss.pd.common.ClientConfig;
+import com.google.android.as.oss.pd.config.ClientBuildVersionReader;
 import com.google.android.as.oss.pd.config.ProtectedDownloadConfig;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
 import dagger.hilt.components.SingletonComponent;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import javax.inject.Singleton;
 
@@ -37,11 +41,23 @@ interface ProtectedDownloadConfigModule {
   @Binds
   ConfigReader<ProtectedDownloadConfig> bindConfigReader(ProtectedDownloadConfigReader reader);
 
+  @Binds
+  ClientBuildVersionReader bindClientBuildVersionReader(ClientBuildVersionReaderImpl reader);
+
   @Provides
   @Singleton
   static ProtectedDownloadConfigReader provideConfigReader(
       FlagManagerFactory flagManagerFactory, @GeneralExecutorQualifier Executor executor) {
     return ProtectedDownloadConfigReader.create(
         flagManagerFactory.create(FlagNamespace.DEVICE_PERSONALIZATION_SERVICES, executor));
+  }
+
+  @Provides
+  @Singleton
+  static ClientBuildVersionReaderImpl provideClientBuildVersionReaderImpl(
+      FlagManagerFactory flagManagerFactory,
+      @GeneralExecutorQualifier Executor executor,
+      Map<Client, ClientConfig> clientConfigMap) {
+    return ClientBuildVersionReaderImpl.create(flagManagerFactory, executor, clientConfigMap);
   }
 }
