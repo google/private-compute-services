@@ -27,6 +27,8 @@ import com.google.android.apps.aicore.aidl.ISmartReplyResultCallback;
 import com.google.android.apps.aicore.aidl.ISmartReplyService;
 import com.google.android.apps.aicore.aidl.ISummarizationResultCallback;
 import com.google.android.apps.aicore.aidl.ISummarizationService;
+import com.google.android.apps.aicore.aidl.ITextEmbeddingResultCallback;
+import com.google.android.apps.aicore.aidl.ITextEmbeddingService;
 import com.google.android.apps.aicore.aidl.InferenceError;
 import com.google.android.apps.aicore.aidl.LLMRequest;
 import com.google.android.apps.aicore.aidl.LLMResult;
@@ -34,6 +36,8 @@ import com.google.android.apps.aicore.aidl.SmartReplyRequest;
 import com.google.android.apps.aicore.aidl.SmartReplyResult;
 import com.google.android.apps.aicore.aidl.SummarizationRequest;
 import com.google.android.apps.aicore.aidl.SummarizationResult;
+import com.google.android.apps.aicore.aidl.TextEmbeddingRequest;
+import com.google.android.apps.aicore.aidl.TextEmbeddingResult;
 import com.google.android.as.oss.ai.aidl.PccCancellationCallback;
 import com.google.android.as.oss.ai.aidl.PccLlmResultCallback;
 import com.google.android.as.oss.ai.aidl.PccLlmService;
@@ -41,6 +45,8 @@ import com.google.android.as.oss.ai.aidl.PccSmartReplyResultCallback;
 import com.google.android.as.oss.ai.aidl.PccSmartReplyService;
 import com.google.android.as.oss.ai.aidl.PccSummarizationResultCallback;
 import com.google.android.as.oss.ai.aidl.PccSummarizationService;
+import com.google.android.as.oss.ai.aidl.PccTextEmbeddingResultCallback;
+import com.google.android.as.oss.ai.aidl.PccTextEmbeddingService;
 import com.google.common.flogger.GoogleLogger;
 import java.util.concurrent.Callable;
 
@@ -105,6 +111,46 @@ final class GenAiServiceUtils {
           // Binder doesn't propagate exceptions across processes.
           logger.atWarning().withCause(e).log("Failed to run summarization service");
           callback.onSummarizationInferenceFailure(InferenceError.IPC_ERROR);
+        }
+      }
+    };
+  }
+
+  public static PccTextEmbeddingService createTextEmbeddingServiceStub(
+      IAICoreService service, AIFeature feature) throws RemoteException {
+    ITextEmbeddingService textEmbeddingService =
+        checkNonNullAidlResponse(() -> service.getTextEmbeddingService(feature));
+    return new PccTextEmbeddingService.Stub() {
+      @Override
+      public PccCancellationCallback runCancellableInference(
+          TextEmbeddingRequest request, PccTextEmbeddingResultCallback callback)
+          throws RemoteException {
+        try {
+          ICancellationCallback cancellationCallback =
+              checkNonNullAidlResponse(
+                  () ->
+                      textEmbeddingService.runCancellableInference(
+                          request,
+                          new ITextEmbeddingResultCallback.Stub() {
+                            @Override
+                            public void onTextEmbeddingInferenceSuccess(
+                                TextEmbeddingResult response) throws RemoteException {
+                              callback.onTextEmbeddingInferenceSuccess(response);
+                            }
+
+                            @Override
+                            public void onTextEmbeddingInferenceFailure(int err)
+                                throws RemoteException {
+                              callback.onTextEmbeddingInferenceFailure(err);
+                            }
+                          }));
+          return createCancellationCallback(cancellationCallback);
+        } catch (RemoteException e) {
+          // When any of the above fail due to an exception, binder doesn't propagate it across
+          // processes, just silently returns a null. We can do slightly better.
+          callback.onTextEmbeddingInferenceFailure(InferenceError.IPC_ERROR);
+          // Now that we've indicated a failure via callback, we don't need to throw or return null.
+          return createCancellationCallback(null);
         }
       }
     };

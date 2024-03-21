@@ -24,6 +24,7 @@ import com.google.android.apps.aicore.aidl.DownloadRequestStatus;
 import com.google.android.as.oss.ai.aidl.PccLlmService;
 import com.google.android.as.oss.ai.aidl.PccSummarizationService;
 import com.google.android.as.oss.ai.aidl.PccSmartReplyService;
+import com.google.android.as.oss.ai.aidl.PccTextEmbeddingService;
 
 /**
  * PCS's interface for AICore interactions.
@@ -48,6 +49,11 @@ interface IGenAiInferenceService {
 
   /** Request downloadable feature to be downloaded */
   @DownloadRequestStatus int requestDownloadableFeature(in AIFeature feature);
+
+  /**
+   * Request Text Embedding Service for an AIFeature of a TEXT_EMBEDDING type
+   */
+  PccTextEmbeddingService getTextEmbeddingService(in AIFeature feature);
 
   /** Request LLM Service for an AIFeature of a LLM type */
   PccLlmService getLLMService(in AIFeature feature);
