@@ -18,6 +18,7 @@ package com.google.android.as.oss.pd.processor.impl;
 
 import android.content.Context;
 import com.google.android.as.oss.pd.common.ProtoConversions;
+import com.google.android.as.oss.pd.config.ClientBuildVersionReader;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
@@ -32,8 +33,10 @@ final class BlobProtoUtilsModule {
   @Provides
   @Singleton
   static BlobProtoUtils provideBlobProtoUtils(
-      ProtoConversions protoConversions, @ApplicationContext Context context) {
-    return new BlobProtoUtils(protoConversions, context);
+      @ApplicationContext Context context,
+      ProtoConversions protoConversions,
+      ClientBuildVersionReader clientBuildVersionReader) {
+    return new BlobProtoUtils(context, protoConversions, clientBuildVersionReader);
   }
 
   private BlobProtoUtilsModule() {}
