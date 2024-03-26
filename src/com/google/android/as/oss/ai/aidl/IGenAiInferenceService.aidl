@@ -32,44 +32,45 @@ import com.google.android.as.oss.ai.aidl.PccTextEmbeddingService;
  * <p>Note that AICore keeps data for all clients isolated from each other.
  * So data from PCS's requests is never shared with any other client.
  */
+// Next id: 10
 interface IGenAiInferenceService {
 
   /** List all features which are not {@link AIFeatureStatus#UNAVAILABLE}  */
-  AIFeature[] listFeatures();
+  AIFeature[] listFeatures() = 0;
 
   /**
    * Gets {@link AIFeature} by the unique {@link AIFeature.Id}.
    *
    * <p>It returns null the requested feature is {@link AIFeatureStatus#UNAVAILABLE}.
    */
-  @Nullable AIFeature getFeature(int id);
+  @Nullable AIFeature getFeature(int id) = 1;
 
   /** Provide feature status infromation */
-  @AIFeatureStatus int getFeatureStatus(in AIFeature feature);
+  @AIFeatureStatus int getFeatureStatus(in AIFeature feature) = 2;
 
   /** Request downloadable feature to be downloaded */
-  @DownloadRequestStatus int requestDownloadableFeature(in AIFeature feature);
+  @DownloadRequestStatus int requestDownloadableFeature(in AIFeature feature) = 3;
 
   /**
    * Request Text Embedding Service for an AIFeature of a TEXT_EMBEDDING type
    */
-  PccTextEmbeddingService getTextEmbeddingService(in AIFeature feature);
+  PccTextEmbeddingService getTextEmbeddingService(in AIFeature feature) = 9;
 
   /** Request LLM Service for an AIFeature of a LLM type */
-  PccLlmService getLLMService(in AIFeature feature);
+  PccLlmService getLLMService(in AIFeature feature) = 4;
 
   /** Request Smart Reply Service for an AIFeature of a SMART_REPLY type */
-  PccSmartReplyService getSmartReplyService(in AIFeature feature);
+  PccSmartReplyService getSmartReplyService(in AIFeature feature) = 5;
 
   /** Request Summarization Service for an AIFeature of a SUMMARIZATION type */
-  PccSummarizationService getSummarizationService(in AIFeature feature);
+  PccSummarizationService getSummarizationService(in AIFeature feature) = 6;
 
   /**
   * Request downloadable feature to be downloaded and listen to download
   * progress updates. Will throw an exception if {@code null} listener is provided.
   */
-  @DownloadRequestStatus int requestDownloadableFeatureWithDownloadListener(in AIFeature feature, IDownloadListener listener);
+  @DownloadRequestStatus int requestDownloadableFeatureWithDownloadListener(in AIFeature feature, IDownloadListener listener) = 7;
 
   /** Returns whether persistent mode is enabled for AICore service. */
-  boolean isPersistentModeEnabled();
+  boolean isPersistentModeEnabled() = 8;
 };
