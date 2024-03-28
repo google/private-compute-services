@@ -25,9 +25,11 @@ import androidx.annotation.GuardedBy;
 import androidx.annotation.Nullable;
 import com.google.android.apps.aicore.aidl.AIFeature;
 import com.google.android.apps.aicore.aidl.AIFeatureStatus;
+import com.google.android.apps.aicore.aidl.DownloadFailureStatus;
 import com.google.android.apps.aicore.aidl.DownloadRequestStatus;
 import com.google.android.apps.aicore.aidl.IAICoreService;
 import com.google.android.apps.aicore.aidl.IDownloadListener;
+import com.google.android.apps.aicore.aidl.IDownloadListener2;
 import com.google.android.as.oss.ai.aidl.IGenAiInferenceService;
 import com.google.android.as.oss.ai.aidl.PccLlmService;
 import com.google.android.as.oss.ai.aidl.PccSmartReplyService;
@@ -168,6 +170,25 @@ public class GenAiInferenceService extends Hilt_GenAiInferenceService {
         logger.atWarning().withCause(e).log("Failed to request downloadable feature");
         listener.onDownloadFailed(
             feature.getName(), String.format("Failed to request download: %s", e.getMessage()));
+        return DownloadRequestStatus.UNAVAILABLE;
+      }
+    }
+
+    @Override
+    @DownloadRequestStatus
+    public int requestDownloadableFeatureWithDownloadListener2(
+        AIFeature feature, IDownloadListener2 listener) throws RemoteException {
+      Preconditions.checkNotNull(feature);
+      Preconditions.checkNotNull(listener);
+      try {
+        return getServiceOrThrow()
+            .requestDownloadableFeatureWithDownloadListener2(feature, listener);
+      } catch (RemoteException e) {
+        logger.atWarning().withCause(e).log("Failed to request downloadable feature");
+        listener.onDownloadFailed(
+            feature.getName(),
+            DownloadFailureStatus.UNKNOWN,
+            String.format("Failed to request download: %s", e.getMessage()));
         return DownloadRequestStatus.UNAVAILABLE;
       }
     }

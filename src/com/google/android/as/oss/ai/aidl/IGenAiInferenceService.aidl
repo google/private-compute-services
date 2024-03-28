@@ -20,6 +20,7 @@ import androidx.annotation.Nullable;
 import com.google.android.apps.aicore.aidl.AIFeature;
 import com.google.android.apps.aicore.aidl.AIFeatureStatus;
 import com.google.android.apps.aicore.aidl.IDownloadListener;
+import com.google.android.apps.aicore.aidl.IDownloadListener2;
 import com.google.android.apps.aicore.aidl.DownloadRequestStatus;
 import com.google.android.as.oss.ai.aidl.PccLlmService;
 import com.google.android.as.oss.ai.aidl.PccSummarizationService;
@@ -32,7 +33,7 @@ import com.google.android.as.oss.ai.aidl.PccTextEmbeddingService;
  * <p>Note that AICore keeps data for all clients isolated from each other.
  * So data from PCS's requests is never shared with any other client.
  */
-// Next id: 10
+// Next id: 11
 interface IGenAiInferenceService {
 
   /** List all features which are not {@link AIFeatureStatus#UNAVAILABLE}  */
@@ -68,9 +69,17 @@ interface IGenAiInferenceService {
   /**
   * Request downloadable feature to be downloaded and listen to download
   * progress updates. Will throw an exception if {@code null} listener is provided.
+  *
+  * @deprecated Deprecated in AICoreVersion.V2, use {@link #requestDownloadableFeatureWithDownloadListener2} instead
   */
-  @DownloadRequestStatus int requestDownloadableFeatureWithDownloadListener(in AIFeature feature, IDownloadListener listener) = 7;
+  @Deprecated @DownloadRequestStatus int requestDownloadableFeatureWithDownloadListener(in AIFeature feature, IDownloadListener listener) = 7;
 
   /** Returns whether persistent mode is enabled for AICore service. */
   boolean isPersistentModeEnabled() = 8;
+
+  /**
+  * Request downloadable feature to be downloaded and listen to download progress updates.
+  * Will throw an exception if null listener is provided. Introduced in AICoreVersion.V2.
+  */
+  @DownloadRequestStatus int requestDownloadableFeatureWithDownloadListener2(in AIFeature feature, IDownloadListener2 listener) = 10;
 };
