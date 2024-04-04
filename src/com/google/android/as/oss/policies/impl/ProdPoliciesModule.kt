@@ -40,6 +40,7 @@ internal object ProdPoliciesModule {
       "AppLaunchPredictionMetricsPolicy_FederatedCompute_ASI_PROD.binarypb",
       "AutofillPolicy_FederatedCompute_ASI_PROD.binarypb",
       "ContentCapturePerformanceDataPolicy_FederatedCompute_ASI_PROD.binarypb",
+      "GPPServicePolicyV2_FederatedCompute_GPPS_PROD.binarypb",
       "GPPServicePolicy_FederatedCompute_GPPS_PROD.binarypb",
       "LiveTranslatePolicy_FederatedCompute_ASI_PROD.binarypb",
       "NowPlayingUsagePolicy_FederatedCompute_ASI_PROD.binarypb",
