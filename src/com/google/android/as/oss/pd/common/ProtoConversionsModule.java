@@ -108,6 +108,139 @@ final class ProtoConversionsModule {
   }
 
   @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_12)
+  static ClientConfig provideAiCoreClient12ClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:418124939180967388");
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_13)
+  static ClientConfig provideAiCoreClient13ClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:15018369527000359173");
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_14)
+  static ClientConfig provideAiCoreClient14ClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:10085173703611871103");
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_15)
+  static ClientConfig provideAiCoreClient15ClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:14589082030786492895");
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_16)
+  static ClientConfig provideAiCoreClient16ClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:5333321975141516928");
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_17)
+  static ClientConfig provideAiCoreClient17ClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:9353767029546147385");
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_18)
+  static ClientConfig provideAiCoreClient18ClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:10167985913044593434");
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_19)
+  static ClientConfig provideAiCoreClient19ClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:3561907884583738100");
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_20)
+  static ClientConfig provideAiCoreClient20ClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:4870111188580693201");
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_21)
+  static ClientConfig provideAiCoreClient21ClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:6642565339740637386");
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_22)
+  static ClientConfig provideAiCoreClient22ClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:9931783747856508885");
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_23)
+  static ClientConfig provideAiCoreClient23ClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:5848825322855942324");
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_24)
+  static ClientConfig provideAiCoreClient24ClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:4341791953025243445");
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_25)
+  static ClientConfig provideAiCoreClient25ClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:6417633745608261729");
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_26)
+  static ClientConfig provideAiCoreClient26ClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:11720962012422846819");
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_27)
+  static ClientConfig provideAiCoreClient27ClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:14254786987761682043");
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_28)
+  static ClientConfig provideAiCoreClient28ClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:4027292349711707490");
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_29)
+  static ClientConfig provideAiCoreClient29ClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:1558569612950046780");
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_30)
+  static ClientConfig provideAiCoreClient30ClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:6109265619551471570");
+  }
+
+  @Provides
   @Singleton
   static ProtoConversions provideProtoConversions(Map<Client, ClientConfig> clientToClientId) {
     return new ProtoConversions(ImmutableMap.copyOf(clientToClientId));
