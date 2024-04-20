@@ -33,7 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -310,7 +310,7 @@ class LocalComputeResourceManagerImpl implements LocalComputeResourceManager {
 
               try {
                 List<String> allLines =
-                    Files.readAllLines(Paths.get(sessionMarker.getAbsolutePath()));
+                    Files.readAllLines(Path.of(sessionMarker.getAbsolutePath()));
                 if (!allLines.isEmpty()) {
                   Uri convertedInputDirUri = Uri.parse(allLines.get(0));
                   File convertedInputDir =
@@ -329,7 +329,7 @@ class LocalComputeResourceManagerImpl implements LocalComputeResourceManager {
 
   private boolean isPossiblyInTraining(File marker) {
     try {
-      List<String> allLines = Files.readAllLines(Paths.get(marker.getAbsolutePath()));
+      List<String> allLines = Files.readAllLines(Path.of(marker.getAbsolutePath()));
       if (allLines.size() > 1) {
         long lastTrainingStartTime = Long.parseLong(allLines.get(1));
         if (timeSource
