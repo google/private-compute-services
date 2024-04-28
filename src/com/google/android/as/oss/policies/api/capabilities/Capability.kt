@@ -34,7 +34,7 @@ sealed class Capability(val tag: String) {
   enum class Comparison {
     LessStrict,
     Equivalent,
-    Stricter
+    Stricter,
   }
 
   open fun isEquivalent(other: Capability): Boolean {
@@ -95,7 +95,7 @@ sealed class Capability(val tag: String) {
       None,
       InMemory,
       OnDisk,
-      Unrestricted
+      Unrestricted,
     }
 
     fun compare(other: Persistence): Comparison {

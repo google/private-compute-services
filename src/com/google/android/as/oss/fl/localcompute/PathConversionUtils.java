@@ -23,7 +23,7 @@ import android.net.Uri;
 import com.google.fcp.client.InAppTrainerOptions;
 import com.google.fcp.client.TrainingInterval;
 import java.io.File;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 
 /**
  * Provides Util methods to convert {@link android.net.Uri} of local compute resources between ASI
@@ -50,7 +50,7 @@ public final class PathConversionUtils {
     checkNotNull(originalPlanPath);
     checkNotNull(scheme);
     String convertedPath =
-        Paths.get(getPlanRootDirRelativePathForSession(sessionName), scheme, originalPlanPath)
+        Path.of(getPlanRootDirRelativePathForSession(sessionName), scheme, originalPlanPath)
             .toString();
     return Uri.parse(APP_FILES_SCHEME + ":" + convertedPath);
   }
@@ -66,7 +66,7 @@ public final class PathConversionUtils {
     String originalInputPath = originalInputUri.getPath();
     if (originalInputPath != null && scheme != null) {
       String convertedPath =
-          Paths.get(getInputRootDirRelativePathForSession(sessionName), scheme, originalInputPath)
+          Path.of(getInputRootDirRelativePathForSession(sessionName), scheme, originalInputPath)
               .toString();
       return Uri.parse(APP_FILES_SCHEME + ":" + convertedPath);
     } else {
@@ -87,7 +87,7 @@ public final class PathConversionUtils {
     checkNotNull(originalOutputPath);
     checkNotNull(scheme);
     String convertedPath =
-        Paths.get(getOutputRootDirRelativePathForSession(sessionName), scheme, originalOutputPath)
+        Path.of(getOutputRootDirRelativePathForSession(sessionName), scheme, originalOutputPath)
             .toString();
     return Uri.parse(APP_FILES_SCHEME + ":" + convertedPath);
   }
