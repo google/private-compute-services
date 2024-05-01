@@ -104,7 +104,8 @@ public class GenAiInferenceService extends Hilt_GenAiInferenceService {
       }
       serviceConnection.disconnect(
           "Force disconnecting old connection either because the service is being"
-              + " destroyed or trying to reconnect.");
+              + " destroyed or trying to reconnect.",
+          false);
       serviceConnection = null;
     }
   }

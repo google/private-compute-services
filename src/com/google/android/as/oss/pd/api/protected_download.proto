@@ -143,6 +143,10 @@ message BlobConstraints {
     PIXEL = 2;
     SAMSUNG_QC = 3;
     SAMSUNG_SLSI = 4;
+    VARIANT_5 = 5;
+    VARIANT_6 = 6;
+    VARIANT_7 = 7;
+    VARIANT_8 = 8;
   }
 
   // Variant of the Android device requests a new download.

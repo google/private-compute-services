@@ -52,6 +52,8 @@ final class AiCoreServiceConnection implements ServiceConnection {
   private static final String AICORE_PACKAGE_NAME = "com.google.android.aicore";
   private static final String AICORE_SERVICE_NAME =
       "com.google.android.apps.aicore.service.multiuser.AiCoreMultiUserService";
+  private static final String PCS_AICORE_CONNECTION_STOPPED =
+      "com.google.android.as.oss.AiCoreServiceConnection_STOPPED";
 
   private final AtomicBoolean disconnected = new AtomicBoolean(false);
   private final Context context;
@@ -77,7 +79,7 @@ final class AiCoreServiceConnection implements ServiceConnection {
             completer -> {
               this.completer = completer;
               completer.addCancellationListener(
-                  () -> disconnect("AICore<>PCS Connection cancelled, likely timed-out."),
+                  () -> disconnect("AICore<>PCS Connection cancelled, likely timed-out.", false),
                   executorService);
 
               String action = IAICoreService.class.getCanonicalName();
@@ -85,7 +87,7 @@ final class AiCoreServiceConnection implements ServiceConnection {
               aiCoreIntent.setComponent(
                   new ComponentName(AICORE_PACKAGE_NAME, AICORE_SERVICE_NAME));
               if (!context.bindService(aiCoreIntent, this, Context.BIND_AUTO_CREATE)) {
-                disconnect("Unable to find/start AICoreService");
+                disconnect("Unable to find/start AICoreService", false);
               }
               return "AiCoreServiceConnection";
             });
@@ -135,7 +137,7 @@ final class AiCoreServiceConnection implements ServiceConnection {
   public void onServiceConnected(ComponentName name, IBinder providerService) {
     logger.atFine().log("PCS<>AICore connected");
     try {
-      providerService.linkToDeath(() -> disconnect("PCS<>AICore binder died"), 0);
+      providerService.linkToDeath(() -> disconnect("PCS<>AICore binder died", true), 0);
       IAiCoreServiceProvider provider = IAiCoreServiceProvider.Stub.asInterface(providerService);
       provider.get(
           new IAiCoreServiceProviderCallback.Stub() {
@@ -143,7 +145,9 @@ final class AiCoreServiceConnection implements ServiceConnection {
             public void onServiceProviderSuccess(IAICoreService service) {
               completer.set(service);
               try {
-                service.asBinder().linkToDeath(() -> disconnect("PCS<>AICore binder died"), 0);
+                service
+                    .asBinder()
+                    .linkToDeath(() -> disconnect("PCS<>AICore binder died", true), 0);
               } catch (RemoteException e) {
                 logger.atWarning().withCause(e).log("Unable to set death callback.");
               }
@@ -157,7 +161,8 @@ final class AiCoreServiceConnection implements ServiceConnection {
                       Locale.US,
                       "Failed to get AICoreService. Error code [%d], error message [%s]",
                       errorCode,
-                      errorMessage));
+                      errorMessage),
+                  true);
             }
           });
     } catch (RemoteException e) {
@@ -165,26 +170,27 @@ final class AiCoreServiceConnection implements ServiceConnection {
           String.format(
               Locale.US,
               "Encountered error while connecting to AICoreService. Error: [%s]",
-              e.getMessage()));
+              e.getMessage()),
+          true);
     }
   }
 
   @Override
   public void onServiceDisconnected(ComponentName name) {
-    disconnect("PCS<>AICore disconnected");
+    disconnect("PCS<>AICore disconnected", true);
   }
 
   @Override
   public void onBindingDied(ComponentName name) {
-    disconnect("PCS<>AICore binding died");
+    disconnect("PCS<>AICore binding died", true);
   }
 
   @Override
   public void onNullBinding(ComponentName name) {
-    disconnect("Received null binding for AICoreService");
+    disconnect("Received null binding for AICoreService", false);
   }
 
-  public void disconnect(String errorMessage) {
+  public void disconnect(String errorMessage, boolean notifyClient) {
     if (disconnected.getAndSet(true)) {
       // Already disconnected earlier.
       return;
@@ -195,6 +201,9 @@ final class AiCoreServiceConnection implements ServiceConnection {
       context.unbindService(this);
     } catch (RuntimeException e) {
       logger.atInfo().withCause(e).log("Failed to unbind.");
+    }
+    if (notifyClient) {
+      context.sendBroadcast(new Intent(PCS_AICORE_CONNECTION_STOPPED));
     }
   }
 }

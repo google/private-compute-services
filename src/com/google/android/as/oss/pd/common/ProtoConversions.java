@@ -70,7 +70,11 @@ public final class ProtoConversions {
           Variant.OEM, "OEM",
           Variant.PIXEL, "PIXEL",
           Variant.SAMSUNG_QC, "SAMSUNG_QC",
-          Variant.SAMSUNG_SLSI, "SAMSUNG_SLSI");
+          Variant.SAMSUNG_SLSI, "SAMSUNG_SLSI",
+          Variant.VARIANT_5, "VARIANT_5",
+          Variant.VARIANT_6, "VARIANT_6",
+          Variant.VARIANT_7, "VARIANT_7",
+          Variant.VARIANT_8, "VARIANT_8");
 
   public Optional<String> toClientIdString(Client client) {
     return Optional.ofNullable(clientToClientConfig.get(client)).map(ClientConfig::clientId);
