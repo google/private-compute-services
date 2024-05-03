@@ -37,6 +37,9 @@
   <!-- This permission is for PCS to use AICore for on-device AI features. -->
   <uses-permission android:name="com.google.android.apps.aicore.service.BIND_SERVICE"/>
 
+  <!-- Required in V+ for correct grammatical gender in translated strings. -->
+  <uses-permission android:name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER" />
+
   <application
       android:name="com.google.android.as.oss.PrivateComputeServicesApplication"
       android:label="@string/pcs_app_name">
