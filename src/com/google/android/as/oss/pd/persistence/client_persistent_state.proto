@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-syntax = "proto2";
+edition = "2023";
 
 package com.google.android.as.oss.pd.persistence;
 
@@ -25,14 +25,14 @@ option java_package = "com.google.android.as.oss.pd.persistence";
 message ClientPersistentState {
   // Encrypted key set used to encrypt/decrypt the communication with Google
   // servers.
-  optional bytes external_key_set = 1;
+  bytes external_key_set = 1;
 
   // Blob continuation token. Should be replaced on successful download,
   // read and included with the next download request.
-  optional bytes page_token = 2;
+  bytes page_token = 2;
 
   // Timestamp of last successful download.
-  optional int64 last_completion_time_millis = 4;
+  int64 last_completion_time_millis = 4;
 
   reserved 3;
 }
