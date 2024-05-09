@@ -16,6 +16,7 @@
 
 package com.google.android.as.oss.pd.common;
 
+import com.google.android.as.oss.common.config.FlagNamespace;
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.Client;
 import com.google.common.collect.ImmutableMap;
 import dagger.MapKey;
@@ -132,7 +133,12 @@ final class ProtoConversionsModule {
   @IntoMap
   @ClientMapKey(Client.AI_CORE_CLIENT_15)
   static ClientConfig provideAiCoreClient15ClientConfig() {
-    return ClientConfig.create("com.google.android.aicore:14589082030786492895");
+    return ClientConfig.builder()
+        .setClientId("com.google.android.aicore:14589082030786492895")
+        .setBuildIdFlag(
+            ClientConfig.BuildIdFlag.create(
+                FlagNamespace.AICORE, "AicSafety__build_id_14589082030786492895"))
+        .build();
   }
 
   @Provides

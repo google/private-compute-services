@@ -22,6 +22,7 @@ package com.google.android.as.oss.common.config;
  * references to the specific framework to one package (i.e. easier to refactor).
  */
 public enum FlagNamespace {
+  AICORE("aicore"),
   DEVICE_PERSONALIZATION_SERVICES("device_personalization_services");
 
   private final String namespace;
