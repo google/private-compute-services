@@ -103,13 +103,6 @@ final class ProtoConversionsModule {
 
   @Provides
   @IntoMap
-  @ClientMapKey(Client.AI_CORE_PROTECTED_DOWNLOAD)
-  static ClientConfig provideAiCoreProtectedDownloadClientConfig() {
-    return ClientConfig.create("com.google.android.aicore:11791126134479005147");
-  }
-
-  @Provides
-  @IntoMap
   @ClientMapKey(Client.AI_CORE_CLIENT_12)
   static ClientConfig provideAiCoreClient12ClientConfig() {
     return ClientConfig.create("com.google.android.aicore:418124939180967388");
@@ -139,6 +132,13 @@ final class ProtoConversionsModule {
             ClientConfig.BuildIdFlag.create(
                 FlagNamespace.AICORE, "AicDataRelease__build_id_14589082030786492895"))
         .build();
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_PROTECTED_DOWNLOAD)
+  static ClientConfig provideAiCoreProtectedDownloadClientConfig() {
+    return ClientConfig.create("com.google.android.aicore:11791126134479005147");
   }
 
   @Provides
