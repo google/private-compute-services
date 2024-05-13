@@ -137,7 +137,7 @@ final class ProtoConversionsModule {
         .setClientId("com.google.android.aicore:14589082030786492895")
         .setBuildIdFlag(
             ClientConfig.BuildIdFlag.create(
-                FlagNamespace.AICORE, "AicSafety__build_id_14589082030786492895"))
+                FlagNamespace.AICORE, "AicDataRelease__build_id_14589082030786492895"))
         .build();
   }
 
@@ -145,7 +145,12 @@ final class ProtoConversionsModule {
   @IntoMap
   @ClientMapKey(Client.AI_CORE_CLIENT_16)
   static ClientConfig provideAiCoreClient16ClientConfig() {
-    return ClientConfig.create("com.google.android.aicore:5333321975141516928");
+    return ClientConfig.builder()
+        .setClientId("com.google.android.aicore:5333321975141516928")
+        .setBuildIdFlag(
+            ClientConfig.BuildIdFlag.create(
+                FlagNamespace.AICORE, "AicDataRelease__build_id_5333321975141516928"))
+        .build();
   }
 
   @Provides
