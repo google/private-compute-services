@@ -25,6 +25,7 @@ import com.google.android.apps.aicore.aidl.DownloadRequestStatus;
 import com.google.android.as.oss.ai.aidl.PccLlmService;
 import com.google.android.as.oss.ai.aidl.PccSummarizationService;
 import com.google.android.as.oss.ai.aidl.PccSmartReplyService;
+import com.google.android.as.oss.ai.aidl.PccTarsService;
 import com.google.android.as.oss.ai.aidl.PccTextEmbeddingService;
 
 /**
@@ -33,7 +34,7 @@ import com.google.android.as.oss.ai.aidl.PccTextEmbeddingService;
  * <p>Note that AICore keeps data for all clients isolated from each other.
  * So data from PCS's requests is never shared with any other client.
  */
-// Next id: 11
+// Next id: 12
 interface IGenAiInferenceService {
 
   /** List all features which are not {@link AIFeatureStatus#UNAVAILABLE}  */
@@ -65,6 +66,9 @@ interface IGenAiInferenceService {
 
   /** Request Summarization Service for an AIFeature of a SUMMARIZATION type */
   PccSummarizationService getSummarizationService(in AIFeature feature) = 6;
+
+  /** Request Tars service for an AIFeature of TARS type. */
+  PccTarsService getTarsService(in AIFeature feature) = 11;
 
   /**
   * Request downloadable feature to be downloaded and listen to download

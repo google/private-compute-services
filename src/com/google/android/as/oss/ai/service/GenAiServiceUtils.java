@@ -27,6 +27,8 @@ import com.google.android.apps.aicore.aidl.ISmartReplyResultCallback;
 import com.google.android.apps.aicore.aidl.ISmartReplyService;
 import com.google.android.apps.aicore.aidl.ISummarizationResultCallback;
 import com.google.android.apps.aicore.aidl.ISummarizationService;
+import com.google.android.apps.aicore.aidl.ITarsResultCallback;
+import com.google.android.apps.aicore.aidl.ITarsService;
 import com.google.android.apps.aicore.aidl.ITextEmbeddingResultCallback;
 import com.google.android.apps.aicore.aidl.ITextEmbeddingService;
 import com.google.android.apps.aicore.aidl.InferenceError;
@@ -36,6 +38,8 @@ import com.google.android.apps.aicore.aidl.SmartReplyRequest;
 import com.google.android.apps.aicore.aidl.SmartReplyResult;
 import com.google.android.apps.aicore.aidl.SummarizationRequest;
 import com.google.android.apps.aicore.aidl.SummarizationResult;
+import com.google.android.apps.aicore.aidl.TarsRequest;
+import com.google.android.apps.aicore.aidl.TarsResult;
 import com.google.android.apps.aicore.aidl.TextEmbeddingRequest;
 import com.google.android.apps.aicore.aidl.TextEmbeddingResult;
 import com.google.android.as.oss.ai.aidl.PccCancellationCallback;
@@ -45,6 +49,8 @@ import com.google.android.as.oss.ai.aidl.PccSmartReplyResultCallback;
 import com.google.android.as.oss.ai.aidl.PccSmartReplyService;
 import com.google.android.as.oss.ai.aidl.PccSummarizationResultCallback;
 import com.google.android.as.oss.ai.aidl.PccSummarizationService;
+import com.google.android.as.oss.ai.aidl.PccTarsResultCallback;
+import com.google.android.as.oss.ai.aidl.PccTarsService;
 import com.google.android.as.oss.ai.aidl.PccTextEmbeddingResultCallback;
 import com.google.android.as.oss.ai.aidl.PccTextEmbeddingService;
 import com.google.common.flogger.GoogleLogger;
@@ -111,6 +117,40 @@ final class GenAiServiceUtils {
           // Binder doesn't propagate exceptions across processes.
           logger.atWarning().withCause(e).log("Failed to run summarization service");
           callback.onSummarizationInferenceFailure(InferenceError.IPC_ERROR);
+        }
+      }
+    };
+  }
+
+  public static PccTarsService createTarsServiceStub(IAICoreService service, AIFeature feature)
+      throws RemoteException {
+    ITarsService tarsService = checkNonNullAidlResponse(() -> service.getTarsService(feature));
+    return new PccTarsService.Stub() {
+      @Override
+      public PccCancellationCallback runCancellableInference(
+          TarsRequest request, PccTarsResultCallback callback) throws RemoteException {
+        try {
+          ICancellationCallback cancellationCallback =
+              checkNonNullAidlResponse(
+                  () ->
+                      tarsService.runCancellableInference(
+                          request,
+                          new ITarsResultCallback.Stub() {
+                            @Override
+                            public void onTarsSuccess(TarsResult response) throws RemoteException {
+                              callback.onTarsInferenceSuccess(response);
+                            }
+
+                            @Override
+                            public void onTarsFailure(@InferenceError int err)
+                                throws RemoteException {
+                              callback.onTarsInferenceFailure(err);
+                            }
+                          }));
+          return createCancellationCallback(cancellationCallback);
+        } catch (RemoteException e) {
+          callback.onTarsInferenceFailure(InferenceError.IPC_ERROR);
+          return createCancellationCallback(null);
         }
       }
     };

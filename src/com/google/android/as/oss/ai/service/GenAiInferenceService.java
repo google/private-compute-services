@@ -34,6 +34,7 @@ import com.google.android.as.oss.ai.aidl.IGenAiInferenceService;
 import com.google.android.as.oss.ai.aidl.PccLlmService;
 import com.google.android.as.oss.ai.aidl.PccSmartReplyService;
 import com.google.android.as.oss.ai.aidl.PccSummarizationService;
+import com.google.android.as.oss.ai.aidl.PccTarsService;
 import com.google.android.as.oss.ai.aidl.PccTextEmbeddingService;
 import com.google.android.as.oss.ai.config.PcsAiConfig;
 import com.google.android.as.oss.common.ExecutorAnnotations.GenAiExecutorQualifier;
@@ -223,6 +224,12 @@ public class GenAiInferenceService extends Hilt_GenAiInferenceService {
         throws RemoteException {
       Preconditions.checkNotNull(feature);
       return GenAiServiceUtils.createTextEmbeddingServiceStub(getServiceOrThrow(), feature);
+    }
+
+    @Override
+    public PccTarsService getTarsService(AIFeature feature) throws RemoteException {
+      return GenAiServiceUtils.createTarsServiceStub(
+          getServiceOrThrow(), Preconditions.checkNotNull(feature));
     }
 
     @Override
