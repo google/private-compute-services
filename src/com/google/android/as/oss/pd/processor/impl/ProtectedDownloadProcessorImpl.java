@@ -218,9 +218,11 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
                       pdExecutor)
                   .catching(
                       Exception.class,
-                      e ->
-                          IntegrityResponse.create(
-                              finalClientPersistentState, externalEncryption, Optional.empty()),
+                      e -> {
+                        logger.atInfo().withCause(e).log("Failed to get attestation token.");
+                        return IntegrityResponse.create(
+                            finalClientPersistentState, externalEncryption, Optional.empty());
+                      },
                       pdExecutor);
             },
             pdExecutor);
