@@ -102,6 +102,16 @@ message BlobConstraints {
     AI_CORE_CLIENT_28 = 28;
     AI_CORE_CLIENT_29 = 29;
     AI_CORE_CLIENT_30 = 30;
+    AI_CORE_CLIENT_31 = 31;
+    AI_CORE_CLIENT_32 = 32;
+    AI_CORE_CLIENT_33 = 33;
+    AI_CORE_CLIENT_34 = 34;
+    AI_CORE_CLIENT_35 = 35;
+    AI_CORE_CLIENT_36 = 36;
+    AI_CORE_CLIENT_37 = 37;
+    AI_CORE_CLIENT_38 = 38;
+    AI_CORE_CLIENT_39 = 39;
+    AI_CORE_CLIENT_40 = 40;
     reserved 10000 to 10004, 99997 to 99999;
   }
   Client client = 1002;
