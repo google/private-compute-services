@@ -44,15 +44,14 @@ class PersistentStateManagerSharedPreferencesImpl implements PersistentStateMana
   @VisibleForTesting
   static final String PROTECTED_DOWNLOAD_CLIENT_STATE_FILE = "protected_download_persistent_state";
 
-  private final SharedPreferences sharedPreferences;
+  private final Context context;
   private final ListeningExecutorService executorService;
 
   @Inject
   PersistentStateManagerSharedPreferencesImpl(
       @ApplicationContext Context context,
       @ProtectedDownloadExecutorQualifier ListeningExecutorService executorService) {
-    this.sharedPreferences =
-        context.getSharedPreferences(PROTECTED_DOWNLOAD_CLIENT_STATE_FILE, Context.MODE_PRIVATE);
+    this.context = context;
     this.executorService = executorService;
   }
 
@@ -62,19 +61,23 @@ class PersistentStateManagerSharedPreferencesImpl implements PersistentStateMana
         () ->
             toClientState(
                 Optional.ofNullable(
-                    sharedPreferences.getString(toClientStateKey(clientId), null))));
+                    getSharedPreferences().getString(toClientStateKey(clientId), null))));
   }
 
   @Override
   public ListenableFuture<Void> writeState(String clientId, ClientPersistentState state) {
     return executorService.submit(
         () -> {
-          sharedPreferences
+          getSharedPreferences()
               .edit()
               .putString(toClientStateKey(clientId), toClientStateValue(state))
               .apply();
           return null;
         });
+  }
+
+  private SharedPreferences getSharedPreferences() {
+    return context.getSharedPreferences(PROTECTED_DOWNLOAD_CLIENT_STATE_FILE, Context.MODE_PRIVATE);
   }
 
   @VisibleForTesting
