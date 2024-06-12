@@ -290,6 +290,11 @@ abstract class NetworkUsageLogContentModule {
                 .featureNameId(R.string.feature_name_aicore_service)
                 .descriptionId(R.string.description_bt_log_root_signature)
                 .build(),
+            aicoreHttpEntryBuilder
+                .connectionKeyStringId(R.string.url_regex_aicore_safety)
+                .featureNameId(R.string.feature_name_aicore_service)
+                .descriptionId(R.string.description_aicore_service)
+                .build(),
             pdEntryBuilder
                 .connectionKeyStringId(R.string.ap_client_id_aicore)
                 .featureNameId(R.string.feature_name_aicore_service)
