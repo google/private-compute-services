@@ -374,6 +374,14 @@ enum HistogramCounters {
    * distinguish values logged before and after training.
    */
   TRAINING_PROCESS_MEM_USAGE_NATIVE_PSS = 36;
+  /**
+   * The reason the training process was stopped. Maps to {@code
+   * JobParams.getStopReason}.
+   *
+   * <p>The dimensions proto will include a TrainingEventKind enum to
+   * distinguish values logged before and after training.
+   */
+  TRAINING_PROCESS_STOP_REASON = 37;
 
   /**
    * How long running training takes in total, including checking in, training,
