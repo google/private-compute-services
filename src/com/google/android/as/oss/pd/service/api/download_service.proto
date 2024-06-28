@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-syntax = "proto3";
+edition = "2023";
 
 package google.internal.abuse.ondevicesafety.v2;
 
 import "google/api/annotations.proto";
 import "storage/datapol/annotations/proto/semantic_annotations.proto";
 
+option features.field_presence = IMPLICIT;
 option java_multiple_files = true;
 option java_outer_classname = "ProtectedDownloadServiceProto";
 option java_package = "com.google.android.as.oss.pd.manifest.api.proto";
@@ -40,6 +41,7 @@ service ProtectedDownloadService {
 // Label expresses a generic constraint in config selection.
 message Label {
   string attribute = 1 [(datapol.semantic_type) = ST_KEY];
+
   string value = 2 [(datapol.semantic_type) = ST_VALUE];
 }
 
@@ -78,7 +80,6 @@ message IntegrityResponse {
 message GetManifestConfigRequest {
   // Constraints placed on the config selection.
   ManifestConfigConstraints constraints = 1;
-
   CryptoKeys crypto_keys = 2;
 
   // Device attestation.
