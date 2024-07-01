@@ -151,7 +151,7 @@
   <string name="description_people_conversations_service_fa">Contributed to privacy-preserving analytics to improve People and Conversations Service</string>
   <string name="url_regex_people_conversations_service" translatable="false">https://(www.)?gstatic.com/pecan/.*</string>
 
-    <!-- Universal Search -->
+  <!-- Universal Search -->
   <!-- Name of the Search feature which is part of Private Compute Core, displayed in the network usage log. "Search your phone" is the product name. [CHAR_LIMIT=NONE] -->
   <string name="feature_name_universal_search">Search your phone</string>
   <!-- Description of downloads consisting of spell checker models for the Search feature, displayed in the network usage log. "Search your phone" is the product name. [CHAR_LIMIT=NONE] -->
@@ -293,5 +293,13 @@
   <!-- Description of downloads consisting of search engine definition and icons, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
   <string name="description_search_engine_customization">Updated the on-device search engine definitions</string>
   <string name="url_regex_search_engine_customization" translatable="false">https://www.gstatic.com/android_search/search_providers/.*/.*</string>
+
+  <!-- Dynamic contextual suggestions -->
+  <!-- Name of the Dynamic Contextual Suggestions feature which is part of Private Compute Core, displayed in the network usage log. [CHAR LIMIT=NONE] -->
+  <string name="feature_name_dynamic_contextual_suggestions">Dynamic Contextual Suggestions</string>
+  <!-- Description of downloads consisting of Dynamic Contextual Suggestions models, displayed in the network usage log. [CHAR LIMIT=NONE] -->
+  <string name="description_dynamic_contextual_suggestions">Updated the on-device model for using screen information to generate contextually relevant suggestions</string>
+  <!-- Url pattern for the MDD download for contextual suggestions classifier for network usage logging. -->
+  <string name="url_regex_dynamic_contextual_suggestions_classifier_mdd" translatable="false">https://edgedl.me.gvt1.com/edgedl/mdi-serving/asi-echo-memory/.*</string>
 
 </resources>

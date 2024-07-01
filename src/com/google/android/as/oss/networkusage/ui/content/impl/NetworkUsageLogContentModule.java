@@ -263,6 +263,12 @@ abstract class NetworkUsageLogContentModule {
                 .featureNameId(R.string.feature_name_toast_search)
                 .descriptionId(R.string.description_toast_search_fa_ranking)
                 .build(),
+            asiHttpEntryBuilder
+                .connectionKeyStringId(
+                    R.string.url_regex_dynamic_contextual_suggestions_classifier_mdd)
+                .featureNameId(R.string.feature_name_dynamic_contextual_suggestions)
+                .descriptionId(R.string.description_dynamic_contextual_suggestions)
+                .build(),
             attestationEntryBuilder
                 .connectionKeyString(ATTESTATION_FEATURE_NAME)
                 .featureNameId(R.string.feature_name_android_key_attestation)
