@@ -157,6 +157,16 @@ message BlobConstraints {
     VARIANT_6 = 6;
     VARIANT_7 = 7;
     VARIANT_8 = 8;
+    VARIANT_9 = 9;
+    VARIANT_10 = 10;
+    VARIANT_11 = 11;
+    VARIANT_12 = 12;
+    VARIANT_13 = 13;
+    VARIANT_14 = 14;
+    VARIANT_15 = 15;
+    VARIANT_16 = 16;
+    VARIANT_17 = 17;
+    VARIANT_18 = 18;
   }
 
   // Variant of the Android device requests a new download.
