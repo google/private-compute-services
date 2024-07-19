@@ -84,6 +84,9 @@ message GetManifestConfigRequest {
 
   // Device attestation.
   IntegrityResponse integrity_response = 3;
+
+  // Options to transform the manifest config.
+  ManifestTransform manifest_transform = 4;
 }
 
 // Response from ProtectedDownloadService.
@@ -91,4 +94,19 @@ message GetManifestConfigResponse {
   // Contains the requested manifest.
   bytes encrypted_manifest_config = 1
       [(datapol.semantic_type) = ST_NOT_REQUIRED];
+
+  // Transformations applied to the manifest config.
+  ManifestTransformResult manifest_transform_result = 2;
+}
+
+// Options to transform the manifest config.
+message ManifestTransform {
+  // Whether to compress the manifest config.
+  bool compress_manifest = 1;
+}
+
+// Transformations applied to the manifest config.
+message ManifestTransformResult {
+  // Whether the manifest config is compressed.
+  bool compressed_manifest = 1;
 }

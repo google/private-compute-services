@@ -293,6 +293,9 @@ message GetManifestConfigRequest {
 
   // The authentication key with Google server
   string api_key = 1001;
+
+  // Options to transform the manifest config.
+  ManifestTransform manifest_transform = 2;
 }
 
 // Response from ProtectedDownloadService, which includes a ManifestConfig with
@@ -300,6 +303,12 @@ message GetManifestConfigRequest {
 message GetManifestConfigResponse {
   // Serialized Manifest config proto.
   bytes manifest_config = 1;
+}
+
+// Options to transform the manifest config.
+message ManifestTransform {
+  // Whether to compress the manifest config.
+  bool compress_manifest = 1;
 }
 
 message GetVmRequest {
