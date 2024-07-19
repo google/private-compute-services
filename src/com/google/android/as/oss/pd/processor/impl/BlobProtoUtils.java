@@ -38,6 +38,7 @@ import com.google.android.as.oss.pd.common.ProtoConversions;
 import com.google.android.as.oss.pd.config.ClientBuildVersionReader;
 import com.google.android.as.oss.pd.keys.EncryptionHelper;
 import com.google.android.as.oss.pd.manifest.api.proto.ManifestConfigConstraints;
+import com.google.android.as.oss.pd.manifest.api.proto.ManifestTransform;
 import com.google.android.as.oss.pd.service.api.proto.BlobConstraints;
 import com.google.android.as.oss.pd.service.api.proto.ClientVersion;
 import com.google.android.as.oss.pd.service.api.proto.Counters;
@@ -50,8 +51,11 @@ import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
 import com.google.protobuf.ByteString;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Optional;
+import java.util.zip.InflaterInputStream;
 
 /**
  * Contains utility functions to translate between PCS-internal proto definitions and the external
@@ -114,6 +118,10 @@ public final class BlobProtoUtils {
         .setCryptoKeys(
             com.google.android.as.oss.pd.manifest.api.proto.CryptoKeys.newBuilder()
                 .setPublicKey(ByteString.copyFrom(publicKey)))
+        .setManifestTransform(
+            ManifestTransform.newBuilder()
+                .setCompressManifest(request.getManifestTransform().getCompressManifest())
+                .build())
         .build();
   }
 
@@ -227,13 +235,17 @@ public final class BlobProtoUtils {
       com.google.android.as.oss.pd.manifest.api.proto.GetManifestConfigResponse externalResponse,
       EncryptionHelper externalEncryption,
       byte[] associatedData)
-      throws GeneralSecurityException {
-    return GetManifestConfigResponse.newBuilder()
-        .setManifestConfig(
-            ByteString.copyFrom(
-                externalEncryption.decrypt(
-                    externalResponse.getEncryptedManifestConfig().toByteArray(), associatedData)))
-        .build();
+      throws Exception {
+    byte[] manifestConfig =
+        externalEncryption.decrypt(
+            externalResponse.getEncryptedManifestConfig().toByteArray(), associatedData);
+    return externalResponse.getManifestTransformResult().getCompressedManifest()
+        ? GetManifestConfigResponse.newBuilder()
+            .setManifestConfig(decompressManifestConfig(manifestConfig))
+            .build()
+        : GetManifestConfigResponse.newBuilder()
+            .setManifestConfig(ByteString.copyFrom(manifestConfig))
+            .build();
   }
 
   /** Retrieves the client identifier used by the server to select the blob to provide. */
@@ -397,6 +409,11 @@ public final class BlobProtoUtils {
         .setInclusionProof(
             InclusionProof.newBuilder().addAllHashes(proof.getInclusionProof().getHashesList()))
         .build();
+  }
+
+  @VisibleForTesting
+  public static ByteString decompressManifestConfig(byte[] manifestConfig) throws IOException {
+    return ByteString.readFrom(new InflaterInputStream(new ByteArrayInputStream(manifestConfig)));
   }
 
   private static String getDeviceTier(Metadata metadata) {
