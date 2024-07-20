@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-syntax = "proto2";
+edition = "2023";
 
 package com.google.android.as.oss.fl.brella.api;
 
@@ -34,70 +34,101 @@ option java_package = "com.google.android.as.oss.fl.brella.api.proto";
  * debug errors.
  */
 enum TrainingError {
+  option features.enum_type = CLOSED;
+
   /** An unknown error occurred. */
   TRAINING_ERROR_UNKNOWN = 1;
 
   /** Private Compute Core specific error codes. */
+
   /** The specified query is invalid. */
   TRAINING_ERROR_PCC_FAILED_TO_PARSE_QUERY = 2;
+
   /** The specified policy is not present in the PCC apk. */
   TRAINING_ERROR_PCC_POLICY_NOT_PRESENT = 3;
+
   /** The specified client is not supported. */
   TRAINING_ERROR_PCC_CLIENT_NOT_SUPPORTED = 4;
+
   /** Training failed while binding to client. */
   TRAINING_ERROR_PCC_BINDING_TO_CLIENT_FAILED = 5;
+
   /** Training failed while delegating training to client. */
   TRAINING_ERROR_PCC_TRAINING_DELEGATION_TO_CLIENT_FAILED = 6;
+
   /** Training failed while validating configs. */
   TRAINING_ERROR_PCC_CONFIG_VALIDATION_FAILED = 7;
+
   /** Training failed while copying local compute resources. */
   TRAINING_ERROR_PCC_COPY_LOCAL_COMPUTE_RESOURCE_FAILED = 8;
 
   /** Generic error codes. */
+
   /** The specified policy has an invalid egress type. */
   TRAINING_ERROR_EGRESS_TYPE_NOT_ALLOWED = 10;
+
   /** A failure occurred while creating the example store iterator. */
   TRAINING_ERROR_FAILED_TO_CREATE_EXAMPLE_ITERATOR = 11;
+
   /** The specified collection is invalid. */
   TRAINING_ERROR_INVALID_COLLECTION = 12;
+
   /** The specified selection criteria is invalid. */
   TRAINING_ERROR_INVALID_CRITERIA = 13;
+
   /** The specified population is invalid. */
   TRAINING_ERROR_INVALID_POPULATION = 14;
+
   /** The specified policy does not match the one that is present in the apk. */
   TRAINING_ERROR_POLICY_MISMATCH = 15;
+
   /** The specified policy is not present in the apk. */
   TRAINING_ERROR_POLICY_NOT_PRESENT = 16;
+
   /** The apk does not contain a SQL policy for the specified policy. */
   TRAINING_ERROR_SQL_POLICY_NOT_PRESENT = 17;
+
   /** The specified SQL query is not policy compliant. */
   TRAINING_ERROR_QUERY_NOT_ALLOWED = 18;
+
   /** Training has been disabled on the device. */
   TRAINING_ERROR_TRAINING_DISABLED = 19;
+
   /** The user did not grant the consent required by the specified policy. */
   TRAINING_ERROR_USER_CONSENT_NOT_GRANTED = 20;
+
   /** The user consent required by the specified policy is not supported. */
   TRAINING_ERROR_USER_CONSENT_NOT_SUPPORTED = 21;
+
   /** ExampleStoreIterator.next threw an exception. */
   TRAINING_ERROR_EXAMPLE_ITERATOR_NEXT_FAILED = 22;
+
   /** The specified custom selection criteria is invalid. */
   TRAINING_ERROR_INVALID_CUSTOM_SELECTION_CRITERIA = 23;
+
   /** The example store contains no eligible examples */
   TRAINING_ERROR_NO_ELIGIBLE_EXAMPLES = 24;
+
   /** The SmartSelect preprocessor failed. */
   TRAINING_ERROR_PREPROCESSING_FAILED = 25;
+
   /** The query failed to start. */
   TRAINING_ERROR_START_QUERY_FAILED = 26;
+
   /** The query failed to start due to a runtime exception. */
   TRAINING_ERROR_START_QUERY_RUNTIME_EXCEPTION = 27;
+
   /** The specified example store is not present. */
   TRAINING_ERROR_EXAMPLE_STORE_NOT_PRESENT = 28;
+
   /** The specified selectorContext is invalid. */
   TRAINING_ERROR_INVALID_SELECTOR_CONTEXT = 29;
+
   /** The binding connection timed out. */
   TRAINING_ERROR_PCC_BINDING_TO_CLIENT_TIMED_OUT = 30;
 
-  /** Client specific error codes. Use numbers greater than or equal to 40 and
+  /**
+   * Client specific error codes. Use numbers greater than or equal to 40 and
    * smaller than 50.
    */
 }
