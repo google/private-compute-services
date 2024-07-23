@@ -18,6 +18,7 @@ package com.google.android.as.oss.pd.common;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static java.util.Arrays.stream;
 
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.Client;
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.ClientGroup;
@@ -25,6 +26,7 @@ import com.google.android.as.oss.pd.api.proto.BlobConstraints.DeviceTier;
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.Variant;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.flogger.GoogleLogger;
 import java.util.Map;
 import java.util.Optional;
 
@@ -36,6 +38,7 @@ public final class ProtoConversions {
 
   private final ImmutableMap<Client, ClientConfig> clientToClientConfig;
   private final ImmutableMap<String, Client> clientIdToClient;
+  private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
 
   public ProtoConversions(ImmutableMap<Client, ClientConfig> clientToClientConfig) {
     this.clientToClientConfig = clientToClientConfig;
@@ -64,17 +67,8 @@ public final class ProtoConversions {
           ClientGroup.ALPHA, "alpha",
           ClientGroup.THIRD_PARTY_EAP, "third_party_eap");
 
-  private static final ImmutableBiMap<Variant, String> VARIANT_TO_STRING =
-      ImmutableBiMap.of(
-          Variant.VARIANT_UNSPECIFIED, "",
-          Variant.OEM, "OEM",
-          Variant.PIXEL, "PIXEL",
-          Variant.SAMSUNG_QC, "SAMSUNG_QC",
-          Variant.SAMSUNG_SLSI, "SAMSUNG_SLSI",
-          Variant.VARIANT_5, "VARIANT_5",
-          Variant.VARIANT_6, "VARIANT_6",
-          Variant.VARIANT_7, "VARIANT_7",
-          Variant.VARIANT_8, "VARIANT_8");
+  private static final ImmutableMap<String, Variant> STRING_TO_VARIANT =
+      stream(Variant.values()).collect(toImmutableMap(Enum::name, variant -> variant));
 
   public Optional<String> toClientIdString(Client client) {
     return Optional.ofNullable(clientToClientConfig.get(client)).map(ClientConfig::clientId);
@@ -101,10 +95,25 @@ public final class ProtoConversions {
   }
 
   public static Optional<String> toVariantString(Variant variant) {
-    return Optional.ofNullable(VARIANT_TO_STRING.get(variant));
+    if (variant == Variant.UNRECOGNIZED) {
+      return Optional.empty();
+    }
+    if (variant == Variant.VARIANT_UNSPECIFIED) {
+      return Optional.of("");
+    }
+    return Optional.of(variant.name());
   }
 
-  public static Optional<Variant> fromVariantString(String variant) {
-    return Optional.ofNullable(VARIANT_TO_STRING.inverse().get(variant));
+  public static Optional<Variant> fromVariantString(String variantName) {
+    if (variantName.isEmpty()) {
+      return Optional.of(Variant.VARIANT_UNSPECIFIED);
+    }
+    Variant variant = STRING_TO_VARIANT.get(variantName);
+    if (variant == null) {
+      logger.atWarning().log("Variant %s was not found and will be ignored.", variantName);
+      return Optional.empty();
+    }
+
+    return Optional.of(variant);
   }
 }
