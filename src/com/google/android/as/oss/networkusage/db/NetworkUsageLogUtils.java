@@ -163,7 +163,7 @@ public final class NetworkUsageLogUtils {
     checkArgument(connectionDetails.type() == ConnectionType.PD);
     checkArgument(connectionDetails.connectionKey().hasPdConnectionKey());
     checkArgument(
-        clientId.equals(connectionDetails.connectionKey().getPdConnectionKey().getClientId()));
+        clientId.matches(connectionDetails.connectionKey().getPdConnectionKey().getClientId()));
     return getNetworkUsageEntityBuilder(connectionDetails, status, downloadSize).build();
   }
 
