@@ -17,12 +17,14 @@
 package com.google.android.as.oss.common.config;
 
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import java.lang.ref.WeakReference;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import javax.annotation.concurrent.ThreadSafe;
 
 /**
- * A simple thread-safe multi-cast listener helper.
+ * A simple thread-safe multicast listener helper.
  *
  * <p>Usage example:
  *
@@ -42,6 +44,7 @@ import javax.annotation.concurrent.ThreadSafe;
 @ThreadSafe
 public class MulticastListenable<L extends Object> implements Listenable<L> {
   private final CopyOnWriteArrayList<L> listeners;
+  private final CopyOnWriteArrayList<WeakReference<L>> weakListeners;
   private final Executor notifyExecutor;
 
   /**
@@ -67,33 +70,75 @@ public class MulticastListenable<L extends Object> implements Listenable<L> {
   }
 
   @Override
+  @CanIgnoreReturnValue
+  public boolean addWeakListener(L listener) {
+    return weakListeners.add(new WeakReference<>(listener));
+  }
+
+  @Override
+  @CanIgnoreReturnValue
   public boolean addListener(L listener) {
     return listeners.add(listener);
   }
 
   @Override
+  @CanIgnoreReturnValue
   public boolean removeListener(L listener) {
-    return listeners.remove(listener);
+    if (listeners.remove(listener)) {
+      return true;
+    }
+
+    boolean removed = false;
+    for (int i = 0; i < weakListeners.size(); i++) {
+      if (weakListeners.get(i).get() == listener) {
+        weakListeners.remove(i);
+        removed = true;
+        break;
+      }
+    }
+    return removed;
+  }
+
+  /** Removes all listeners that have been garbage collected. */
+  private void cleanUp() {
+    for (int i = weakListeners.size() - 1; i >= 0; i--) {
+      if (weakListeners.get(i).get() == null) {
+        weakListeners.remove(i);
+      }
+    }
   }
 
   public boolean isEmpty() {
-    return listeners.isEmpty();
+    return listeners.isEmpty() && weakListeners.isEmpty();
   }
 
   /**
    * Executes the given function with every registered listener. The function can use the listener
    * to call the appropriate notification method in its interface.
+   *
+   * <p>StrongRef listeners are notified first in the order they were added. WeakRef listeners that
+   * are not garbage collected will be notified after the StrongRef listeners.
    */
+  @SuppressWarnings("nullness") // wrong nullness warning on ..function.accept(listener.get())
   public void notify(Consumer<L> function) {
     synchronized (listeners) {
       for (L listener : listeners) {
         notifyExecutor.execute(() -> function.accept(listener));
       }
     }
+    synchronized (weakListeners) {
+      for (WeakReference<L> listener : weakListeners) {
+        if (listener.get() != null) {
+          notifyExecutor.execute(() -> function.accept(listener.get()));
+        }
+      }
+      cleanUp();
+    }
   }
 
   protected MulticastListenable(Executor notifyExecutor) {
     listeners = new CopyOnWriteArrayList<>();
+    weakListeners = new CopyOnWriteArrayList<>();
     this.notifyExecutor = notifyExecutor;
   }
 }

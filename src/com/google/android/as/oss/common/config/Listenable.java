@@ -16,6 +16,8 @@
 
 package com.google.android.as.oss.common.config;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+
 /**
  * Implemented by classes that can be listened to.
  *
@@ -32,12 +34,25 @@ public interface Listenable<L> {
    *
    * @return true if the listener was successfully added.
    */
+  @CanIgnoreReturnValue
   boolean addListener(L listener);
+
+  /**
+   * Variant of {@link #addListener} that adds a listener to the weakListener list. This listener
+   * will be garbage collected if it is no longer referenced by any other code.
+   *
+   * @return true if the listener was successfully added.
+   */
+  @CanIgnoreReturnValue
+  default boolean addWeakListener(L listener) {
+    return false;
+  }
 
   /**
    * Removes a listener from the listener list, if exists in the list.
    *
    * @return true if the listener was removed, false if it wasn't, because it was not in the list.
    */
+  @CanIgnoreReturnValue
   boolean removeListener(L listener);
 }
