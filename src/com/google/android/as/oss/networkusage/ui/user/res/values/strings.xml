@@ -294,6 +294,13 @@
   <string name="description_search_engine_customization">Updated the on-device search engine definitions</string>
   <string name="url_regex_search_engine_customization" translatable="false">https://www.gstatic.com/android_search/search_providers/.*/.*</string>
 
+  <!-- Android App Widgets quality  -->
+  <!-- Name of the app widgets filtering feature in Pixel Launcher as displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_app_widgets_filtering">App Widgets Quality</string>
+  <!-- Description of downloads consisting of app widgets filtering lists, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_app_widgets_filtering">Updated the app widgets quality filter lists</string>
+  <string name="url_regex_app_widgets_filtering" translatable="false">https://www.gstatic.com/android/app_widgets/filters/.*/.*</string>
+
   <!-- Dynamic contextual suggestions -->
   <!-- Name of the Dynamic Contextual Suggestions feature which is part of Private Compute Core, displayed in the network usage log. [CHAR LIMIT=NONE] -->
   <string name="feature_name_dynamic_contextual_suggestions">Dynamic Contextual Suggestions</string>

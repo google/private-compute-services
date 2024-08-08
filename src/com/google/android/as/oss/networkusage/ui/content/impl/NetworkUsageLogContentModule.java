@@ -311,6 +311,11 @@ abstract class NetworkUsageLogContentModule {
                 .connectionKeyStringId(R.string.url_regex_search_engine_customization)
                 .featureNameId(R.string.feature_name_search_engine_customization)
                 .descriptionId(R.string.description_search_engine_customization)
+                .build(),
+            launcherHttpEntryBuilder
+                .connectionKeyStringId(R.string.url_regex_app_widgets_filtering)
+                .featureNameId(R.string.feature_name_app_widgets_filtering)
+                .descriptionId(R.string.description_app_widgets_filtering)
                 .build());
     ImmutableMap<ConnectionDetails, ConnectionResources> finalImmutableMap = entries;
 
