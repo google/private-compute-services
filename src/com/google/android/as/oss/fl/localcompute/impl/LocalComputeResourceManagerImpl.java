@@ -192,7 +192,7 @@ class LocalComputeResourceManagerImpl implements LocalComputeResourceManager {
         () -> {
           try {
             String inputDirUriStr = FileUtils.readLines(marker, Charset.defaultCharset()).get(0);
-            String currentTimeMillis = String.valueOf(timeSource.now().toEpochMilli());
+            String currentTimeMillis = String.valueOf(timeSource.instant().toEpochMilli());
             FileUtils.writeLines(marker, ImmutableList.of(inputDirUriStr, currentTimeMillis));
           } catch (IOException e) {
             logger.atSevere().withCause(e).log("Failed to create the marker file.");
@@ -333,7 +333,7 @@ class LocalComputeResourceManagerImpl implements LocalComputeResourceManager {
       if (allLines.size() > 1) {
         long lastTrainingStartTime = Long.parseLong(allLines.get(1));
         if (timeSource
-            .now()
+            .instant()
             .isBefore(
                 Instant.ofEpochMilli(lastTrainingStartTime).plusMillis(FREEZE_WINDOW_MILLIS))) {
           return true;
@@ -348,7 +348,7 @@ class LocalComputeResourceManagerImpl implements LocalComputeResourceManager {
 
   private boolean isExpired(File marker) {
     return timeSource
-        .now()
+        .instant()
         .isAfter(Instant.ofEpochMilli(marker.lastModified()).plusMillis(RESOURCE_TTL_MILLIS));
   }
 }
