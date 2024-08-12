@@ -25,6 +25,7 @@ import androidx.annotation.GuardedBy;
 import androidx.annotation.Nullable;
 import com.google.android.apps.aicore.aidl.AIFeature;
 import com.google.android.apps.aicore.aidl.AIFeatureStatus;
+import com.google.android.apps.aicore.aidl.ApiVersion.AICoreVersion;
 import com.google.android.apps.aicore.aidl.DownloadFailureStatus;
 import com.google.android.apps.aicore.aidl.DownloadRequestStatus;
 import com.google.android.apps.aicore.aidl.IAICoreService;
@@ -157,6 +158,16 @@ public class GenAiInferenceService extends Hilt_GenAiInferenceService {
     @Nullable
     public AIFeature getFeature(@AIFeature.Id int id) throws RemoteException {
       return getServiceOrThrow().getFeature(id);
+    }
+
+    @Override
+    @Nullable
+    public AIFeature getFeatureWithVersion(@AIFeature.Id int id, int version)
+        throws RemoteException {
+      if (getServiceOrThrow().getApiVersion() < AICoreVersion.V7) {
+        throw new RemoteException("getFeatureWithVersion is not supported before AICoreVersion V7");
+      }
+      return getServiceOrThrow().getFeatureWithVersion(id, version);
     }
 
     @Override

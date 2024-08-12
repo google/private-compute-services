@@ -34,7 +34,7 @@ import com.google.android.as.oss.ai.aidl.PccTextEmbeddingService;
  * <p>Note that AICore keeps data for all clients isolated from each other.
  * So data from PCS's requests is never shared with any other client.
  */
-// Next id: 12
+// Next id: 13
 interface IGenAiInferenceService {
 
   /** List all features which are not {@link AIFeatureStatus#UNAVAILABLE}  */
@@ -46,6 +46,13 @@ interface IGenAiInferenceService {
    * <p>It returns null the requested feature is {@link AIFeatureStatus#UNAVAILABLE}.
    */
   @Nullable AIFeature getFeature(int id) = 1;
+
+  /**
+   * Gets {@link AIFeature} by the unique {@link AIFeature.Id} and version.
+   *
+   * <p>It returns null the requested feature is {@link AIFeatureStatus#UNAVAILABLE}.
+   */
+  @Nullable AIFeature getFeatureWithVersion(int id, int version) = 12;
 
   /** Provide feature status infromation */
   @AIFeatureStatus int getFeatureStatus(in AIFeature feature) = 2;
