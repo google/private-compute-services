@@ -283,8 +283,12 @@ public final class BlobProtoUtils {
         == com.google.android.as.oss.pd.api.proto.BlobConstraints.ClientVersion.Type.TYPE_ANDROID) {
       return CLIENT_VERSION;
     }
+    return getClientPackageVersion(getClientId(metadata));
+  }
+
+  private long getClientPackageVersion(String clientId) {
     // Query PackageManager for the client application's version code.
-    String packageName = getClientId(metadata).split(":", 2)[0];
+    String packageName = clientId.split(":", 2)[0];
     String[] versionParts = null;
     try {
       // Attempt to extract version number from versionName of the form: %s.%s.<VERSION>.
@@ -377,12 +381,13 @@ public final class BlobProtoUtils {
   @VisibleForTesting
   ManifestConfigConstraints buildConstraints(
       com.google.android.as.oss.pd.api.proto.BlobConstraints constraints) {
+    String clientId = getClientId(constraints);
     ManifestConfigConstraints.Builder constraintsBuilder =
         ManifestConfigConstraints.newBuilder()
-            .setClientId(getClientId(constraints))
+            .setClientId(clientId)
             .setClientVersion(
                 com.google.android.as.oss.pd.manifest.api.proto.ClientVersion.newBuilder()
-                    .setVersion(CLIENT_VERSION))
+                    .setVersion(getClientPackageVersion(clientId)))
             .addLabel(toLabelM(CLIENT_GROUP_LABEL_KEY, getClientGroup(constraints)))
             .addLabel(toLabelM(DEVICE_TIER_LABEL_KEY, getDeviceTier(constraints)));
     getVariant(constraints)
