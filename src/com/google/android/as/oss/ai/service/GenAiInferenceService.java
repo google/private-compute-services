@@ -162,12 +162,12 @@ public class GenAiInferenceService extends Hilt_GenAiInferenceService {
 
     @Override
     @Nullable
-    public AIFeature getFeatureWithVersion(@AIFeature.Id int id, int version)
+    public AIFeature getFeatureOrControl(@AIFeature.Id int id, int desiredVersion)
         throws RemoteException {
       if (getServiceOrThrow().getApiVersion() < AICoreVersion.V7) {
-        throw new RemoteException("getFeatureWithVersion is not supported before AICoreVersion V7");
+        throw new RemoteException("getFeatureOrControl is not supported before AICoreVersion V7");
       }
-      return getServiceOrThrow().getFeatureWithVersion(id, version);
+      return getServiceOrThrow().getFeatureOrControl(id, desiredVersion);
     }
 
     @Override

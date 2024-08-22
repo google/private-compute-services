@@ -50,9 +50,11 @@ interface IGenAiInferenceService {
   /**
    * Gets {@link AIFeature} by the unique {@link AIFeature.Id} and version.
    *
-   * <p>It returns null the requested feature is {@link AIFeatureStatus#UNAVAILABLE}.
+   * <p>If the feature with the desired version is not found, it returns
+   * whichever control version of the feature is known to AICore at the moment
+   * and the client is allowed to use it, {@code null} otherwise.
    */
-  @Nullable AIFeature getFeatureWithVersion(int id, int version) = 12;
+  @Nullable AIFeature getFeatureOrControl(int id, int desiredVersion) = 12;
 
   /** Provide feature status infromation */
   @AIFeatureStatus int getFeatureStatus(in AIFeature feature) = 2;
