@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-syntax = "proto2";
+edition = "2023";
 
 package com.google.android.as.oss.logging;
 
+option features.enum_type = CLOSED;
 option java_outer_classname = "PcsStatsEnums";
 option java_package = "com.google.android.as.oss.logging";
 
@@ -197,9 +198,7 @@ enum CollectionName {
   COLLECTION_NAME_STATSD = 3;
 }
 
-/**
- * Enumerations of timer and counter identifiers.
- */
+/** Enumerations of timer and counter identifiers. */
 enum HistogramCounters {
   HISTOGRAM_COUNTER_UNDEFINED = 0;
 
@@ -274,23 +273,29 @@ enum HistogramCounters {
    * average time taken over all examples.
    */
   EXAMPLE_STORE_ITERATOR_NEXT_LATENCY = 20;
+
   /** The number of examples encountered by an example store iterator. */
   EXAMPLE_STORE_ITERATOR_OVERALL_EXAMPLE_COUNT = 21;
-  /** The cumulative size of examples encountered by an example store iterator.
+
+  /**
+   * The cumulative size of examples encountered by an example store iterator.
    */
   EXAMPLE_STORE_ITERATOR_OVERALL_EXAMPLE_SIZE = 22;
+
   /**
    * Cumulative time spent over the course of a single iteration to receive and
    * return all examples. This includes the latency reported in {@link
    * #EXAMPLE_STORE_ITERATOR_OVERALL_IPC_LATENCY}.
    */
   EXAMPLE_STORE_ITERATOR_OVERALL_LATENCY = 23;
+
   /**
    * Cumulative time spent over the course of a single iteration to receive data
    * over the IPC boundary. This includes the latency reported in {@link
    * #EXAMPLE_STORE_ITERATOR_OVERALL_IPC_LATENCY}.
    */
   EXAMPLE_STORE_ITERATOR_OVERALL_IPC_LATENCY = 24;
+
   /**
    * Cumulative time spent over the course of a single iteration for the proxy
    * implementation to receive the data from the app and prepare it to be sent
@@ -298,18 +303,22 @@ enum HistogramCounters {
    * #EXAMPLE_STORE_ITERATOR_OVERALL_CLIENT_LATENCY}.
    */
   EXAMPLE_STORE_ITERATOR_OVERALL_PROXY_LATENCY = 25;
+
   /**
    * Cumulative time spent over the course of a single iteration for the app's
    * implementation to return its data.
    */
   EXAMPLE_STORE_ITERATOR_OVERALL_CLIENT_LATENCY = 26;
+
   /** Example store errors. */
   EXAMPLE_STORE_ERROR_COUNT = 27;
+
   /**
    * The total amount of memory available to the kernel on this device. Maps to
    * {@code ActivityManager.MemoryInfo.totalMem}.
    */
   TRAINING_SYSTEM_TOTAL_MEM = 28;
+
   /**
    * The amount of memory available for allocations. Maps to {@code
    * ActivityManager.MemoryInfo.availMem}.
@@ -318,6 +327,7 @@ enum HistogramCounters {
    * distinguish values logged before and after training.
    */
   TRAINING_SYSTEM_AVAILABLE_MEM = 29;
+
   /**
    * The threshold of available memory at which the system will start killing
    * processes to free up more memory. Maps to {@code
@@ -327,6 +337,7 @@ enum HistogramCounters {
    * distinguish values logged before and after training.
    */
   TRAINING_SYSTEM_LOW_MEM_THRESHOLD = 30;
+
   /**
    * The amount of memory available for allocations without triggering the low
    * memory killer. Maps to {@code ActivityManager.MemoryInfo.availMem -
@@ -336,6 +347,7 @@ enum HistogramCounters {
    * distinguish values logged before and after training.
    */
   TRAINING_SYSTEM_AVAILABLE_MEM_BEFORE_THRESHOLD = 31;
+
   /**
    * Whether the system is in a low-memory state at the time the counter is
    * logged. Maps to {@code ActivityManager.MemoryInfo.lowMem}.
@@ -344,6 +356,7 @@ enum HistogramCounters {
    * distinguish values logged before and after training.
    */
   TRAINING_SYSTEM_LOW_MEM_STATE = 32;
+
   /**
    * The memory importance of the training process. Maps to {@code
    * ActivityManager.RunningAppProcessInfo.importance}.
@@ -352,6 +365,7 @@ enum HistogramCounters {
    * distinguish values logged before and after training.
    */
   TRAINING_PROCESS_MEM_IMPORTANCE_STATE = 33;
+
   /**
    * The LRU status of the training process. Maps to {@code
    * ActivityManager.RunningAppProcessInfo.lru}.
@@ -360,6 +374,7 @@ enum HistogramCounters {
    * distinguish values logged before and after training.
    */
   TRAINING_PROCESS_MEM_LRU_STATE = 34;
+
   /**
    * The Java heap memory usage of the training process.
    *
@@ -367,6 +382,7 @@ enum HistogramCounters {
    * distinguish values logged before and after training.
    */
   TRAINING_PROCESS_MEM_USAGE_JAVA_HEAP = 35;
+
   /**
    * The native memory PSS of the training process.
    *
@@ -374,6 +390,7 @@ enum HistogramCounters {
    * distinguish values logged before and after training.
    */
   TRAINING_PROCESS_MEM_USAGE_NATIVE_PSS = 36;
+
   /**
    * The reason the training process was stopped. Maps to {@code
    * JobParams.getStopReason}.
@@ -388,24 +405,30 @@ enum HistogramCounters {
    * uploading the results.
    */
   TRAINING_OVERALL_LATENCY = 40;
+
   /** How long running an "save checkpoint op" takes. */
   TRAINING_SAVE_CHECKPOINT_LATENCY = 41;
+
   /**
    * How long it takes to receive the result to a {@link
    * com.google.fcp.client.ExampleStoreService#startQuery} call, incl.
    * time spent in IPC, proxy, and client code.
    */
   EXAMPLE_STORE_START_QUERY_LATENCY = 42;
+
   /**
    * How long it takes to wait for a {@link ExampleStoreIterator#close} call to
    * finish, incl. time spent in IPC, proxy, and client code.
    */
   EXAMPLE_STORE_ITERATOR_CLOSE_LATENCY = 43;
+
   /** How long the HTTP client initialization takes. */
   HTTP_CLIENT_INITIALIZATION_LATENCY = 44;
 
-  /** The number of examples encountered during overall training, across all
-   * client executions. */
+  /**
+   * The number of examples encountered during overall training, across all
+   * client executions.
+   */
   TRAINING_OVERALL_EXAMPLE_COUNT = 100001;
 
   /**
@@ -450,19 +473,13 @@ enum HistogramCounters {
    */
   TRAINING_MINI_BATCH_EXAMPLE_SIZE = 100008;
 
-  /**
-   * The size (in bytes) of the OpStatsDb file.
-   */
+  /** The size (in bytes) of the OpStatsDb file. */
   OPSTATS_DB_SIZE_BYTES = 100009;
 
-  /**
-   * The number of entries in OpStatsDb.
-   */
+  /** The number of entries in OpStatsDb. */
   OPSTATS_DB_NUM_ENTRIES = 100010;
 
-  /**
-   * The number of entries pruned from OpStatsDb due to exceeding max size.
-   */
+  /** The number of entries pruned from OpStatsDb due to exceeding max size. */
   OPSTATS_NUM_PRUNED_ENTRIES = 100011;
 
   /**
@@ -483,15 +500,19 @@ enum HistogramCounters {
   /** How long reporting results to the server takes. */
   TRAINING_FL_REPORT_RESULTS_LATENCY = 200003;
 
-  /** The end time of checking in/downloading a plan from the server, relative
-  to the start of the training session. */
+  /**
+   * The end time of checking in/downloading a plan from the server, relative
+   * to the start of the training session.
+   */
   TRAINING_FL_CHECKIN_END_TIME = 200004;
 
   /** How long reporting results to the server takes. */
   TRAINING_FL_ELIGIBILITY_EVAL_CHECKIN_LATENCY = 200005;
 
-  /** The end time of multiple task assignments, relative to the start of the
-   * training session. */
+  /**
+   * The end time of multiple task assignments, relative to the start of the
+   * training session.
+   */
   TRAINING_FL_MULTIPLE_TASK_ASSIGNMENTS_END_TIME = 200006;
 
   /** How long multiple task assignments takes. */
