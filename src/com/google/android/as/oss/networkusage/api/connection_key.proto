@@ -12,31 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-syntax = "proto2";
+edition = "2023";
 
 package com.google.android.as.oss.networkusage.api;
 
+option features.utf8_validation = NONE;
 option java_multiple_files = true;
 option java_package = "com.google.android.as.oss.networkusage.api.proto";
 
 message FlConnectionKey {
-  optional string feature_name = 1;
+  string feature_name = 1;
 }
 
 message HttpConnectionKey {
-  optional string url_regex = 1;
+  string url_regex = 1;
 }
 
 message PirConnectionKey {
-  optional string url_regex = 1;
+  string url_regex = 1;
 }
 
 message PdConnectionKey {
-  optional string client_id = 1;
+  string client_id = 1;
 }
 
 message AttestationConnectionKey {
-  optional string feature_name = 1;
+  string feature_name = 1;
 }
 
 message ConnectionKey {
