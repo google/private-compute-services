@@ -12,32 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-syntax = "proto2";
+edition = "2023";
 
 package java.com.google.android.as.oss.fl.localcompute.api;
 
+option features.utf8_validation = NONE;
 option java_multiple_files = true;
 option java_package = "com.google.android.as.oss.fl.localcompute.api.proto";
 
 message UriQueryRequest {
   // The session name of the Local Compute task.
-  optional string session_name = 1;
+  string session_name = 1;
 
   // A string key mapping to a file's {@link android.net.Uri} in the server app.
-  optional string file_key = 2;
+  string file_key = 2;
 }
 
 message UriQueryResponse {
   // A {@link android.net.Uri} of the file queried.
-  optional string result_file_uri = 1;
+  string result_file_uri = 1;
 
   // If the queried file is a directory or not.
-  optional bool is_directory = 2;
+  bool is_directory = 2;
 }
 
 message TraverseDirRequest {
   // A {@link android.net.Uri} of the directory to traverse in server app.
-  optional string dir_uri = 1;
+  string dir_uri = 1;
 }
 
 message TraverseDirResponse {
@@ -48,11 +49,11 @@ message TraverseDirResponse {
 message FileCopyRequest {
   // The destination or source file Uri depending on if it's a copy-to or
   // copy-from request.
-  optional string file_uri = 2;
+  string file_uri = 2;
 }
 
 message FileCopyResponse {
-  optional bool success = 1;
+  bool success = 1;
 }
 
 service FileCopyService {
