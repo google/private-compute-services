@@ -139,32 +139,17 @@ public abstract class AbstractFlagManager implements FlagManager {
   }
 
   @Override
-  @SuppressWarnings("unchecked") // Guaranteed by runtime.
   public <ResultT extends MessageLite> ResultT get(
       ProtoFlag<ResultT> flag, ResultT defaultOverride) {
-    String base64Proto = getProperty(flag.name());
-    if (isNullOrEmpty(base64Proto)) {
-      return defaultOverride;
-    }
     try {
-      byte[] decodedProto = Base64.decode(base64Proto, Base64.DEFAULT);
-      if (flag.merge()) {
-        return (ResultT)
-            defaultOverride.toBuilder()
-                .mergeFrom(decodedProto, ExtensionRegistryLite.getEmptyRegistry())
-                .build();
-      }
-      return (ResultT)
-          defaultOverride
-              .getParserForType()
-              .parseFrom(decodedProto, ExtensionRegistryLite.getEmptyRegistry());
+      return getProtoFlag(flag.name(), defaultOverride, flag.merge());
     } catch (InvalidProtocolBufferException | IllegalArgumentException e) {
       LazyLogger.logger
           .atSevere()
           .withCause(e)
           .log("Failed to parse proto. Flag name = %s.", flag.name());
+      return defaultOverride;
     }
-    return defaultOverride;
   }
 
   /** Returns the raw string value for a given flag name. */
@@ -175,5 +160,26 @@ public abstract class AbstractFlagManager implements FlagManager {
         .atWarning()
         .withCause(t)
         .log("Failed to get a property for name %s with type %s, returning safe value", name, type);
+  }
+
+  @SuppressWarnings("unchecked") // Guaranteed by runtime.
+  private <ResultT extends MessageLite> ResultT getProtoFlag(
+      String flagName, ResultT defaultOverride, boolean merge)
+      throws InvalidProtocolBufferException {
+    String base64Proto = getProperty(flagName);
+    if (isNullOrEmpty(base64Proto)) {
+      return defaultOverride;
+    }
+    byte[] decodedProto = Base64.decode(base64Proto, Base64.DEFAULT);
+    if (merge) {
+      return (ResultT)
+          defaultOverride.toBuilder()
+              .mergeFrom(decodedProto, ExtensionRegistryLite.getEmptyRegistry())
+              .build();
+    }
+    return (ResultT)
+        defaultOverride
+            .getParserForType()
+            .parseFrom(decodedProto, ExtensionRegistryLite.getEmptyRegistry());
   }
 }
