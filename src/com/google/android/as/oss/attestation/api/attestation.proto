@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-syntax = "proto2";
+edition = "2023";
 
 package com.google.android.as.oss.attestation.api;
 
+option features.utf8_validation = NONE;
 option java_multiple_files = true;
 option java_package = "com.google.android.as.oss.attestation.api.proto";
 
@@ -25,7 +26,8 @@ option java_package = "com.google.android.as.oss.attestation.api.proto";
  */
 message AttestationMeasurementResponse {
   repeated bytes key_attestation_certificate_chain = 1;
-  optional string payload = 2;
-  optional bytes signature_bytes = 3;
-  optional bytes public_key = 4;
+  string payload = 2;
+  bytes signature_bytes = 3;
+
+  bytes public_key = 4;
 }
