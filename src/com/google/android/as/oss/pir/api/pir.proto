@@ -12,20 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-syntax = "proto2";
+edition = "2023";
 
 package com.google.android.as.oss.pir.api;
 
-import 'private_retrieval/java/proto/private_retrieval_log.proto';
+import "private_retrieval/java/proto/private_retrieval_log.proto";
 
+option features.utf8_validation = NONE;
 option java_multiple_files = true;
 option java_package = "com.google.android.as.oss.pir.api.pir.proto";
 
 message PirDownloadRequest {
-  optional string url = 1;
-  optional string api_key = 2;
-  optional int32 num_chunks_per_request = 3;
-  optional int64 task_id = 4;
+  string url = 1;
+  string api_key = 2;
+  int32 num_chunks_per_request = 3;
+  int64 task_id = 4;
 }
 
 message PirDownloadResponse {
@@ -38,12 +39,12 @@ message PirDownloadResponse {
 }
 
 message NumberOfChunksDeterminedEvent {
-  optional int32 number_of_chunks = 1;
+  int32 number_of_chunks = 1;
 }
 
 message BytesDownloadedEvent {
-  optional int64 offset = 1;
-  optional bytes payload = 2;
+  int64 offset = 1;
+  bytes payload = 2;
 }
 
 message DeletePartialDownloadEvent {}
