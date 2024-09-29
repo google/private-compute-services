@@ -19,6 +19,7 @@ package(default_visibility = ["//visibility:public"])
 proto_library(
     name = "http_proto",
     srcs = ["http.proto"],
+    has_services = True,
 )
 
 java_lite_proto_library(
