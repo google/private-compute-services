@@ -12,95 +12,103 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-syntax = "proto2";
+edition = "2023";
 
 package com.google.android.as.oss.fl.api;
 
+option features.enum_type = CLOSED;
+option features.utf8_validation = NONE;
 option java_multiple_files = true;
 option java_package = "com.google.android.as.oss.fl.api.proto";
 
 message TrainerOptions {
   enum JobType {
     JOB_TYPE_UNSPECIFIED = 0;
+
     // schedule in-app federated job.
     JOB_TYPE_SCHEDULE = 1;
+
     // cancel in-app federated job.
     JOB_TYPE_CANCEL = 2;
   }
+
   enum TrainingMode {
     TRAINING_MODE_UNSPECIFIED = 0;
+
     // Training mode server side.
     TRAINING_MODE_FEDERATION = 1;
+
     // Training mode local (personalization).
     TRAINING_MODE_LOCAL_COMPUTATION = 2;
   }
+
   enum SchedulingMode {
     SCHEDULING_MODE_UNSPECIFIED = 0;
     SCHEDULING_MODE_RECURRENT = 1;
     SCHEDULING_MODE_ONE_TIME = 2;
   }
 
-  optional JobType job_type = 1;
+  JobType job_type = 1;
+
   /**
    * Federated compute session name. This name must be unique across the APK.
    */
-  optional string session_name = 2;
+  string session_name = 2;
+
   /**
    * The job id that federated compute should use for its in-app trainer. This
    * must be unique across the APK.
    */
-  optional int32 trainer_job_id = 3;
+  int32 trainer_job_id = 3;
+
   /**
    * The name of the population that you want to participate in. This will be
    * passed to the federated compute in-app trainer and it must match the
    * population name used in your federated compute server config.
    */
-  optional string population_name = 4;
+  string population_name = 4;
+
   /**
    * Time interval between federated compute jobs. This will be passed to
    * the federated compute in-app trainer.
    */
-  optional int64 training_interval_ms = 5;
-  /**
-   * Uri for the initial local computation file.
-   */
-  optional string local_computation_plan_uri = 6;
-  /**
-   * Uri for the input resources used by local computation file.
-   */
-  optional string input_directory_uri = 7;
-  /**
-   * Uri for the output of local computation.
-   */
-  optional string output_directory_uri = 8;
-  /**
-   * Training mode: server side (federation) or local (personalization).
-   */
-  optional TrainingMode training_mode = 9;
-  /**
-   * Client context data passed back to result handling callback.
-   */
-  optional bytes context_data = 10;
+  int64 training_interval_ms = 5;
 
-  /**
-   * The mode which the training job is scheduled.
-   */
-  optional SchedulingMode scheduling_mode = 11;
+  /** Uri for the initial local computation file. */
+  string local_computation_plan_uri = 6;
+
+  /** Uri for the input resources used by local computation file. */
+  string input_directory_uri = 7;
+
+  /** Uri for the output of local computation. */
+  string output_directory_uri = 8;
+
+  /** Training mode: server side (federation) or local (personalization). */
+  TrainingMode training_mode = 9;
+
+  /** Client context data passed back to result handling callback. */
+  bytes context_data = 10;
+
+  /** The mode which the training job is scheduled. */
+  SchedulingMode scheduling_mode = 11;
 }
 
 // A TrainerResponse represents the response returned by the service.
 message TrainerResponse {
   enum ResponseCode {
     RESPONSE_CODE_UNSPECIFIED = 0;
+
     // Successfully scheduled/canceled federated job.
     RESPONSE_CODE_SUCCESS = 1;
+
     // Requested JobType not supported.
     RESPONSE_CODE_UNSUPPORTED_JOB_TYPE = 2;
+
     // Trainer is not enabled.
     RESPONSE_CODE_TRAINER_NOT_ENABLED = 3;
   }
 
-  optional ResponseCode response_code = 1;
+  ResponseCode response_code = 1;
 }
 
 service TrainingService {
