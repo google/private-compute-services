@@ -20,10 +20,11 @@ import com.google.android.as.oss.ai.aidl.PccCancellationCallback;
 import com.google.android.as.oss.ai.aidl.PccSmartReplyResultCallback;
 import com.google.android.apps.aicore.aidl.SmartReplyRequest;
 import com.google.android.apps.aicore.aidl.ApiVersion.SmartReplyVersion;
+import com.google.android.apps.aicore.aidl.IPrepareInferenceEngineCallback;
 
 interface PccSmartReplyService  {
   PccCancellationCallback runCancellableInference(
-      in SmartReplyRequest request, in PccSmartReplyResultCallback callback);
-
-  @SmartReplyVersion int getApiVersion();
+      in SmartReplyRequest request, in PccSmartReplyResultCallback callback) = 0;
+  @SmartReplyVersion int getApiVersion() = 1;
+  PccCancellationCallback prepareInferenceEngine(in IPrepareInferenceEngineCallback callback) = 2;
 };
