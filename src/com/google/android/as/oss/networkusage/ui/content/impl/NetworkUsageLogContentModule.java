@@ -21,6 +21,7 @@ import static com.google.android.as.oss.networkusage.db.ConnectionDetails.Connec
 import static com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType.FC_TRAINING_START_QUERY;
 import static com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType.HTTP;
 import static com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType.PD;
+import static com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType.SURVEY_REQUEST;
 import static com.google.android.as.oss.networkusage.ui.content.impl.ContentMapEntryBuilder.AICORE_PACKAGE_NAME;
 import static com.google.android.as.oss.networkusage.ui.content.impl.ContentMapEntryBuilder.ASI_PACKAGE_NAME;
 import static com.google.android.as.oss.networkusage.ui.content.impl.ContentMapEntryBuilder.GPPS_PACKAGE_NAME;
@@ -75,6 +76,10 @@ abstract class NetworkUsageLogContentModule {
             .packageName(GPPS_PACKAGE_NAME)
             .connectionType(FC_TRAINING_START_QUERY);
     ContentMapEntryBuilder pdEntryBuilder = new ContentMapEntryBuilder(context).connectionType(PD);
+    ContentMapEntryBuilder surveyEntryBuilder =
+        new ContentMapEntryBuilder(context)
+            .packageName(ASI_PACKAGE_NAME)
+            .connectionType(SURVEY_REQUEST);
     ContentMapEntryBuilder attestationEntryBuilder =
         new ContentMapEntryBuilder(context)
             .packageName(ASI_PACKAGE_NAME)
@@ -316,6 +321,16 @@ abstract class NetworkUsageLogContentModule {
                 .connectionKeyStringId(R.string.url_regex_app_widgets_filtering)
                 .featureNameId(R.string.feature_name_app_widgets_filtering)
                 .descriptionId(R.string.description_app_widgets_filtering)
+                .build(),
+            surveyEntryBuilder
+                .connectionKeyStringId(R.string.url_regex_user_survey_one_platform)
+                .featureNameId(R.string.feature_name_user_survey)
+                .descriptionId(R.string.description_user_survey)
+                .build(),
+            surveyEntryBuilder
+                .connectionKeyStringId(R.string.url_regex_user_survey_legacy)
+                .featureNameId(R.string.feature_name_user_survey)
+                .descriptionId(R.string.description_user_survey)
                 .build());
     ImmutableMap<ConnectionDetails, ConnectionResources> finalImmutableMap = entries;
 
@@ -352,6 +367,9 @@ abstract class NetworkUsageLogContentModule {
           break;
         case ATTESTATION_REQUEST:
           connectionKey = details.connectionKey().getAttestationConnectionKey().getFeatureName();
+          break;
+        case SURVEY_REQUEST:
+          connectionKey = details.connectionKey().getSurveyConnectionKey().getUrlRegex();
           break;
         default:
           // Should never be reached.

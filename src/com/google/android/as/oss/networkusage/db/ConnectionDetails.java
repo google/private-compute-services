@@ -92,7 +92,9 @@ public abstract class ConnectionDetails implements Parcelable {
     /** A protected download using a GRPC-based protocol. */
     PD,
     /** A Lightweight download of nonce challenge from the Key Attestation Validation Service. */
-    ATTESTATION_REQUEST
+    ATTESTATION_REQUEST,
+    /** A survey request using HTTPS */
+    SURVEY_REQUEST
   }
 
   /** All the connection types related to federated computations. */

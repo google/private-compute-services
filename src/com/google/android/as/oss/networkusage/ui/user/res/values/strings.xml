@@ -32,6 +32,9 @@
   <!-- Name of the Attestation request protocol, which is used to download a nonce challenge from the Key Attestation Validation Service. [CHAR_LIMIT=NONE] -->
   <string name="connection_type_attestation">Key Attestation</string>
 
+  <!-- Name of the survey protocal, which is used to communicate with survey service. [CHAR_LIMIT=NONE]  -->
+  <string name="connection_type_survey">Survey</string>
+
   <!-- Feature names and descriptions -->
 
   <!-- Name of the lightweight download events representing attempts to participate in federated computation. [CHAR_LIMIT=NONE] -->
@@ -308,5 +311,15 @@
   <string name="description_dynamic_contextual_suggestions">Updated the on-device model for using screen information to generate contextually relevant suggestions</string>
   <!-- Url pattern for the MDD download for contextual suggestions classifier for network usage logging. -->
   <string name="url_regex_dynamic_contextual_suggestions_classifier_mdd" translatable="false">https://edgedl.me.gvt1.com/edgedl/mdi-serving/asi-echo-memory/.*</string>
+
+  <!-- Survey -->
+  <!-- Name of the survey feature which is used for collecting user feedback, displayed in the network usage log. "User Survey" is the product name. [CHAR LIMIT=NONE] -->
+  <string name="feature_name_user_survey">User Survey</string>
+  <!-- Description of the survey feature which is used for collecting user feedback, displayed in the network usage log. [CHAR LIMIT=NONE]  -->
+  <string name="description_user_survey">Collected user feedback for product improvement</string>
+  <!-- Url pattern for survey request and response[CHAR LIMIT=NONE] -->
+  <string name="url_regex_user_survey_one_platform" translatable="false">https://feedback-pa.googleapis.com/v1/survey/.*</string>
+  <!-- Legacy url pattern for survey request and response [CHAR LIMIT=NONE] -->
+  <string name="url_regex_user_survey_legacy" translatable="false">https://scone-pa.googleapis.com/v1/survey/.*</string>
 
 </resources>

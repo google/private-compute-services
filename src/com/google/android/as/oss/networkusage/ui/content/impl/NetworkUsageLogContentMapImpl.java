@@ -90,6 +90,18 @@ public final class NetworkUsageLogContentMapImpl implements NetworkUsageLogConte
   }
 
   @Override
+  public Optional<ConnectionDetails> getSurveyConnectionDetails(String url) {
+    for (ConnectionDetails details : entryContentMap.keySet()) {
+      if (details.connectionKey().hasSurveyConnectionKey()
+          && url.matches(details.connectionKey().getSurveyConnectionKey().getUrlRegex())) {
+        return Optional.of(details);
+      }
+    }
+    logger.atWarning().log("Unauthorized Survey request for url '%s'", url);
+    return Optional.empty();
+  }
+
+  @Override
   public Optional<ConnectionDetails> getPdConnectionDetails(String clientId) {
     for (ConnectionDetails details : entryContentMap.keySet()) {
       if (details.connectionKey().hasPdConnectionKey()
@@ -159,6 +171,8 @@ public final class NetworkUsageLogContentMapImpl implements NetworkUsageLogConte
         return context.getString(R.string.connection_type_ap);
       case ATTESTATION_REQUEST:
         return context.getString(R.string.connection_type_attestation);
+      case SURVEY_REQUEST:
+        return context.getString(R.string.connection_type_survey);
       default:
         throw new UnsupportedOperationException(
             String.format("Unsupported connection type '%s'", connectionDetails.type().name()));

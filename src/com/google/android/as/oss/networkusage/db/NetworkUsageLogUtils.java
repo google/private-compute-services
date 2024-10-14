@@ -26,6 +26,7 @@ import com.google.android.as.oss.networkusage.api.proto.ConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.FlConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.HttpConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.PirConnectionKey;
+import com.google.android.as.oss.networkusage.api.proto.SurveyConnectionKey;
 import com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType;
 import com.google.common.base.Strings;
 
@@ -61,6 +62,18 @@ public final class NetworkUsageLogUtils {
         .setConnectionKey(
             ConnectionKey.newBuilder()
                 .setPirConnectionKey(PirConnectionKey.newBuilder().setUrlRegex(urlRegex).build())
+                .build())
+        .build();
+  }
+
+  public static ConnectionDetails createSurveyConnectionDetails(
+      String urlRegex, String packageName) {
+    checkArgument(!Strings.isNullOrEmpty(urlRegex));
+    return getDefaultConnectionDetailsBuilder(ConnectionType.SURVEY_REQUEST, packageName)
+        .setConnectionKey(
+            ConnectionKey.newBuilder()
+                .setSurveyConnectionKey(
+                    SurveyConnectionKey.newBuilder().setUrlRegex(urlRegex).build())
                 .build())
         .build();
   }
@@ -165,6 +178,15 @@ public final class NetworkUsageLogUtils {
     checkArgument(
         clientId.matches(connectionDetails.connectionKey().getPdConnectionKey().getClientId()));
     return getNetworkUsageEntityBuilder(connectionDetails, status, downloadSize).build();
+  }
+
+  public static NetworkUsageEntity createSurveyNetworkUsageEntity(
+      ConnectionDetails connectionDetails, Status status, long downloadSize, String url) {
+    checkArgument(connectionDetails.type() == ConnectionType.SURVEY_REQUEST);
+    checkArgument(connectionDetails.connectionKey().hasSurveyConnectionKey());
+    checkArgument(
+        url.matches(connectionDetails.connectionKey().getSurveyConnectionKey().getUrlRegex()));
+    return getNetworkUsageEntityForUrl(connectionDetails, status, downloadSize, url);
   }
 
   private static NetworkUsageEntity getNetworkUsageEntityForUrl(

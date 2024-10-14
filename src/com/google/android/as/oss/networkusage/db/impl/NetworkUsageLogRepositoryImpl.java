@@ -133,6 +133,8 @@ public class NetworkUsageLogRepositoryImpl implements NetworkUsageLogRepository 
         return contentMap.getPdConnectionDetails(connectionKeyString).isPresent();
       case ATTESTATION_REQUEST:
         return contentMap.getAttestationConnectionDetails(connectionKeyString).isPresent();
+      case SURVEY_REQUEST:
+        return contentMap.getSurveyConnectionDetails(connectionKeyString).isPresent();
       default:
         return false;
     }

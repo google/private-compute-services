@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright 2024 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:layout_width="wrap_content"
+  android:layout_height="wrap_content"
+  android:theme="@style/SurveyTheme"
+  android:layout_gravity="bottom|end"
+  android:fillViewport="true"
+  android:fitsSystemWindows="true"
+  android:orientation="vertical"
+  android:scrollbars="vertical">
+
+    <com.google.android.material.card.MaterialCardView
+      android:id="@+id/survey_prompt_container"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginLeft="16dp"
+      android:layout_marginRight="16dp"
+      android:layout_marginBottom="@dimen/survey_card_vertical_margin"
+      android:clipToPadding="false"
+      app:enforceMaterialTheme="false"
+      app:cardBackgroundColor="@color/survey_surface_color_elevation_2"
+      app:cardCornerRadius="@dimen/survey_prompt_corner_radius"
+      app:cardElevation="2dp"
+      app:strokeWidth="0dp">
+
+        <LinearLayout
+          android:id="@+id/survey_prompt_banner"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:background="@color/survey_surface_color_elevation_2"
+          android:orientation="vertical">
+
+          <LinearLayout
+            android:id="@+id/survey_prompt_header"
+            style="@style/SurveyPromptHeaderStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <include
+              style="@style/SurveyPromptLogoStyle"
+              layout="@layout/survey_display_logo"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="@dimen/survey_display_logo_margin_top"
+              android:layout_marginBottom="@dimen/survey_display_logo_margin_bottom" />
+
+            <TextView
+              android:id="@+id/survey_prompt_title_text"
+              android:text="@string/survey_confirm_dialog_title"
+              android:layout_width="0dp"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="@dimen/survey_display_logo_margin_top"
+              android:layout_marginBottom="12dp"
+              android:layout_weight="1"
+              android:accessibilityHeading="true"
+              android:background="@drawable/survey_prompt_selector"
+              android:focusable="true"
+              android:focusedByDefault="true"
+              android:fontFamily="@string/survey_font_medium"
+              android:includeFontPadding="false"
+              android:minHeight="24dp"
+              android:paddingTop="2dp"
+              android:textColor="@color/survey_primary_text_color"
+              android:textSize="@dimen/survey_question_text_size" />
+
+            <include layout="@layout/survey_close_button" />
+          </LinearLayout>
+
+          <androidx.core.widget.NestedScrollView
+            android:id="@+id/survey_prompt_banner_scrollable_container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:fadeScrollbars="false"
+            android:layout_weight="1"
+            android:scrollbars="vertical">
+
+              <LinearLayout
+                android:id="@+id/survey_prompt_banner_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:descendantFocusability="afterDescendants"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:orientation="vertical" />
+
+          </androidx.core.widget.NestedScrollView>
+
+          <LinearLayout 
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:layout_marginBottom="16dp"
+            android:gravity="end">
+
+            <com.google.android.material.button.MaterialButton
+              android:id="@+id/survey_confirm_cancel_button"
+              android:text="@string/survey_confirm_dialog_cancel_button"
+              style="@style/SurveyNoThanksButtonStyle"
+              android:theme="@style/SurveyTheme"
+              android:layout_marginLeft="4dp"
+              android:layout_marginRight="4dp"
+              android:textSize="@dimen/survey_prompt_buttons_text_size"/>
+
+            <com.google.android.material.button.MaterialButton
+              android:id="@+id/survey_confirm_submit_button"
+              android:text="@string/survey_confirm_dialog_submit_button"
+              style="@style/SurveyTakeSurveyButtonStyle"
+              android:theme="@style/SurveyTheme"
+              android:layout_marginLeft="4dp"
+              android:layout_marginRight="4dp"
+              android:textSize="@dimen/survey_prompt_buttons_text_size"/>
+
+          </LinearLayout>
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</FrameLayout>

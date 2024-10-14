@@ -29,6 +29,7 @@ import com.google.android.as.oss.networkusage.api.proto.FlConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.HttpConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.PdConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.PirConnectionKey;
+import com.google.android.as.oss.networkusage.api.proto.SurveyConnectionKey;
 import com.google.android.as.oss.networkusage.db.ConnectionDetails;
 import com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType;
 import com.google.android.as.oss.networkusage.ui.content.impl.NetworkUsageLogContentMapImpl.ConnectionResources;
@@ -166,6 +167,10 @@ final class ContentMapEntryBuilder {
       case ATTESTATION_REQUEST:
         connectionKeyBuilder.setAttestationConnectionKey(
             AttestationConnectionKey.newBuilder().setFeatureName(connectionKeyString).build());
+        break;
+      case SURVEY_REQUEST:
+        connectionKeyBuilder.setSurveyConnectionKey(
+            SurveyConnectionKey.newBuilder().setUrlRegex(connectionKeyString).build());
         break;
       default:
         throw new UnsupportedOperationException(

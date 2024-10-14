@@ -1,0 +1,375 @@
+// Copyright 2024 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+edition = "2023";
+
+package com.google.android.as.oss.survey.api;
+
+option features.field_presence = IMPLICIT;
+option java_multiple_files = true;
+option java_package = "com.google.android.as.oss.survey.api.proto";
+
+// Struct representing a key/value pair (e.g. HTTP request property / response
+// headers).
+message HttpProperty {
+  string key = 1;
+
+  repeated string value = 2;
+}
+
+message HttpSurveyTriggerRequest {
+  string url = 1;
+
+  repeated HttpProperty request_property = 2;
+  SurveyTriggerId survey_trigger_id = 3;
+
+  bool testing_mode = 4;
+
+  int32 library_version = 5;
+
+  int32 app_version = 6;
+
+  SurveyAppId survey_app_id = 7;
+}
+
+enum SurveyTriggerId {
+  SURVEY_TRIGGER_ID_UNKNOWN = 0;
+  SURVEY_TRIGGER_ID_LIVE_CAPTION_OVERALL_SATISFACTION = 1;
+}
+
+enum SurveyAppId {
+  SURVEY_APP_ID_UNKNOWN = 0;
+  SURVEY_APP_ID_ASI = 1;
+}
+
+message SurveyQuestion {
+  string question_ordinal = 1;
+
+  string question_text = 2;
+
+  string question_suffix_text = 3;
+}
+
+message HttpSurveyRecordEventRequest {
+  string url = 1;
+
+  repeated HttpProperty request_property = 2;
+  Event event = 3;
+}
+
+message HttpSurveyRecordEventRequestList {
+  repeated HttpSurveyRecordEventRequest requests = 1;
+}
+
+message HttpUploadSurveyRequest {
+  HttpSurveyRecordEventRequestList request_list = 1;
+  repeated SurveyQuestion questions = 2;
+  SurveyTriggerId survey_trigger_id = 3;
+}
+
+message ResponseHeaders {
+  int32 response_code = 1;
+
+  repeated HttpProperty header = 2;
+}
+
+message ResponseBodyChunk {
+  bytes response_bytes = 1;
+}
+
+message HttpSurveyResponse {
+  ResponseHeaders response_headers = 1;
+  ResponseBodyChunk response_body_chunk = 2;
+}
+
+message UnrecognizedUrlException {
+  string url = 1;
+}
+
+message HttpSurveyStartupConfigRequest {
+  string url = 1;
+
+  repeated HttpProperty request_property = 2;
+  StartupConfigId startup_config_id = 3;
+}
+
+enum StartupConfigId {
+  STARTUP_CONFIG_ID_UNKNOWN = 0;
+  STARTUP_CONFIG_ID_LIVE_CAPTION = 1;
+}
+
+service SurveyService {
+  // Request survey from HaTS server through HTTPS.
+  rpc RequestSurvey(HttpSurveyTriggerRequest)
+      returns (stream HttpSurveyResponse);
+
+  // Startup config before requesting the survey.
+  rpc StartupConfig(HttpSurveyStartupConfigRequest)
+      returns (stream HttpSurveyResponse);
+}
+
+// Protos from HaTS Survey
+// SurveyTriggerRequest
+message SurveyTriggerRequest {
+  TriggerContext trigger_context = 1;
+
+  ClientContext client_context = 2;
+
+  reserved 3;
+}
+
+// Describes the context for triggering a survey.
+message TriggerContext {
+  // ID of the trigger point.
+  string trigger_id = 1;
+
+  // List of languages at the trigger in order of preference. A language
+  // matching algorithm is used to determine the most suitable survey language,
+  // if any.
+  repeated string language = 2;
+
+  // Whether the session was triggered in testing mode.
+  bool testing_mode = 3;
+
+  reserved 4;
+}
+
+// Client metadata such as user and device data.
+message ClientContext {
+  // Device metadata.
+  DeviceInfo device_info = 1;
+
+  // Surveys library metadata.
+  LibraryInfo library_info = 2;
+
+  reserved 3;
+
+  message DeviceInfo {
+    // Web browser info.
+    reserved 1;
+
+    // Mobile app metadata.
+    MobileInfo mobile_info = 2;
+
+    // Device timezone offset.
+    Duration timezone_offset = 3;
+
+    message MobileInfo {
+      // The device model.
+      string device_model = 1;
+
+      // The brand (e.g. carrier) the software is customized for, if any.
+      string device_brand = 2;
+
+      // Device OS type.
+      OsType os_type = 3;
+
+      // The version of the OS the application is running on.
+      string os_version = 4;
+
+      // Name of the running application.
+      string app_name = 5;
+
+      // App identifier. e.g. bundle ID for iOS or package name for Android.
+      string app_id = 6;
+
+      // Version of the running application.
+      string app_version = 7;
+
+      reserved 8;
+
+      // Telephony data of the device (Android only).
+      reserved 9;
+
+      // Chimera configuration info.
+      reserved 10;
+
+      enum OsType {
+        OS_TYPE_UNKNOWN = 0;
+        OS_TYPE_ANDROID = 1;
+        OS_TYPE_IOS = 2;
+      }
+    }
+  }
+
+  message LibraryInfo {
+    Platform platform = 1;
+
+    reserved 2;
+
+    repeated ClientCapability supported_capability = 3;
+    int32 library_version_int = 4;
+
+    // Supported client platforms.
+    enum Platform {
+      PLATFORM_UNKNOWN = 0;
+      PLATFORM_WEB = 1;
+      PLATFORM_ANDROID = 2;
+      PLATFORM_IOS = 3;
+    }
+  }
+}
+
+message Duration {
+  // Signed seconds of the span of time. Must be from -315,576,000,000
+  // to +315,576,000,000 inclusive. Note: these bounds are computed from:
+  // 60 sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years
+  int64 seconds = 1;
+
+  // Signed fractions of a second at nanosecond resolution of the span
+  // of time. Durations less than one second are represented with a 0
+  // `seconds` field and a positive or negative `nanos` field. For durations
+  // of one second or more, a non-zero value for the `nanos` field must be
+  // of the same sign as the `seconds` field. Must be from -999,999,999
+  // to +999,999,999 inclusive.
+  int32 nanos = 2;
+}
+
+enum ClientCapability {
+  CLIENT_CAPABILITY_UNKNOWN = 0;
+
+  // General availability: PII, open text questions, write-in answers.
+  CLIENT_CAPABILITY_PII = 1;
+
+  // Larger rating scale support for 10- and 11-point scales
+  CLIENT_CAPABILITY_RATING_SCALE_10_11 = 2;
+}
+
+// SurveyRecordEventRequest
+message SurveyRecordEventRequest {
+  Event event = 1;
+  Session session = 2;
+}
+
+message Event {
+  Duration time_since_trigger = 1;
+
+  oneof event {
+    // Not all surveys have invitations
+    SurveyShown survey_shown = 2;
+    SurveyAccepted survey_accepted = 3;
+    InvitationAnswered invitation_answered = 4;
+    QuestionAnswered question_answered = 5;
+    SurveyClosed survey_closed = 6;
+  }
+
+  message SurveyShown {
+    // Indicates how the survey is prompted to user.
+    enum SurveyPromptType {
+      SURVEY_PROMPT_TYPE_UNKNOWN = 0;
+      SURVEY_PROMPT_TYPE_EMBEDDED = 1;
+      SURVEY_PROMPT_TYPE_MODAL = 2;
+      SURVEY_PROMPT_TYPE_NON_MODAL = 3;
+    }
+
+    SurveyPromptType survey_prompt_type = 1;
+  }
+
+  // Metadata for when a survey is accepted, which occurs when the user
+  // answers the invitation (or the first question if the invitation is absent).
+  // This event indicates that the user has accepted a disclaimer if one was
+  // present.
+  message SurveyAccepted {
+    reserved 1;
+    reserved 2;
+    reserved 3;
+  }
+
+  message InvitationAnswered {
+    bool accepted = 1;
+  }
+
+  message QuestionAnswered {
+    // The question ordinal records the originally configured position of the
+    // question in the survey. This field starts counting from 1 rather than
+    // 0.
+    uint32 question_ordinal = 1;
+
+    oneof answer {
+      SingleSelectAnswer single_selection = 2;
+      MultipleSelectAnswer multiple_selection = 3;
+      RatingAnswer rating = 4;
+    }
+
+    reserved 5;
+
+    message SingleSelectAnswer {
+      Selection answer = 1;
+    }
+
+    message MultipleSelectAnswer {
+      repeated Selection answer = 1;
+    }
+
+    message RatingAnswer {
+      Selection answer = 1;
+    }
+
+    message Selection {
+      // The answer ordinal records the originally configured position of the
+      // answer in the question. This field starts counting from 1 rather than
+      // 0.
+      AnswerType answer_type = 1;
+      uint32 answer_ordinal = 2;
+      string text = 3;
+
+      bool write_in = 4;  // DEPRECATED
+
+      enum AnswerType {
+        ANSWER_TYPE_UNSPECIFIED = 0;
+
+        // Standard, pre-specified answer choice text.
+        ANSWER_TYPE_TEXT = 1;
+
+        // Users can input custom text for this answer, and the display text
+        // becomes placeholder text.
+        ANSWER_TYPE_WRITE_IN = 2;
+
+        // In client UI, choosing "None of the above" automatically deselects
+        // all other choices; and, choosing any other choice automatically
+        // deselects "None of the above".
+        ANSWER_TYPE_NONE_OF_THE_ABOVE = 3;
+      }
+    }
+  }
+
+  message SurveyClosed {}
+}
+
+message Session {
+  // The server-generated session ID.
+  string session_id = 1;
+
+  // Opaque token associated with the session and required to be supplied back
+  // to the server.
+  bytes session_token = 2;
+}
+
+message SurveyTriggerResponse {
+  // Session context used {@link RecordEventRequest}.
+  Session session = 1;
+
+  reserved 2;
+  reserved 3;
+  reserved 4;
+  reserved 5;
+  reserved 6;
+}
+
+message SurveyStartupConfigRequest {
+  reserved 1;
+
+  string api_key = 2;
+  ClientContext.LibraryInfo.Platform platform = 3;
+}

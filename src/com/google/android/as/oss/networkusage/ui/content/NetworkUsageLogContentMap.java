@@ -35,6 +35,12 @@ public interface NetworkUsageLogContentMap {
   Optional<ConnectionDetails> getAttestationConnectionDetails(String featureName);
 
   /**
+   * Returns the ConnectionDetails object for SURVEY connections with the url regex corresponding to
+   * the given url.
+   */
+  Optional<ConnectionDetails> getSurveyConnectionDetails(String url);
+
+  /**
    * Returns the ConnectionDetails object for PIR connections with the url regex corresponding to
    * the given url.
    */
