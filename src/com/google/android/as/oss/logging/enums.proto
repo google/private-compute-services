@@ -517,4 +517,8 @@ enum HistogramCounters {
 
   /** How long multiple task assignments takes. */
   TRAINING_FL_MULTIPLE_TASK_ASSIGNMENTS_LATENCY = 200007;
+
+  /** The number of rounds between a client's consecutive training sessions on
+   * the same task. */
+  TRAINING_FL_ROUND_SEPARATION = 200008;
 }
