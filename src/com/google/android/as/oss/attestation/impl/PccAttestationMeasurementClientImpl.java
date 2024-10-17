@@ -113,7 +113,7 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
       AttestationMeasurementRequest attestationMeasurementRequest) {
 
     checkArgument(
-        attestationMeasurementRequest.ttl().getSeconds() > 0,
+        attestationMeasurementRequest.ttl().toSeconds() > 0,
         "TTL less than 1 second is not supported.");
     checkArgument(
         attestationMeasurementRequest.ttl().compareTo(Duration.ofHours(24)) < 0,
