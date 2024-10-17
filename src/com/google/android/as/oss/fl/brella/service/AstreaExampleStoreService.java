@@ -219,9 +219,7 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
   }
 
   private boolean isPlatformLoggingEnabled() {
-    return statsdConfigReader.getConfig().enablePlatformLogging()
-        || (buildFlavor.isInternal()
-            && statsdConfigReader.getConfig().enablePlatformLoggingTesting());
+    return statsdConfigReader.getConfig().enablePlatformLogging();
   }
 
   private boolean hasOnlyLocalCompute(@Nonnull SelectorContext selectorContext) {

@@ -16,18 +16,21 @@
 
 package com.google.android.as.oss.fl.federatedcompute.statsd;
 
+import android.app.PendingIntent;
 import android.app.StatsCursor;
 import android.app.StatsManager;
 import android.app.StatsManager.StatsQueryException;
 import android.app.StatsManager.StatsUnavailableException;
 import android.app.StatsQuery;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build.VERSION_CODES;
 import android.os.OutcomeReceiver;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import com.android.internal.os.StatsPolicyConfigProto.StatsPolicyConfig;
+import com.google.android.as.oss.common.ExecutorAnnotations.FlExecutorQualifier;
 import com.google.android.as.oss.fl.brella.api.EmptyExampleStoreIterator;
 import com.google.android.as.oss.fl.brella.api.proto.TrainingError;
 import com.google.android.as.oss.proto.PcsProtos.AstreaQuery;
@@ -35,15 +38,24 @@ import com.google.android.as.oss.proto.PcsStatsquery.AstreaStatsQuery;
 import com.google.fcp.client.ExampleStoreIterator;
 import com.google.fcp.client.ExampleStoreService.QueryCallback;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.GoogleLogger;
+import com.google.common.primitives.Longs;
 import com.google.intelligence.fcp.client.SelectorContext;
 import com.google.protobuf.Any;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
+import dagger.hilt.android.qualifiers.ApplicationContext;
+import java.util.List;
 import java.util.concurrent.Executor;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /** Example store connector for returning examples from statsd by querying restricted metrics. */
+@Singleton
 public class StatsdExampleStoreConnector implements ExampleStoreConnector {
+  public static final String ACTION_RESTRICTED_METRICS_CHANGED =
+      "com.google.android.as.oss.ACTION_RESTRICTED_METRICS_CHANGED"; // unused, using as placeholder
 
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
   public static final String STATSD_COLLECTION_NAME = "/statsd";
@@ -59,7 +71,9 @@ public class StatsdExampleStoreConnector implements ExampleStoreConnector {
   private final Executor executor;
   private final Context context;
 
-  public StatsdExampleStoreConnector(Executor executor, Context context) {
+  @Inject
+  public StatsdExampleStoreConnector(
+      @FlExecutorQualifier Executor executor, @ApplicationContext Context context) {
     this.executor = executor;
     this.context = context;
   }
@@ -123,6 +137,23 @@ public class StatsdExampleStoreConnector implements ExampleStoreConnector {
       callback.onStartQueryFailure(
           TrainingError.TRAINING_ERROR_START_QUERY_RUNTIME_EXCEPTION_VALUE,
           "Statsd query failed: " + e.getLocalizedMessage());
+    }
+  }
+
+  public List<Long> getRestrictedMetricIds() {
+    StatsManager statsManager = context.getSystemService(StatsManager.class);
+    PendingIntent pi =
+        PendingIntent.getBroadcast(
+            context,
+            0,
+            new Intent(ACTION_RESTRICTED_METRICS_CHANGED),
+            PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+    try {
+      return Longs.asList(
+          statsManager.setRestrictedMetricsChangedOperation(
+              getConfigId(), getConfigPackageName(), pi));
+    } catch (StatsUnavailableException | RuntimeException e) {
+      return ImmutableList.of();
     }
   }
 

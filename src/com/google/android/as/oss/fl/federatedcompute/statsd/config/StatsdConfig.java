@@ -24,20 +24,20 @@ public abstract class StatsdConfig {
 
   public static StatsdConfig.Builder builder() {
     return new AutoValue_StatsdConfig.Builder()
-        .setEnablePlatformLoggingTesting(false)
-        .setEnablePlatformLogging(false);
+        .setEnablePlatformLogging(false)
+        .setEnableMetricWisePopulations(false);
   }
 
   public abstract boolean enablePlatformLogging();
 
-  public abstract boolean enablePlatformLoggingTesting();
+  public abstract boolean enableMetricWisePopulations();
 
   /** Builder for {@link StatsdConfig}. */
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract StatsdConfig.Builder setEnablePlatformLogging(boolean value);
 
-    public abstract StatsdConfig.Builder setEnablePlatformLoggingTesting(boolean value);
+    public abstract StatsdConfig.Builder setEnableMetricWisePopulations(boolean value);
 
     public abstract StatsdConfig build();
   }

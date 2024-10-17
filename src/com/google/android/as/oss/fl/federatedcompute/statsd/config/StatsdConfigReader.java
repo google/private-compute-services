@@ -26,9 +26,9 @@ public class StatsdConfigReader extends AbstractConfigReader<StatsdConfig> {
   private static final String FLAG_PREFIX = "PlatformLogging__";
 
   public static final BooleanFlag ENABLE_PLATFORM_LOGGING =
-      BooleanFlag.create(FLAG_PREFIX + "enable_platform_logging", false);
-  public static final BooleanFlag ENABLE_PLATFORM_LOGGING_TESTING =
-      BooleanFlag.create(FLAG_PREFIX + "enable_platform_logging_testing", false);
+      BooleanFlag.create(FLAG_PREFIX + "enable_platform_logging", true);
+  public static final BooleanFlag ENABLE_METRIC_WISE_POPULATIONS =
+      BooleanFlag.create(FLAG_PREFIX + "enable_metric_wise_populations", false);
 
   private final FlagManager flagManager;
 
@@ -52,7 +52,7 @@ public class StatsdConfigReader extends AbstractConfigReader<StatsdConfig> {
   protected StatsdConfig computeConfig() {
     return StatsdConfig.builder()
         .setEnablePlatformLogging(flagManager.get(ENABLE_PLATFORM_LOGGING))
-        .setEnablePlatformLoggingTesting(flagManager.get(ENABLE_PLATFORM_LOGGING_TESTING))
+        .setEnableMetricWisePopulations(flagManager.get(ENABLE_METRIC_WISE_POPULATIONS))
         .build();
   }
 

@@ -26,11 +26,13 @@ import dagger.Provides;
 import dagger.hilt.InstallIn;
 import dagger.hilt.components.SingletonComponent;
 import java.util.concurrent.Executor;
+import javax.inject.Singleton;
 
 @Module
 @InstallIn(SingletonComponent.class)
 abstract class StatsdConnectorModule {
   @Provides
+  @Singleton
   static ExampleStoreConnector provideExampleStoreConnector(
       @FlExecutorQualifier Executor executor, @ApplicationContext Context context) {
     return new StatsdExampleStoreConnector(executor, context);
