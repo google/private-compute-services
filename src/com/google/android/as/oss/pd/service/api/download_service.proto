@@ -74,6 +74,27 @@ message IntegrityResponse {
   // Response from content binding with Key Attestation.
   bytes key_attestation_token = 2
       [(datapol.semantic_type) = ST_SECURITY_MATERIAL];
+
+  // Status of the integrity check from the client side.
+  enum ClientStatus {
+    // Unknown status.
+    STATUS_UNKNOWN = 0;
+
+    // Integrity check ran successfully and returned a token.
+    STATUS_OK = 1;
+
+    // No integrity module was found on device.
+    STATUS_NOT_RUN = 2;
+
+    // Integrity check returned an empty token.
+    STATUS_EMPTY_FAILURE = 3;
+
+    // Integrity check threw an exception.
+    STATUS_EXCEPTION_FAILURE = 4;
+  }
+
+  // Status of the integrity check from the client side.
+  ClientStatus client_status = 3;
 }
 
 // Request to fetch the ManifestConfig.

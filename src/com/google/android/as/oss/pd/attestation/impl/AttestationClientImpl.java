@@ -19,9 +19,9 @@ package com.google.android.as.oss.pd.attestation.impl;
 import com.google.android.as.oss.attestation.AttestationMeasurementRequest;
 import com.google.android.as.oss.attestation.PccAttestationMeasurementClient;
 import com.google.android.as.oss.pd.attestation.AttestationClient;
+import com.google.android.as.oss.pd.attestation.AttestationResponse;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.protobuf.ByteString;
 import java.time.Duration;
 import java.util.concurrent.Executor;
 
@@ -44,7 +44,8 @@ public class AttestationClientImpl implements AttestationClient {
   }
 
   @Override
-  public ListenableFuture<ByteString> requestMeasurementWithContentBinding(String contentBinding) {
+  public ListenableFuture<AttestationResponse> requestMeasurementWithContentBinding(
+      String contentBinding) {
     AttestationMeasurementRequest request =
         AttestationMeasurementRequest.builder()
             .setTtl(ATTESTATION_MEASUREMENT_TTL)
@@ -53,7 +54,7 @@ public class AttestationClientImpl implements AttestationClient {
             .build();
 
     return FluentFuture.from(attestationMeasurementClient.requestAttestationMeasurement(request))
-        .transform(response -> response.toByteString(), executor);
+        .transform(response -> AttestationResponse.create(response.toByteString()), executor);
   }
 
   private AttestationClientImpl(

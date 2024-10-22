@@ -16,16 +16,18 @@
 
 package com.google.android.as.oss.pd.attestation.impl;
 
+import static com.google.common.util.concurrent.Futures.immediateFuture;
+
 import com.google.android.as.oss.pd.attestation.AttestationClient;
-import com.google.common.util.concurrent.Futures;
+import com.google.android.as.oss.pd.attestation.AttestationResponse;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.protobuf.ByteString;
 
 /** An Implementation of {@link AttestationClient}, that skips attestation. */
 public class AttestationClientNoopImpl implements AttestationClient {
 
   @Override
-  public ListenableFuture<ByteString> requestMeasurementWithContentBinding(String contentBinding) {
-    return Futures.immediateFuture(ByteString.EMPTY);
+  public ListenableFuture<AttestationResponse> requestMeasurementWithContentBinding(
+      String contentBinding) {
+    return immediateFuture(AttestationResponse.empty());
   }
 }

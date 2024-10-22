@@ -17,7 +17,6 @@
 package com.google.android.as.oss.pd.attestation;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.protobuf.ByteString;
 
 /** An interface for a class that generates an attestation measurement. */
 public interface AttestationClient {
@@ -28,5 +27,5 @@ public interface AttestationClient {
    *
    * <p>Returns opaque attestation token that server will decode for validation.
    */
-  ListenableFuture<ByteString> requestMeasurementWithContentBinding(String contentBinding);
+  ListenableFuture<AttestationResponse> requestMeasurementWithContentBinding(String contentBinding);
 }

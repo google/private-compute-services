@@ -32,6 +32,7 @@ import com.google.android.as.oss.pd.api.proto.DownloadBlobResponse;
 import com.google.android.as.oss.pd.api.proto.GetManifestConfigRequest;
 import com.google.android.as.oss.pd.api.proto.GetManifestConfigResponse;
 import com.google.android.as.oss.pd.attestation.AttestationClient;
+import com.google.android.as.oss.pd.attestation.AttestationResponse;
 import com.google.android.as.oss.pd.channel.ChannelProvider;
 import com.google.android.as.oss.pd.keys.EncryptionHelper;
 import com.google.android.as.oss.pd.keys.EncryptionHelperFactory;
@@ -206,22 +207,22 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
             externalEncryption -> {
               String contentBinding =
                   contentBindingHashFunction.apply(externalEncryption.publicKey());
-              ListenableFuture<ByteString> attestationFuture =
+              ListenableFuture<AttestationResponse> attestationFuture =
                   attestationClient.requestMeasurementWithContentBinding(contentBinding);
               return FluentFuture.from(attestationFuture)
                   .transform(
-                      attestationToken ->
+                      attestationResponse ->
                           IntegrityResponse.create(
-                              finalClientPersistentState,
-                              externalEncryption,
-                              Optional.of(attestationToken)),
+                              finalClientPersistentState, externalEncryption, attestationResponse),
                       pdExecutor)
                   .catching(
                       Exception.class,
                       e -> {
                         logger.atInfo().withCause(e).log("Failed to get attestation token.");
                         return IntegrityResponse.create(
-                            finalClientPersistentState, externalEncryption, Optional.empty());
+                            finalClientPersistentState,
+                            externalEncryption,
+                            AttestationResponse.failed());
                       },
                       pdExecutor);
             },
@@ -294,7 +295,7 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
                     request,
                     externalEncryption.publicKey(),
                     finalClientPersistentState.getPageToken().toByteArray(),
-                    integrityResponse.attestationToken())))
+                    integrityResponse.attestationResponse())))
         .catchingAsync(Exception.class, getFailureLoggingTransform(clientId), pdExecutor)
         .transformAsync(
             externalResponse -> {
@@ -340,7 +341,9 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
     return FluentFuture.from(
             serviceStub.getManifestConfig(
                 blobProtoUtils.toExternalRequest(
-                    request, externalEncryption.publicKey(), integrityResponse.attestationToken())))
+                    request,
+                    externalEncryption.publicKey(),
+                    integrityResponse.attestationResponse())))
         .catchingAsync(Exception.class, getFailureLoggingTransform(clientId), pdExecutor)
         .transformAsync(
             externalResponse -> {
@@ -448,9 +451,9 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
     public static IntegrityResponse create(
         ClientPersistentState state,
         EncryptionHelper externalEncryption,
-        Optional<ByteString> attestationToken) {
+        AttestationResponse attestationResponse) {
       return new AutoValue_ProtectedDownloadProcessorImpl_IntegrityResponse(
-          state, externalEncryption, attestationToken);
+          state, externalEncryption, attestationResponse);
     }
 
     /** The {@link ClientPersistentState} to store at the end of the download operation. */
@@ -460,7 +463,7 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
     public abstract EncryptionHelper externalEncryption();
 
     /** An attestation token for download request. */
-    public abstract Optional<ByteString> attestationToken();
+    public abstract AttestationResponse attestationResponse();
   }
 
   private interface ContentBindingHashFunction {

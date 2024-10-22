@@ -34,6 +34,7 @@ import com.google.android.as.oss.pd.api.proto.LogEntryId;
 import com.google.android.as.oss.pd.api.proto.Metadata;
 import com.google.android.as.oss.pd.api.proto.ProtectionComponent;
 import com.google.android.as.oss.pd.api.proto.ProtectionProof;
+import com.google.android.as.oss.pd.attestation.AttestationResponse;
 import com.google.android.as.oss.pd.common.ProtoConversions;
 import com.google.android.as.oss.pd.config.ClientBuildVersionReader;
 import com.google.android.as.oss.pd.keys.EncryptionHelper;
@@ -45,6 +46,7 @@ import com.google.android.as.oss.pd.service.api.proto.Counters;
 import com.google.android.as.oss.pd.service.api.proto.CryptoKeys;
 import com.google.android.as.oss.pd.service.api.proto.DownloadBlobRequest.DownloadMode;
 import com.google.android.as.oss.pd.service.api.proto.IntegrityResponse;
+import com.google.android.as.oss.pd.service.api.proto.IntegrityResponse.ClientStatus;
 import com.google.android.as.oss.pd.service.api.proto.Label;
 import com.google.android.as.oss.pd.service.api.proto.ProtectionProofConfig;
 import com.google.common.hash.Hasher;
@@ -98,9 +100,9 @@ public final class BlobProtoUtils {
       DownloadBlobRequest request,
       byte[] publicKey,
       byte[] pageToken,
-      Optional<ByteString> attestationToken) {
+      AttestationResponse attestationResponse) {
     return com.google.android.as.oss.pd.service.api.proto.DownloadBlobRequest.newBuilder()
-        .setIntegrityResponse(getIntegrityResponse(attestationToken))
+        .setIntegrityResponse(getIntegrityResponse(attestationResponse))
         .setMetadata(toExternalMetadata(ByteString.copyFrom(publicKey), request.getMetadata()))
         .setPageToken(ByteString.copyFrom(pageToken))
         .setProtectionProofConfig(
@@ -111,10 +113,10 @@ public final class BlobProtoUtils {
 
   /** Converts a manifest request from PCS to a server request to get a manifest. */
   public com.google.android.as.oss.pd.manifest.api.proto.GetManifestConfigRequest toExternalRequest(
-      GetManifestConfigRequest request, byte[] publicKey, Optional<ByteString> attestationToken) {
+      GetManifestConfigRequest request, byte[] publicKey, AttestationResponse attestationResponse) {
     return com.google.android.as.oss.pd.manifest.api.proto.GetManifestConfigRequest.newBuilder()
         .setConstraints(buildConstraints(request.getConstraints()))
-        .setIntegrityResponse(getManifestIntegrityResponse(attestationToken))
+        .setIntegrityResponse(getManifestIntegrityResponse(attestationResponse))
         .setCryptoKeys(
             com.google.android.as.oss.pd.manifest.api.proto.CryptoKeys.newBuilder()
                 .setPublicKey(ByteString.copyFrom(publicKey)))
@@ -125,23 +127,58 @@ public final class BlobProtoUtils {
         .build();
   }
 
-  private static IntegrityResponse getIntegrityResponse(Optional<ByteString> attestationToken) {
-    if (attestationToken.isEmpty()) {
-      return IntegrityResponse.getDefaultInstance();
-    } else {
-      return IntegrityResponse.newBuilder().setKeyAttestationToken(attestationToken.get()).build();
+  private static IntegrityResponse getIntegrityResponse(AttestationResponse attestationResponse) {
+    ClientStatus clientStatus = ClientStatus.STATUS_UNKNOWN;
+    switch (attestationResponse.status()) {
+      case SUCCESS:
+        clientStatus = ClientStatus.STATUS_OK;
+        break;
+      case NOT_RUN:
+        clientStatus = ClientStatus.STATUS_NOT_RUN;
+        break;
+      case FAILED:
+        clientStatus = ClientStatus.STATUS_EXCEPTION_FAILURE;
+        break;
     }
+
+    IntegrityResponse.Builder responseBuilder =
+        IntegrityResponse.newBuilder().setClientStatus(clientStatus);
+    if (attestationResponse.status() == AttestationResponse.Status.SUCCESS) {
+      responseBuilder.setKeyAttestationToken(attestationResponse.attestationToken());
+    }
+    return responseBuilder.build();
   }
 
   private static com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse
-      getManifestIntegrityResponse(Optional<ByteString> attestationToken) {
-    if (attestationToken.isEmpty()) {
-      return com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.getDefaultInstance();
-    } else {
-      return com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.newBuilder()
-          .setKeyAttestationToken(attestationToken.get())
-          .build();
+      getManifestIntegrityResponse(AttestationResponse attestationResponse) {
+    com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.ClientStatus clientStatus =
+        com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.ClientStatus
+            .STATUS_UNKNOWN;
+    switch (attestationResponse.status()) {
+      case SUCCESS:
+        clientStatus =
+            com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.ClientStatus
+                .STATUS_OK;
+        break;
+      case NOT_RUN:
+        clientStatus =
+            com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.ClientStatus
+                .STATUS_NOT_RUN;
+        break;
+      case FAILED:
+        clientStatus =
+            com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.ClientStatus
+                .STATUS_EXCEPTION_FAILURE;
+        break;
     }
+
+    com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.Builder responseBuilder =
+        com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.newBuilder()
+            .setClientStatus(clientStatus);
+    if (attestationResponse.status() == AttestationResponse.Status.SUCCESS) {
+      responseBuilder.setKeyAttestationToken(attestationResponse.attestationToken());
+    }
+    return responseBuilder.build();
   }
 
   /**
