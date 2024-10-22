@@ -108,6 +108,16 @@ abstract class NetworkUsageLogContentModule {
                 .descriptionId(R.string.description_nowplaying_http)
                 .build(),
             asiHttpEntryBuilder
+                .connectionKeyStringId(R.string.url_regex_nowplaying_albumart_ondevice)
+                .featureNameId(R.string.feature_name_nowplaying)
+                .descriptionId(R.string.description_nowplaying_albumart)
+                .build(),
+            asiHttpEntryBuilder
+                .connectionKeyStringId(R.string.url_regex_nowplaying_albumart_ondemand)
+                .featureNameId(R.string.feature_name_nowplaying)
+                .descriptionId(R.string.description_nowplaying_albumart)
+                .build(),
+            asiHttpEntryBuilder
                 .connectionKeyStringId(R.string.url_regex_tc_actions)
                 .featureNameId(R.string.feature_name_tc)
                 .descriptionId(R.string.description_tc_actions)

@@ -82,6 +82,13 @@
   <string name="description_nowplaying_fa">Contributed to privacy-preserving analytics to improve Now Playing</string>
   <string name="url_regex_nowplaying" translatable="false">https://storage.googleapis.com/music-iq-db(-dogfood)?/.*</string>
 
+  <!-- Description of downloads consisting of Album Art images for Now Playing, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_nowplaying_albumart">Updated the on-device album art cache for Now Playing</string>
+  <!-- Url pattern for album art images curated by YouTube Music, used for on-device database matches. A more specific subdomain will be used in the future (ETA 12/2025) [CHAR_LIMIT=NONE] -->
+  <string name="url_regex_nowplaying_albumart_ondevice" translatable="false">https://yt[3-6]\.googleusercontent\.com/.*</string>
+  <!-- Url pattern for album art images curated by Google Search, used for Cloud Search matches. A more specific path will be used in the future (ETA 12/2025) [CHAR_LIMIT=NONE] -->
+  <string name="url_regex_nowplaying_albumart_ondemand" translatable="false">https://encrypted-tbn[0-9]\.gstatic\.com/images\?.*</string>
+
   <!-- Text Classification -->
   <!-- Name of the Text Classification feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
   <string name="feature_name_tc">Text Classification</string>
