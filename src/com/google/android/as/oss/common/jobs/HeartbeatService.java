@@ -24,19 +24,32 @@ import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.UserManager;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.os.BuildCompat;
 import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.common.config.impl.PcsCommonConfig;
+import com.google.android.as.oss.common.flavor.BuildFlavor;
+import com.google.android.as.oss.fl.api.proto.TrainerOptions;
+import com.google.android.as.oss.fl.federatedcompute.statsd.StatsdExampleStoreConnector;
+import com.google.android.as.oss.fl.federatedcompute.statsd.config.StatsdConfig;
 import com.google.android.as.oss.fl.federatedcompute.training.PopulationTrainingScheduler;
+import com.google.android.as.oss.fl.federatedcompute.training.TrainingCriteria;
 import com.google.android.as.oss.fl.federatedcompute.training.TrainingSchedulerCallback;
+import com.google.android.as.oss.fl.populations.Population;
 import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceValueReported;
 import com.google.android.as.oss.logging.PcsStatsEnums.ValueMetricId;
 import com.google.android.as.oss.logging.PcsStatsLog;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.GoogleLogger;
 import dagger.hilt.android.AndroidEntryPoint;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 import java.time.Duration;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import javax.inject.Inject;
 
 /**
@@ -51,6 +64,10 @@ public class HeartbeatService extends Hilt_HeartbeatService {
   @Inject PopulationTrainingScheduler populationScheduler;
   @Inject PcsStatsLog pcsStatsLogger;
   @Inject ConfigReader<PcsCommonConfig> pcsCommonConfigReader;
+  @Inject StatsdExampleStoreConnector statsdExampleStoreConnector;
+  @Inject BuildFlavor buildFlavor;
+  @Inject @ApplicationContext Context context;
+  @Inject ConfigReader<StatsdConfig> statsdConfigReader;
 
   @Override
   public boolean onStartJob(JobParameters params) {
@@ -75,9 +92,47 @@ public class HeartbeatService extends Hilt_HeartbeatService {
                     "Failure in scheduling training, rescheduling the job.");
                 jobFinished(params, /* wantsReschedule= */ true);
               }
-            }));
+            }),
+        Optional.of(getAdditionalTrainingCriteria()));
     logScheduledJobsCount();
     return true;
+  }
+
+  private Set<TrainingCriteria> getAdditionalTrainingCriteria() {
+    if (!BuildCompat.isAtLeastU()
+        || !statsdConfigReader.getConfig().enableMetricWisePopulations()) {
+      return ImmutableSet.of();
+    }
+    Set<TrainingCriteria> trainingCriteria = new HashSet<>();
+    List<Long> restrictedMetricIds = statsdExampleStoreConnector.getRestrictedMetricIds();
+    for (Long restrictedMetricId : restrictedMetricIds) {
+      trainingCriteria.add(
+          new TrainingCriteria() {
+            @Override
+            public TrainerOptions getTrainerOptions() {
+              return PopulationTrainingScheduler.buildTrainerOpts(
+                  String.format(
+                      "%s/%s",
+                      buildFlavor.isRelease()
+                          ? Population.PLATFORM_LOGGING.populationName()
+                          : Population.PLATFORM_LOGGING_DEV.populationName(),
+                      restrictedMetricId));
+            }
+
+            @Override
+            public boolean canScheduleTraining() {
+              UserManager userManager = context.getSystemService(UserManager.class);
+              if (userManager == null) {
+                return false;
+              }
+              return BuildCompat.isAtLeastU()
+                  && userManager.isSystemUser()
+                  && statsdConfigReader.getConfig().enablePlatformLogging()
+                  && statsdConfigReader.getConfig().enableMetricWisePopulations();
+            }
+          });
+    }
+    return trainingCriteria;
   }
 
   private void logScheduledJobsCount() {

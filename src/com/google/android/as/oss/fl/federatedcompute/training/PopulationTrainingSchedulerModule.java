@@ -45,6 +45,6 @@ abstract class PopulationTrainingSchedulerModule {
   @IntoSet
   static PcsInitializer providePcsInitializer(
       PopulationTrainingScheduler populationTrainingScheduler) {
-    return () -> populationTrainingScheduler.schedule(Optional.empty());
+    return () -> populationTrainingScheduler.schedule(Optional.empty(), Optional.empty());
   }
 }

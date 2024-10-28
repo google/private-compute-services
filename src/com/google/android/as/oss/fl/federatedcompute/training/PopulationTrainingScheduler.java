@@ -16,6 +16,8 @@
 
 package com.google.android.as.oss.fl.federatedcompute.training;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
+
 import android.os.Build.VERSION_CODES;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -25,12 +27,14 @@ import com.google.android.as.oss.fl.api.proto.TrainerOptions.JobType;
 import com.google.android.as.oss.fl.api.proto.TrainerOptions.TrainingMode;
 import com.google.android.as.oss.fl.brella.service.scheduler.TrainingScheduler;
 import com.google.android.as.oss.fl.populations.Population;
+import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.GoogleLogger;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -41,7 +45,7 @@ import java.util.concurrent.Executor;
 @RequiresApi(VERSION_CODES.UPSIDE_DOWN_CAKE)
 public class PopulationTrainingScheduler {
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
-  private final Set<Optional<TrainingCriteria>> trainingCriteria;
+  private final ImmutableList<TrainingCriteria> trainingCriteria;
   private final Executor executor;
   private final TrainingScheduler trainingScheduler;
 
@@ -49,7 +53,11 @@ public class PopulationTrainingScheduler {
       TrainingScheduler trainingScheduler,
       Set<Optional<TrainingCriteria>> trainingCriteria,
       Executor executor) {
-    this.trainingCriteria = trainingCriteria;
+    this.trainingCriteria =
+        trainingCriteria.stream()
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(toImmutableList());
     this.trainingScheduler = trainingScheduler;
     this.executor = executor;
   }
@@ -59,16 +67,20 @@ public class PopulationTrainingScheduler {
    *
    * @param callback callback to be called when training for all criteria is scheduled.
    */
-  public void schedule(Optional<TrainingSchedulerCallback> callback) {
+  public void schedule(
+      Optional<TrainingSchedulerCallback> callback,
+      Optional<Set<TrainingCriteria>> additionalTrainingCriteria) {
+    Set<TrainingCriteria> trainingCriteriaToSchedule = new HashSet<>(this.trainingCriteria);
+    if (additionalTrainingCriteria.isPresent()) {
+      trainingCriteriaToSchedule.addAll(additionalTrainingCriteria.get());
+    }
+
     List<ListenableFuture<Void>> futures = new ArrayList<>();
-    for (var maybeCriteria : trainingCriteria) {
-      if (maybeCriteria.isPresent()) {
-        TrainingCriteria criteria = maybeCriteria.get();
-        if (criteria.canScheduleTraining()) {
-          futures.add(registerPopulation(criteria.getTrainerOptions()));
-        } else {
-          futures.add(unregisterPopulation(criteria.getTrainerOptions()));
-        }
+    for (var criteria : trainingCriteriaToSchedule) {
+      if (criteria.canScheduleTraining()) {
+        futures.add(registerPopulation(criteria.getTrainerOptions()));
+      } else {
+        futures.add(unregisterPopulation(criteria.getTrainerOptions()));
       }
     }
     // Add a callback to the list of ListenableFutures that will be called when all of the futures
