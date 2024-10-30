@@ -41,13 +41,14 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.GoogleLogger;
 import com.google.common.primitives.Longs;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.intelligence.fcp.client.SelectorContext;
 import com.google.protobuf.Any;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import java.util.List;
-import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -68,12 +69,13 @@ public class StatsdExampleStoreConnector implements ExampleStoreConnector {
 
   private static final String NO_TABLE_PRESENT_ERROR = "no such table: metric_";
 
-  private final Executor executor;
+  private final ListeningScheduledExecutorService executor;
   private final Context context;
 
   @Inject
   public StatsdExampleStoreConnector(
-      @FlExecutorQualifier Executor executor, @ApplicationContext Context context) {
+      @FlExecutorQualifier ListeningScheduledExecutorService executor,
+      @ApplicationContext Context context) {
     this.executor = executor;
     this.context = context;
   }
@@ -140,7 +142,7 @@ public class StatsdExampleStoreConnector implements ExampleStoreConnector {
     }
   }
 
-  public List<Long> getRestrictedMetricIds() {
+  public ListenableFuture<List<Long>> getRestrictedMetricIds() {
     StatsManager statsManager = context.getSystemService(StatsManager.class);
     PendingIntent pi =
         PendingIntent.getBroadcast(
@@ -148,13 +150,16 @@ public class StatsdExampleStoreConnector implements ExampleStoreConnector {
             0,
             new Intent(ACTION_RESTRICTED_METRICS_CHANGED),
             PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-    try {
-      return Longs.asList(
-          statsManager.setRestrictedMetricsChangedOperation(
-              getConfigId(), getConfigPackageName(), pi));
-    } catch (StatsUnavailableException | RuntimeException e) {
-      return ImmutableList.of();
-    }
+    return executor.submit(
+        () -> {
+          try {
+            return Longs.asList(
+                statsManager.setRestrictedMetricsChangedOperation(
+                    getConfigId(), getConfigPackageName(), pi));
+          } catch (StatsUnavailableException | RuntimeException e) {
+            return ImmutableList.of();
+          }
+        });
   }
 
   @Nullable

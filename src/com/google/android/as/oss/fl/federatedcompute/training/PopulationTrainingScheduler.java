@@ -17,9 +17,9 @@
 package com.google.android.as.oss.fl.federatedcompute.training;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.util.concurrent.Futures.immediateFuture;
 
 import android.os.Build.VERSION_CODES;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.concurrent.futures.CallbackToFutureAdapter;
 import com.google.android.as.oss.fl.api.proto.TrainerOptions;
@@ -28,11 +28,12 @@ import com.google.android.as.oss.fl.api.proto.TrainerOptions.TrainingMode;
 import com.google.android.as.oss.fl.brella.service.scheduler.TrainingScheduler;
 import com.google.android.as.oss.fl.populations.Population;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.GoogleLogger;
-import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import java.util.ArrayList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
@@ -65,41 +66,39 @@ public class PopulationTrainingScheduler {
   /**
    * Schedules training for all training criteria.
    *
-   * @param callback callback to be called when training for all criteria is scheduled.
+   * @param additionalTrainingCriteria an optional future of additional training criteria to
+   *     schedule.
    */
-  public void schedule(
-      Optional<TrainingSchedulerCallback> callback,
-      Optional<Set<TrainingCriteria>> additionalTrainingCriteria) {
-    Set<TrainingCriteria> trainingCriteriaToSchedule = new HashSet<>(this.trainingCriteria);
-    if (additionalTrainingCriteria.isPresent()) {
-      trainingCriteriaToSchedule.addAll(additionalTrainingCriteria.get());
-    }
-
-    List<ListenableFuture<Void>> futures = new ArrayList<>();
-    for (var criteria : trainingCriteriaToSchedule) {
-      if (criteria.canScheduleTraining()) {
-        futures.add(registerPopulation(criteria.getTrainerOptions()));
-      } else {
-        futures.add(unregisterPopulation(criteria.getTrainerOptions()));
-      }
-    }
-    // Add a callback to the list of ListenableFutures that will be called when all of the futures
-    // have completed
-    Futures.addCallback(
-        Futures.allAsList(futures),
-        new FutureCallback<List<Void>>() {
-          @Override
-          public void onSuccess(@Nullable List<Void> results) {
-            // This code will be called when all of the futures have completed without errors.
-            callback.ifPresent(c -> c.onTrainingScheduleSuccess());
-          }
-
-          @Override
-          public void onFailure(Throwable t) {
-            callback.ifPresent(c -> c.onTrainingScheduleFailure(t));
-          }
-        },
-        executor);
+  @CanIgnoreReturnValue
+  public ListenableFuture<Void> schedule(
+      Optional<ListenableFuture<Set<TrainingCriteria>>> additionalTrainingCriteria) {
+    return FluentFuture.from(
+            additionalTrainingCriteria.isPresent()
+                ? additionalTrainingCriteria.get()
+                : immediateFuture(ImmutableSet.of()))
+        .transformAsync(
+            additionalCriteria -> {
+              Set<TrainingCriteria> trainingCriteriaToSchedule =
+                  new HashSet<>(PopulationTrainingScheduler.this.trainingCriteria);
+              trainingCriteriaToSchedule.addAll(additionalCriteria);
+              return Futures.allAsList(
+                  trainingCriteriaToSchedule.stream()
+                      .map(
+                          criteria -> {
+                            if (criteria.canScheduleTraining()) {
+                              return registerPopulation(criteria.getTrainerOptions());
+                            } else {
+                              return unregisterPopulation(criteria.getTrainerOptions());
+                            }
+                          })
+                      .collect(toImmutableList()));
+            },
+            executor)
+        .transform(
+            results -> {
+              return null;
+            },
+            executor);
   }
 
   private ListenableFuture<Void> registerPopulation(TrainerOptions trainerOpts) {

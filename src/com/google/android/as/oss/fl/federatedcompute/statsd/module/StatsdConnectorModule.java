@@ -21,11 +21,11 @@ import com.google.android.as.oss.common.ExecutorAnnotations.FlExecutorQualifier;
 import com.google.android.as.oss.fl.federatedcompute.statsd.ExampleStoreConnector;
 import com.google.android.as.oss.fl.federatedcompute.statsd.StatsdExampleStoreConnector;
 import com.google.apps.tiktok.inject.ApplicationContext;
+import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
 import dagger.hilt.components.SingletonComponent;
-import java.util.concurrent.Executor;
 import javax.inject.Singleton;
 
 @Module
@@ -34,7 +34,8 @@ abstract class StatsdConnectorModule {
   @Provides
   @Singleton
   static ExampleStoreConnector provideExampleStoreConnector(
-      @FlExecutorQualifier Executor executor, @ApplicationContext Context context) {
+      @FlExecutorQualifier ListeningScheduledExecutorService executor,
+      @ApplicationContext Context context) {
     return new StatsdExampleStoreConnector(executor, context);
   }
 }
