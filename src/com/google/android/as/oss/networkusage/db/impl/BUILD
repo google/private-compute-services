@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@bazel_rules_android//android:rules.bzl", "android_library")
+load("//third_party/bazel_rules/rules_java/java:java_plugin.bzl", "java_plugin")
 
 package(default_visibility = ["//visibility:public"])
 
