@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-syntax = "proto3";
+edition = "2023";
 
 package com.google.android.as.oss.pd.api;
 
+option features.field_presence = IMPLICIT;
 option java_multiple_files = true;
 option java_package = "com.google.android.as.oss.pd.api.proto";
 option use_java_stubby_library = true;
@@ -29,6 +30,7 @@ message DownloadBlobRequest {
 
   // Define the download mode.
   DownloadMode download_mode = 1002;
+
   enum DownloadMode {
     MODE_UNSPECIFIED = 0;
 
@@ -67,6 +69,7 @@ message BlobConstraints {
     HIGH = 4;
     ULTRA = 5;
   }
+
   DeviceTier device_tier = 1001;
 
   enum Client {
@@ -82,6 +85,7 @@ message BlobConstraints {
     AI_CORE_IMAGE_INPUT = 9;
     AI_CORE_MESSAGES_TEXT = 10;
     AI_CORE_CHROME_SUMMARIZATION_OUTPUT = 11;
+
     // AI_CORE clients reserved range from 12 to 100
     AI_CORE_CLIENT_12 = 12;
     AI_CORE_CLIENT_13 = 13;
@@ -112,8 +116,10 @@ message BlobConstraints {
     AI_CORE_CLIENT_38 = 38;
     AI_CORE_CLIENT_39 = 39;
     AI_CORE_CLIENT_40 = 40;
+
     reserved 10000 to 10004, 99997 to 99999;
   }
+
   Client client = 1002;
 
   enum ClientGroup {
@@ -128,11 +134,8 @@ message BlobConstraints {
   message ClientVersion {
     enum Type {
       TYPE_UNKNOWN = 0;
-
       TYPE_ANDROID = 1;
-
       TYPE_ANDROID_CORE = 2;
-
       TYPE_ANDROID_CORE_ATTESTED_PKVM = 3;
     }
 
@@ -153,6 +156,7 @@ message BlobConstraints {
     PIXEL = 2;
     SAMSUNG_QC = 3;
     SAMSUNG_SLSI = 4;
+
     VARIANT_5 = 5;
     VARIANT_6 = 6;
     VARIANT_7 = 7;
@@ -184,11 +188,8 @@ message CryptoKeys {
 // The type of component.
 enum ProtectionType {
   TYPE_UNKNOWN = 0;
-
   TYPE_RULE = 1;
-
   TYPE_MODEL = 2;
-
   TYPE_BLM_BLOCK_LIST = 4;
 
   reserved 3;
@@ -227,7 +228,6 @@ message DownloadBlobResponse {
   // Proof that can be verified to ensure the blob shipped to user devices
   // has been included in a transparency log.
   ProtectionProof protection_proof_v2 = 12;
-
   repeated ProtectionComponent protection_components = 13;
 
   // This type specifies the status of the downloaded package.
@@ -235,11 +235,8 @@ message DownloadBlobResponse {
 
   enum DownloadStatus {
     STATUS_UNSPECIFIED = 0;
-
     FULL_PACKAGE_DOWNLOADED = 1;
-
     PARTIAL_PACKAGE_UPDATED = 2;
-
     PARTIAL_UPDATE_EMPTY = 3;
   }
 
