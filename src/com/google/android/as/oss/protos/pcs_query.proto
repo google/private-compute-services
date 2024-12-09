@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-syntax = "proto3";
+edition = "2023";
 
 package com.google.android.as.oss.proto;
 
@@ -20,11 +20,13 @@ import "google/protobuf/any.proto";
 import "src/com/google/android/as/oss/protos/pcs_feature-enum.proto";
 import "third_party/java/arcs/policy.proto";
 
+option features.field_presence = IMPLICIT;
 option java_package = "com.google.android.as.oss.proto";
 option java_outer_classname = "PcsProtos";
 
 // Federated compute plans (task groups) must use this protocol buffer as
 // selection criteria.
+
 message AstreaQuery {
   // Client to which the query needs to be routed (Google Play Protect
   // Service/ASI/StatsD).
@@ -37,6 +39,7 @@ message AstreaQuery {
   string population_name = 3;
 
   // Feature specific selection criteria.
+
   .google.protobuf.Any data_selection_criteria = 4;
 
   // Feature name for which the federated training is requested.
