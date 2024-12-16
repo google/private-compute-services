@@ -30,4 +30,6 @@ message AttestationMeasurementResponse {
   bytes signature_bytes = 3;
 
   bytes public_key = 4;
+
+  bool content_binding_as_challenge = 5;
 }
