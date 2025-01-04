@@ -153,6 +153,8 @@ message BlobConstraints {
   enum Variant {
     VARIANT_UNSPECIFIED = 0;
     OEM = 1;
+
+    // Pixel8 (SoC: Zuma)
     PIXEL = 2;
     SAMSUNG_QC = 3;
     SAMSUNG_SLSI = 4;
