@@ -40,6 +40,8 @@ public abstract class PcsAttestationMeasurementConfig {
 
   public abstract long delaySeconds();
 
+  public abstract boolean enableContentBindingAsChallenge();
+
   /** Builder for {@link PcsAttestationMeasurementConfig}. */
   @AutoValue.Builder
   public abstract static class Builder {
@@ -54,6 +56,8 @@ public abstract class PcsAttestationMeasurementConfig {
     public abstract Builder setMaxDelaySeconds(long value);
 
     public abstract Builder setDelaySeconds(long value);
+
+    public abstract Builder setEnableContentBindingAsChallenge(boolean value);
 
     public abstract PcsAttestationMeasurementConfig build();
   }

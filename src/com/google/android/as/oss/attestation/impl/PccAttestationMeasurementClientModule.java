@@ -20,7 +20,9 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 
 import android.content.Context;
 import com.google.android.as.oss.attestation.PccAttestationMeasurementClient;
+import com.google.android.as.oss.attestation.config.PcsAttestationMeasurementConfig;
 import com.google.android.as.oss.common.ExecutorAnnotations.AttestationExecutorQualifier;
+import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.common.time.TimeSource;
 import com.google.android.as.oss.logging.PcsStatsLog;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
@@ -52,6 +54,7 @@ final class PccAttestationMeasurementClientModule {
       NetworkUsageLogRepository networkUsageLogRepository,
       TimeSource timeSource,
       PcsStatsLog pcsStatsLogger,
+      ConfigReader<PcsAttestationMeasurementConfig> configReader,
       @ApplicationContext Context context) {
     ManagedChannel managedChannel =
         OkHttpChannelBuilder.forAddress(ATTESTATION_API_HOST, ATTESTATION_API_PORT)
@@ -64,6 +67,7 @@ final class PccAttestationMeasurementClientModule {
         networkUsageLogRepository,
         timeSource,
         pcsStatsLogger,
+        configReader.getConfig().enableContentBindingAsChallenge(),
         context);
   }
 

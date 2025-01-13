@@ -39,6 +39,7 @@ import com.google.android.as.oss.networkusage.db.NetworkUsageEntity;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogUtils;
 import com.google.common.flogger.GoogleLogger;
+import com.google.common.hash.Hashing;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.internal.android.keyattestation.v1.Challenge;
@@ -80,6 +81,7 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
   private final TimeSource timeSource;
   private final NetworkUsageLogRepository networkUsageLogRepository;
 
+  private final boolean enableContentBindingAsChallenge;
   private final PcsStatsLog pcsStatsLogger;
   private final Context context;
 
@@ -98,12 +100,14 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
       NetworkUsageLogRepository networkUsageLogRepository,
       TimeSource timeSource,
       PcsStatsLog pcsStatsLogger,
+      boolean enableContentBindingAsChallenge,
       Context context) {
     this.executor = executor;
     this.managedChannel = channel;
     this.timeSource = timeSource;
     this.networkUsageLogRepository = networkUsageLogRepository;
     this.pcsStatsLogger = pcsStatsLogger;
+    this.enableContentBindingAsChallenge = enableContentBindingAsChallenge;
     this.context = context;
   }
 
@@ -178,6 +182,9 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
         attestationResponseBuilder
             .setPayload(attestationMeasurementRequest.contentBinding().get())
             .setSignatureBytes(ByteString.copyFrom(signature));
+        if (this.enableContentBindingAsChallenge) {
+          attestationResponseBuilder.setContentBindingAsChallenge(true);
+        }
       }
     } catch (GeneralSecurityException e) {
       logger.atWarning().withCause(e).log(
@@ -198,6 +205,17 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
   /** Helper method to initiate a grpc request for an attestation challenge. */
   private ListenableFuture<Challenge> requestChallenge(
       AttestationMeasurementRequest attestationRequest) {
+    if (attestationRequest.contentBinding().isPresent() && this.enableContentBindingAsChallenge) {
+      return Futures.immediateFuture(
+          Challenge.newBuilder()
+              .setChallenge(
+                  ByteString.copyFrom(
+                      Hashing.sha384()
+                          .hashBytes(attestationRequest.contentBinding().get().getBytes())
+                          .asBytes()))
+              .setTtl(toProtoDuration(attestationRequest.ttl()))
+              .build());
+    }
     GenerateChallengeRequest.Builder generateChallengeRequest =
         GenerateChallengeRequest.newBuilder().setTtl(toProtoDuration(attestationRequest.ttl()));
     KeyAttestationServiceFutureStub futureStub =
