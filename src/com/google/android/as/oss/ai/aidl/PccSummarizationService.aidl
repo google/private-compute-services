@@ -16,9 +16,11 @@
 
 package com.google.android.as.oss.ai.aidl;
 
+import com.google.android.as.oss.ai.aidl.PccCancellationCallback;
 import com.google.android.as.oss.ai.aidl.PccSummarizationResultCallback;
 import com.google.android.apps.aicore.aidl.SummarizationRequest;
 
 interface PccSummarizationService  {
-  void runInference(in SummarizationRequest request, in PccSummarizationResultCallback callback);
+  PccCancellationCallback runCancellableInference(
+      in SummarizationRequest request, in PccSummarizationResultCallback callback);
 };

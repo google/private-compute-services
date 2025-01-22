@@ -96,28 +96,34 @@ final class GenAiServiceUtils {
         checkNonNullAidlResponse(() -> service.getSummarizationService(feature));
     return new PccSummarizationService.Stub() {
       @Override
-      public void runInference(
+      public PccCancellationCallback runCancellableInference(
           SummarizationRequest request, PccSummarizationResultCallback callback)
           throws RemoteException {
         try {
-          summarizationService.runInference(
-              request,
-              new ISummarizationResultCallback.Stub() {
-                @Override
-                public void onSummarizationInferenceSuccess(SummarizationResult response)
-                    throws RemoteException {
-                  callback.onSummarizationInferenceSuccess(response);
-                }
+          ICancellationCallback cancellationCallback =
+              checkNonNullAidlResponse(
+                  () ->
+                      summarizationService.runCancellableInference(
+                          request,
+                          new ISummarizationResultCallback.Stub() {
+                            @Override
+                            public void onSummarizationInferenceSuccess(
+                                SummarizationResult response) throws RemoteException {
+                              callback.onSummarizationInferenceSuccess(response);
+                            }
 
-                @Override
-                public void onSummarizationInferenceFailure(int err) throws RemoteException {
-                  callback.onSummarizationInferenceFailure(err);
-                }
-              });
+                            @Override
+                            public void onSummarizationInferenceFailure(int err)
+                                throws RemoteException {
+                              callback.onSummarizationInferenceFailure(err);
+                            }
+                          }));
+          return createCancellationCallback(cancellationCallback);
         } catch (RemoteException e) {
           // Binder doesn't propagate exceptions across processes.
           logger.atWarning().withCause(e).log("Failed to run summarization service");
           callback.onSummarizationInferenceFailure(InferenceError.IPC_ERROR);
+          return createCancellationCallback(null);
         }
       }
     };
