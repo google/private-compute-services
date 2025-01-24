@@ -24,7 +24,6 @@ option java_multiple_files = true;
 option java_outer_classname = "ProtectedDownloadServiceProto";
 option java_package = "com.google.android.as.oss.pd.manifest.api.proto";
 option (datapol.file_vetting_status) = "latest";
-option use_java_stubby_library = true;
 
 // Service API for providing download manifests.
 service ProtectedDownloadService {
