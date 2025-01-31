@@ -127,6 +127,7 @@ message BlobConstraints {
     BETA = 1;
     ALPHA = 2;
     THIRD_PARTY_EAP = 3;
+    THIRD_PARTY_EXPERIMENTAL = 4;
   }
   ClientGroup client_group = 1003;
 

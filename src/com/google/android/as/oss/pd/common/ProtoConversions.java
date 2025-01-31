@@ -65,7 +65,8 @@ public final class ProtoConversions {
           ClientGroup.ALL, "all",
           ClientGroup.BETA, "beta",
           ClientGroup.ALPHA, "alpha",
-          ClientGroup.THIRD_PARTY_EAP, "third_party_eap");
+          ClientGroup.THIRD_PARTY_EAP, "third_party_eap",
+          ClientGroup.THIRD_PARTY_EXPERIMENTAL, "third_party_experimental");
 
   private static final ImmutableMap<String, Variant> STRING_TO_VARIANT =
       stream(Variant.values()).collect(toImmutableMap(Enum::name, variant -> variant));
