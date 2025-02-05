@@ -19,8 +19,15 @@ package com.google.android.as.oss.ai.aidl;
 import com.google.android.as.oss.ai.aidl.PccCancellationCallback;
 import com.google.android.as.oss.ai.aidl.PccSummarizationResultCallback;
 import com.google.android.apps.aicore.aidl.SummarizationRequest;
+import com.google.android.apps.aicore.aidl.IPrepareInferenceEngineCallback;
 
 interface PccSummarizationService  {
+  /** Runs an inference that allows explicit cancellation before completion. */
   PccCancellationCallback runCancellableInference(
       in SummarizationRequest request, in PccSummarizationResultCallback callback);
+  /**
+   * Prepares engine in advance so as to move setup cost out of inference. Calling this method
+   * is strictly optional.
+   */
+  PccCancellationCallback prepareInferenceEngine(in IPrepareInferenceEngineCallback callback);
 };
