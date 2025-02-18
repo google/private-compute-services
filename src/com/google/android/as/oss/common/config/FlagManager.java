@@ -18,8 +18,8 @@ package com.google.android.as.oss.common.config;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.MessageLite;
-import javax.annotation.concurrent.Immutable;
 
 /** Connector for system-configurable flags. */
 public interface FlagManager {
