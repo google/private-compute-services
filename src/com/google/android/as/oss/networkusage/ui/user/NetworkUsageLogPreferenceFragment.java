@@ -22,7 +22,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
-import android.widget.Switch;
+import android.widget.CompoundButton;
 import androidx.preference.PreferenceFragmentCompat;
 import com.android.settingslib.widget.MainSwitchPreference;
 import com.android.settingslib.widget.OnMainSwitchChangeListener;
@@ -59,7 +59,7 @@ public class NetworkUsageLogPreferenceFragment extends Hilt_NetworkUsageLogPrefe
   }
 
   @Override
-  public void onSwitchChanged(Switch switchView, boolean isChecked) {
+  public void onSwitchChanged(CompoundButton switchView, boolean isChecked) {
     if (isChecked) {
       onSwitchedOn();
     } else {
