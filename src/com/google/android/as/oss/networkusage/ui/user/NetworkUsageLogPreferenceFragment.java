@@ -110,7 +110,7 @@ public class NetworkUsageLogPreferenceFragment extends Hilt_NetworkUsageLogPrefe
             .setCountMetricId(CountMetricId.PCS_NETWORK_USAGE_LOG_OPTED_OUT)
             .build());
     logger.atInfo().log("NetworkUsageLog switched off by user.");
-    mainSwitchPreference.updateStatus(false);
+    mainSwitchPreference.setChecked(false);
     removeNetworkUsageLogFragment();
     clearDatabase();
   }
