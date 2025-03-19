@@ -17,6 +17,7 @@
 package com.google.android.as.oss.pd.common;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static java.util.Arrays.stream;
 
@@ -25,6 +26,7 @@ import com.google.android.as.oss.pd.api.proto.BlobConstraints.ClientGroup;
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.DeviceTier;
 import com.google.android.as.oss.pd.api.proto.BlobConstraints.Variant;
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.GoogleLogger;
 import java.util.Map;
@@ -116,5 +118,12 @@ public final class ProtoConversions {
     }
 
     return Optional.of(variant);
+  }
+
+  public ImmutableList<ClientConfig> getClientConfigsForPackage(String packageName) {
+    return clientToClientConfig.entrySet().stream()
+        .filter(entity -> entity.getValue().clientId().startsWith(packageName + ":"))
+        .map(Map.Entry::getValue)
+        .collect(toImmutableList());
   }
 }
