@@ -23,7 +23,6 @@ import com.google.android.as.oss.attestation.PccAttestationMeasurementClient;
 import com.google.android.as.oss.attestation.config.PcsAttestationMeasurementConfig;
 import com.google.android.as.oss.common.ExecutorAnnotations.AttestationExecutorQualifier;
 import com.google.android.as.oss.common.config.ConfigReader;
-import com.google.android.as.oss.common.time.TimeSource;
 import com.google.android.as.oss.logging.PcsStatsLog;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
 import dagger.Module;
@@ -52,7 +51,6 @@ final class PccAttestationMeasurementClientModule {
   static PccAttestationMeasurementClient providePccAttestationMeasurementClient(
       @AttestationExecutorQualifier Executor attestationExecutor,
       NetworkUsageLogRepository networkUsageLogRepository,
-      TimeSource timeSource,
       PcsStatsLog pcsStatsLogger,
       ConfigReader<PcsAttestationMeasurementConfig> configReader,
       @ApplicationContext Context context) {
@@ -65,7 +63,6 @@ final class PccAttestationMeasurementClientModule {
         attestationExecutor,
         managedChannel,
         networkUsageLogRepository,
-        timeSource,
         pcsStatsLogger,
         configReader.getConfig().enableContentBindingAsChallenge(),
         context);

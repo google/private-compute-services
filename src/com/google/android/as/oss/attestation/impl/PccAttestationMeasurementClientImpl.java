@@ -17,10 +17,6 @@
 package com.google.android.as.oss.attestation.impl;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.time.Durations.isPositive;
-import static com.google.protobuf.util.JavaTimeConversions.toJavaDuration;
-import static com.google.protobuf.util.JavaTimeConversions.toJavaInstant;
 import static com.google.protobuf.util.JavaTimeConversions.toProtoDuration;
 
 import android.annotation.SuppressLint;
@@ -31,7 +27,6 @@ import android.util.Pair;
 import com.google.android.as.oss.attestation.AttestationMeasurementRequest;
 import com.google.android.as.oss.attestation.PccAttestationMeasurementClient;
 import com.google.android.as.oss.attestation.api.proto.AttestationMeasurementResponse;
-import com.google.android.as.oss.common.time.TimeSource;
 import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceCountReported;
 import com.google.android.as.oss.logging.PcsStatsEnums.CountMetricId;
 import com.google.android.as.oss.logging.PcsStatsLog;
@@ -58,7 +53,6 @@ import java.security.Signature;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -78,7 +72,6 @@ import java.util.concurrent.Executor;
 public class PccAttestationMeasurementClientImpl implements PccAttestationMeasurementClient {
   private final Executor executor;
   private final ManagedChannel managedChannel;
-  private final TimeSource timeSource;
   private final NetworkUsageLogRepository networkUsageLogRepository;
 
   private final boolean enableContentBindingAsChallenge;
@@ -98,13 +91,11 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
       Executor executor,
       ManagedChannel channel,
       NetworkUsageLogRepository networkUsageLogRepository,
-      TimeSource timeSource,
       PcsStatsLog pcsStatsLogger,
       boolean enableContentBindingAsChallenge,
       Context context) {
     this.executor = executor;
     this.managedChannel = channel;
-    this.timeSource = timeSource;
     this.networkUsageLogRepository = networkUsageLogRepository;
     this.pcsStatsLogger = pcsStatsLogger;
     this.enableContentBindingAsChallenge = enableContentBindingAsChallenge;
@@ -150,8 +141,6 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
    */
   private ListenableFuture<AttestationMeasurementResponse> requestAttestationInternal(
       AttestationMeasurementRequest attestationMeasurementRequest, Challenge challenge) {
-    checkState(!timeHasExpired(challenge), "Expired challenge is not supported for attestation.");
-
     // Record challenge request in network usage log
     insertNetworkUsageLogRow(challenge.getSerializedSize());
 
@@ -299,27 +288,6 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
       encodedAttestationRecord.add(ByteString.copyFrom(cert.getEncoded()));
     }
     return encodedAttestationRecord;
-  }
-
-  /** Helper method to check if a {@link Challenge} has a valid expiration (ttl/expiry time). */
-  private boolean timeHasExpired(Challenge challenge) {
-    Duration ttl;
-    switch (challenge.getExpirationCase()) {
-      case TTL:
-        ttl = toJavaDuration(challenge.getTtl());
-        return !isPositive(ttl);
-      case EXPIRE_TIME:
-        Instant currentTime = timeSource.now();
-        Instant expirationTtl = toJavaInstant(challenge.getExpireTime());
-        ttl = Duration.between(currentTime, expirationTtl);
-        return !isPositive(ttl);
-      case EXPIRATION_NOT_SET:
-        // This should be unreachable as the attestation challenge should always have either a ttl
-        // or an expiration time.
-        throw new AssertionError("Attestation challenge does not contain expiration time.");
-    }
-    // Challenge has expired.
-    return false;
   }
 
   /** Helper method to insert download into network usage log. */
