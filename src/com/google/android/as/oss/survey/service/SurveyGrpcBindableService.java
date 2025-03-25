@@ -506,38 +506,31 @@ public class SurveyGrpcBindableService extends SurveyServiceGrpc.SurveyServiceIm
   }
 
   private static String getTriggerId(SurveyTriggerId surveyTriggerId) {
-    switch (surveyTriggerId) {
-      case SURVEY_TRIGGER_ID_LIVE_CAPTION_OVERALL_SATISFACTION:
-        return LIVE_CAPTION_SURVEY_OVERALL_TRIGGER_ID;
-      default:
-        throw new IllegalArgumentException("Unknown survey trigger id");
-    }
+    return switch (surveyTriggerId) {
+      case SURVEY_TRIGGER_ID_LIVE_CAPTION_OVERALL_SATISFACTION ->
+          LIVE_CAPTION_SURVEY_OVERALL_TRIGGER_ID;
+      default -> throw new IllegalArgumentException("Unknown survey trigger id");
+    };
   }
 
   private static String getSurveyAppId(SurveyAppId surveyAppId) {
-    switch (surveyAppId) {
-      case SURVEY_APP_ID_ASI:
-        return SYSTEM_INTELLEGENCE_APP_ID;
-      default:
-        throw new IllegalArgumentException("Unknown survey app id for getSurveyAppId");
-    }
+    return switch (surveyAppId) {
+      case SURVEY_APP_ID_ASI -> SYSTEM_INTELLEGENCE_APP_ID;
+      default -> throw new IllegalArgumentException("Unknown survey app id for getSurveyAppId");
+    };
   }
 
   private static String getSurveyAppName(SurveyAppId surveyAppId) {
-    switch (surveyAppId) {
-      case SURVEY_APP_ID_ASI:
-        return SYSTEM_INTELLEGENCE_APP_NAME;
-      default:
-        throw new IllegalArgumentException("Unknown survey app id for getSurveyAppName");
-    }
+    return switch (surveyAppId) {
+      case SURVEY_APP_ID_ASI -> SYSTEM_INTELLEGENCE_APP_NAME;
+      default -> throw new IllegalArgumentException("Unknown survey app id for getSurveyAppName");
+    };
   }
 
   private static String getStartUpConfigKey(StartupConfigId startUpConfigId) {
-    switch (startUpConfigId) {
-      case STARTUP_CONFIG_ID_LIVE_CAPTION:
-        return LIVE_CAPTION_STARTUP_CONFIG_KEY;
-      default:
-        throw new IllegalArgumentException("Unknown startup config id");
-    }
+    return switch (startUpConfigId) {
+      case STARTUP_CONFIG_ID_LIVE_CAPTION -> LIVE_CAPTION_STARTUP_CONFIG_KEY;
+      default -> throw new IllegalArgumentException("Unknown startup config id");
+    };
   }
 }
