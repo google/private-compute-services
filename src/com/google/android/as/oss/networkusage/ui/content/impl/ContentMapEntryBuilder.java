@@ -29,20 +29,7 @@ import com.google.android.as.oss.networkusage.api.proto.FlConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.HttpConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.PdConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.PirConnectionKey;
-import com.google.android.as.oss.networkusage.api.proto.SurveyConnectionKey;
-import com.google.android.as.oss.networkusage.db.ConnectionDetails;
-import com.google.android.as.oss.networkusage.db.ConnectionDetails.ConnectionType;
-import com.google.android.as.oss.networkusage.ui.content.impl.NetworkUsageLogContentMapImpl.ConnectionResources;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import java.util.AbstractMap.SimpleImmutableEntry;
-
-/** Builder class for NetworkUsageContentMap entries. */
-final class ContentMapEntryBuilder {
-  static final String ASI_PACKAGE_NAME = "com.google.android.as";
-  static final String STATSD_PACKAGE_NAME = "com.android.os.statsd";
-  static final String AICORE_PACKAGE_NAME = "com.google.android.aicore";
-  static final String GPPS_PACKAGE_NAME = "com.google.android.odad";
-  static final String LAUNCHER_PACKAGE_NAME = "com.google.android.apps.nexuslauncher";
+import com.google.android.as.oss.networkusage.api.proto.PrivateInferenceConnectionKey;
 
   private final Context context;
 
@@ -117,9 +104,7 @@ final class ContentMapEntryBuilder {
     return this;
   }
 
-  /**
-   * @return The built map entry with ConnectionDetails as key and ConnectionResources as value.
-   */
+  /** @return The built map entry with ConnectionDetails as key and ConnectionResources as value. */
   SimpleImmutableEntry<ConnectionDetails, ConnectionResources> build() {
     checkArgument(!isNullOrEmpty(packageName));
     checkNotNull(connectionType);
