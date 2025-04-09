@@ -38,6 +38,11 @@ public interface Annotations {
   @Retention(RetentionPolicy.RUNTIME)
   @interface GrpcService {}
 
+  /** Annotation for bindable services' security policies used in PCS. */
+  @Qualifier
+  @Retention(RetentionPolicy.RUNTIME)
+  @interface GrpcServiceSecurityPolicy {}
+
   /** Annotation for package name that provides PCS services. */
   @Qualifier
   @Retention(RetentionPolicy.RUNTIME)

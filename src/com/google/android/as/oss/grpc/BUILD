@@ -48,10 +48,12 @@ android_library(
         ":annotations",
         ":api",
         "//third_party/java/hilt:hilt-android",
+        "@maven//:androidx_annotation_annotation",
         "@maven//:androidx_lifecycle_lifecycle_service",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_flogger_google_extensions",
         "@maven//:io_grpc_grpc_api",
+        "@maven//:io_grpc_grpc_binder",
         "@maven//:javax_inject_javax_inject",
     ],
 )

@@ -19,6 +19,7 @@ package com.google.android.apps.miphone.astrea.grpc;
 import com.google.android.apps.miphone.astrea.grpc.Annotations.AllowedPackageName;
 import com.google.android.apps.miphone.astrea.grpc.Annotations.GrpcService;
 import com.google.android.apps.miphone.astrea.grpc.Annotations.GrpcServiceName;
+import com.google.android.apps.miphone.astrea.grpc.Annotations.GrpcServiceSecurityPolicy;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
@@ -26,6 +27,8 @@ import dagger.hilt.InstallIn;
 import dagger.hilt.components.SingletonComponent;
 import dagger.multibindings.Multibinds;
 import io.grpc.BindableService;
+import io.grpc.binder.SecurityPolicy;
+import java.util.Map;
 import java.util.Set;
 import javax.inject.Singleton;
 
@@ -43,6 +46,10 @@ abstract class PcsGrpcModule {
   abstract Set<String> provideServiceName();
 
   @Multibinds
+  @GrpcServiceSecurityPolicy
+  abstract Map<String, SecurityPolicy> provideServiceSecurityPolicies();
+
+  @Multibinds
   @AllowedPackageName
   abstract Set<String> provideAllowedPackageNames();
 
@@ -51,7 +58,8 @@ abstract class PcsGrpcModule {
   static GrpcServerEndpointConfiguration provideConfiguration(
       @GrpcServiceName Set<String> serviceNames,
       @AllowedPackageName Set<String> allowedPackages,
-      @GrpcService Lazy<Set<BindableService>> services) {
+      @GrpcService Lazy<Set<BindableService>> services,
+      @GrpcServiceSecurityPolicy Lazy<Map<String, SecurityPolicy>> serviceSecurityPolicies) {
     return new GrpcServerEndpointConfiguration() {
       @Override
       public String getServerName() {
@@ -66,6 +74,11 @@ abstract class PcsGrpcModule {
       @Override
       public Set<BindableService> getServices() {
         return services.get();
+      }
+
+      @Override
+      public Map<String, SecurityPolicy> getServiceSecurityPolicies() {
+        return serviceSecurityPolicies.get();
       }
 
       @Override

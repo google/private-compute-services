@@ -17,6 +17,8 @@
 package com.google.android.apps.miphone.astrea.grpc;
 
 import io.grpc.BindableService;
+import io.grpc.binder.SecurityPolicy;
+import java.util.Map;
 import java.util.Set;
 
 /** Defines configuration necessary for standing up a gRPC server endpoint. */
@@ -32,6 +34,15 @@ public interface GrpcServerEndpointConfiguration {
    * gRPC server endpoint.
    */
   Set<BindableService> getServices();
+
+  /**
+   * Returns a map of service names of the {@link BindableService}s provided by {@link
+   * #getServices()}, and a corresponding {@link SecurityPolicy} for each service.
+   *
+   * <p>It is optional to have a custom security policy for a service. If not present, the default
+   * security policy will be used.
+   */
+  Map<String, SecurityPolicy> getServiceSecurityPolicies();
 
   /** Returns the set of package names that are allowed to bind to this server. */
   Set<String> getAllowedPackages();

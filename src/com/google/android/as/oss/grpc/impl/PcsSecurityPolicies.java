@@ -21,6 +21,7 @@ import com.google.android.apps.miphone.astrea.grpc.GrpcServerEndpointConfigurati
 import io.grpc.Status;
 import io.grpc.binder.SecurityPolicy;
 import io.grpc.binder.ServerSecurityPolicy;
+import java.util.Map;
 
 final class PcsSecurityPolicies {
 
@@ -48,8 +49,11 @@ final class PcsSecurityPolicies {
   static ServerSecurityPolicy buildServerSecurityPolicy(
       SecurityPolicy defaultPolicy, GrpcServerEndpointConfiguration configuration) {
     ServerSecurityPolicy.Builder result = ServerSecurityPolicy.newBuilder();
+    Map<String, SecurityPolicy> configuredSecurityPolicies =
+        configuration.getServiceSecurityPolicies();
     for (String service : configuration.getServiceNames()) {
-      result.servicePolicy(service, defaultPolicy);
+      result.servicePolicy(
+          service, configuredSecurityPolicies.getOrDefault(service, defaultPolicy));
     }
     return result.build();
   }
