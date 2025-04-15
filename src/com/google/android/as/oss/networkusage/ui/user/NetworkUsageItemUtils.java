@@ -131,19 +131,14 @@ class NetworkUsageItemUtils {
   }
 
   static String getConnectionKeyString(ConnectionDetails connectionDetails) {
-    switch (connectionDetails.type()) {
-      case FC_TRAINING_START_QUERY:
-      case FC_TRAINING_RESULT_UPLOAD:
-        return connectionDetails.connectionKey().getFlConnectionKey().getFeatureName();
-      case HTTP:
-        return connectionDetails.connectionKey().getHttpConnectionKey().getUrlRegex();
-      case PIR:
-        return connectionDetails.connectionKey().getPirConnectionKey().getUrlRegex();
-      case PD:
-        return connectionDetails.connectionKey().getPdConnectionKey().getClientId();
-      default:
-        return "";
-    }
+    return switch (connectionDetails.type()) {
+      case FC_TRAINING_START_QUERY, FC_TRAINING_RESULT_UPLOAD ->
+          connectionDetails.connectionKey().getFlConnectionKey().getFeatureName();
+      case HTTP -> connectionDetails.connectionKey().getHttpConnectionKey().getUrlRegex();
+      case PIR -> connectionDetails.connectionKey().getPirConnectionKey().getUrlRegex();
+      case PD -> connectionDetails.connectionKey().getPdConnectionKey().getClientId();
+      default -> "";
+    };
   }
 
   @SuppressWarnings("AndroidJdkLibsChecker")
@@ -205,24 +200,19 @@ class NetworkUsageItemUtils {
    */
   private static ImmutableList<LogItemWrapper> createTotalInstanceInfo(
       Context context, NetworkUsageItemWrapper networkUsageItem, PcsStatsLog pcsStatsLogger) {
-    switch (networkUsageItem.connectionDetails().type()) {
-      case PIR:
-      case HTTP:
-        return createDownloadInstanceInfo(context, networkUsageItem);
-      case PD:
-        return createPdDownloadInstanceInfo(context, networkUsageItem);
-      case FC_TRAINING_RESULT_UPLOAD:
-      case FC_TRAINING_START_QUERY:
-        return createFcResultUploadInstanceInfo(context, networkUsageItem, pcsStatsLogger);
-      case FC_CHECK_IN:
-        return createFcCheckInInstanceInfo(context, networkUsageItem);
-      case ATTESTATION_REQUEST:
-        return createAttestationRequestInstanceInfo(context, networkUsageItem);
-      default:
+    return switch (networkUsageItem.connectionDetails().type()) {
+      case PIR, HTTP -> createDownloadInstanceInfo(context, networkUsageItem);
+      case PD -> createPdDownloadInstanceInfo(context, networkUsageItem);
+      case FC_TRAINING_RESULT_UPLOAD, FC_TRAINING_START_QUERY ->
+          createFcResultUploadInstanceInfo(context, networkUsageItem, pcsStatsLogger);
+      case FC_CHECK_IN -> createFcCheckInInstanceInfo(context, networkUsageItem);
+      case ATTESTATION_REQUEST -> createAttestationRequestInstanceInfo(context, networkUsageItem);
+      default -> {
         logger.atWarning().log(
             "WARNING: Unknown ConnectionType %s", networkUsageItem.connectionDetails().type());
-        return ImmutableList.of();
-    }
+        yield ImmutableList.of();
+      }
+    };
   }
 
   private static ImmutableList<LogItemWrapper> createDownloadInstanceInfo(
