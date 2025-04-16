@@ -442,6 +442,126 @@ final class ProtoConversionsModule {
   }
 
   @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_41)
+  static ClientConfig provideAiCoreClient41ClientConfig() {
+    return ClientConfig.builder()
+        .setClientId("com.google.android.aicore:9347763061896501379")
+        .setBuildIdFlag(
+            ClientConfig.BuildIdFlag.create(
+                FlagNamespace.AICORE, "AicDataRelease__build_id_9347763061896501379"))
+        .build();
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_42)
+  static ClientConfig provideAiCoreClient42ClientConfig() {
+    return ClientConfig.builder()
+        .setClientId("com.google.android.aicore:10553225535939326565")
+        .setBuildIdFlag(
+            ClientConfig.BuildIdFlag.create(
+                FlagNamespace.AICORE, "AicDataRelease__build_id_10553225535939326565"))
+        .build();
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_43)
+  static ClientConfig provideAiCoreClient43ClientConfig() {
+    return ClientConfig.builder()
+        .setClientId("com.google.android.aicore:5742606038786011969")
+        .setBuildIdFlag(
+            ClientConfig.BuildIdFlag.create(
+                FlagNamespace.AICORE, "AicDataRelease__build_id_5742606038786011969"))
+        .build();
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_44)
+  static ClientConfig provideAiCoreClient44ClientConfig() {
+    return ClientConfig.builder()
+        .setClientId("com.google.android.aicore:9614928112563494806")
+        .setBuildIdFlag(
+            ClientConfig.BuildIdFlag.create(
+                FlagNamespace.AICORE, "AicDataRelease__build_id_9614928112563494806"))
+        .build();
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_45)
+  static ClientConfig provideAiCoreClient45ClientConfig() {
+    return ClientConfig.builder()
+        .setClientId("com.google.android.aicore:6824732181910573706")
+        .setBuildIdFlag(
+            ClientConfig.BuildIdFlag.create(
+                FlagNamespace.AICORE, "AicDataRelease__build_id_6824732181910573706"))
+        .build();
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_46)
+  static ClientConfig provideAiCoreClient46ClientConfig() {
+    return ClientConfig.builder()
+        .setClientId("com.google.android.aicore:7632259796561150258")
+        .setBuildIdFlag(
+            ClientConfig.BuildIdFlag.create(
+                FlagNamespace.AICORE, "AicDataRelease__build_id_7632259796561150258"))
+        .build();
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_47)
+  static ClientConfig provideAiCoreClient47ClientConfig() {
+    return ClientConfig.builder()
+        .setClientId("com.google.android.aicore:12851944831581789857")
+        .setBuildIdFlag(
+            ClientConfig.BuildIdFlag.create(
+                FlagNamespace.AICORE, "AicDataRelease__build_id_12851944831581789857"))
+        .build();
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_48)
+  static ClientConfig provideAiCoreClient48ClientConfig() {
+    return ClientConfig.builder()
+        .setClientId("com.google.android.aicore:17203260412298451912")
+        .setBuildIdFlag(
+            ClientConfig.BuildIdFlag.create(
+                FlagNamespace.AICORE, "AicDataRelease__build_id_17203260412298451912"))
+        .build();
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_49)
+  static ClientConfig provideAiCoreClient49ClientConfig() {
+    return ClientConfig.builder()
+        .setClientId("com.google.android.aicore:2651730305904984656")
+        .setBuildIdFlag(
+            ClientConfig.BuildIdFlag.create(
+                FlagNamespace.AICORE, "AicDataRelease__build_id_2651730305904984656"))
+        .build();
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.AI_CORE_CLIENT_50)
+  static ClientConfig provideAiCoreClient50ClientConfig() {
+    return ClientConfig.builder()
+        .setClientId("com.google.android.aicore:5495164372972161668")
+        .setBuildIdFlag(
+            ClientConfig.BuildIdFlag.create(
+                FlagNamespace.AICORE, "AicDataRelease__build_id_5495164372972161668"))
+        .build();
+  }
+
+  @Provides
   @Singleton
   static ProtoConversions provideProtoConversions(Map<Client, ClientConfig> clientToClientId) {
     return new ProtoConversions(ImmutableMap.copyOf(clientToClientId));
