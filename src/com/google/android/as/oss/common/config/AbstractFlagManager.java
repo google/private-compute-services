@@ -43,18 +43,17 @@ public abstract class AbstractFlagManager implements FlagManager {
       return defaultOverride;
     }
 
-    switch (property) {
-      case "true":
-        return true;
-      case "false":
-        return false;
-      default:
+    return switch (property) {
+      case "true" -> true;
+      case "false" -> false;
+      default -> {
         logReadWarning(
             flag.name(),
             "boolean",
             new IllegalStateException("Value " + property + " is not a valid boolean"));
-        return defaultOverride;
-    }
+        yield defaultOverride;
+      }
+    };
   }
 
   @Override
