@@ -358,62 +358,86 @@ public final class AstreaExampleStoreService extends Hilt_AstreaExampleStoreServ
     }
 
     Map<String, String> policyConfigs = installedPolicy.getConfigs().get("federatedCompute");
-    if (policyConfigs == null || !policyConfigs.containsKey("minSecAggRoundSize")) {
+    if (policyConfigs == null) {
       logger.atWarning().log("Policy provided doesn't have configs.");
       return false;
     }
-    int secAggRoundSize = Integer.parseInt(policyConfigs.getOrDefault("minSecAggRoundSize", "0"));
 
-    if (selectorContext.getComputationProperties().hasEligibilityEval()) {
-      if (secAggRoundSize > 1) {
-        // EETs are not allowed to run with SecAgg policy.
-        logger.atWarning().log("EETs are not allowed to run with SecAgg policy.");
-        return false;
-      }
-
-      if (!query
-          .getPopulationName()
-          .equals(
-              selectorContext
-                  .getComputationProperties()
-                  .getEligibilityEval()
-                  .getPopulationName())) {
-        logger.atWarning().log(
-            "Population in the query does not match population in the computation properties.");
-        return false;
-      }
-
-      return true;
+    // First, check that the population name matches.
+    String executingPopulationName = "";
+    if (selectorContext.getComputationProperties().hasFederated()) {
+      executingPopulationName =
+          selectorContext.getComputationProperties().getFederated().getPopulationName();
+    } else if (selectorContext.getComputationProperties().hasEligibilityEval()) {
+      executingPopulationName =
+          selectorContext.getComputationProperties().getEligibilityEval().getPopulationName();
+    } else {
+      // We will have checked that the task is not local compute before calling this method.
+      logger.atWarning().log(
+          "No federated or eligibility eval computation found in selector context.");
+      return false;
     }
-
-    if (!query
-        .getPopulationName()
-        .equals(selectorContext.getComputationProperties().getFederated().getPopulationName())) {
+    if (!query.getPopulationName().equals(executingPopulationName)) {
       logger.atWarning().log(
           "Population in the query does not match population in the computation properties.");
       return false;
     }
 
-    // Secure Aggregation with size <= 1 is equivalent to disabling SecAgg.
-    if (secAggRoundSize > 1) {
-      if (!selectorContext.getComputationProperties().getFederated().hasSecureAggregation()) {
-        logger.atWarning().log(
-            "SecAgg metadata not provided by Federated Compute, but SecAgg is required by policy.");
-        return false;
+    // The task must be aggregated either using legacy rounds or confidential aggregation. If the
+    // task is aggregated using legacy rounds, then the policy will specify both minRoundSize and
+    // minSecAggRoundSize.
+    if (policyConfigs.containsKey("minSecAggRoundSize")) {
+      int secAggRoundSize = Integer.parseInt(policyConfigs.getOrDefault("minSecAggRoundSize", "0"));
+      if (selectorContext.getComputationProperties().hasEligibilityEval()) {
+        if (secAggRoundSize > 1) {
+          // EETs are not allowed to run with SecAgg policy.
+          logger.atWarning().log("EETs are not allowed to run with SecAgg policy.");
+          return false;
+        }
+        // Currently executing an EET, the population matches, and it doesn't require SecAgg.
+        // Access is allowed.
+        return true;
       }
 
-      if (selectorContext
-              .getComputationProperties()
-              .getFederated()
-              .getSecureAggregation()
-              .getMinimumClientsInServerVisibleAggregate()
-          < secAggRoundSize) {
+      // If the minSecAggRoundSize is 0, then the task is aggregated using legacy rounds with simple
+      // aggregation. If the minSecAggRoundSize is > 0, then the task is
+      // aggregated using secure aggregation.
+      // Secure Aggregation with size <= 1 is equivalent to disabling SecAgg.
+      if (secAggRoundSize > 1) {
+        if (!selectorContext.getComputationProperties().getFederated().hasSecureAggregation()) {
+          logger.atWarning().log(
+              "SecAgg metadata not provided by Federated Compute, but SecAgg is required by"
+                  + " policy.");
+          return false;
+        }
+
+        if (selectorContext
+                .getComputationProperties()
+                .getFederated()
+                .getSecureAggregation()
+                .getMinimumClientsInServerVisibleAggregate()
+            < secAggRoundSize) {
+          logger.atWarning().log(
+              "SecAgg round size is less than the round size required by the policy.");
+          return false;
+        }
+      }
+    } else if (policyConfigs.containsKey("confidentialAgg")) {
+      // Task uses confidential aggregation. Make sure the task being executed is configured to use
+      // confidential aggregation, using the hint in the SelectorContext.
+      if (!selectorContext.getComputationProperties().getFederated().hasConfidentialAggregation()) {
         logger.atWarning().log(
-            "SecAgg round size is less than the round size required by the policy.");
+            "Policy requires task is aggregated using confidential aggregation, but the task is not"
+                + " configured to use confidential aggregation.");
         return false;
       }
+    } else {
+      logger.atWarning().log("Policy provided doesn't have minSecAggRoundSize or confidentialAgg.");
+      return false;
     }
 
+    // Made it through all the checks without returning false, so the task meets the policy
+    // requirements.
     return true;
   }
 
