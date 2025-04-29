@@ -38,7 +38,7 @@ abstract class EntityListProcessorsModule {
     return ImmutableList.of(
         new MostRecentEntitiesProcessor(entitiesTtl),
         new FcTrainingEntitiesProcessor(),
-        new AsiOnlyEntitiesProcessor(),
+        new DenylistedEntitiesProcessor(),
         new MergeSimilarEntitiesPerDayProcessor());
   }
 }

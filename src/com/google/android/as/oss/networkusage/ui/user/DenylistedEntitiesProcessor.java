@@ -20,18 +20,17 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import com.google.common.collect.ImmutableList;
 
-/** Filters non ASI entities from the {@link NetworkUsageItemWrapper} list. */
-class AsiOnlyEntitiesProcessor implements EntityListProcessor {
-  static final String ASI_PACKAGE_NAME = "com.google.android.as";
+/** Filters entities on denylist from the {@link NetworkUsageItemWrapper} list. */
+class DenylistedEntitiesProcessor implements EntityListProcessor {
+  static final String GPPS_PACKAGE_NAME = "com.google.android.odad";
+  static final ImmutableList<String> DENYLISTED_PACKAGE_NAMES = ImmutableList.of(GPPS_PACKAGE_NAME);
 
   @Override
   public ImmutableList<NetworkUsageItemWrapper> process(
       ImmutableList<NetworkUsageItemWrapper> networkUsageItems) {
     return networkUsageItems.stream()
         .filter(
-            entity ->
-                entity.connectionDetails().packageName().equals(ASI_PACKAGE_NAME)
-                    || entity.connectionDetails().packageName().equals("unknown"))
+            entity -> !DENYLISTED_PACKAGE_NAMES.contains(entity.connectionDetails().packageName()))
         .collect(toImmutableList());
   }
 }
