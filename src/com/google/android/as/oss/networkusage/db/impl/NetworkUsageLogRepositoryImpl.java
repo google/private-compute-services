@@ -119,25 +119,18 @@ public class NetworkUsageLogRepositoryImpl implements NetworkUsageLogRepository 
 
   @Override
   public boolean isKnownConnection(ConnectionType type, String connectionKeyString) {
-    switch (type) {
-      case HTTP:
-        return contentMap.getHttpConnectionDetails(connectionKeyString).isPresent();
-      case PIR:
-        return contentMap.getPirConnectionDetails(connectionKeyString).isPresent();
-      case FC_TRAINING_START_QUERY:
-      case FC_TRAINING_RESULT_UPLOAD:
-        return contentMap.getFcStartQueryConnectionDetails(connectionKeyString).isPresent();
-      case FC_CHECK_IN:
-        return true;
-      case PD:
-        return contentMap.getPdConnectionDetails(connectionKeyString).isPresent();
-      case ATTESTATION_REQUEST:
-        return contentMap.getAttestationConnectionDetails(connectionKeyString).isPresent();
-      case SURVEY_REQUEST:
-        return contentMap.getSurveyConnectionDetails(connectionKeyString).isPresent();
-      default:
-        return false;
-    }
+    return switch (type) {
+      case HTTP -> contentMap.getHttpConnectionDetails(connectionKeyString).isPresent();
+      case PIR -> contentMap.getPirConnectionDetails(connectionKeyString).isPresent();
+      case FC_TRAINING_START_QUERY, FC_TRAINING_RESULT_UPLOAD ->
+          contentMap.getFcStartQueryConnectionDetails(connectionKeyString).isPresent();
+      case FC_CHECK_IN -> true;
+      case PD -> contentMap.getPdConnectionDetails(connectionKeyString).isPresent();
+      case ATTESTATION_REQUEST ->
+          contentMap.getAttestationConnectionDetails(connectionKeyString).isPresent();
+      case SURVEY_REQUEST -> contentMap.getSurveyConnectionDetails(connectionKeyString).isPresent();
+      default -> false;
+    };
   }
 
   @Override
