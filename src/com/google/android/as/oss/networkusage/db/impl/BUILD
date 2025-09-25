@@ -1,4 +1,4 @@
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +17,12 @@ load("//third_party/bazel_rules/rules_java/java:java_plugin.bzl", "java_plugin")
 
 package(default_visibility = ["//visibility:public"])
 
+# Needed to collect all .json schema files for open sourcing.
+filegroup(
+    name = "room_schema_files",
+    srcs = glob(["schemas/**/*.json"]),
+)
+
 android_library(
     name = "impl",
     srcs = glob(["*.java"]) + [
@@ -24,6 +30,7 @@ android_library(
         "//src/com/google/android/as/oss/networkusage/db:ConnectionDetails.java",
         "//src/com/google/android/as/oss/networkusage/db:NetworkUsageEntity.java",
     ],
+    assets = [":room_schema_files"],
     exports_manifest = 1,
     javacopts = ["-Aroom.schemaLocation=src/com/google/android/as/oss/networkusage/db/impl/schemas"],
     manifest = "AndroidManifest.xml",
@@ -43,7 +50,6 @@ android_library(
         "//src/com/google/android/as/oss/networkusage/ui/user:res_lib",
         "//third_party/java/auto:auto_value",
         "//third_party/java/auto:auto_value_parcel_adapter",
-        "//third_party/java/hilt:hilt-android",
         "@maven//:androidx_annotation_annotation",
         "@maven//:androidx_lifecycle_lifecycle_livedata",
         "@maven//:androidx_lifecycle_lifecycle_livedata_core",
@@ -51,6 +57,7 @@ android_library(
         "@maven//:androidx_room_room_common",
         "@maven//:androidx_room_room_runtime",
         "@maven//:com_google_dagger_dagger",
+        "@maven//:com_google_dagger_hilt-android",
         "@maven//:com_google_flogger_google_extensions",
         "@maven//:com_google_guava_guava",
         "@maven//:javax_inject_javax_inject",

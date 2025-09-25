@@ -1,0 +1,95 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+edition = "2023";
+
+package com.google.android.as.oss.feedback.api;
+
+import "src/com/google/android/as/oss/feedback/proto/feedback_dialog_common_data.proto";
+import "src/com/google/android/as/oss/feedback/proto/feedback_tag_data.proto";
+import "src/com/google/android/as/oss/feedback/proto/gateway/quartz_log.proto";
+import "src/com/google/android/as/oss/feedback/proto/gateway/spoon.proto";
+
+option java_package = "com.google.android.as.oss.feedback.api";
+option java_multiple_files = true;
+
+// The data required to populate the feedback UI for multiple entities.
+// Next ID: 12
+message MultiFeedbackDialogData {
+  // The client session ID of the entities.
+  string client_session_id = 1;
+  // The title of the dialog.
+  string title = 2;
+
+  // The common dialog data.
+  FeedbackDialogCommonData dialog_common_data = 10;
+  // Common data shared across entities.
+  FeedbackEntityCommonData feedback_entity_common_data = 9;
+
+  // The entities in this feedback dialog.
+  repeated FeedbackEntityData feedback_entities = 3;
+
+  // Label for opt-in checkbox.
+  string opt_in_label = 4;
+  // Clickable label substring that links to the privacy policy.
+  string opt_in_label_link_privacy_policy = 5;
+  // Clickable label substring that links to the view data screen.
+  string opt_in_label_link_view_data = 11;
+  // Label for send button.
+  string button_label = 6;
+
+  // The toast to show when the feedback is submitted successfully.
+  string feedback_dialog_sent_successfully_toast = 7;
+
+  // The toast to show when the feedback submission fails.
+  string feedback_dialog_sent_failed_toast = 8;
+}
+
+message FeedbackEntityCommonData {
+  // The content description of the Thumbs Up button.
+  string thumbs_up_button_content_description = 1;
+  // The content description of the Thumbs Down button.
+  string thumbs_down_button_content_description = 2;
+}
+
+// Next ID: 8
+message FeedbackEntityData {
+  // The CUJ type of the entity.
+  oneof cuj_type {
+    gateway.SpoonCUJ cuj = 1;
+    // The CUJ type of the Quartz entity.
+    gateway.QuartzCUJ quartz_cuj = 7;
+  }
+  // The content of the entity, uniquely identifies this entity within the same
+  // session.
+  string entity_content = 2;
+  // Title shown in the entity header.
+  string title = 3;
+  // Optional label shown under the title, in the entity header.
+  string label = 4;
+
+  // Optional data to show when the user selects positive feedback.
+  FeedbackRatingData positive_rating_data = 5;
+  // Optional data to show when the user selects negative feedback.
+  FeedbackRatingData negative_rating_data = 6;
+}
+
+message FeedbackRatingData {
+  // Header for the feedback card when expanded.
+  string header = 1;
+  // Zero or more feedback tags, rendered as selectable chips.
+  repeated FeedbackTagData tags = 2;
+  // Hint for freeform text input field.
+  string free_form_hint = 3;
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ val SmartSelectLearningPolicy_FederatedCompute =
   ) {
     description =
       """
-      To train and improve SmartSelect ML models that correctly select and classify actionable text.
+        To train and improve SmartSelect ML models that correctly select and classify actionable text.
 
-      ALLOWED EGRESSES: FederatedCompute.
-      ALLOWED USAGES: Federated learning.
-    """
+        ALLOWED EGRESSES: FederatedCompute.
+        ALLOWED USAGES: Federated learning.
+      """
         .trimIndent()
 
     // Smart select needs a smaller round size due to:

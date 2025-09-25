@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
- Copyright 2024 Google LLC
+ Copyright 2025 Google LLC
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -18,17 +18,17 @@
 
 
 <resources>
-  <color name="survey_primary_text_color">#3C4043</color>  <!-- google_grey800-->
-  <color name="survey_surface_color_elevation_2">#FFFFFF</color> <!-- google_white-->
-  <color name="survey_accent_color">#1A73E8</color> <!-- google_blue600-->
-  <color name="survey_close_icon_color">#3C4043</color> <!-- google_grey800-->
+  <color name="survey_primary_text_color">@color/google_grey800</color>  <!-- google_grey800-->
+  <color name="survey_surface_color_elevation_2">@color/google_white</color> <!-- google_white-->
+  <color name="survey_accent_color">@color/google_blue600</color> <!-- google_blue600-->
+  <color name="survey_close_icon_color">@color/google_grey800</color> <!-- google_grey800-->
 
   <!-- Component colors -->
-  <color name="google_marterial_color_button_background_light">#D9E2FF</color> <!-- system_accent1_100-->
-  <color name="google_marterial_color_primary_variant_light">#475D92</color> <!-- system_accent1_600-->
-  <color name="google_marterial_color_primary_variant_dark">#94AAE4</color> <!-- system_accent1_300-->
-  <color name="google_marterial_color_primary_text_dark">#F1F0F7</color> <!-- system_neutral1_50-->
-  <color name="google_marterial_color_button_text_light">#1A1B20</color> <!-- system_neutral1_900-->
+  <color name="google_marterial_color_button_background_light">@android:color/system_accent1_100</color>
+  <color name="google_marterial_color_primary_variant_light">@android:color/system_accent1_600</color>
+  <color name="google_marterial_color_primary_variant_dark">@android:color/system_accent1_300</color>
+  <color name="google_marterial_color_primary_text_dark">@android:color/system_neutral1_50</color>
+  <color name="google_marterial_color_button_text_light">@android:color/system_neutral1_900</color>
 
   <color name="google_marterial_button_background_color">@color/google_marterial_color_button_background_light</color>
   <color name="google_marterial_button_text_color">@color/google_marterial_color_button_text_light</color>
@@ -40,6 +40,6 @@
   <color name="survey_button_text_color">@color/google_marterial_button_text_color</color>
   <color name="survey_outlined_button_text_color">@color/google_marterial_button_text_color</color>
   <color name="survey_button_stroke_color">@color/google_marterial_button_stroke_color</color>
-  <color name="survey_confirm_item_background">#F0F4F9</color>
+  <color name="survey_confirm_item_background">@color/gm3_default_color_surface_container</color>
 
 </resources>

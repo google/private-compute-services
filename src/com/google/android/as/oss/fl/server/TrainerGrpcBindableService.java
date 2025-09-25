@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import com.google.android.as.oss.fl.api.proto.TrainerOptions.TrainingMode;
 import com.google.android.as.oss.fl.api.proto.TrainerResponse;
 import com.google.android.as.oss.fl.api.proto.TrainerResponse.ResponseCode;
 import com.google.android.as.oss.fl.api.proto.TrainingServiceGrpc;
-import com.google.android.as.oss.fl.brella.service.scheduler.TrainingScheduler;
+import com.google.android.as.oss.fl.fc.service.scheduler.TrainingScheduler;
 import com.google.android.as.oss.fl.localcompute.LocalComputeResourceManager;
 import com.google.android.as.oss.fl.localcompute.LocalComputeUtils;
 import com.google.fcp.client.tasks.OnFailureListener;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.google.android.as.oss.grpc.impl;
 
 import android.annotation.TargetApi;
 import android.os.Build;
+import com.google.common.flogger.GoogleLogger;
 import io.grpc.Context;
 import io.grpc.Contexts;
 import io.grpc.ForwardingServerCall.SimpleForwardingServerCall;
@@ -32,6 +33,8 @@ import java.util.concurrent.atomic.AtomicReference;
 /** An interceptor for copying data from the RPC context to the response trailer metadata. */
 @TargetApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 public class MetadataTrailerInsertionInterceptor<T> implements ServerInterceptor {
+  private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
+
   private final Context.Key<AtomicReference<T>> contextKey;
   private final Metadata.Key<T> metadataKey;
 
@@ -49,14 +52,14 @@ public class MetadataTrailerInsertionInterceptor<T> implements ServerInterceptor
   public <ReqT, RespT> Listener<ReqT> interceptCall(
       ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
     AtomicReference<T> ref = new AtomicReference<T>();
-    System.err.println("Seeding context with ref: " + System.identityHashCode(ref));
+    logger.atFine().log("Seeding context with ref: %s", System.identityHashCode(ref));
     Context context = Context.current().withValue(contextKey, ref);
     ServerCall<ReqT, RespT> wrappedCall =
         new SimpleForwardingServerCall<ReqT, RespT>(call) {
           @Override
           public void close(Status status, Metadata trailers) {
             T val = ref.get();
-            System.err.println("val in interceptor: " + val);
+            logger.atFine().log("val in interceptor: %s", val);
             if (val != null) {
               trailers.put(metadataKey, val);
             }

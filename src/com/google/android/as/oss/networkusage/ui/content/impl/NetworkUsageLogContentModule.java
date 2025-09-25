@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import static com.google.android.as.oss.networkusage.ui.content.impl.ContentMapE
 import static com.google.android.as.oss.networkusage.ui.content.impl.ContentMapEntryBuilder.ASI_PACKAGE_NAME;
 import static com.google.android.as.oss.networkusage.ui.content.impl.ContentMapEntryBuilder.GPPS_PACKAGE_NAME;
 import static com.google.android.as.oss.networkusage.ui.content.impl.ContentMapEntryBuilder.LAUNCHER_PACKAGE_NAME;
+import static com.google.android.as.oss.networkusage.ui.content.impl.ContentMapEntryBuilder.PSI_PACKAGE_NAME;
 import static com.google.android.as.oss.networkusage.ui.content.impl.ContentMapEntryBuilder.STATSD_PACKAGE_NAME;
 
 import android.content.Context;
@@ -84,6 +85,8 @@ abstract class NetworkUsageLogContentModule {
         new ContentMapEntryBuilder(context)
             .packageName(ASI_PACKAGE_NAME)
             .connectionType(ATTESTATION_REQUEST);
+    ContentMapEntryBuilder psiHttpEntryBuilder =
+        new ContentMapEntryBuilder(context).packageName(PSI_PACKAGE_NAME).connectionType(HTTP);
 
     ImmutableMap<ConnectionDetails, ConnectionResources> entries =
         ImmutableMap.ofEntries(
@@ -341,6 +344,17 @@ abstract class NetworkUsageLogContentModule {
                 .connectionKeyStringId(R.string.url_regex_user_survey_legacy)
                 .featureNameId(R.string.feature_name_user_survey)
                 .descriptionId(R.string.description_user_survey)
+                .build(),
+            psiHttpEntryBuilder
+                .connectionKeyStringId(R.string.url_regex_device_intelligence_edgedl)
+                .featureNameId(R.string.feature_name_device_intelligence)
+                .descriptionId(R.string.description_device_intelligence)
+                .build(),
+            pdEntryBuilder
+                .connectionKeyStringId(R.string.ap_client_id_psi)
+                .featureNameId(R.string.feature_name_device_intelligence)
+                .descriptionId(R.string.description_psi_ap)
+                .packageName(PSI_PACKAGE_NAME)
                 .build());
     ImmutableMap<ConnectionDetails, ConnectionResources> finalImmutableMap = entries;
 

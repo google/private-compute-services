@@ -1,0 +1,67 @@
+# Copyright 2025 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+load("//third_party/bazel_rules/rules_python/python:proto.bzl", "py_proto_library")
+load("//third_party/protobuf/bazel:java_lite_proto_library.bzl", "java_lite_proto_library")
+load("//third_party/protobuf/bazel:proto_library.bzl", "proto_library")
+load("//third_party/protobuf/build_defs:kt_jvm_proto_library.bzl", "kt_jvm_lite_proto_library")
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+proto_library(
+    name = "templates_proto",
+    srcs = ["template_integration.proto"],
+    deps = [
+        "//src/com/google/android/as/oss/delegatedui/api/integration/templates/airflow:airflow_template_proto",
+        "//src/com/google/android/as/oss/delegatedui/api/integration/templates/beacon:beacon_template_proto",
+        "//src/com/google/android/as/oss/delegatedui/api/integration/templates/bugle:bugle_template_proto",
+        "//src/com/google/android/as/oss/delegatedui/api/integration/templates/example:example_template_proto",
+        "//src/com/google/android/as/oss/delegatedui/api/integration/templates/subzero:subzero_template_proto",
+        "//src/com/google/android/as/oss/delegatedui/api/integration/templates/sundog:sundog_template_proto",
+    ],
+)
+
+java_lite_proto_library(
+    name = "templates_java_proto_lite",
+    deps = [":templates_proto"],
+)
+
+kt_jvm_lite_proto_library(
+    name = "templates_kt_proto_lite",
+    deps = [":templates_proto"],
+)
+
+py_proto_library(
+    name = "templates_py_pb2",
+    deps = [":templates_proto"],
+)
+
+proto_library(
+    name = "ui_id_token_proto",
+    srcs = ["ui_id_token.proto"],
+)
+
+java_lite_proto_library(
+    name = "ui_id_token_java_proto_lite",
+    deps = [":ui_id_token_proto"],
+)
+
+kt_jvm_lite_proto_library(
+    name = "ui_id_token_kt_proto_lite",
+    deps = [":ui_id_token_proto"],
+)

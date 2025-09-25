@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ val PlatformLoggingPolicy_FederatedCompute =
   ) {
     description =
       """
-      To enable querying of Android Platform logs in a privacy-preserving way, using federated analytics.
-    
-      ALLOWED EGRESSES: FederatedCompute.
-      ALLOWED USAGES: Federated analytics.
-    """
+        To enable querying of Android Platform logs in a privacy-preserving way, using federated analytics.
+      
+        ALLOWED EGRESSES: FederatedCompute.
+        ALLOWED USAGES: Federated analytics.
+      """
         .trimIndent()
     flavors(Flavor.PCS_RELEASE) { minRoundSize(minRoundSize = 25, minSecAggRoundSize = 25) }
     presubmitReviewRequired(OwnersApprovalOnly)

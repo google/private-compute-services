@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright 2025 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.google.android.as.oss.fl.fc.service">
+
+  <uses-sdk
+      android:minSdkVersion="29"
+      android:targetSdkVersion="33"/>
+
+  <application>
+    <service
+        android:name="com.google.android.as.oss.fl.fc.service.PcsExampleStoreService"
+        android:enabled="true"
+        android:exported="false">
+      <intent-filter>
+        <action android:name="com.google.fcp.client.EXAMPLE_STORE"/>
+      </intent-filter>
+      <!-- Preventively setting this filter to a low priority so if in the future multiple example
+      store service is allowed, this won't intercept those with more specific filters.
+      Since currently there is only one example store, this is a no-op. -->
+      <intent-filter android:priority="-100">
+        <action android:name="com.google.fcp.client.EXAMPLE_STORE_V2" />
+        <!-- Important: the v2 <intent-filter> must include at least a <data> entry with an "app"
+        scheme, otherwise this intent-filter won't match the intent used by the training service.
+        See https://developer.android.com/guide/components/intents-filters.html#Resolution -->
+        <data android:scheme="app" />
+      </intent-filter>
+    </service>
+    <service
+        android:name="com.google.android.as.oss.fl.fc.service.PcsResultHandlingService"
+        android:label="PcsResultHandlingService"
+        android:enabled="true"
+        android:exported="false">
+      <intent-filter>
+        <action android:name="com.google.fcp.client.COMPUTATION_RESULT" />
+        <data android:scheme="app" />
+      </intent-filter>
+    </service>
+  </application>
+
+  <!-- Declare package names per https://developer.android.com/training/package-visibility/declaring#package-name -->
+  <queries>
+    <package android:name="com.google.android.as" />
+    <package android:name="com.google.android.PlayProtect" />
+  </queries>
+</manifest>

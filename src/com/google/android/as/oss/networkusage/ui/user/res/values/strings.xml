@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
- Copyright 2024 Google LLC
+ Copyright 2025 Google LLC
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -250,7 +250,7 @@
 
   <!-- Description of downloads consisting of Google Play Protect Service models using Protected Download protocol, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
   <string name="description_gpps_ap">Updated the on-device protections of Google Play Protect Service</string>
-  <string name="ap_client_id_gpps" translatable="false">com.google.android.odad(:.*)?</string>
+  <string name="ap_client_id_gpps" translatable="false">com.google.android.PlayProtect(:.*)?</string>
   <string name="url_regex_gpps_bt_signature" translatable="false">https://www.gstatic.com/on-device-safety/bt_log_signature_key.txt\\?c=tnAbOw</string>
 
   <!-- Cinematic Wallpaper  -->
@@ -329,4 +329,15 @@
   <!-- Legacy url pattern for survey request and response [CHAR LIMIT=NONE] -->
   <string name="url_regex_user_survey_legacy" translatable="false">https://scone-pa.googleapis.com/v1/survey/.*</string>
 
+  <!-- Device Intelligence -->
+  <!-- Name of the Device Intelligence feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_device_intelligence">Device Intelligence</string>
+  <!-- Description of downloads consisting of Device Intelligence models, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_device_intelligence">Updated the on-device model for Device Intelligence</string>
+  <string name="url_regex_device_intelligence_edgedl" translatable="false">https://edgedl.me.gvt1.com/edgedl/mdi-serving/psi-models/.*</string>
+  <string name="ap_client_id_psi" translatable="false">com.google.android.apps.pixel.psi(:.*)?</string>
+  <!-- Description of downloads from PSI using Protected Download protocol, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_psi_ap">Updated the on-device protections for Device Intelligence</string>
+
 </resources>
+

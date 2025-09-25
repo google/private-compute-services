@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import java.util.List;
 /** Implementation of {@link PcsFcFlags} which reads flag values from DeviceConfig. */
 public final class PcsFcDeviceConfigFlags extends PcsFcFlags {
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
-  private static final String FLAG_PREFIX = "Brella__";
+  private static final String FLAG_PREFIX = "Fc__";
   private static final String FLAG_NAMESPACE =
       FlagNamespace.DEVICE_PERSONALIZATION_SERVICES.toString();
 

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright 2025 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="@drawable/ripple_rounded_background"
+    android:gravity="center_vertical"
+    android:paddingStart="12dp"
+    android:paddingVertical="12dp"
+    android:paddingEnd="16dp"
+    android:animateLayoutChanges="true">
+
+  <LinearLayout
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:orientation="vertical"
+      android:layout_marginStart="16dp"
+      android:layout_marginVertical="4dp">
+
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="11sp"
+        android:textColor="#FF46464F" />
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/message_container"
+        android:layout_width="match_parent"
+        android:layout_height="48dp">
+
+      <HorizontalScrollView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textColor="#FF3D351E" />
+      </HorizontalScrollView>
+    </androidx.core.widget.NestedScrollView>
+  </LinearLayout>
+
+  <ImageButton
+      android:contentDescription="@null"
+      android:id="@+id/action"
+      android:layout_width="40dp"
+      android:layout_height="match_parent"
+      android:layout_marginVertical="4dp"
+      android:background="@drawable/action_button_ripple_rounded_background"
+      android:src="@drawable/gs_arrow_right_alt_vd_24"
+      android:tint="#181C21"
+      android:foregroundGravity="center" />
+</LinearLayout>

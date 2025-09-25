@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@ edition = "2023";
 
 package com.google.android.as.oss.pd.api;
 
+import "third_party/protobuf/cpp_features.proto";
+
+option features.(pb.cpp).string_type = VIEW;
 option features.field_presence = IMPLICIT;
 option java_multiple_files = true;
 option java_package = "com.google.android.as.oss.pd.api.proto";
-option use_java_stubby_library = true;
 
 // Request to download a blob.
 message DownloadBlobRequest {
@@ -127,6 +129,13 @@ message BlobConstraints {
     AI_CORE_CLIENT_49 = 49;
     AI_CORE_CLIENT_50 = 50;
 
+    // PSI clients reserved range from 101 to 200
+    PSI_MDD_MODELS_CLIENT = 101;
+    PSI_LLM_OUTPUT_CLASSIFIER_CLIENT = 102;
+    PSI_NON_LLM_OUTPUT_CLASSIFIER_CLIENT = 103;
+    PSI_TEXT_INPUT_REGEXT_ONLY_CLASSIFIER_CLIENT = 104;
+    PSI_TEXT_OUTPUT_REGEX_ONLY_CLASSIFIER_CLIENT = 105;
+
     reserved 10000 to 10004, 99997 to 99999;
   }
 
@@ -139,6 +148,7 @@ message BlobConstraints {
     THIRD_PARTY_EAP = 3;
     THIRD_PARTY_EXPERIMENTAL = 4;
   }
+
   ClientGroup client_group = 1003;
 
   // Client SDK Version to help server estimate SDK capabilities.
@@ -211,6 +221,9 @@ message BlobConstraints {
   // Variant of the Android device requests a new download.
   Variant variant = 1005;
 
+  // An optional build id to override the value returned by the DeviceConfig.
+  int64 build_id = 1006;
+
   reserved 1, 2, 3, 4, 5;
 }
 
@@ -226,8 +239,7 @@ enum ProtectionType {
   TYPE_RULE = 1;
   TYPE_MODEL = 2;
   TYPE_BLM_BLOCK_LIST = 4;
-
-  reserved 3;
+  reserved 3, 5, 6;
 }
 
 message ProtectionComponent {

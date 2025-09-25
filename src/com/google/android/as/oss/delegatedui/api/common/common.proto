@@ -1,0 +1,75 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+edition = "2023";
+
+package com.google.android.as.oss.delegatedui.api.common;
+
+option java_package = "com.google.android.as.oss.delegatedui.api.common";
+option java_multiple_files = true;
+
+message DelegatedUiClientId {
+  // The package name of the client app.
+  string client_package_name = 1;
+  DelegatedUiUseCase use_case = 2;
+}
+
+// Next ID: 7
+message DelegatedUiClientInputs {
+  // Client data to use to generate remote content.
+  common.DelegatedUiIngressData ingress_data = 1;
+
+  // The data provider requested by the client.
+  common.DelegatedUiDataProviderInfo data_provider_info = 6;
+
+  // The android.view.View.MeasureSpec of the delegated UI that the client's
+  // local UI can support.
+  int32 measure_spec_width = 2;
+  int32 measure_spec_height = 3;
+
+  // The client can pass in an argb int value representing the background color
+  // for the delegated UI to draw. This is useful for when the client sets the
+  // SurfaceView z-order to Behind, which would normally render black pixels
+  // wherever the delegated UI is not drawing.
+  int32 background_color = 4;
+
+  // The client can pass in a bitmasked flag value representing the nested
+  // scroll axes that are supported. This impacts the way the remote UI handles
+  // its internal nested scrolling, and the nested scroll events that the DUI
+  // session sends back to the client.
+  int32 client_nested_scroll_axes = 5;
+}
+
+message DelegatedUiDataProviderInfo {
+  enum DelegatedUiDataProvider {
+    DATA_PROVIDER_UNSPECIFIED = 0;
+    // Device Intelligence (PSI)
+    DATA_PROVIDER_PSI = 1;
+    // Android System Intelligence (ASI)
+    DATA_PROVIDER_ASI = 2;
+  }
+  DelegatedUiDataProvider data_provider = 1;
+}
+
+// Client extensions
+
+// Ingress data from clients to the delegated UI service.
+message DelegatedUiIngressData {
+  extensions 16 to 100;
+}
+
+// Describes the client's delegated UI use-case.
+message DelegatedUiUseCase {
+  extensions 16 to 100;
+}

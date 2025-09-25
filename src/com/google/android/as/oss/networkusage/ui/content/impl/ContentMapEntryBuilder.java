@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,9 @@ final class ContentMapEntryBuilder {
   static final String ASI_PACKAGE_NAME = "com.google.android.as";
   static final String STATSD_PACKAGE_NAME = "com.android.os.statsd";
   static final String AICORE_PACKAGE_NAME = "com.google.android.aicore";
-  static final String GPPS_PACKAGE_NAME = "com.google.android.odad";
+  static final String GPPS_PACKAGE_NAME = "com.google.android.PlayProtect";
   static final String LAUNCHER_PACKAGE_NAME = "com.google.android.apps.nexuslauncher";
+  static final String PSI_PACKAGE_NAME = "com.google.android.apps.pixel.psi";
 
   private final Context context;
 

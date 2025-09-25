@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -202,8 +202,7 @@ enum ProtectionType {
   TYPE_RULE = 1;
   TYPE_MODEL = 2;
   TYPE_BLM_BLOCK_LIST = 4;
-
-  reserved 3;
+  reserved 3, 5, 6;
 }
 
 message ProtectionComponent {

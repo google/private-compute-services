@@ -1,0 +1,72 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+edition = "2023";
+
+package com.google.android.as.oss.delegatedui.api.integration.templates;
+
+import "src/com/google/android/as/oss/delegatedui/api/integration/templates/airflow/airflow_template_integration.proto";
+import "src/com/google/android/as/oss/delegatedui/api/integration/templates/beacon/beacon_template_integration.proto";
+import "src/com/google/android/as/oss/delegatedui/api/integration/templates/bugle/bugle_template_integration.proto";
+import "src/com/google/android/as/oss/delegatedui/api/integration/templates/example/example_template_integration.proto";
+import "src/com/google/android/as/oss/delegatedui/api/integration/templates/subzero/subzero_template_integration.proto";
+import "src/com/google/android/as/oss/delegatedui/api/integration/templates/sundog/sundog_template_integration.proto";
+
+option java_package = "com.google.android.as.oss.delegatedui.api.integration.templates";
+option java_multiple_files = true;
+
+// Protos encapsulating template data managed by the delegated UI service.
+
+// A list of supported UI templates.
+// Next ID: 10
+enum DelegatedUiTemplateType {
+  TEMPLATE_TYPE_UNSPECIFIED = 0;
+  TEMPLATE_TYPE_EXAMPLE_COMPOSE = 1;
+  TEMPLATE_TYPE_BUGLE = 2;
+  TEMPLATE_TYPE_SUBZERO_REMINDERS_TILE = 3;
+  TEMPLATE_TYPE_SUNDOG_LOCATION = 4;
+  TEMPLATE_TYPE_SUNDOG_EVENT = 5;
+  TEMPLATE_TYPE_BEACON = 6;
+  TEMPLATE_TYPE_EXAMPLE_VIEWS = 8;
+  TEMPLATE_TYPE_AIRFLOW = 9;
+  // New CUJ template types should be added above.
+
+  // Retired template enums.
+  TEMPLATE_TYPE_RETIRED_T7 = 7 [deprecated = true];
+}
+
+// Detailed data formats for the UI templates.
+// Next ID: 9
+message DelegatedUiTemplateData {
+  oneof template_data {
+    example.ExampleTemplateData example_template_data = 1;
+    bugle.BugleTemplateData bugle_template_data = 2;
+    subzero.SubZeroRemindersTileTemplateData
+        subzero_reminders_tile_template_data = 3;
+    sundog.SundogLocationTemplateData sundog_location_template_data = 4;
+    sundog.SundogEventTemplateData sundog_event_template_data = 5;
+    beacon.BeaconTemplateData beacon_template_data = 6;
+    airflow.AirflowTemplateData airflow_template_data = 8;
+    // New CUJ template data types should be added above.
+  }
+  reserved 7;
+}
+
+message DelegatedUiAdditionalData {
+  oneof additional_data {
+    example.ExampleAdditionalData example_additional_data = 1;
+    bugle.BugleAdditionalData bugle_additional_data = 2;
+    // New CUJ additional data types should be added above.
+  }
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package com.google.android.as.oss.fl.server;
 
 import com.google.android.as.oss.common.ExecutorAnnotations.FlExecutorQualifier;
 import com.google.android.as.oss.fl.api.proto.TrainingServiceGrpc;
-import com.google.android.as.oss.fl.brella.service.scheduler.TrainingScheduler;
+import com.google.android.as.oss.fl.fc.service.scheduler.TrainingScheduler;
 import com.google.android.as.oss.fl.localcompute.LocalComputeResourceManager;
-import com.google.android.apps.miphone.astrea.grpc.Annotations.GrpcService;
-import com.google.android.apps.miphone.astrea.grpc.Annotations.GrpcServiceName;
+import com.google.android.apps.miphone.pcs.grpc.Annotations.GrpcService;
+import com.google.android.apps.miphone.pcs.grpc.Annotations.GrpcServiceName;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
