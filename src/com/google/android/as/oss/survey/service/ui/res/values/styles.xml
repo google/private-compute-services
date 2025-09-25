@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
- Copyright 2024 Google LLC
+ Copyright 2025 Google LLC
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -42,27 +42,23 @@
     <item name="android:layout_height">wrap_content</item>
   </style>
 
-  <style name="SurveyMaterialFilledButtonStyle" parent="Widget.MaterialComponents.Button">
+  <style name="SurveyMaterialFilledButtonStyle" parent="Widget.GoogleMaterial3.Button">
     <item name="backgroundTint">@color/survey_filled_button_background_color</item>
     <item name="android:textColor">@color/survey_filled_button_text_color</item>
     <item name="android:textSize">@dimen/google_marterial_button_text_size</item>
     <item name="android:textAllCaps">false</item>
-    <item name="android:stateListAnimator">@null</item>
-    <item name="app:cornerRadius">20dp</item>
-    <item name="android:letterSpacing">0</item>
     <item name="fontFamily">@string/survey_font_medium</item>
   </style>
 
-  <style name="SurveyMaterialOutlinedButtonStyle" parent="Widget.MaterialComponents.Button.OutlinedButton">
+  <style name="SurveyMaterialOutlinedButtonStyle" parent="Widget.GoogleMaterial3.Button.OutlinedButton">
     <item name="android:backgroundTint">@android:color/transparent</item>
     <item name="strokeColor">@color/survey_outlined_button_stroke_color</item>
     <item name="android:textColor">@color/survey_outlined_button_text_color</item>
     <item name="android:textSize">@dimen/google_marterial_button_text_size</item>
     <item name="android:textAllCaps">false</item>
-    <item name="app:cornerRadius">20dp</item>
-    <item name="android:letterSpacing">0</item>
     <item name="fontFamily">@string/survey_font_medium</item>
   </style>
 
-  <style name="SurveyTheme" parent="Theme.MaterialComponents.Light.NoActionBar"/>
+  <style name="SurveyTheme" parent="Theme.GoogleMaterial3.Light.NoActionBar"/>
+
 </resources>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
- Copyright 2024 Google LLC
+ Copyright 2025 Google LLC
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@
 
 <resources>
 
-  <color name="survey_primary_text_color">#E8EAED</color> <!-- google_grey200-->
+  <color name="survey_primary_text_color">@color/google_grey200</color> <!-- google_grey200-->
   <color name="survey_surface_color_elevation_2">#2D2E30</color>
-  <color name="survey_accent_color">#8AB4F8</color> <!-- google_blue300 -->
-  <color name="survey_close_icon_color">#E8EAED</color> <!-- google_grey200-->
+  <color name="survey_accent_color">@color/google_blue300</color> <!-- google_blue300 -->
+  <color name="survey_close_icon_color">@color/google_grey200</color> <!-- google_grey200-->
 
   <!-- Component colors -->
   <color name="google_marterial_button_stroke_color">@color/google_marterial_color_primary_variant_dark</color>
@@ -32,6 +32,6 @@
   <color name="survey_rounded_button_clicked_color">@color/ripple_material_dark</color>
   <color name="survey_button_text_color">@color/google_marterial_button_text_color</color>
   <color name="survey_outlined_button_text_color">@color/google_marterial_color_primary_text_dark</color>
-  <color name="survey_confirm_item_background">#1E1F20</color>
+  <color name="survey_confirm_item_background">@color/gm3_dark_default_color_surface_container</color>
 
 </resources>

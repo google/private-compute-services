@@ -1,0 +1,57 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+edition = "2023";
+
+package com.google.android.as.oss.delegatedui.api.infra.dataservice;
+
+import "src/com/google/android/as/oss/delegatedui/api/infra/dataservice/data_service_get_additional_data.proto";
+import "src/com/google/android/as/oss/delegatedui/api/infra/dataservice/data_service_get_template_data.proto";
+import "src/com/google/android/as/oss/delegatedui/api/infra/dataservice/data_service_log_usage_data.proto";
+
+option java_package = "com.google.android.as.oss.delegatedui.api.infra.dataservice";
+option java_multiple_files = true;
+
+// Service to provide data for a delegated UI renderer.
+//
+// This service proto is defined inside PCS, but the implementation will be
+// offered by another app.
+service DelegatedUiDataService {
+  // Get the delegated ui template data used for rendering the remote template
+  // and for data egress.
+  //
+  // Request headers contain Parcelable Configuration "configuration". Response
+  // headers may contain Parcelable Bitmap "image", RemoteViews "remote_views",
+  // PendingIntentList "pending_intent_list", or RemoteActionList
+  // "remote_action_list".
+  rpc GetDelegatedUiTemplateData(DelegatedUiGetTemplateDataRequest)
+      returns (DelegatedUiGetTemplateDataResponse) {
+    option deadline = 5.0;
+  }
+
+  // Get additional data for handling clicks.
+  //
+  // Response headers may contain Parcelable PendingIntentList
+  // "pending_intent_list" or RemoteActionList "remote_action_list".
+  rpc GetDelegatedUiAdditionalData(DelegatedUiGetAdditionalDataRequest)
+      returns (DelegatedUiGetAdditionalDataResponse) {
+    option deadline = 5.0;
+  }
+
+  // Log usage data for user interactions with the remote UI.
+  rpc LogDelegatedUiUsageData(DelegatedUiLogUsageDataRequest)
+      returns (DelegatedUiLogUsageDataResponse) {
+    option deadline = 5.0;
+  }
+}

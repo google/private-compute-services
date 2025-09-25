@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 edition = "2023";
 
-package com.google.android.apps.miphone.astrea.http.api;
+package com.google.android.apps.miphone.pcs.http.api;
 
 option features.utf8_validation = NONE;
 option java_multiple_files = true;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,22 @@ import com.google.auto.value.AutoValue;
 public abstract class PcsGrpcConfig {
 
   public static Builder builder() {
-    return new AutoValue_PcsGrpcConfig.Builder().setIdleTimeoutSeconds(1800);
+    return new AutoValue_PcsGrpcConfig.Builder()
+        .setIdleTimeoutSeconds(60)
+        .setShutdownGrpcServerOnDestroy(true);
   }
 
   public abstract int idleTimeoutSeconds();
+
+  public abstract boolean shutdownGrpcServerOnDestroy();
 
   /** Builder for {@link PcsGrpcConfig} */
   @AutoValue.Builder
   public abstract static class Builder {
 
     public abstract Builder setIdleTimeoutSeconds(int value);
+
+    public abstract Builder setShutdownGrpcServerOnDestroy(boolean value);
 
     public abstract PcsGrpcConfig build();
   }

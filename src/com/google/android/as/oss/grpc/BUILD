@@ -1,4 +1,4 @@
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,16 +41,18 @@ android_library(
 android_library(
     name = "grpc",
     srcs = [
-        "AstreaGrpcService.java",
         "PcsGrpcModule.java",
+        "PcsGrpcService.java",
     ],
     deps = [
         ":annotations",
         ":api",
-        "//third_party/java/hilt:hilt-android",
+        "//src/com/google/android/as/oss/common/config",
+        "//src/com/google/android/as/oss/grpc/config",
         "@maven//:androidx_annotation_annotation",
         "@maven//:androidx_lifecycle_lifecycle_service",
         "@maven//:com_google_dagger_dagger",
+        "@maven//:com_google_dagger_hilt-android",
         "@maven//:com_google_flogger_google_extensions",
         "@maven//:io_grpc_grpc_api",
         "@maven//:io_grpc_grpc_binder",

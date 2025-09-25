@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import androidx.annotation.VisibleForTesting;
 import com.google.android.as.oss.common.ExecutorAnnotations.IoExecutorQualifier;
 import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.common.flavor.BuildFlavor;
-import com.google.android.apps.miphone.astrea.grpc.GrpcStatusProto;
+import com.google.android.apps.miphone.pcs.grpc.GrpcStatusProto;
 import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceCountReported;
 import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceUnrecognisedNetworkRequestReported;
 import com.google.android.as.oss.logging.PcsStatsEnums.CountMetricId;
@@ -97,6 +97,8 @@ public class SurveyGrpcBindableService extends SurveyServiceGrpc.SurveyServiceIm
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
 
   private static final String LIVE_CAPTION_SURVEY_OVERALL_TRIGGER_ID = "";
+  private static final String LIVE_CAPTION_SURVEY_EC_OVERALL_TRIGGER_ID = "";
+  private static final String LIVE_CAPTION_SURVEY_TEST_TRIGGER_ID = "";
   private static final String LIVE_CAPTION_STARTUP_CONFIG_KEY = "";
 
   private static final String SYSTEM_INTELLEGENCE_APP_ID = "com.google.android.as";
@@ -509,6 +511,9 @@ public class SurveyGrpcBindableService extends SurveyServiceGrpc.SurveyServiceIm
     return switch (surveyTriggerId) {
       case SURVEY_TRIGGER_ID_LIVE_CAPTION_OVERALL_SATISFACTION ->
           LIVE_CAPTION_SURVEY_OVERALL_TRIGGER_ID;
+      case SURVEY_TRIGGER_ID_LIVE_CAPTION_EC_OVERALL_SATISFACTION ->
+          LIVE_CAPTION_SURVEY_EC_OVERALL_TRIGGER_ID;
+      case SURVEY_TRIGGER_ID_LIVE_CAPTION_TEST_TRIGGER -> LIVE_CAPTION_SURVEY_TEST_TRIGGER_ID;
       default -> throw new IllegalArgumentException("Unknown survey trigger id");
     };
   }

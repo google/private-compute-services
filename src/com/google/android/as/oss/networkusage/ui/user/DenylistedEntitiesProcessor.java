@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import com.google.common.collect.ImmutableList;
 
 /** Filters entities on denylist from the {@link NetworkUsageItemWrapper} list. */
 class DenylistedEntitiesProcessor implements EntityListProcessor {
-  static final String GPPS_PACKAGE_NAME = "com.google.android.odad";
+  static final String GPPS_PACKAGE_NAME = "com.google.android.PlayProtect";
   static final ImmutableList<String> DENYLISTED_PACKAGE_NAMES = ImmutableList.of(GPPS_PACKAGE_NAME);
 
   @Override

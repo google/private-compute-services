@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -429,10 +429,17 @@ public final class BlobProtoUtils {
             .addLabel(toLabelM(DEVICE_TIER_LABEL_KEY, getDeviceTier(constraints)));
     getVariant(constraints)
         .ifPresent(value -> constraintsBuilder.addLabel(toLabelM(VARIANT_LABEL_KEY, value)));
-    clientBuildVersionReader
-        .getBuildId(constraints.getClient())
-        .ifPresent(
-            value -> constraintsBuilder.addLabel(toLabelM(BUILD_ID_LABEL_KEY, value.toString())));
+
+    // If the build ID is not set in the constraints, we will try to get it from the client.
+    Optional<Long> buildId;
+    if (constraints.getBuildId() != 0) {
+      buildId = Optional.of(constraints.getBuildId());
+    } else {
+      buildId = clientBuildVersionReader.getBuildId(constraints.getClient());
+    }
+    buildId.ifPresent(
+        value -> constraintsBuilder.addLabel(toLabelM(BUILD_ID_LABEL_KEY, value.toString())));
+
     return constraintsBuilder.build();
   }
 

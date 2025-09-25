@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@ val SearchPolicy_FederatedCompute =
   ) {
     description =
       """
-      To measure and improve the quality of the search feature such as analyzing the ranking
-      quality and the ranking model.
+        To measure and improve the quality of the search feature such as analyzing the ranking
+        quality and the ranking model.
 
-      ALLOWED EGRESSES: FederatedCompute.
-      ALLOWED USAGES: Federated analytics, federated learning.
-    """
+        ALLOWED EGRESSES: FederatedCompute.
+        ALLOWED USAGES: Federated analytics, federated learning.
+      """
         .trimIndent()
 
     consentRequiredForCollectionOrStorage(Consent.UsageAndDiagnosticsCheckbox)

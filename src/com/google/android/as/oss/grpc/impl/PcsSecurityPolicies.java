@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,29 @@
 
 package com.google.android.as.oss.grpc.impl;
 
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static java.util.Arrays.stream;
+
 import android.content.Context;
-import com.google.android.apps.miphone.astrea.grpc.GrpcServerEndpointConfiguration;
+import com.google.android.as.oss.common.security.api.PackageSecurityInfo;
+import com.google.android.apps.miphone.pcs.grpc.GrpcServerEndpointConfiguration;
+import com.google.common.collect.ImmutableSet;
 import io.grpc.Status;
 import io.grpc.binder.SecurityPolicy;
 import io.grpc.binder.ServerSecurityPolicy;
+import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 final class PcsSecurityPolicies {
 
   static SecurityPolicy allowlistedOnly(
-      Context appContext, GrpcServerEndpointConfiguration configuration) {
+      Context appContext, List<PackageSecurityInfo> packageSecurityInfoList) {
     return new SecurityPolicy() {
       @Override
       public Status checkAuthorization(int uid) {
-        return isPackageAllowed(appContext, configuration, uid)
+        // TODO: Check for signature as well.
+        return isPackageAllowed(appContext, uid, packageSecurityInfoList)
             ? Status.OK
             : Status.PERMISSION_DENIED.withDescription("Permission denied by security policy");
       }
@@ -59,17 +67,16 @@ final class PcsSecurityPolicies {
   }
 
   private static boolean isPackageAllowed(
-      Context appContext, GrpcServerEndpointConfiguration configuration, int uid) {
+      Context appContext, int uid, @Nullable List<PackageSecurityInfo> packageSecurityInfoList) {
     String[] packages = appContext.getPackageManager().getPackagesForUid(uid);
-    if (packages == null) {
+    if (packages == null || packageSecurityInfoList == null) {
       return false;
     }
-    for (String packageName : packages) {
-      if (configuration.getAllowedPackages().contains(packageName)) {
-        return true;
-      }
-    }
-    return false;
+    ImmutableSet<String> allowedPackages =
+        packageSecurityInfoList.stream()
+            .map(PackageSecurityInfo::getPackageName)
+            .collect(toImmutableSet());
+    return stream(packages).anyMatch(allowedPackages::contains);
   }
 
   private PcsSecurityPolicies() {}

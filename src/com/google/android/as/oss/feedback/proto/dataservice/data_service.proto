@@ -1,0 +1,38 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+edition = "2023";
+
+package com.google.android.as.oss.feedback.api.dataservice;
+
+import "src/com/google/android/as/oss/feedback/proto/dataservice/get_feedback_donation_data.proto";
+
+option java_package = "com.google.android.as.oss.feedback.api.dataservice";
+option java_multiple_files = true;
+
+// Service to provide data for feedback flow.
+//
+// This service proto is defined inside PCS, but the implementation will be
+// offered by other apps.
+service FeedbackDataService {
+  // Get the feedback donation data from from another app.
+  //
+  // The data will be restructured and sent to APEX service by the Feedback
+  // Gateway. User consent needs to be provided prior to the data egress out
+  // of PCC.
+  rpc GetFeedbackDonationData(GetFeedbackDonationDataRequest)
+      returns (GetFeedbackDonationDataResponse) {
+    option deadline = 5.0;
+  }
+}

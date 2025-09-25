@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public final class PcsFcInit {
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
 
-  private static final String CLIENT_NAME = "astrea";
+  private static final String CLIENT_NAME = "pcs";
   // Name of the custom TensorFlow native lib that contains a selection of regular TensorFlow and
   // custom ops necessary for local computation tasks.
   private static final String TENSORFLOW_NATIVE_LIB = "pcs_tensorflow_jni";

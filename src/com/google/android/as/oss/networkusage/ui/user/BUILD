@@ -1,4 +1,4 @@
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,16 +12,53 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Localization
 load("@bazel_rules_android//android:rules.bzl", "android_library")
+
+android_library(
+    name = "user",
+    srcs = glob(["*.java"]),
+    exports_manifest = 1,
+    manifest = "AndroidManifest.xml",
+    resource_files = glob(["res/**"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//src/com/google/android/as/oss/logging:api",
+        "//src/com/google/android/as/oss/logging:atoms_java_proto_lite",
+        "//src/com/google/android/as/oss/logging:enums_java_proto_lite",
+        "//src/com/google/android/as/oss/networkusage/api:connection_key_java_proto_lite",
+        "//src/com/google/android/as/oss/networkusage/db",
+        "//src/com/google/android/as/oss/networkusage/db:repository",
+        "//src/com/google/android/as/oss/networkusage/ui/content",
+        "//third_party/java/android_libs/settingslib:footerpreference",
+        "//third_party/java/android_libs/settingslib:mainswitchpreference",
+        "//third_party/java/android_libs/settingslib:settingstheme",
+        "//third_party/java/android_libs/settingslib/collapsingtoolbarbaseactivity",
+        "//third_party/java/androidx/appcompat",
+        "//third_party/java/androidx/recyclerview",
+        "//third_party/java/auto:auto_value",
+        "@maven//:androidx_annotation_annotation",
+        "@maven//:androidx_fragment_fragment",
+        "@maven//:androidx_preference_preference",
+        "@maven//:androidx_swiperefreshlayout_swiperefreshlayout",
+        "@maven//:com_google_dagger_dagger",
+        "@maven//:com_google_dagger_hilt-android",
+        "@maven//:com_google_flogger_google_extensions",
+        "@maven//:com_google_guava_guava",
+        "@maven//:javax_inject_javax_inject",
+        "@maven//:org_checkerframework_checker_qual",
+    ],
+)
 
 android_library(
     name = "res_lib",
     manifest = "AndroidManifest.xml",
-    resource_files = [
-        "res/values/strings.xml",
-        "res/values/prefs.xml",
-    ],
+    resource_files = glob(["res/**"]),
     visibility = ["//visibility:public"],
     deps = [
+        "//third_party/java/android_libs/settingslib:footerpreference",
+        "//third_party/java/android_libs/settingslib:mainswitchpreference",
+        "//third_party/java/android_libs/settingslib:settingstheme",
+        "//third_party/java/android_libs/settingslib:topintropreference",
     ],
 )

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package com.google.android.as.oss.grpc.perapp;
 
-import com.google.android.apps.miphone.astrea.grpc.Annotations.GrpcServicePackageName;
-import com.google.android.apps.miphone.astrea.grpc.Annotations.PcsGrpcServiceName;
+import com.google.android.apps.miphone.pcs.grpc.Annotations.GrpcServicePackageName;
+import com.google.android.apps.miphone.pcs.grpc.Annotations.PcsGrpcServiceName;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
@@ -36,7 +36,7 @@ class PcsGrpcConstantsModule {
   @Provides
   @PcsGrpcServiceName
   static String providePcsGrpcServiceName() {
-    return "com.google.android.apps.miphone.astrea.grpc.AstreaGrpcService";
+    return "com.google.android.apps.miphone.pcs.grpc.PcsGrpcService";
   }
 
   private PcsGrpcConstantsModule() {}

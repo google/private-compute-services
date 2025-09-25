@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import androidx.concurrent.futures.CallbackToFutureAdapter;
 import com.google.android.as.oss.fl.api.proto.TrainerOptions;
 import com.google.android.as.oss.fl.api.proto.TrainerOptions.JobType;
 import com.google.android.as.oss.fl.api.proto.TrainerOptions.TrainingMode;
-import com.google.android.as.oss.fl.brella.service.scheduler.TrainingScheduler;
+import com.google.android.as.oss.fl.fc.service.scheduler.TrainingScheduler;
 import com.google.android.as.oss.fl.populations.Population;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;

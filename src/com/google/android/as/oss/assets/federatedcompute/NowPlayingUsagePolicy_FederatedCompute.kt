@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ val NowPlayingUsagePolicy_FederatedCompute =
   ) {
     description =
       """
-      To provide usage statistics to monitor/improve Now Playing.
+        To provide usage statistics to monitor/improve Now Playing.
 
-      ALLOWED EGRESSES: FederatedCompute.
-      ALLOWED USAGES: Federated analytics.
-    """
+        ALLOWED EGRESSES: FederatedCompute.
+        ALLOWED USAGES: Federated analytics.
+      """
         .trimIndent()
 
     // The population is defined for Pixel 4+ devices per country. Most

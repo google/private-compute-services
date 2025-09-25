@@ -1,0 +1,50 @@
+# Copyright 2025 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+load("@bazel_rules_android//android:rules.bzl", "android_library")
+
+package(default_visibility = [
+    "//visibility:public",
+])
+
+android_library(
+    name = "virtualmachine",
+    srcs = glob(["*.java"]),
+    deps = [
+        "//src/com/google/android/as/oss/pd/api:protected_download_java_proto_lite",
+        "@maven//:com_google_guava_guava",
+    ],
+)
+
+filegroup(
+    name = "aidl_files",
+    srcs = glob(["aidl/**/*.aidl"]),
+)
+
+android_library(
+    name = "aidl_java",
+    idl_import_root = "aidl",
+    idl_srcs = [":aidl_files"],
+    # Communicating with the VM uses Binder RPC (over vsock), which needs the
+    # --rpc option, which is only supported by the AOSP IDL compiler, and only
+    # from SDK 33 (T).
+    idl_uses_aosp_compiler = True,
+    idlopts = [
+        "--rpc",
+        "--min_sdk_version=33",
+    ],
+    visibility = [
+        "//src/com/google/android/as/oss/pd/virtualmachine/impl:__pkg__",
+    ],
+)

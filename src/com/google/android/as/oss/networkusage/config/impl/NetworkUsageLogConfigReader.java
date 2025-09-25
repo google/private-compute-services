@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,13 @@ import com.google.android.as.oss.networkusage.config.NetworkUsageLogConfig;
 
 /** ConfigReader for {@link NetworkUsageLogConfig}. */
 class NetworkUsageLogConfigReader extends AbstractConfigReader<NetworkUsageLogConfig> {
-  private static final String FLAG_PREFIX = "AstreaNetworkUsageLog__";
+  private static final String FLAG_PREFIX = "PcsNetworkUsageLog__";
 
   static final BooleanFlag ENABLE_NETWORK_USAGE_LOG =
-      BooleanFlag.create("AstreaNetworkUsageLog__enable_network_usage_log", false);
+      BooleanFlag.create("PcsNetworkUsageLog__enable_network_usage_log", false);
 
   static final BooleanFlag REJECT_UNKNOWN_REQUESTS =
-      BooleanFlag.create("AstreaNetworkUsageLog__reject_unknown_requests", false);
+      BooleanFlag.create("PcsNetworkUsageLog__reject_unknown_requests", false);
 
   private final FlagManager flagManager;
 

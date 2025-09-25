@@ -1,4 +1,4 @@
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ android_library(
         ],
     deps = [
         ":annotation",
-        "//third_party/java/hilt:hilt-android",
         "@maven//:com_google_dagger_dagger",
+        "@maven//:com_google_dagger_hilt-android",
         "@maven//:com_google_guava_guava",
         "@maven//:javax_inject_javax_inject",
     ],

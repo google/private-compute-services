@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,13 +17,13 @@ edition = "2023";
 package google.internal.abuse.ondevicesafety.v2;
 
 import "google/api/annotations.proto";
-import "storage/datapol/annotations/proto/semantic_annotations.proto";
+
 
 option features.field_presence = IMPLICIT;
 option java_multiple_files = true;
 option java_outer_classname = "ProtectedDownloadServiceProto";
 option java_package = "com.google.android.as.oss.pd.manifest.api.proto";
-option (datapol.file_vetting_status) = "latest";
+
 
 // Service API for providing download manifests.
 service ProtectedDownloadService {
@@ -39,21 +39,21 @@ service ProtectedDownloadService {
 
 // Label expresses a generic constraint in config selection.
 message Label {
-  string attribute = 1 [(datapol.semantic_type) = ST_KEY];
+  string attribute = 1;
 
-  string value = 2 [(datapol.semantic_type) = ST_VALUE];
+  string value = 2;
 }
 
 // Client SDK Version to help server estimate client capabilities.
 message ClientVersion {
   // Build CL for the SDK.
-  int64 version = 1 [(datapol.semantic_type) = ST_SOFTWARE_ID];
+  int64 version = 1;
 }
 
 // Constraints used to select the resources that will be downloaded.
 message ManifestConfigConstraints {
   // Application identifier.
-  string client_id = 1 [(datapol.semantic_type) = ST_IDENTIFYING_ID];
+  string client_id = 1;
 
   // Additional labels that the requested resources should carry.
   repeated Label label = 2;
@@ -66,13 +66,13 @@ message ManifestConfigConstraints {
 // The cryptographic keys to use for encrypting the config.
 message CryptoKeys {
   // The device generated public key to encrypt the manifest config.
-  bytes public_key = 1 [(datapol.semantic_type) = ST_SECURITY_KEY];
+  bytes public_key = 1;
 }
 
 message IntegrityResponse {
   // Response from content binding with Key Attestation.
   bytes key_attestation_token = 2
-      [(datapol.semantic_type) = ST_SECURITY_MATERIAL];
+     ;
 
   // Status of the integrity check from the client side.
   enum ClientStatus {
@@ -113,7 +113,7 @@ message GetManifestConfigRequest {
 message GetManifestConfigResponse {
   // Contains the requested manifest.
   bytes encrypted_manifest_config = 1
-      [(datapol.semantic_type) = ST_NOT_REQUIRED];
+     ;
 
   // Transformations applied to the manifest config.
   ManifestTransformResult manifest_transform_result = 2;

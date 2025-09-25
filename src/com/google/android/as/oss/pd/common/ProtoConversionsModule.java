@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,21 +42,21 @@ final class ProtoConversionsModule {
   @IntoMap
   @ClientMapKey(Client.PLAY_PROTECT_SERVICE)
   static ClientConfig providePlayProtectClientConfig() {
-    return ClientConfig.create("com.google.android.odad");
+    return ClientConfig.create("com.google.android.PlayProtect");
   }
 
   @Provides
   @IntoMap
   @ClientMapKey(Client.PLAY_PROTECT_SERVICE_CORE_DEFAULT)
   static ClientConfig providePlayProtectCoreDefaultClientConfig() {
-    return ClientConfig.create("com.google.android.odad:2793571637033546290");
+    return ClientConfig.create("com.google.android.PlayProtect:2793571637033546290");
   }
 
   @Provides
   @IntoMap
   @ClientMapKey(Client.PLAY_PROTECT_SERVICE_PVM_DEFAULT)
   static ClientConfig providePlayProtectPvmDefaultClientConfig() {
-    return ClientConfig.create("com.google.android.odad:2525461103339185322");
+    return ClientConfig.create("com.google.android.PlayProtect:2525461103339185322");
   }
 
   @Provides
@@ -558,6 +558,71 @@ final class ProtoConversionsModule {
         .setBuildIdFlag(
             ClientConfig.BuildIdFlag.create(
                 FlagNamespace.AICORE, "AicDataRelease__build_id_5495164372972161668"))
+        .build();
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.PSI_MDD_MODELS_CLIENT)
+  static ClientConfig providePsiMddModelsClientConfig() {
+    return ClientConfig.builder()
+        .setClientId("com.google.android.apps.pixel.psi:11791126134479005147")
+        .setBuildIdFlag(
+            ClientConfig.BuildIdFlag.create(
+                FlagNamespace.DEVICE_PERSONALIZATION_SERVICES,
+                "PsiModelDownload__psi_build_id_11791126134479005147"))
+        .build();
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.PSI_LLM_OUTPUT_CLASSIFIER_CLIENT)
+  static ClientConfig providePsiLlmOutputClassifierClientConfig() {
+    return ClientConfig.builder()
+        .setClientId("com.google.android.apps.pixel.psi:3177959871173576590")
+        .setBuildIdFlag(
+            ClientConfig.BuildIdFlag.create(
+                FlagNamespace.DEVICE_PERSONALIZATION_SERVICES,
+                "PsiModelDownload__psi_build_id_3177959871173576590"))
+        .build();
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.PSI_NON_LLM_OUTPUT_CLASSIFIER_CLIENT)
+  static ClientConfig providePsiNonLlmOutputClassifierClientConfig() {
+    return ClientConfig.builder()
+        .setClientId("com.google.android.apps.pixel.psi:12033173399242171289")
+        .setBuildIdFlag(
+            ClientConfig.BuildIdFlag.create(
+                FlagNamespace.DEVICE_PERSONALIZATION_SERVICES,
+                "PsiModelDownload__psi_build_id_12033173399242171289"))
+        .build();
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.PSI_TEXT_INPUT_REGEXT_ONLY_CLASSIFIER_CLIENT)
+  static ClientConfig providePsiTextIutputClassifierClientConfig() {
+    return ClientConfig.builder()
+        .setClientId("com.google.android.apps.pixel.psi:17453388543208459382")
+        .setBuildIdFlag(
+            ClientConfig.BuildIdFlag.create(
+                FlagNamespace.DEVICE_PERSONALIZATION_SERVICES,
+                "PsiModelDownload__psi_build_id_17453388543208459382"))
+        .build();
+  }
+
+  @Provides
+  @IntoMap
+  @ClientMapKey(Client.PSI_TEXT_OUTPUT_REGEX_ONLY_CLASSIFIER_CLIENT)
+  static ClientConfig providePsiTextOutputClassifierClientConfig() {
+    return ClientConfig.builder()
+        .setClientId("com.google.android.apps.pixel.psi:11987824919611589942")
+        .setBuildIdFlag(
+            ClientConfig.BuildIdFlag.create(
+                FlagNamespace.DEVICE_PERSONALIZATION_SERVICES,
+                "PsiModelDownload__psi_build_id_11987824919611589942"))
         .build();
   }
 

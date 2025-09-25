@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ val GPPServicePolicy_FederatedCompute =
   ) {
     description =
       """
-      To detect or identify harmful applications.
+        To detect or identify harmful applications.
 
-      ALLOWED EGRESSES: FederatedCompute.
-      ALLOWED USAGES: Federated analytics, federated learning.
-    """
+        ALLOWED EGRESSES: FederatedCompute.
+        ALLOWED USAGES: Federated analytics, federated learning.
+      """
         .trimIndent()
 
     flavors(Flavor.GPPS_PROD) { minRoundSize(minRoundSize = 500, minSecAggRoundSize = 500) }

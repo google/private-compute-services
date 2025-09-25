@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,25 +158,18 @@ public final class NetworkUsageLogContentMapImpl implements NetworkUsageLogConte
 
   @Override
   public String getMechanismName(ConnectionDetails connectionDetails) {
-    switch (connectionDetails.type()) {
-      case HTTP:
-        return context.getString(R.string.connection_type_http);
-      case PIR:
-        return context.getString(R.string.connection_type_pir);
-      case FC_CHECK_IN:
-      case FC_TRAINING_START_QUERY:
-      case FC_TRAINING_RESULT_UPLOAD:
-        return context.getString(R.string.connection_type_fc);
-      case PD:
-        return context.getString(R.string.connection_type_ap);
-      case ATTESTATION_REQUEST:
-        return context.getString(R.string.connection_type_attestation);
-      case SURVEY_REQUEST:
-        return context.getString(R.string.connection_type_survey);
-      default:
-        throw new UnsupportedOperationException(
-            String.format("Unsupported connection type '%s'", connectionDetails.type().name()));
-    }
+    return switch (connectionDetails.type()) {
+      case HTTP -> context.getString(R.string.connection_type_http);
+      case PIR -> context.getString(R.string.connection_type_pir);
+      case FC_CHECK_IN, FC_TRAINING_START_QUERY, FC_TRAINING_RESULT_UPLOAD ->
+          context.getString(R.string.connection_type_fc);
+      case PD -> context.getString(R.string.connection_type_ap);
+      case ATTESTATION_REQUEST -> context.getString(R.string.connection_type_attestation);
+      case SURVEY_REQUEST -> context.getString(R.string.connection_type_survey);
+      default ->
+          throw new UnsupportedOperationException(
+              String.format("Unsupported connection type '%s'", connectionDetails.type().name()));
+    };
   }
 
   /** Contains resource ids of strings to be used in the Network Usage Log UI. */
