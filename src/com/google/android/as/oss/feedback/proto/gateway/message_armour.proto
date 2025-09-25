@@ -1,0 +1,49 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+edition = "2023";
+
+package com.google.android.as.oss.feedback.api.gateway;
+
+
+option java_multiple_files = true;
+option java_package = "com.google.android.as.oss.feedback.api.gateway";
+
+// This enum defines the specific CUJs within Message Armour.
+enum MessageArmourCUJ {
+  // Default value. Should not be used explicitly.
+  MESSAGE_ARMOUR_CUJ_UNSPECIFIED = 0;
+
+  // CUJ for user-initiated donations to improve the Message Armour model's
+  // scam detection capabilities.
+  MESSAGE_ARMOUR_CUJ_SCAM_DETECTION = 1;
+}
+
+// This message allows to store specific data related to the Message Armour CUJ,
+// such as user data donation.
+message MessageArmourDataDonation {
+  // This oneof allows to store specific data donation based on the Message
+  // Armour CUJ.
+  oneof cuj_specific_data_donation {
+    // User data related to a message donation.
+    MessageArmourUserDataDonation message_armour_user_data_donation = 1;
+  }
+}
+
+// This message contains user data related to a message donation.
+message MessageArmourUserDataDonation {
+  // The user-donated message.
+  // This field contains the raw message text that the user donated.
+  string user_donated_message = 1;
+}

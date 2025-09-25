@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package com.google.android.as.oss.pir.service;
 
-import com.google.android.apps.miphone.astrea.grpc.Annotations.GrpcService;
-import com.google.android.apps.miphone.astrea.grpc.Annotations.GrpcServiceName;
+import com.google.android.apps.miphone.pcs.grpc.Annotations.GrpcService;
+import com.google.android.apps.miphone.pcs.grpc.Annotations.GrpcServiceName;
 import com.google.android.as.oss.pir.api.pir.proto.PirServiceGrpc;
 import com.google.private_retrieval.pir.AndroidLocalPirDownloadTaskBuilderFactory;
 import com.google.private_retrieval.pir.PirDownloadTask.Builder.PirDownloadTaskBuilderFactory;

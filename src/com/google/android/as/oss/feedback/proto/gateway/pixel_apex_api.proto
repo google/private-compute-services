@@ -1,0 +1,178 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+edition = "2023";
+
+package com.google.android.as.oss.feedback.api.gateway;
+
+import "src/com/google/android/as/oss/feedback/proto/gateway/message_armour.proto";
+import "src/com/google/android/as/oss/feedback/proto/gateway/quartz_log.proto";
+import "src/com/google/android/as/oss/feedback/proto/gateway/spoon.proto";
+
+
+option features.field_presence = IMPLICIT;
+option java_api_version = 2;
+option java_multiple_files = true;
+option java_package = "com.google.android.as.oss.feedback.api.gateway";
+
+message LogFeedbackV2Request {
+  // The app id of the feedback.
+  string app_id = 1;
+
+  // The interaction id of the feedback.
+  string interaction_id = 2;
+
+  // The type of the CUJ for clients.
+  FeedbackCUJ feedback_cuj = 3;
+
+  // The runtime config of the app.
+  RuntimeConfig runtime_config = 4;
+
+  // The rating of the feedback.
+  Rating rating = 5;
+
+  // The additional comment of the feedback.
+  string additional_comment = 6;
+
+  // The positive tags of the feedback.
+  repeated PositiveRatingTag positive_tags = 7;
+
+  // The negative tags of the feedback.
+  repeated NegativeRatingTag negative_tags = 8;
+
+  // The donation option of the feedback.
+  UserDataDonationOption donation_option = 9;
+
+  // The user donation of the feedback.
+  UserDonation user_donation = 10;
+
+  // The structured user input sent with the feedback and the data will be
+  // stored in the storage regardless of the user's donation option.
+  StructuredUserInput structured_user_input = 11;
+}
+
+message BlobDonation {
+  // Blob data donation, for example, screenshots of what user currently sees.
+  bytes donation_blob = 1;
+}
+
+// The runtime config of the app.
+message RuntimeConfig {
+  // The build type of the app.
+  string app_build_type = 1;
+
+  // The version of the app.
+  string app_version = 2;
+
+  // The model metadata of the app.
+  // This is a general field for clients to populate.
+  string model_metadata = 3;
+
+  // The id of the model.
+  string model_id = 4;
+}
+
+enum Rating {
+  RATING_UNSPECIFIED = 0;
+  THUMB_UP = 1;
+  THUMB_DOWN = 2;
+}
+
+enum UserDataDonationOption {
+  USER_DATA_DONATION_OPTION_UNSPECIFIED = 0;
+  OPT_IN = 1;
+  OPT_OUT = 2;
+}
+
+// Each client extends this proto to define their own structured user input.
+// This proto is used to store the user input for the online feedback and the
+// data included in this proto will be stored in the storage regardless of the
+// user's donation option.
+message StructuredUserInput {
+  oneof user_input {
+    // This is used to corresponds to the notification category.
+    KeyTypeOptionTag key_type_option = 1
+       ;
+  }
+}
+
+// The user data donation for the Apex API service. Structured proto data
+// donation, storage proto defined by each app.
+message UserDonation {
+  oneof data_donation {
+    SpoonFeedbackDataDonation structured_data_donation = 1
+       ;
+    QuartzDataDonation quartz_data_donation = 3;
+    MessageArmourDataDonation message_armour_data_donation = 4;
+  }
+
+  BlobDonation blob_donation = 2;
+}
+
+// The CUJ for the feedback defined by each app.
+message FeedbackCUJ {
+  SpoonCUJ spoon_feedback_cuj = 1;
+
+  BlobDonation blob_donation = 2;
+
+  QuartzCUJ quartz_cuj = 3;
+
+  MessageArmourCUJ message_armour_cuj = 4
+     ;
+}
+
+enum PositiveRatingTag {
+  POSITIVE_RATING_TAG_UNSPECIFIED = 0;
+  CORRECT = 1;
+  POSITIVE_TAG_OTHER = 2;
+  EASY_TO_UNDERSTAND = 3;
+  COMPLETE = 4;
+  USEFUL_ACTIONS = 5;
+  CORRECT_RESPONSE = 6;
+  CORRECT_SCREENSHOT = 7;
+  HIGH_QUALITY = 8;
+  OTHER = 9;
+}
+
+enum NegativeRatingTag {
+  NEGATIVE_RATING_TAG_UNSPECIFIED = 0;
+  INCORRECT = 1;
+  LEGAL_CONCERN = 2;
+  OFFENSIVE = 3;
+  NEGATIVE_TAG_OTHER = 4;
+  INCORRECT_TITLE = 5;
+  INCORRECT_SUMMARY = 6;
+  MISSING_CRITICAL_INFO = 7;
+  MISSING_ACTIONS = 8;
+  UNHELPFUL_ACTIONS = 9;
+  INCORRECT_RESPONSE = 10;
+  MISSING_RESPONSE_INFO = 11;
+  INCORRECT_SCREENSHOT = 12;
+  MISSING_SCREENSHOT = 13;
+  REPETIVE = 14;
+  IRRELEVANT_CONTENT_ADDED = 15;
+  MEANING_CHANGED = 16;
+  TOO_LATE = 17;
+  INCORRECT_APP = 18;
+  IRRELEVANT_NOW = 19;
+}
+
+enum KeyTypeOptionTag {
+  KEY_TYPE_OPTION_UNSPECIFIED = 0;
+  KEY_TYPE_OPTION_PROMOTION = 1;
+  KEY_TYPE_OPTION_SOCIAL_MEDIA = 2;
+  KEY_TYPE_OPTION_NEWS = 3;
+  KEY_TYPE_OPTION_CONTENT_RECOMMENDATION = 4;
+  KEY_TYPE_OPTION_OTHER = 5;
+}

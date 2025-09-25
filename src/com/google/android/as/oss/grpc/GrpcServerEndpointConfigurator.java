@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package com.google.android.apps.miphone.astrea.grpc;
+package com.google.android.apps.miphone.pcs.grpc;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
-import androidx.annotation.Nullable;
+import io.grpc.Server;
+import io.grpc.binder.IBinderReceiver;
 import java.io.IOException;
 
 /**
@@ -34,9 +35,14 @@ public interface GrpcServerEndpointConfigurator {
    * @param context the hosting service context.
    * @param cls the hosting service class.
    * @param configuration details on how to configure the on-device server.
+   * @param iBinderReceiver the {@link IBinderReceiver} that will be used to receive the {@link
+   *     IBinder} of the created server.
+   * @return the created {@link Server} instance.
    */
-  @Nullable
-  IBinder buildOnDeviceServerEndpoint(
-      Context context, Class<?> cls, GrpcServerEndpointConfiguration configuration)
+  Server buildOnDeviceServerEndpoint(
+      Context context,
+      Class<?> cls,
+      GrpcServerEndpointConfiguration configuration,
+      IBinderReceiver iBinderReceiver)
       throws IOException;
 }

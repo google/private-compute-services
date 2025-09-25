@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ option java_outer_classname = "PcsProtos";
 // Federated compute plans (task groups) must use this protocol buffer as
 // selection criteria.
 
-message AstreaQuery {
+message PcsQuery {
   // Client to which the query needs to be routed (Google Play Protect
   // Service/ASI/StatsD).
   string client_name = 1;

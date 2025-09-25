@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.google.android.apps.miphone.astrea.grpc;
+package com.google.android.apps.miphone.pcs.grpc;
 
-import com.google.android.apps.miphone.astrea.grpc.Annotations.AllowedPackageName;
-import com.google.android.apps.miphone.astrea.grpc.Annotations.GrpcService;
-import com.google.android.apps.miphone.astrea.grpc.Annotations.GrpcServiceName;
-import com.google.android.apps.miphone.astrea.grpc.Annotations.GrpcServiceSecurityPolicy;
+import com.google.android.apps.miphone.pcs.grpc.Annotations.AllowedPackageName;
+import com.google.android.apps.miphone.pcs.grpc.Annotations.GrpcService;
+import com.google.android.apps.miphone.pcs.grpc.Annotations.GrpcServiceName;
+import com.google.android.apps.miphone.pcs.grpc.Annotations.GrpcServiceSecurityPolicy;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
@@ -35,7 +35,7 @@ import javax.inject.Singleton;
 @Module
 @InstallIn(SingletonComponent.class)
 abstract class PcsGrpcModule {
-  private static final String SERVER_NAME = "astrea_grpc";
+  private static final String SERVER_NAME = "pcs_grpc";
 
   @Multibinds
   @GrpcService

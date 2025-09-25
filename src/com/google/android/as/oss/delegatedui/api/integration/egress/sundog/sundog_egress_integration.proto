@@ -1,0 +1,40 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+edition = "2023";
+
+package com.google.android.as.oss.delegatedui.api.integration.egress.sundog;
+
+import "google/protobuf/timestamp.proto";
+
+
+option java_package = "com.google.android.as.oss.delegatedui.api.integration.egress.sundog";
+option java_multiple_files = true;
+
+// When user clicks on the chip.
+// Next Id: 5
+message SundogEventClickEgressData {
+  string event_title = 1;
+  string location_name = 2;
+  .google.protobuf.Timestamp start_time = 3;
+  .google.protobuf.Timestamp end_time = 4;
+}
+
+// When user clicks on the chip.
+// Next Id: 4
+message SundogLocationClickEgressData {
+  string location_name = 1;
+  double latitude = 2;
+  double longitude = 3;
+}

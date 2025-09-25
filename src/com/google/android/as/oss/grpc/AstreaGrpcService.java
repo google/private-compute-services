@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,38 +14,47 @@
  * limitations under the License.
  */
 
-package com.google.android.apps.miphone.astrea.grpc;
+package com.google.android.apps.miphone.pcs.grpc;
 
 import android.content.Intent;
 import android.os.IBinder;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LifecycleService;
+import com.google.android.as.oss.common.config.ConfigReader;
+import com.google.android.as.oss.grpc.config.PcsGrpcConfig;
 import com.google.common.flogger.GoogleLogger;
 import dagger.hilt.android.AndroidEntryPoint;
+import io.grpc.Server;
+import io.grpc.binder.IBinderReceiver;
 import java.io.IOException;
 import javax.inject.Inject;
 
 /** Service providing GRPC connection to PCS. */
 @AndroidEntryPoint(LifecycleService.class)
-public class AstreaGrpcService extends Hilt_AstreaGrpcService {
+public class PcsGrpcService extends Hilt_PcsGrpcService {
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
 
   @Inject GrpcServerEndpointConfiguration configuration;
   @Inject GrpcServerEndpointConfigurator configurator;
+  @Inject ConfigReader<PcsGrpcConfig> config;
 
   @Nullable private IBinder binder;
+  @Nullable private Server server;
 
   @Override
   public void onCreate() {
     super.onCreate();
-    logger.atInfo().log(
-        "AstreaGrpcService#onCreate called with the following services: %s",
+    logger.atFine().log(
+        "PcsGrpcService#onCreate called with the following services: %s",
         configuration.getServiceNames());
+    IBinderReceiver binderReceiver = new IBinderReceiver();
 
     try {
-      binder = configurator.buildOnDeviceServerEndpoint(this, getClass(), configuration);
+      server =
+          configurator.buildOnDeviceServerEndpoint(this, getClass(), configuration, binderReceiver);
+      binder = binderReceiver.get();
       if (binder == null) {
-        throw new NullPointerException();
+        throw new NullPointerException("BinderReceiver returned null binder.");
       }
     } catch (IOException | NullPointerException e) {
       throw new PCSBinderException("Failed to start grpc server.", e);
@@ -57,6 +66,17 @@ public class AstreaGrpcService extends Hilt_AstreaGrpcService {
   public IBinder onBind(Intent intent) {
     super.onBind(intent);
     return binder;
+  }
+
+  @Override
+  public void onDestroy() {
+    logger.atInfo().log("PcsGrpcService#onDestroy called.");
+    super.onDestroy();
+    if (config.getConfig().shutdownGrpcServerOnDestroy()) {
+      if (server != null) {
+        server.shutdown();
+      }
+    }
   }
 
   /** Thrown if the GRPC server fails to start. */

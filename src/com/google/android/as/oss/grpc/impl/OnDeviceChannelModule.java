@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 import android.content.Context;
 import com.google.android.as.oss.common.config.ConfigReader;
-import com.google.android.apps.miphone.astrea.grpc.Annotations.GrpcServicePackageName;
-import com.google.android.apps.miphone.astrea.grpc.Annotations.PcsGrpcServiceName;
+import com.google.android.apps.miphone.pcs.grpc.Annotations.GrpcServicePackageName;
+import com.google.android.apps.miphone.pcs.grpc.Annotations.PcsGrpcServiceName;
 import com.google.android.as.oss.grpc.config.PcsGrpcConfig;
 import dagger.Module;
 import dagger.Provides;

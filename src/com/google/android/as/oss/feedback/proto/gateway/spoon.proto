@@ -1,0 +1,55 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+edition = "2023";
+
+package com.google.android.as.oss.feedback.api.gateway;
+
+
+option java_multiple_files = true;
+option java_package = "com.google.android.as.oss.feedback.api.gateway";
+
+enum SpoonCUJ {
+  SPOON_CUJ_UNKNOWN = 0;
+  SPOON_CUJ_MR_NOTIFICATION = 1;
+  SPOON_CUJ_MR_KEYBOARD = 2;
+  SPOON_CUJ_MA_NOTIFICATION = 3;
+  SPOON_CUJ_BUGLE = 4;
+  SPOON_CUJ_SUBZERO_REMINDERS_TILE = 5;
+  SPOON_CUJ_SUNDOG_LOCATION = 6;
+  SPOON_CUJ_SUNDOG_EVENT = 7;
+  SPOON_CUJ_BEACON = 8;
+  SPOON_CUJ_SMART_CLIPBOARD = 10;
+  SPOON_CUJ_AMBIENT_CUE = 11;
+  SPOON_CUJ_OVERALL_FEEDBACK = 12;
+
+  // Retired CUJ enums.
+  SPOON_CUJ_RETIRED_T9 = 9 [deprecated = true];
+}
+
+message SpoonFeedbackDataDonation {
+  repeated string triggering_messages = 1
+     ;
+  repeated string intent_queries = 2
+     ;
+  repeated string model_outputs = 3;
+  repeated MemoryEntity memory_entities = 4;
+  string selected_entity_content = 5
+     ;
+}
+
+message MemoryEntity {
+  string entity_data = 1;
+  string model_version = 2;
+}

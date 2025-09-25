@@ -1,0 +1,75 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+edition = "2023";
+
+package com.google.android.as.oss.feedback.api.dataservice;
+
+import "src/com/google/android/as/oss/feedback/proto/feedback_tag_data.proto";
+import "src/com/google/android/as/oss/feedback/proto/gateway/pixel_apex_api.proto";
+import "src/com/google/android/as/oss/feedback/proto/gateway/quartz_log.proto";
+import "src/com/google/android/as/oss/feedback/proto/gateway/spoon.proto";
+
+option java_package = "com.google.android.as.oss.feedback.api.dataservice";
+option java_multiple_files = true;
+
+// Request for getting feedback donation data.
+message GetFeedbackDonationDataRequest {
+  // The ID that represents the feedback client session.
+  string client_session_id = 1;
+
+  // The type of the UI element user gives feedback to.
+  int32 ui_element_type = 2;
+
+  // The index of the UI element user gives feedback to.
+  //
+  // This field is optional and only needed when there are multiple UI items and
+  // the selected chip needs to be recorded.
+  int32 ui_element_index = 3;
+
+  // The optional field that represents the cuj of Quartz.
+  feedback.api.gateway.QuartzCUJ quartz_cuj = 4;
+}
+
+// Response for GetFeedbackDonationDataRequest.
+message GetFeedbackDonationDataResponse {
+  feedback.api.gateway.UserDonation donation_data = 1;
+  string app_id = 2;
+  string interaction_id = 3;
+  feedback.api.gateway.RuntimeConfig runtime_config = 4;
+  FeedbackUiRenderingData feedback_ui_rendering_data = 5;
+  feedback.api.gateway.SpoonCUJ cuj = 6;
+  // The optional field that represents the cuj of Quartz.
+  feedback.api.gateway.QuartzCUJ quartz_cuj = 7;
+}
+
+// Next ID: 21
+message FeedbackUiRenderingData {
+  string feedback_dialog_good_feedback_title = 5;
+  string feedback_dialog_bad_feedback_title = 6;
+  string feedback_dialog_fallback_title = 19;
+  string feedback_dialog_free_form_label = 7;
+  string feedback_dialog_free_form_hint = 8;
+  string feedback_dialog_opt_in_label = 9;
+  string feedback_dialog_opt_in_label_generic_info_label = 20;
+  string feedback_dialog_opt_in_label_link_privacy_policy = 18;
+  string feedback_dialog_opt_in_label_link_view_data = 10;
+  string feedback_dialog_button_label = 11;
+  repeated FeedbackTagData feedback_chips = 12;
+  string feedback_dialog_view_data_title = 13;
+  string feedback_dialog_view_data_back_button_content_description = 14;
+  string feedback_dialog_view_data_header = 15;
+  string feedback_dialog_sent_successfully_toast = 16;
+  string feedback_dialog_sent_failed_toast = 17;
+}

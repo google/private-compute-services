@@ -1,4 +1,4 @@
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ android_library(
         ["*.java"],
     ),
     deps = [
+        "//src/com/google/android/as/oss/common/security/api:package_security_info_kt_proto_lite",
         "//third_party/java/auto:auto_value",
+        "@maven//:com_google_guava_guava",
     ],
 )

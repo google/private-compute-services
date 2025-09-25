@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package com.google.android.as.oss.grpc.config.impl;
 import com.google.android.as.oss.common.config.AbstractConfigReader;
 import com.google.android.as.oss.common.config.FlagListener;
 import com.google.android.as.oss.common.config.FlagManager;
+import com.google.android.as.oss.common.config.FlagManager.BooleanFlag;
 import com.google.android.as.oss.common.config.FlagManager.IntegerFlag;
 import com.google.android.as.oss.grpc.config.PcsGrpcConfig;
 
@@ -28,6 +29,9 @@ class PcsGrpcConfigReader extends AbstractConfigReader<PcsGrpcConfig> {
 
   static final IntegerFlag IDLE_TIMEOUT_SECONDS =
       IntegerFlag.create("PcsGrpc__idle_timeout_seconds", 60);
+
+  static final BooleanFlag SHUTDOWN_GRPC_SERVER_ON_DESTROY =
+      BooleanFlag.create("PcsGrpc__shutdown_grpc_server_on_destroy", true);
 
   private final FlagManager flagManager;
 
@@ -51,6 +55,7 @@ class PcsGrpcConfigReader extends AbstractConfigReader<PcsGrpcConfig> {
   protected PcsGrpcConfig computeConfig() {
     return PcsGrpcConfig.builder()
         .setIdleTimeoutSeconds(flagManager.get(IDLE_TIMEOUT_SECONDS))
+        .setShutdownGrpcServerOnDestroy(flagManager.get(SHUTDOWN_GRPC_SERVER_ON_DESTROY))
         .build();
   }
 

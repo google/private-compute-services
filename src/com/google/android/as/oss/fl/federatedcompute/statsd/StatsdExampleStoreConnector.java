@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,10 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import com.android.internal.os.StatsPolicyConfigProto.StatsPolicyConfig;
 import com.google.android.as.oss.common.ExecutorAnnotations.FlExecutorQualifier;
-import com.google.android.as.oss.fl.brella.api.EmptyExampleStoreIterator;
-import com.google.android.as.oss.fl.brella.api.proto.TrainingError;
-import com.google.android.as.oss.proto.PcsProtos.AstreaQuery;
-import com.google.android.as.oss.proto.PcsStatsquery.AstreaStatsQuery;
+import com.google.android.as.oss.fl.fc.api.EmptyExampleStoreIterator;
+import com.google.android.as.oss.fl.fc.api.proto.TrainingError;
+import com.google.android.as.oss.proto.PcsProtos.PcsQuery;
+import com.google.android.as.oss.proto.PcsStatsquery.PcsStatsQuery;
 import com.google.fcp.client.ExampleStoreIterator;
 import com.google.fcp.client.ExampleStoreService.QueryCallback;
 import com.google.common.base.Preconditions;
@@ -61,9 +61,9 @@ public class StatsdExampleStoreConnector implements ExampleStoreConnector {
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
   public static final String STATSD_COLLECTION_NAME = "/statsd";
   private static final String PCS_CRITERIA_TYPE_URL =
-      "type.googleapis.com/com.google.android.as.oss.proto.AstreaQuery";
+      "type.googleapis.com/com.google.android.as.oss.proto.PcsQuery";
   public static final String PCS_STATSQUERY_CRITERIA_TYPE_URL =
-      "type.googleapis.com/com.google.android.as.oss.proto.AstreaStatsQuery";
+      "type.googleapis.com/com.google.android.as.oss.proto.PcsStatsQuery";
   private static long configKey = 175747355; // [redacted]
   private static String configPackage = "com.google.fcp.client";
 
@@ -169,16 +169,16 @@ public class StatsdExampleStoreConnector implements ExampleStoreConnector {
       if (!parsedCriteria.getTypeUrl().equals(PCS_CRITERIA_TYPE_URL)) {
         return null;
       }
-      AstreaQuery query =
-          AstreaQuery.parseFrom(
+      PcsQuery query =
+          PcsQuery.parseFrom(
               parsedCriteria.getValue(), ExtensionRegistryLite.getGeneratedRegistry());
       if (query.hasDataSelectionCriteria()
           && query
               .getDataSelectionCriteria()
               .getTypeUrl()
               .equals(PCS_STATSQUERY_CRITERIA_TYPE_URL)) {
-        AstreaStatsQuery statsQuery =
-            AstreaStatsQuery.parseFrom(
+        PcsStatsQuery statsQuery =
+            PcsStatsQuery.parseFrom(
                 query.getDataSelectionCriteria().getValue(),
                 ExtensionRegistryLite.getGeneratedRegistry());
         return statsQuery.getSqlQuery();

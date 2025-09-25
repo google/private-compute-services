@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ val SafecommsPolicy_FederatedCompute =
   ) {
     description =
       """
-      To improve phishing detection for messaging apps.
+        To improve phishing detection for messaging apps.
 
-      ALLOWED EGRESSES: FederatedCompute.
-      ALLOWED USAGES: Federated analytics, federated learning.
-    """
+        ALLOWED EGRESSES: FederatedCompute.
+        ALLOWED USAGES: Federated analytics, federated learning.
+      """
         .trimIndent()
 
     flavors(Flavor.ASI_PROD) { minRoundSize(minRoundSize = 1000, minSecAggRoundSize = 0) }
@@ -49,7 +49,6 @@ val SafecommsPolicy_FederatedCompute =
         conditionalUsage("top2000PackageNamesWith2000Wau", UsageType.ANY)
         rawUsage(UsageType.JOIN)
       }
-      "riskType" { rawUsage(UsageType.ANY) }
       "verdict" { rawUsage(UsageType.ANY) }
       "lastMessageSource" { rawUsage(UsageType.ANY) }
       "predictedValue" { rawUsage(UsageType.ANY) }

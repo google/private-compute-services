@@ -1,4 +1,4 @@
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,9 +29,9 @@ android_library(
         "//src/com/google/android/as/oss/networkusage/ui/content",
         "//src/com/google/android/as/oss/networkusage/ui/user:res_lib",
         "//third_party/java/auto:auto_value",
-        "//third_party/java/hilt:hilt-android",
         "@maven//:androidx_annotation_annotation",
         "@maven//:com_google_dagger_dagger",
+        "@maven//:com_google_dagger_hilt-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:com_google_flogger_google_extensions",
         "@maven//:com_google_guava_guava",
@@ -52,8 +52,8 @@ android_library(
         "//src/com/google/android/as/oss/networkusage/ui/content",
         "//src/com/google/android/as/oss/networkusage/ui/user:res_lib",
         "//src/com/google/android/as/oss/protos:pcs_feature_enum_java_proto_lite",
-        "//third_party/java/hilt:hilt-android",
         "@maven//:com_google_dagger_dagger",
+        "@maven//:com_google_dagger_hilt-android",
         "@maven//:com_google_guava_guava",
         "@maven//:javax_inject_javax_inject",
     ],

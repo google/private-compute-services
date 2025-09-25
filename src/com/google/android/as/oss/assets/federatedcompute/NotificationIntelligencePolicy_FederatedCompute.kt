@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ val NotificationIntelligencePolicy_FederatedCompute =
   ) {
     description =
       """
-      To measure and improve the quality of Notification Intelligence.
+        To measure and improve the quality of Notification Intelligence.
 
-      ALLOWED EGRESSES: FederatedCompute.
-      ALLOWED USAGES: Federated analytics.
-    """
+        ALLOWED EGRESSES: FederatedCompute.
+        ALLOWED USAGES: Federated analytics.
+      """
         .trimIndent()
 
     consentRequiredForCollectionOrStorage(Consent.UsageAndDiagnosticsCheckbox)
@@ -105,5 +105,37 @@ val NotificationIntelligencePolicy_FederatedCompute =
         rawUsage(UsageType.JOIN)
       }
       "feedbackCategory" { rawUsage(UsageType.ANY) }
+    }
+
+    target(
+      PERSISTED_SMART_NOTIFICATION_LANGUAGE_DETECTION_GENERATED_DTD,
+      maxAge = Duration.ofDays(28),
+    ) {
+      retention(StorageMedium.RAM)
+      retention(StorageMedium.DISK)
+
+      "id" { rawUsage(UsageType.JOIN) }
+      "timestampMillis" {
+        ConditionalUsage.TruncatedToDays.whenever(UsageType.ANY)
+        rawUsage(UsageType.JOIN)
+      }
+      "isMessageStyleNotification" { rawUsage(UsageType.ANY) }
+      "notificationLanguage" { rawUsage(UsageType.ANY) }
+    }
+
+    target(
+      PERSISTED_SMART_NOTIFICATION_SUMMARIZATION_ERROR_GENERATED_DTD,
+      maxAge = Duration.ofDays(28),
+    ) {
+      retention(StorageMedium.RAM)
+      retention(StorageMedium.DISK)
+
+      "id" { rawUsage(UsageType.JOIN) }
+      "timestampMillis" {
+        ConditionalUsage.TruncatedToDays.whenever(UsageType.ANY)
+        rawUsage(UsageType.JOIN)
+      }
+      "errorType" { rawUsage(UsageType.ANY) }
+      "modelVersion" { rawUsage(UsageType.ANY) }
     }
   }

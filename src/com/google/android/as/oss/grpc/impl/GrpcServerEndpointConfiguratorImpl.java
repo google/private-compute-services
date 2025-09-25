@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,32 @@
 
 package com.google.android.as.oss.grpc.impl;
 
+import static com.google.android.as.oss.grpc.impl.PcsSecurityPolicies.allowlistedOnly;
 import static com.google.android.as.oss.grpc.impl.PcsSecurityPolicies.buildServerSecurityPolicy;
 import static com.google.android.as.oss.grpc.impl.PcsSecurityPolicies.untrustedPolicy;
 
 import android.content.Context;
 import android.os.Build;
 import android.os.IBinder;
-import androidx.annotation.Nullable;
-import com.google.android.apps.miphone.astrea.grpc.GrpcServerEndpointConfiguration;
-import com.google.android.apps.miphone.astrea.grpc.GrpcServerEndpointConfigurator;
+import com.google.android.as.oss.common.config.ConfigReader;
+import com.google.android.as.oss.common.security.api.PackageSecurityInfo;
+import com.google.android.as.oss.common.security.config.PccSecurityConfig;
+import com.google.android.apps.miphone.pcs.grpc.GrpcServerEndpointConfiguration;
+import com.google.android.apps.miphone.pcs.grpc.GrpcServerEndpointConfigurator;
 import dagger.Module;
 import dagger.hilt.InstallIn;
 import dagger.hilt.components.SingletonComponent;
 import io.grpc.BindableService;
 import io.grpc.CompressorRegistry;
 import io.grpc.DecompressorRegistry;
+import io.grpc.Server;
 import io.grpc.binder.AndroidComponentAddress;
 import io.grpc.binder.BinderServerBuilder;
 import io.grpc.binder.IBinderReceiver;
 import io.grpc.binder.InboundParcelablePolicy;
 import io.grpc.binder.ServerSecurityPolicy;
 import java.io.IOException;
+import java.util.List;
 import javax.inject.Inject;
 
 /**
@@ -51,30 +56,40 @@ import javax.inject.Inject;
 @Module
 @InstallIn(SingletonComponent.class)
 final class GrpcServerEndpointConfiguratorImpl implements GrpcServerEndpointConfigurator {
+  private final ConfigReader<PccSecurityConfig> pccSecurityConfigReader;
 
   @Inject
-  GrpcServerEndpointConfiguratorImpl() {}
-
-  @Override
-  @Nullable
-  public IBinder buildOnDeviceServerEndpoint(
-      Context context, Class<?> cls, GrpcServerEndpointConfiguration configuration)
-      throws IOException {
-    IBinderReceiver iBinderReceiver = new IBinderReceiver();
-    buildAndStartOnDeviceServer(context, cls, configuration, iBinderReceiver);
-    return iBinderReceiver.get();
+  GrpcServerEndpointConfiguratorImpl(ConfigReader<PccSecurityConfig> pccSecurityConfigReader) {
+    this.pccSecurityConfigReader = pccSecurityConfigReader;
   }
 
-  private void buildAndStartOnDeviceServer(
+  @Override
+  public Server buildOnDeviceServerEndpoint(
+      Context context,
+      Class<?> cls,
+      GrpcServerEndpointConfiguration configuration,
+      IBinderReceiver iBinderReceiver)
+      throws IOException {
+    return buildAndStartOnDeviceServer(context, cls, configuration, iBinderReceiver);
+  }
+
+  private Server buildAndStartOnDeviceServer(
       Context context,
       Class<?> cls,
       GrpcServerEndpointConfiguration configuration,
       IBinderReceiver iBinderReceiver)
       throws IOException {
 
-    // TODO: Use allowlistedOnly() instead of untrustedPolicy().
-    ServerSecurityPolicy serverSecurityPolicy =
-        buildServerSecurityPolicy(untrustedPolicy(), configuration);
+    PccSecurityConfig pccSecurityConfig = pccSecurityConfigReader.getConfig();
+    ServerSecurityPolicy serverSecurityPolicy;
+    if (pccSecurityConfig.enableAllowlistedOnly()) {
+      List<PackageSecurityInfo> packageSecurityInfos =
+          pccSecurityConfig.securityInfoList().getPackageSecurityInfosList();
+      serverSecurityPolicy =
+          buildServerSecurityPolicy(allowlistedOnly(context, packageSecurityInfos), configuration);
+    } else {
+      serverSecurityPolicy = buildServerSecurityPolicy(untrustedPolicy(), configuration);
+    }
 
     BinderServerBuilder builder =
         BinderServerBuilder.forAddress(
@@ -93,7 +108,9 @@ final class GrpcServerEndpointConfiguratorImpl implements GrpcServerEndpointConf
     for (BindableService service : configuration.getServices()) {
       builder.addService(service);
     }
-    builder.build().start();
+    Server server = builder.build();
+    server.start();
+    return server;
   }
 
   private InboundParcelablePolicy buildInboundParcelablePolicy() {

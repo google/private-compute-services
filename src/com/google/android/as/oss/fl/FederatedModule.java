@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import javax.annotation.Nullable;
 @InstallIn(SingletonComponent.class)
 abstract class FederatedModule {
   private static final String ASI_CLIENT_NAME = "com.google.android.as";
-  private static final String GPPS_CLIENT_NAME = "com.google.android.odad";
+  private static final String GPPS_CLIENT_NAME = "com.google.android.PlayProtect";
 
   @Provides
   @ExampleStoreClientsInfo
@@ -46,7 +46,7 @@ abstract class FederatedModule {
         ASI_CLIENT_NAME,
         "com.google.android.apps.miphone.aiai.EXAMPLE_STORE_V1",
         GPPS_CLIENT_NAME,
-        "com.google.android.apps.miphone.odad.EXAMPLE_STORE_V1");
+        "com.google.android.apps.miphone.PlayProtect.EXAMPLE_STORE_V1");
   }
 
   @Provides
@@ -56,7 +56,7 @@ abstract class FederatedModule {
         ASI_CLIENT_NAME,
         "com.google.android.apps.miphone.aiai.COMPUTATION_RESULT_V1",
         GPPS_CLIENT_NAME,
-        "com.google.android.apps.miphone.odad.COMPUTATION_RESULT_V1");
+        "com.google.android.apps.miphone.PlayProtect.COMPUTATION_RESULT_V1");
   }
 
   @Provides

@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -49,29 +49,32 @@ message IntelligenceUnrecognisedNetworkRequestReported {
   }
 
   ConnectionType connection_type = 1;
-  string connection_key = 2;
+  string connection_key = 2
+      ;
 }
 
 message IntelligenceFederatedLearningTrainingLogReported {
-  int64 federated_compute_version = 1;
+  int64 federated_compute_version = 1
+      ;
 
   TrainingEventKind kind = 2;
-  string config_name = 3;
+  string config_name = 3 ;
 
   int64 duration_millis = 4;
   int64 example_size = 5;
-  int64 run_id = 6;
+  int64 run_id = 6 ;
 
   TrainingErrorCode error_code = 7;
   int64 native_heap_bytes_allocated = 8;
   int64 java_heap_total_memory = 9;
   int64 java_heap_free_memory = 10;
-  string model_identifier = 11;
+  string model_identifier = 11
+      ;
 
   int64 data_transfer_duration_millis = 12;
   int64 bytes_uploaded = 13;
   int64 bytes_downloaded = 14;
-  string error_message = 15;
+  string error_message = 15 ;
 
   TrainingDataSourceType data_source = 16;
   int64 high_water_mark_memory_bytes = 17;
@@ -84,17 +87,19 @@ message IntelligenceFederatedLearningTrainingLogReported {
 }
 
 message IntelligenceFederatedLearningSecAggClientLogReported {
-  int64 federated_compute_version = 1;
+  int64 federated_compute_version = 1
+      ;
 
-  int64 run_id = 2;
+  int64 run_id = 2 ;
 
-  string config_name = 3;
+  string config_name = 3 ;
 
-  string model_identifier = 4;
+  string model_identifier = 4
+      ;
 
-  int64 client_session_id = 5;
+  int64 client_session_id = 5 ;
 
-  int64 execution_session_id = 6;
+  int64 execution_session_id = 6 ;
 
   SecAggClientEventKind kind = 7;
   int64 duration_millis = 8;
@@ -107,8 +112,9 @@ message IntelligenceFederatedLearningSecAggClientLogReported {
 }
 
 message IntelligenceFederatedLearningDiagnosisLogReported {
-  int64 federated_compute_version = 1;
+  int64 federated_compute_version = 1
+      ;
 
   int64 diag_code = 2;
-  int64 run_id = 3;
+  int64 run_id = 3 ;
 }

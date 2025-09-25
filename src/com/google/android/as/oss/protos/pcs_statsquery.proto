@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package com.google.android.as.oss.proto;
 option features.field_presence = IMPLICIT;
 option java_package = "com.google.android.as.oss.proto";
 
-message AstreaStatsQuery {
+message PcsStatsQuery {
   // SQL query for querying statsd platform logs.
   string sql_query = 1;
 }

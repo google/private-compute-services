@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,11 @@ import static com.google.android.as.oss.fl.api.proto.TrainerOptions.SchedulingMo
 
 import android.net.Uri;
 import com.google.android.as.oss.fl.api.proto.TrainerOptions;
-import com.google.android.as.oss.fl.brella.api.ExampleConsumption;
-import com.google.android.as.oss.fl.brella.api.InAppTrainerOptions;
-import com.google.android.as.oss.fl.brella.api.InAppTrainingConstraints;
-import com.google.android.as.oss.fl.brella.api.TrainingInterval;
-import com.google.android.as.oss.fl.brella.api.TrainingInterval.SchedulingMode;
+import com.google.android.as.oss.fl.fc.api.ExampleConsumption;
+import com.google.android.as.oss.fl.fc.api.InAppTrainerOptions;
+import com.google.android.as.oss.fl.fc.api.InAppTrainingConstraints;
+import com.google.android.as.oss.fl.fc.api.TrainingInterval;
+import com.google.android.as.oss.fl.fc.api.TrainingInterval.SchedulingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,27 +97,23 @@ public final class ClassConversionUtils {
   }
 
   public static TrainerOptions.SchedulingMode schedulingModeIntDefToEnum(int schedulingMode) {
-    switch (schedulingMode) {
-      case SchedulingMode.RECURRENT:
-        return SCHEDULING_MODE_RECURRENT;
-      case SchedulingMode.ONE_TIME:
-        return SCHEDULING_MODE_ONE_TIME;
-      default:
-        throw new IllegalArgumentException(
-            String.format("Unknown Scheduling Mode: %d", schedulingMode));
-    }
+    return switch (schedulingMode) {
+      case SchedulingMode.RECURRENT -> SCHEDULING_MODE_RECURRENT;
+      case SchedulingMode.ONE_TIME -> SCHEDULING_MODE_ONE_TIME;
+      default ->
+          throw new IllegalArgumentException(
+              String.format("Unknown Scheduling Mode: %d", schedulingMode));
+    };
   }
 
   public static int schedulingModeEnumToIntDef(TrainerOptions.SchedulingMode schedulingMode) {
-    switch (schedulingMode) {
-      case SCHEDULING_MODE_RECURRENT:
-        return SchedulingMode.RECURRENT;
-      case SCHEDULING_MODE_ONE_TIME:
-        return SchedulingMode.ONE_TIME;
-      default:
-        throw new IllegalArgumentException(
-            String.format("Unknown Scheduling Mode: %d", schedulingMode.getNumber()));
-    }
+    return switch (schedulingMode) {
+      case SCHEDULING_MODE_RECURRENT -> SchedulingMode.RECURRENT;
+      case SCHEDULING_MODE_ONE_TIME -> SchedulingMode.ONE_TIME;
+      default ->
+          throw new IllegalArgumentException(
+              String.format("Unknown Scheduling Mode: %d", schedulingMode.getNumber()));
+    };
   }
 
   /**

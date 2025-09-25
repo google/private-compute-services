@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package com.google.android.as.oss.http.service;
 
-import static com.google.android.apps.miphone.astrea.grpc.ContextKeys.WRITEABLE_FILE_CONTEXT_KEY;
+import static com.google.android.apps.miphone.pcs.grpc.ContextKeys.WRITEABLE_FILE_CONTEXT_KEY;
 
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
@@ -26,7 +26,7 @@ import androidx.annotation.VisibleForTesting;
 import com.google.android.as.oss.common.ExecutorAnnotations.IoExecutorQualifier;
 import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.common.flavor.BuildFlavor;
-import com.google.android.apps.miphone.astrea.grpc.GrpcStatusProto;
+import com.google.android.apps.miphone.pcs.grpc.GrpcStatusProto;
 import com.google.android.as.oss.http.api.proto.HttpDownloadRequest;
 import com.google.android.as.oss.http.api.proto.HttpDownloadResponse;
 import com.google.android.as.oss.http.api.proto.HttpProperty;

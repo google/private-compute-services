@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
- Copyright 2024 Google LLC
+ Copyright 2025 Google LLC
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@
   <dimen name="survey_display_logo_margin_top">16dp</dimen>
   <dimen name="survey_display_logo_margin_bottom">12dp</dimen>
   <dimen name="survey_display_logo_padding_top">0dp</dimen>
-
+  
   <dimen name="survey_question_text_size">16sp</dimen>
   <dimen name="survey_prompt_buttons_text_size">14sp</dimen>
   <dimen name="survey_prompt_buttons_max_text_size">16dp</dimen>
   <dimen name="google_marterial_button_text_size">14sp</dimen>
-
+  
   <dimen name="survey_prompt_max_width_sw_411">363dp</dimen>
   <dimen name="survey_prompt_max_width_sw_380">361dp</dimen>
   <dimen name="survey_prompt_max_width_sw_320">288dp</dimen>

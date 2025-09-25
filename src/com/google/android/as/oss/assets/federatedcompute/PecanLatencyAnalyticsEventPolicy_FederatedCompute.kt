@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@ val PecanLatencyAnalyticsEventPolicy_FederatedCompute =
   ) {
     description =
       """
-      Monitor latency statistics for People and Conversations. Latency statistics will help improve
-      the performance of People and Conversations infrastructure.
+        Monitor latency statistics for People and Conversations. Latency statistics will help improve
+        the performance of People and Conversations infrastructure.
 
-      ALLOWED EGRESSES: FederatedCompute.
-      ALLOWED USAGES: Federated analytics, federated learning.
-    """
+        ALLOWED EGRESSES: FederatedCompute.
+        ALLOWED USAGES: Federated analytics, federated learning.
+      """
         .trimIndent()
     flavors(Flavor.ASI_PROD) { minRoundSize(minRoundSize = 1000, minSecAggRoundSize = 0) }
     consentRequiredForCollectionOrStorage(Consent.UsageAndDiagnosticsCheckbox)

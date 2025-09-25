@@ -1,0 +1,79 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+edition = "2023";
+
+package com.google.android.as.oss.dataattribution.proto;
+
+import "src/com/google/android/as/oss/feedback/proto/feedback_dialog_common_data.proto";
+
+import "third_party/protobuf/cpp_features.proto";
+
+option features.(pb.cpp).string_type = VIEW;
+option java_package = "com.google.android.as.oss.dataattribution.proto";
+option java_multiple_files = true;
+
+// The data required to populate [DataAttributionDialog].
+message AttributionDialogData {
+  // the header of the dialog.
+  string title = 1;
+
+  // an optional value proposition logo to display at the top of the dialog,
+  // next to the title.
+  bytes logo = 2;
+
+  // a sub-header providing information regarding the dialog. This property is
+  // used for the row present below the title.
+  string message = 3;
+
+  // the header of the attribution card list. This property is used for the row
+  // present below the message row.
+  string attribution_header = 4;
+
+  // consists of the attribution data. This data is used for the row present
+  // below the attributionHeader.
+  repeated AttributionCardData attributions = 5
+     ;
+
+  // an identifier for the current suggestion session, used for logging or
+  // feedback purposes.
+  string session_id = 6;
+
+  // the TalkBack text of the dismiss button.
+  string dismiss_button_text = 7;
+
+  // The label of the Settings button.
+  string settings_button_text = 8;
+
+  // The content description of the Thumbs Up button.
+  string thumbs_up_button_content_description = 9;
+
+  // The content description of the Thumbs Down button.
+  string thumbs_down_button_content_description = 10;
+
+  // The common dialog data needed to show the Feedback dialog.
+  feedback.api.FeedbackDialogCommonData feedback_dialog_common_data = 11;
+}
+
+// The attribution data used to populate [AttributionCard].
+message AttributionCardData {
+  // the image that represents the source of the attribution.
+  bytes bitmap = 1;
+
+  // the title of the attribution.
+  string title = 2;
+
+  // the subtitle of the attribution.
+  string subtitle = 3;
+}

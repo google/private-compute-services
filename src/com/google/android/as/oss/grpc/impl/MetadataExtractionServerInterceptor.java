@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 package com.google.android.as.oss.grpc.impl;
 
-import static com.google.android.apps.miphone.astrea.grpc.ContextKeys.WRITEABLE_FILE_CONTEXT_KEY;
-import static com.google.android.apps.miphone.astrea.grpc.ContextKeys.WRITEABLE_FILE_METADATA_KEY;
+import static com.google.android.apps.miphone.pcs.grpc.ContextKeys.WRITEABLE_FILE_CONTEXT_KEY;
+import static com.google.android.apps.miphone.pcs.grpc.ContextKeys.WRITEABLE_FILE_METADATA_KEY;
 
-import androidx.annotation.VisibleForTesting;
 import io.grpc.Context;
 import io.grpc.Contexts;
 import io.grpc.Metadata;
@@ -34,7 +33,6 @@ import io.grpc.ServerInterceptor;
  * <p>This class by default extracts a set of allowlisted metadata values and passes them along to
  * context. Bindable services can then read it directly from Context.currentContext().
  */
-@VisibleForTesting
 public class MetadataExtractionServerInterceptor implements ServerInterceptor {
 
   @Override

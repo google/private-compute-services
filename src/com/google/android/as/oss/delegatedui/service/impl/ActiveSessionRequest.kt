@@ -1,0 +1,36 @@
+/*
+ * Copyright 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.google.android.`as`.oss.delegatedui.service.impl
+
+import com.google.android.`as`.oss.delegatedui.api.infra.uiservice.DelegatedUiRequest
+
+/** Types of requests that can be handled by an active delegated UI session. */
+sealed class ActiveSessionRequest {
+
+  /**
+   * Requests belonging to the [DelegatedUiServiceImpl.connectDelegatedUiSession] RPC, including
+   * [DelegatedUiCreateRequest] and [DelegatedUiUpdateRequest].
+   */
+  data class ConnectRequest(val request: DelegatedUiRequest) : ActiveSessionRequest()
+
+  /** Requests external to the [DelegatedUiServiceImpl.connectDelegatedUiSession] RPC. */
+  sealed class ExternalRequest : ActiveSessionRequest() {
+
+    /** Request belonging to the [DelegatedUiServiceImpl.invalidateDelegatedUiSession] RPC. */
+    object InvalidateRequest : ExternalRequest()
+  }
+}

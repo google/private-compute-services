@@ -1,4 +1,4 @@
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,13 +14,15 @@
 
 load("@bazel_rules_android//android:rules.bzl", "android_library")
 
-package(default_visibility = ["//visibility:public"])
+package(default_visibility = [
+    "//visibility:public",
+])
 
 android_library(
     name = "initializer",
     srcs = glob(["*.java"]),
     deps = [
-        "//third_party/java/hilt:hilt-android",
         "@maven//:com_google_dagger_dagger",
+        "@maven//:com_google_dagger_hilt-android",
     ],
 )

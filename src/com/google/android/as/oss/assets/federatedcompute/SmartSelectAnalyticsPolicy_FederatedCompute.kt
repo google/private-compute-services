@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ val SmartSelectAnalyticsPolicy_FederatedCompute =
   ) {
     description =
       """
-      To make improvements to the platform Smart Select service - for example, understand selection usage.
+        To make improvements to the platform Smart Select service - for example, understand selection usage.
 
-      ALLOWED EGRESSES: FederatedCompute.
-      ALLOWED USAGES: Federated analytics.
-    """
+        ALLOWED EGRESSES: FederatedCompute.
+        ALLOWED USAGES: Federated analytics.
+      """
         .trimIndent()
 
     flavors(Flavor.ASI_PROD) { minRoundSize(minRoundSize = 2000, minSecAggRoundSize = 500) }
