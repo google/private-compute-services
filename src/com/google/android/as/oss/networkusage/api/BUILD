@@ -12,19 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("//third_party/protobuf/bazel:java_lite_proto_library.bzl", "java_lite_proto_library")
-load("//third_party/protobuf/bazel:proto_library.bzl", "proto_library")
+unload("//third_party/protobuf/bazel:java_lite_proto_library.bzl", "java_lite_proto_library")
+unload("//third_party/protobuf/bazel:proto_library.bzl", "proto_library")
 
 package(default_visibility = ["//visibility:public"])
 
-proto_library(
+(
     name = "connection_key_proto",
     srcs = [
         "connection_key.proto",
     ],
 )
 
-java_lite_proto_library(
+(
     name = "connection_key_java_proto_lite",
     deps = [
         ":connection_key_proto",
