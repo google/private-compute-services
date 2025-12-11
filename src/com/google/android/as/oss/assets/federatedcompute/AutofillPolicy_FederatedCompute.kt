@@ -24,10 +24,10 @@ val AutofillPolicy_FederatedCompute =
   ) {
     description =
       """
-        To make improvements to the platform Autofill service – for example, provide suggestions for text input fields based on screen content, including smart copy & paste, smart replies and others.
+      To make improvements to the platform Autofill service – for example, provide suggestions for text input fields based on screen content, including smart copy & paste, smart replies and others.
 
-        ALLOWED EGRESSES: FederatedCompute.
-        ALLOWED USAGES: Federated analytics, federated learning.
+      ALLOWED EGRESSES: FederatedCompute.
+      ALLOWED USAGES: Federated analytics, federated learning.
       """
         .trimIndent()
 

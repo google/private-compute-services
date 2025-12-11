@@ -39,6 +39,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,6 +55,7 @@ import com.google.android.`as`.oss.delegatedui.api.integration.egress.airflow.da
 import com.google.android.`as`.oss.delegatedui.api.integration.egress.airflow.errorEvent
 import com.google.android.`as`.oss.delegatedui.api.integration.egress.airflow.preparingDataEvent
 import com.google.android.`as`.oss.delegatedui.api.integration.templates.DelegatedUiTemplateData
+import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiInputSpec
 import com.google.android.`as`.oss.delegatedui.service.templates.TemplateRenderer
 import com.google.android.`as`.oss.delegatedui.service.templates.airflow.data.AirflowDataServiceGrpcKt
 import com.google.android.`as`.oss.delegatedui.service.templates.airflow.data.Annotations.AirflowDataService
@@ -64,6 +66,7 @@ import com.google.common.flogger.GoogleLogger
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
 import javax.inject.Inject
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 /**
@@ -79,16 +82,18 @@ internal constructor(
 
   override fun TemplateRendererScope.onCreateTemplateView(
     context: Context,
+    inputSpecFlow: StateFlow<DelegatedUiInputSpec>,
     response: ResponseWithParcelables<DelegatedUiTemplateData>,
   ): View? {
-    val data = response.value.airflowTemplateData
+    val data = response.data.airflowTemplateData
     return ComposeView(context).apply {
       setContent {
         MainTheme {
-          doOnImpression(data.uiIdToken) { logUsage() }
+          LaunchedEffect(Unit) { doOnImpression(data.uiIdToken) { logUsage() } }
+
           CtaPill(
             label = data.label,
-            icon = response.image.value,
+            icon = response.image.valueOrNull,
             modifier =
               Modifier.doOnClick(
                 data.uiIdToken,

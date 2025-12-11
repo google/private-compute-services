@@ -51,6 +51,7 @@ android_library(
         "//src/com/google/android/as/oss/networkusage/db",
         "//src/com/google/android/as/oss/networkusage/ui/content",
         "//src/com/google/android/as/oss/networkusage/ui/user:res_lib",
+        "//src/com/google/android/as/oss/privateinference/networkusage",
         "//src/com/google/android/as/oss/protos:pcs_feature_enum_java_proto_lite",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",

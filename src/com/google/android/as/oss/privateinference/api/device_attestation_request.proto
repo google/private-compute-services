@@ -1,0 +1,39 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+edition = "2023";
+
+package mdi.privatearatea;
+
+import "third_party/protobuf/cpp_features.proto";
+
+option features.(pb.cpp).string_type = VIEW;
+option java_multiple_files = true;
+option java_package = "com.google.search.mdi.privatearatea.proto";
+
+// An open-sourced, binary-compatible subset of the DeviceAttestationRequest
+// message, containing only the request types needed from within PCS.
+message DeviceAttestationRequest {
+  oneof attestation_evidence {
+    AndroidKeyStoreAttestationEvidence android_key_store_evidence = 1;
+  }
+}
+
+message AndroidKeyStoreAttestationEvidence {
+  // The certificate chain for the attestation evidence, as returned from the
+  // Android Key Store:
+  // * ordered from leaf to root
+  // * raw certifcate bytes returned by Certificate.encoded
+  repeated bytes certificate_chain = 1;
+}

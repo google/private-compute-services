@@ -20,11 +20,11 @@ import android.content.Context;
 import com.google.android.as.oss.common.ExecutorAnnotations.FlExecutorQualifier;
 import com.google.android.as.oss.fl.federatedcompute.statsd.ExampleStoreConnector;
 import com.google.android.as.oss.fl.federatedcompute.statsd.StatsdExampleStoreConnector;
-import com.google.apps.tiktok.inject.ApplicationContext;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
 import javax.inject.Singleton;
 

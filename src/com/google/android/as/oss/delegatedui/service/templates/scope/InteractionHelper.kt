@@ -17,14 +17,11 @@
 package com.google.android.`as`.oss.delegatedui.service.templates.scope
 
 import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiUsageData.InteractionType
-import com.google.android.`as`.oss.delegatedui.api.integration.templates.DelegatedUiAdditionalData
 import com.google.android.`as`.oss.delegatedui.api.integration.templates.UiIdToken
 import com.google.android.`as`.oss.delegatedui.service.common.ConnectLifecycle
-import com.google.android.`as`.oss.delegatedui.utils.ResponseWithParcelables
 import com.google.common.flogger.GoogleLogger
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -45,7 +42,6 @@ interface InteractionHelper {
 class InteractionHelperImpl(
   private val lifecycle: ConnectLifecycle,
   private val mainCoroutineContext: CoroutineContext,
-  private val additionalDataDeferred: Deferred<ResponseWithParcelables<DelegatedUiAdditionalData>>?,
 ) : InteractionHelper {
 
   override fun InteractionHelper.onInteraction(
@@ -56,11 +52,10 @@ class InteractionHelperImpl(
     logger.atFiner().log("Handling interaction %s.", interaction)
 
     lifecycle.streamScope.launch {
-      val additionalData = additionalDataDeferred?.await()
       withContext(mainCoroutineContext) {
         InteractionScopeImpl(interaction, uiIdToken).apply {
           try {
-            interactionCoroutineScope(this) { block(additionalData) }
+            interactionCoroutineScope(this) { block() }
           } catch (e: CancellationException) {
             logger
               .atWarning()

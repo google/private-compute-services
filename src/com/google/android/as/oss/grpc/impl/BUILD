@@ -64,10 +64,9 @@ android_library(
     name = "policies",
     srcs = ["PcsSecurityPolicies.java"],
     deps = [
+        "//src/com/google/android/as/oss/common/security:security_policy_utils",
         "//src/com/google/android/as/oss/common/security/api:package_security_info_kt_proto_lite",
         "//src/com/google/android/as/oss/grpc:api",
-        "@maven//:com_google_code_findbugs_jsr305",
-        "@maven//:com_google_guava_guava",
         "@maven//:io_grpc_grpc_api",
         "@maven//:io_grpc_grpc_binder",
     ],

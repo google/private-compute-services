@@ -19,8 +19,8 @@ package com.google.android.as.oss.fl.fc.api;
 import android.os.Parcel;
 import com.google.fcp.client.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.fcp.client.common.internal.safeparcel.SafeParcelable;
-import com.google.common.base.Objects;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import java.util.Objects;
 
 /** Options which describes the job scheduler constraints. */
 // TODO: Resolve nullness suppression.
@@ -118,7 +118,7 @@ public final class InAppTrainingConstraints extends AbstractSafeParcelable {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(requiresNonInteractive, requiresCharging, requiresUnmeteredNetwork);
+    return Objects.hash(requiresNonInteractive, requiresCharging, requiresUnmeteredNetwork);
   }
 
   public boolean getRequiresNonInteractive() {

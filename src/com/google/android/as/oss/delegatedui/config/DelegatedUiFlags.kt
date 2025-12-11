@@ -38,4 +38,6 @@ object DelegatedUiFlags {
     )
   val BYPASS_ALL_SECURITY_POLICIES =
     BooleanFlag.create("${PREFIX}bypass_all_security_policies", false)
+  val ENABLE_BUGLE_OUTLINE_ANIMATION_V2 =
+    BooleanFlag.create("${PREFIX}enable_bugle_outline_animation_v2", false)
 }

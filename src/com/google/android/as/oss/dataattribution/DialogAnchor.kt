@@ -30,6 +30,9 @@ sealed interface DialogGravity {
   /** The dialog is centered on the screen. */
   data object Center : DialogGravity
 
+  /** The dialog is aligned to the top of the screen. */
+  data object Top : DialogGravity
+
   /** The dialog is positioned above the IME. */
   data class AboveIme(val backgroundInsetBottomPx: Int) : DialogGravity
 }
@@ -43,19 +46,7 @@ sealed interface DialogGravity {
 class DialogAnchor {
 
   /**
-   * Cached value of the dialog gravity for portrait mode.
-   *
-   * This is used to avoid recalculating the dialog gravity multiple times when the activity is
-   * recreated.
-   *
-   * Note: After configuration change, the ime window metrics not updated immediately, and not found
-   * a way to get the updated value, so we need to cache the first time result.
-   */
-  private var cachedDialogGravityForPortrait: DialogGravity? = null
-
-  /**
-   * Determines the appropriate gravity for a dialog, attempting to position it above the Input
-   * Method Editor (IME) if applicable and visible in portrait mode.
+   * Determines the appropriate gravity for a dialog, attempting to avoid overlapping the keyboard.
    *
    * @param window The window to position the dialog relative to.
    * @return [DialogGravity] indicating the suggested placement.
@@ -64,11 +55,6 @@ class DialogAnchor {
     // IME-aware positioning is typically desired only in portrait mode.
     if (!isScreenPortraitMode(window.context)) return Center
 
-    return cachedDialogGravityForPortrait
-      ?: calculateDialogGravity(window).also { cachedDialogGravityForPortrait = it }
-  }
-
-  private fun calculateDialogGravity(window: Window): DialogGravity {
     val windowMetrics = window.windowManager.currentWindowMetrics
     val currentInsets = windowMetrics.windowInsets
 
@@ -78,7 +64,8 @@ class DialogAnchor {
     val imeBottomInset = currentInsets.getInsets(WindowInsets.Type.ime()).bottom
     // Only anchor above IME if it's actually visible and has a positive inset.
     // A zero inset means the IME isn't currently affecting the layout at the bottom.
-    if (imeBottomInset > 0) return DialogGravity.AboveIme(backgroundInsetBottomPx = imeBottomInset)
+    if (imeBottomInset > 0) return DialogGravity.Top
+
     return Center // Fallback to center if IME inset is not positive.
   }
 

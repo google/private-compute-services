@@ -24,13 +24,14 @@ val NotificationIntelligencePolicy_FederatedCompute =
   ) {
     description =
       """
-        To measure and improve the quality of Notification Intelligence.
+      To measure and improve the quality of Notification Intelligence.
 
-        ALLOWED EGRESSES: FederatedCompute.
-        ALLOWED USAGES: Federated analytics.
+      ALLOWED EGRESSES: FederatedCompute.
+      ALLOWED USAGES: Federated analytics.
       """
         .trimIndent()
 
+    flavors(Flavor.ASI_PROD) { minRoundSize(minRoundSize = 1000, minSecAggRoundSize = 0) }
     consentRequiredForCollectionOrStorage(Consent.UsageAndDiagnosticsCheckbox)
     presubmitReviewRequired(OwnersApprovalOnly)
     checkpointMaxTtlDays(720)
@@ -56,6 +57,7 @@ val NotificationIntelligencePolicy_FederatedCompute =
         ConditionalUsage.Top2000PackageNamesWith2000Wau.whenever(UsageType.ANY)
         rawUsage(UsageType.JOIN)
       }
+      "isMessageStyleNotification" { rawUsage(UsageType.ANY) } // 0: false, 1: true
       "totalClassificationLatencyMillis" { rawUsage(UsageType.ANY) }
       "supportAppsCheckLatencyMillis" { rawUsage(UsageType.ANY) }
       "contactAccessLatencyMillis" { rawUsage(UsageType.ANY) }
@@ -63,6 +65,9 @@ val NotificationIntelligencePolicy_FederatedCompute =
       "modelExecutionLatencyMillis" { rawUsage(UsageType.ANY) }
       "ruleCorrectionLatencyMillis" { rawUsage(UsageType.ANY) }
       "languageDetectionLatencyMillis" { rawUsage(UsageType.ANY) }
+      "appProvidedClassifierLatencyMillis" { rawUsage(UsageType.ANY) }
+      "defaultBundleLatencyMillis" { rawUsage(UsageType.ANY) }
+      "systemInfoId" { rawUsage(UsageType.JOIN) }
     }
 
     target(

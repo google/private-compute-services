@@ -14,6 +14,7 @@
 
 load("//third_party/protobuf/bazel:java_lite_proto_library.bzl", "java_lite_proto_library")
 load("//third_party/protobuf/bazel:proto_library.bzl", "proto_library")
+load("//third_party/protobuf/build_defs:kt_jvm_proto_library.bzl", "kt_jvm_lite_proto_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -26,6 +27,13 @@ proto_library(
 
 java_lite_proto_library(
     name = "connection_key_java_proto_lite",
+    deps = [
+        ":connection_key_proto",
+    ],
+)
+
+kt_jvm_lite_proto_library(
+    name = "connection_key_kt_proto_lite",
     deps = [
         ":connection_key_proto",
     ],

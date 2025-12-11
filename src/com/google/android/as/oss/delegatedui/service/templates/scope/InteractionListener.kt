@@ -16,13 +16,9 @@
 
 package com.google.android.`as`.oss.delegatedui.service.templates.scope
 
-import com.google.android.`as`.oss.delegatedui.api.integration.templates.DelegatedUiAdditionalData
-import com.google.android.`as`.oss.delegatedui.utils.ResponseWithParcelables
-
 /**
  * Listener to be invoked when an
  * [interaction][com.google.android.as.oss.delegatedui.service.templates.scope.interactions], is
  * triggered.
  */
-typealias InteractionListener =
-  suspend InteractionCoroutineScope.(ResponseWithParcelables<DelegatedUiAdditionalData>?) -> Unit
+typealias InteractionListener = suspend InteractionCoroutineScope.() -> Unit

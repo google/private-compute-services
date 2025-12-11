@@ -24,8 +24,8 @@ android_library(
     deps = [
         "//google/protobuf:timestamp_kt_proto_lite",
         "//java/com/google/protobuf/util/kotlin:javatime_lite-ktx",
-        "//src/com/google/android/as/oss/feedback:feedback_submission_data",
-        "//src/com/google/android/as/oss/feedback:feedback_ui_state",
+        "//src/com/google/android/as/oss/feedback/domain:feedback_submission_data",
+        "//src/com/google/android/as/oss/feedback/domain:feedback_ui_state",
         "//src/com/google/android/as/oss/feedback/proto:feedback_tag_data_kt_proto_lite",
         "//src/com/google/android/as/oss/feedback/proto/gateway:pixel_apex_api_kt_proto_lite",
         "//src/com/google/android/as/oss/feedback/proto/gateway:quartz_log_kt_proto_lite",

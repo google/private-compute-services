@@ -24,10 +24,10 @@ val NowPlayingUsagePolicy_FederatedCompute =
   ) {
     description =
       """
-        To provide usage statistics to monitor/improve Now Playing.
+      To provide usage statistics to monitor/improve Now Playing.
 
-        ALLOWED EGRESSES: FederatedCompute.
-        ALLOWED USAGES: Federated analytics.
+      ALLOWED EGRESSES: FederatedCompute.
+      ALLOWED USAGES: Federated analytics.
       """
         .trimIndent()
 

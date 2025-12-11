@@ -18,10 +18,13 @@ package com.google.android.`as`.oss.delegatedui.service.renderer
 
 import android.content.Context
 import android.view.View
+import com.google.android.`as`.oss.delegatedui.api.common.DelegatedUiHint
 import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiUsageData
 import com.google.android.`as`.oss.delegatedui.api.integration.egress.DelegatedUiEgressData
 import com.google.android.`as`.oss.delegatedui.api.integration.templates.DelegatedUiTemplateType
 import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiExceptions.InvalidTemplateRendererError
+import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiExceptions.NullTemplateRenderedError
+import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiInputSpec
 import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiLifecycle
 import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiRenderSpec
 import com.google.android.`as`.oss.delegatedui.service.data.DelegatedUiDataRepository
@@ -31,6 +34,8 @@ import com.google.android.`as`.oss.delegatedui.service.templates.render
 import com.google.common.flogger.GoogleLogger
 import com.google.common.flogger.android.AndroidLogTag
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /** Responsible for delegating the construction of the remote UI to the right template renderer. */
 interface DelegatedUiRenderer {
@@ -44,12 +49,26 @@ interface DelegatedUiRenderer {
     context: Context,
     spec: DelegatedUiRenderSpec,
     onDataEgress: suspend (DelegatedUiEgressData) -> Unit = {},
+    onSendHints: suspend (Set<DelegatedUiHint>) -> Unit = {},
     onSessionClose: () -> Unit = {},
-  ): RenderedView?
+  ): RenderedView
 }
 
-/** The remote UI rendered as a View. */
-data class RenderedView(val view: View, val accessibilityPaneTitle: String)
+sealed interface RenderResult
+
+/**
+ * The remote UI rendered as a View.
+ *
+ * Emissions into [updateInputSpec] are tied to the [view].
+ */
+data class RenderedView(
+  val view: View,
+  val updateInputSpec: suspend (DelegatedUiInputSpec) -> Unit,
+  val accessibilityPaneTitle: String,
+) : RenderResult
+
+/** A skipped render result. */
+data object SkippedRender : RenderResult
 
 class DelegatedUiRendererImpl
 @Inject
@@ -65,11 +84,14 @@ internal constructor(
     context: Context,
     spec: DelegatedUiRenderSpec,
     onDataEgress: suspend (DelegatedUiEgressData) -> Unit,
+    onSendHints: suspend (Set<DelegatedUiHint>) -> Unit,
     onSessionClose: () -> Unit,
-  ): RenderedView? {
+  ): RenderedView {
+    val inputSpecFlow = MutableStateFlow(spec.inputSpec)
+
     logger.atFiner().log("Fetching data for %s", spec)
-    val responses = dataRepository.getData(lifecycle, spec)
-    val templateType = responses.templateData.value.templateType
+    val responses = dataRepository.getTemplateData(lifecycle, spec)
+    val templateType = responses.templateData.data.templateType
     val templateRenderer =
       templateRenderers[templateType] ?: throw InvalidTemplateRendererError(templateType)
 
@@ -77,9 +99,11 @@ internal constructor(
       templateRenderer.render(
         lifecycle = lifecycle,
         context = context,
+        inputSpecFlow = inputSpecFlow.asStateFlow(),
         responses = responses,
         logUsageData = { usageData -> logUsageData(spec, usageData) },
         onDataEgress = onDataEgress,
+        onSendHints = onSendHints,
         onSessionClose = onSessionClose,
       )
 
@@ -89,8 +113,9 @@ internal constructor(
         .log(
           "**********\n[DelegatedUILifecycle] DUI-Service template renderer %s rendered null from:\n%s\n**********",
           templateRenderer::class.simpleName,
-          responses.templateData.value.templateData,
+          responses.templateData.data.templateData,
         )
+      throw NullTemplateRenderedError
     } else {
       logger
         .atInfo()
@@ -98,13 +123,15 @@ internal constructor(
           "**********\n[DelegatedUILifecycle] DUI-Service template renderer %s rendered non-null %s from:\n%s\n**********",
           templateRenderer::class.simpleName,
           view,
-          responses.templateData.value.templateData,
+          responses.templateData.data.templateData,
         )
     }
 
-    return view?.let {
-      RenderedView(view, responses.templateData.value.commonData.accessibilityPaneTitle)
-    }
+    return RenderedView(
+      view = view,
+      updateInputSpec = { inputSpecFlow.emit(it) },
+      accessibilityPaneTitle = responses.templateData.data.commonData.accessibilityPaneTitle,
+    )
   }
 
   private suspend fun logUsageData(spec: DelegatedUiRenderSpec, usageData: DelegatedUiUsageData) {

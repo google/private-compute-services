@@ -96,6 +96,10 @@ public final class JobIdPopulationCounterMapper {
       return ValueMetricId.PLATFORM_LOGGING_POPULATION_SCHEDULED_COUNT;
     } else if (populationName.startsWith("smartnotification")) {
       return ValueMetricId.SMART_NOTIFICATION_POPULATION_SCHEDULED_COUNT;
+    } else if (populationName.startsWith("pwm")) {
+      return ValueMetricId.PWM_POPULATION_SCHEDULED_COUNT;
+    } else if (populationName.startsWith("psi")) {
+      return ValueMetricId.PSI_POPULATION_SCHEDULED_COUNT;
     }
 
     return ValueMetricId.UNKNOWN_POPULATION_SCHEDULED_COUNT;

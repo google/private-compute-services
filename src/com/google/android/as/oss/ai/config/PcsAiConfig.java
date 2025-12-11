@@ -28,12 +28,16 @@ public abstract class PcsAiConfig {
 
   public abstract boolean genAiInferenceServiceEnabled();
 
+  public abstract boolean genAiInferenceServiceSecurityPolicyEnabled();
+
   public abstract long genAiServiceConnectionTimeoutMs();
 
   /** Builder for {@link PcsAiConfig}. */
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder setGenAiInferenceServiceEnabled(boolean value);
+
+    public abstract Builder setGenAiInferenceServiceSecurityPolicyEnabled(boolean value);
 
     public abstract Builder setGenAiServiceConnectionTimeoutMs(long value);
 

@@ -24,11 +24,11 @@ val PecanContextPolicy_FederatedCompute =
   ) {
     description =
       """
-        Track screen context (e.g., recent conversation messages, recent search query), to predict
-        the next user action.
+      Track screen context (e.g., recent conversation messages, recent search query), to predict
+      the next user action.
 
-        ALLOWED EGRESSES: FederatedCompute.
-        ALLOWED USAGES: Federated analytics, federated learning.
+      ALLOWED EGRESSES: FederatedCompute.
+      ALLOWED USAGES: Federated analytics, federated learning.
       """
         .trimIndent()
 

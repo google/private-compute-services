@@ -20,7 +20,6 @@ package com.google.android.`as`.oss.dataattribution
 
 import android.app.ActivityOptions
 import android.app.PendingIntent
-import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -55,6 +54,9 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -67,6 +69,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.window.flags.ExportedFlags.balAdditionalStartModes
 import com.google.android.`as`.oss.dataattribution.proto.AttributionCardData
 import com.google.android.`as`.oss.dataattribution.proto.AttributionChipData
@@ -78,15 +81,34 @@ import com.google.android.`as`.oss.delegatedui.utils.asTintableIcon
 import com.google.android.`as`.oss.feedback.FeedbackApi
 import com.google.android.`as`.oss.feedback.api.FeedbackRatingSentiment
 import com.google.android.`as`.oss.feedback.api.entityFeedbackDialogData
+import com.google.android.`as`.oss.logging.uiusage.api.LogUsageDataRequest.InteractionType
+import com.google.common.flogger.GoogleLogger
 
 /** Dialog displayed when a user long clicks Delegated UI. */
 @Composable
-fun DataAttributionDialog(
+internal fun DataAttributionDialog(
+  viewModel: DataAttributionDialogViewModel = viewModel(),
   attributionDialogData: AttributionDialogData,
   attributionChipData: AttributionChipData?,
   sourceDeepLinks: Array<PendingIntent?>?,
   onDismissRequest: () -> Unit,
 ) {
+  val uiState by viewModel.uiState.collectAsState()
+  val logUiEvent = { elementType: Int, interactionType: InteractionType ->
+    viewModel.logUiEvent(
+      elementType,
+      clientSessionId = attributionDialogData.sessionId,
+      interactionType = interactionType,
+    )
+  }
+
+  LaunchedEffect(Unit) {
+    logUiEvent(
+      DataAttributionUiElementType.ATTRIBUTION_DIALOG.id,
+      InteractionType.INTERACTION_TYPE_VIEW,
+    )
+  }
+
   DataAttributionScaffold(
     data = attributionDialogData,
     chipContent = { if (attributionChipData != null) AttributionChip(attributionChipData) },
@@ -94,14 +116,17 @@ fun DataAttributionDialog(
       AttributionCard(
         data = cardData,
         deepLink = sourceDeepLinks?.getOrNull(i),
+        logUiEvent = logUiEvent,
         onDismissRequest = onDismissRequest,
       )
     },
     footerContent = {
       DataAttributionDialogFooter(
+        uiState = uiState,
         data = attributionDialogData,
         feedbackSessionId = attributionDialogData.sessionId,
         feedbackEntityContent = attributionChipData?.chipLabel,
+        logUiEvent = logUiEvent,
         onDismissRequest = onDismissRequest,
       )
     },
@@ -252,13 +277,21 @@ private fun AttributionChip(data: AttributionChipData) {
 fun AttributionCard(
   data: AttributionCardData,
   deepLink: PendingIntent?,
+  logUiEvent: (Int, InteractionType) -> Unit,
   onDismissRequest: () -> Unit,
 ) {
   Row(
     modifier =
       Modifier.fillMaxWidth()
         .clip(RoundedCornerShape(20.dp))
-        .clickable(pendingIntent = deepLink) { onDismissRequest() }
+        .clickable(pendingIntent = deepLink) {
+          logUiEvent(
+            DataAttributionUiElementType.ATTRIBUTION_CLICKABLE_ITEM.id,
+            InteractionType.INTERACTION_TYPE_CLICK,
+          )
+          logger.atInfo().log("Sending pending intent: %s", deepLink)
+          onDismissRequest()
+        }
         .padding(horizontal = 8.dp, vertical = 12.dp),
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -304,50 +337,52 @@ fun AttributionCard(
 }
 
 @Composable
-fun DataAttributionDialogFooter(
+internal fun DataAttributionDialogFooter(
+  uiState: DataAttributionUiState,
   data: AttributionDialogData,
   feedbackSessionId: String,
   feedbackEntityContent: String?,
+  logUiEvent: (Int, InteractionType) -> Unit,
   onDismissRequest: () -> Unit,
 ) {
   val context = LocalContext.current
+
   Row(
     modifier = Modifier.padding(8.dp).fillMaxWidth(),
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.SpaceBetween,
   ) {
     // Settings
-    Row(
-      modifier =
-        Modifier.clip(shape = RoundedCornerShape(percent = 100))
-          .clickable(
-            onClick = {
-              context.startActivity(
-                Intent().apply {
-                  setClassName(
-                    "com.google.android.apps.pixel.psi",
-                    "com.google.android.apps.pixel.psi.app.settings.SettingsActivity",
-                  )
-                }
-              )
-              onDismissRequest()
-            }
-          )
-          .padding(horizontal = 12.dp, vertical = 6.dp),
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-      Icon(
-        modifier = Modifier.size(20.dp),
-        painter = painterResource(R.drawable.gs_settings_24dp),
-        contentDescription = null,
-        tint = MaterialTheme.colorScheme.primary,
-      )
-      Text(
-        text = data.settingsButtonText,
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.primary,
-      )
+    if (uiState.settingsIntent != null) {
+      Row(
+        modifier =
+          Modifier.clip(shape = RoundedCornerShape(percent = 100))
+            .clickable(
+              onClick = {
+                logUiEvent(
+                  DataAttributionUiElementType.ATTRIBUTION_SETTINGS_BUTTON.id,
+                  InteractionType.INTERACTION_TYPE_CLICK,
+                )
+                context.startActivity(uiState.settingsIntent)
+                onDismissRequest()
+              }
+            )
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+      ) {
+        Icon(
+          modifier = Modifier.size(20.dp),
+          painter = painterResource(R.drawable.gs_settings_24dp),
+          contentDescription = null,
+          tint = MaterialTheme.colorScheme.primary,
+        )
+        Text(
+          text = data.settingsButtonText,
+          style = MaterialTheme.typography.labelLarge,
+          color = MaterialTheme.colorScheme.primary,
+        )
+      }
     }
 
     Spacer(modifier = Modifier.width(6.dp))
@@ -360,6 +395,10 @@ fun DataAttributionDialogFooter(
       ) {
         IconButton(
           onClick = {
+            logUiEvent(
+              DataAttributionUiElementType.ATTRIBUTION_GOOD_FEEDBACK_BUTTON.id,
+              InteractionType.INTERACTION_TYPE_CLICK,
+            )
             context.startActivity(
               FeedbackApi.createEntityFeedbackIntent(
                 context = context,
@@ -376,6 +415,13 @@ fun DataAttributionDialogFooter(
           },
           modifier = Modifier.size(48.dp),
         ) {
+          LaunchedEffect(Unit) {
+            logUiEvent(
+              DataAttributionUiElementType.ATTRIBUTION_GOOD_FEEDBACK_BUTTON.id,
+              InteractionType.INTERACTION_TYPE_VIEW,
+            )
+          }
+
           Icon(
             modifier = Modifier.size(20.dp),
             painter = painterResource(R.drawable.gs_thumb_up_24dp),
@@ -385,6 +431,10 @@ fun DataAttributionDialogFooter(
         }
         IconButton(
           onClick = {
+            logUiEvent(
+              DataAttributionUiElementType.ATTRIBUTION_BAD_FEEDBACK_BUTTON.id,
+              InteractionType.INTERACTION_TYPE_CLICK,
+            )
             context.startActivity(
               FeedbackApi.createEntityFeedbackIntent(
                 context = context,
@@ -401,6 +451,13 @@ fun DataAttributionDialogFooter(
           },
           modifier = Modifier.size(48.dp),
         ) {
+          LaunchedEffect(Unit) {
+            logUiEvent(
+              DataAttributionUiElementType.ATTRIBUTION_BAD_FEEDBACK_BUTTON.id,
+              InteractionType.INTERACTION_TYPE_VIEW,
+            )
+          }
+
           Icon(
             modifier = Modifier.size(20.dp),
             painter = painterResource(R.drawable.gs_thumb_down_24dp),
@@ -455,4 +512,14 @@ private fun Modifier.clickable(pendingIntent: PendingIntent?, onClick: () -> Uni
       onClick()
     }
   }
+}
+
+private val logger = GoogleLogger.forEnclosingClass()
+
+enum class DataAttributionUiElementType(val id: Int) {
+  ATTRIBUTION_GOOD_FEEDBACK_BUTTON(34),
+  ATTRIBUTION_BAD_FEEDBACK_BUTTON(35),
+  ATTRIBUTION_SETTINGS_BUTTON(41),
+  ATTRIBUTION_DIALOG(42),
+  ATTRIBUTION_CLICKABLE_ITEM(43),
 }

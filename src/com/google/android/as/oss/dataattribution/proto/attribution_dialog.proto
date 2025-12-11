@@ -38,11 +38,11 @@ message AttributionDialogData {
   string message = 3;
 
   // the header of the attribution card list. This property is used for the row
-  // present below the message row.
+  // present below the message row. Only shown if [attributions] is not empty.
   string attribution_header = 4;
 
   // consists of the attribution data. This data is used for the row present
-  // below the attributionHeader.
+  // below the attributionHeader. Can be empty.
   repeated AttributionCardData attributions = 5
      ;
 

@@ -24,11 +24,11 @@ val ContentCapturePerformanceDataPolicy_FederatedCompute =
   ) {
     description =
       """
-        To track system health costs associated with the content capture service to detect problems
-        and allow optimization of features based on content capture.
+      To track system health costs associated with the content capture service to detect problems
+      and allow optimization of features based on content capture.
 
-        ALLOWED EGRESSES: FederatedCompute.
-        ALLOWED USAGES: Federated analytics, federated learning.
+      ALLOWED EGRESSES: FederatedCompute.
+      ALLOWED USAGES: Federated analytics, federated learning.
       """
         .trimIndent()
 

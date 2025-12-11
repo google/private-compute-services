@@ -22,7 +22,6 @@ import com.google.android.as.oss.pd.attestation.AttestationClient;
 import com.google.android.as.oss.pd.attestation.AttestationResponse;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
-import java.time.Duration;
 import java.util.concurrent.Executor;
 
 /**
@@ -32,11 +31,6 @@ import java.util.concurrent.Executor;
 public class AttestationClientImpl implements AttestationClient {
   private final PccAttestationMeasurementClient attestationMeasurementClient;
   private final Executor executor;
-
-  // Specifies how long the generated attestation measurement is valid. For attestation validation,
-  // if the client tries to attest a measurement older than this, then the validation result will be
-  // UNSPOOFABLE_ID_VERIFICATION_RESULT_CHALLENGE_EXPIRED.
-  private static final Duration ATTESTATION_MEASUREMENT_TTL = Duration.ofMinutes(10);
 
   static AttestationClientImpl create(
       PccAttestationMeasurementClient attestationMeasurementClient, Executor executor) {
@@ -48,7 +42,6 @@ public class AttestationClientImpl implements AttestationClient {
       String contentBinding) {
     AttestationMeasurementRequest request =
         AttestationMeasurementRequest.builder()
-            .setTtl(ATTESTATION_MEASUREMENT_TTL)
             .setContentBinding(contentBinding)
             .setIncludeIdAttestation(true)
             .build();

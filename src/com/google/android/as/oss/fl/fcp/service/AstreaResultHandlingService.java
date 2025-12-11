@@ -95,6 +95,14 @@ public class PcsResultHandlingService extends Hilt_PcsResultHandlingService {
       List<ExampleConsumption> exampleConsumptionList,
       ResultHandlingCallback callback) {
     @Nullable String clientName = connectionManager.getClientName(trainerOptions);
+    if (clientName != null && !connectionManager.isClientSupported(clientName)) {
+      // ResultHandlingService is an optional feature and should not be required for all clients.
+      // If the client is not supported, we should return success as no result processing is
+      // required.
+      logger.atFine().log("ResultHandlingService not present for client %s", clientName);
+      callback.onResult(Status.RESULT_SUCCESS);
+      return;
+    }
     if (!success
         || exampleConsumptionList == null
         || exampleConsumptionList.isEmpty()

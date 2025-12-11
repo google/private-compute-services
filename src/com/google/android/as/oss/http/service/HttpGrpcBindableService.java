@@ -67,7 +67,7 @@ import okhttp3.ResponseBody;
 public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase {
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
 
-  @VisibleForTesting static final int BUFFER_LENGTH = 1_024;
+  @VisibleForTesting static final int BUFFER_LENGTH = 8_192;
 
   private final OkHttpClient client;
   private final Executor executor;

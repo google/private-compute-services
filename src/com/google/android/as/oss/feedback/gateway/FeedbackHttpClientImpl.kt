@@ -28,9 +28,13 @@ import com.google.android.`as`.oss.feedback.api.gateway.UserDataDonationOption
 import com.google.android.`as`.oss.feedback.api.gateway.UserDonation
 import com.google.android.`as`.oss.feedback.messagearmour.utils.MessageArmourDataHelper
 import com.google.android.`as`.oss.feedback.quartz.utils.QuartzDataHelper
-import com.google.apps.tiktok.inject.ApplicationContext
+import com.google.android.`as`.oss.networkusage.db.ConnectionDetails.ConnectionType
+import com.google.android.`as`.oss.networkusage.db.NetworkUsageLogRepository
+import com.google.android.`as`.oss.networkusage.db.NetworkUsageLogUtils
+import com.google.android.`as`.oss.networkusage.db.Status
 import com.google.common.annotations.VisibleForTesting
 import com.google.common.flogger.GoogleLogger
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.IOException
 import javax.inject.Inject
 import okhttp3.MediaType.Companion.toMediaType
@@ -44,26 +48,41 @@ class FeedbackHttpClientImpl
 internal constructor(
   private val quartzDataHelper: QuartzDataHelper,
   private val messageArmourDataHelper: MessageArmourDataHelper,
+  private val networkUsageLogRepository: NetworkUsageLogRepository,
   @ApplicationContext private val context: Context,
 ) : FeedbackHttpClient {
 
   /** Uploads the survey results to server. */
   override fun uploadFeedback(request: LogFeedbackV2Request): Boolean {
-    val client = OkHttpClient.Builder().build()
+    val usageLogFeatureName: String
     val bodyJsonString =
       if (request.feedbackCuj.quartzCuj != QuartzCUJ.QUARTZ_CUJ_UNSPECIFIED) {
+        usageLogFeatureName = FEATURE_NAME_FEEDBACK_ASI
         with(quartzDataHelper) { request.convertToQuartzRequestString() }
       } else if (
         request.feedbackCuj.messageArmourCuj != MessageArmourCUJ.MESSAGE_ARMOUR_CUJ_UNSPECIFIED
       ) {
+        usageLogFeatureName = FEATURE_NAME_FEEDBACK_ASI
         with(messageArmourDataHelper) { request.convertToMessageArmourRequestString() }
       } else {
+        usageLogFeatureName = FEATURE_NAME_FEEDBACK_PSI
         request.convertToRequestString()
       }
 
-    // Logging all the feedback data transferring to the server as part of the data verifiability
-    // requirement.
-    logger.atInfo().log("APEX server call with request: %s", bodyJsonString)
+    if (
+      !networkUsageLogRepository.isKnownConnection(
+        ConnectionType.FEEDBACK_REQUEST,
+        FEATURE_NAME_FEEDBACK_PSI,
+      ) ||
+        networkUsageLogRepository.shouldRejectRequest(
+          ConnectionType.FEEDBACK_REQUEST,
+          FEATURE_NAME_FEEDBACK_ASI,
+        )
+    ) {
+      logger.atInfo().log("Feedback upload request rejected or connection is not known")
+      return false
+    }
+    val client = OkHttpClient.Builder().build()
 
     val okRequest =
       Request.Builder()
@@ -76,17 +95,54 @@ internal constructor(
 
     try {
       val response = client.newCall(okRequest).execute()
+      val responseBody = response.body
+      insertNetworkUsageLogRow(
+        networkUsageLogRepository,
+        usageLogFeatureName,
+        if (responseBody != null) Status.SUCCEEDED else Status.FAILED,
+        responseBody?.bytes()?.size?.toLong() ?: 0L,
+      )
 
       if (response.isSuccessful) {
         logger.atInfo().log("APEX server call successful")
         return true
       } else {
-        logger.atInfo().log("APEX server call failed with response: %s", response.body?.string())
+        logger.atInfo().log("APEX server call failed with response: %s", response.toString())
       }
     } catch (e: IOException) {
       logger.atSevere().log("APEX server call failed with exception: %s", e.stackTraceToString())
     }
     return false
+  }
+
+  private fun insertNetworkUsageLogRow(
+    networkUsageLogRepository: NetworkUsageLogRepository,
+    featureName: String,
+    status: Status,
+    size: Long,
+  ) {
+    if (
+      !networkUsageLogRepository.shouldLogNetworkUsage(
+        ConnectionType.FEEDBACK_REQUEST,
+        featureName,
+      ) || networkUsageLogRepository.contentMap.isEmpty()
+    ) {
+      logger.atInfo().log("Should not log network usage")
+      return
+    }
+
+    val connectionDetails =
+      networkUsageLogRepository.contentMap.get().getFeedbackConnectionDetails(featureName).get()
+    val entity =
+      NetworkUsageLogUtils.createFeedbackNetworkUsageEntity(
+        connectionDetails,
+        status,
+        size,
+        featureName,
+      )
+
+    networkUsageLogRepository.insertNetworkUsageEntity(entity)
+    logger.atInfo().log("Inserted network usage log row with size: %s", size)
   }
 
   private companion object {
@@ -95,6 +151,8 @@ internal constructor(
     const val JSON_CONTENT_TYPE = "application/json"
     const val API_KEY = ""
     const val APEX_SERVICE_URL = ""
+    const val FEATURE_NAME_FEEDBACK_PSI = "feedback_apex_psi"
+    const val FEATURE_NAME_FEEDBACK_ASI = "feedback_apex_asi"
     val JSON_MEDIA_TYPE = "$JSON_CONTENT_TYPE; charset=utf-8".toMediaType()
   }
 }
@@ -134,6 +192,9 @@ fun LogFeedbackV2Request.convertToRequestString(): String {
     finalString = finalString.plus(getDonationDataString(userDonation))
   }
 
+  finalString =
+    finalString.plus(getUserInputString(structuredUserInput.spoonUserInput.groundTruthListList))
+
   // Feedback rating.
   finalString =
     finalString.plus(
@@ -147,6 +208,23 @@ fun LogFeedbackV2Request.convertToRequestString(): String {
   finalString = finalString.plus("}")
 
   return finalString
+}
+
+private fun getUserInputString(groundTruthList: List<String>): String {
+  var inputString = ""
+  inputString =
+    inputString.plus(
+      ", ${quote("structuredUserInput")}: {" +
+        "${quote("pixelSpoonUserInput")}: {" +
+        if (groundTruthList.isNotEmpty()) {
+          "${quote("groundTruthList")}: " + buildGroundTruth(groundTruthList)
+        } else {
+          ""
+        } +
+        "}}"
+    )
+
+  return inputString
 }
 
 private fun getDonationDataString(userDonation: UserDonation): String {
@@ -164,12 +242,20 @@ private fun getDonationDataString(userDonation: UserDonation): String {
         ", " +
         "${quote("modelOutputs")}: " +
         buildRepeatedMessages(userDonation.structuredDataDonation.modelOutputsList) +
-        ", " +
-        "${quote("memoryEntities")}: " +
-        buildMemoryEntities(userDonation.structuredDataDonation.memoryEntitiesList) +
-        ", " +
-        "${quote("selectedEntityContent")}: " +
-        quote(userDonation.structuredDataDonation.selectedEntityContent) +
+        if (userDonation.structuredDataDonation.memoryEntitiesList.isNotEmpty()) {
+          ", " +
+            "${quote("memoryEntities")}: " +
+            buildMemoryEntities(userDonation.structuredDataDonation.memoryEntitiesList)
+        } else {
+          ""
+        } +
+        if (userDonation.structuredDataDonation.selectedEntityContent.isNotEmpty()) {
+          ", " +
+            "${quote("selectedEntityContent")}: " +
+            quote(userDonation.structuredDataDonation.selectedEntityContent)
+        } else {
+          ""
+        } +
         "}}"
     )
 
@@ -193,6 +279,10 @@ private fun buildRepeatedMessages(messages: List<String>): String {
 private fun buildMemoryEntities(entities: List<MemoryEntity>): String {
   return "[${ entities.map {"{${quote("entityData")}: ${quote(it.entityData)}, "+
   "${quote("modelVersion")}: ${quote(it.modelVersion)}}" }.joinToString(", ")}]"
+}
+
+private fun buildGroundTruth(groundTruthList: List<String>): String {
+  return "[${groundTruthList.map { quote(it) }.joinToString(", ")}]"
 }
 
 private fun getCujTypeString(appCujType: FeedbackCUJ): String {

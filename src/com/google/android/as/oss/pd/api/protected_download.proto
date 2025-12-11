@@ -288,6 +288,9 @@ message DownloadBlobResponse {
   }
 
   reserved 3, 4, 5, 7, 8, 9, 10, 11, 15;
+
+  // The unique identifier of the protection release.
+  int64 release_config_id = 16;
 }
 
 // LogEntryId identifies a specific entry in the transparency log.

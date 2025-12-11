@@ -29,6 +29,7 @@ proto_library(
         "",
         ":feedback_dialog_common_data_proto",
         ":feedback_tag_data_proto",
+        "//third_party/protobuf:cpp_features_proto",
     ],
 )
 
@@ -69,6 +70,7 @@ proto_library(
     srcs = ["feedback_tag_data.proto"],
     deps = [
         "",
+        "//third_party/protobuf:cpp_features_proto",
     ],
 )
 
@@ -85,7 +87,10 @@ kt_jvm_lite_proto_library(
 proto_library(
     name = "feedback_dialog_common_data_proto",
     srcs = ["feedback_dialog_common_data.proto"],
-    deps = [""],
+    deps = [
+        "",
+        "//third_party/protobuf:cpp_features_proto",
+    ],
 )
 
 java_lite_proto_library(

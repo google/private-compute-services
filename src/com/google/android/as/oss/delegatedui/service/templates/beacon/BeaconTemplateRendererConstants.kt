@@ -27,4 +27,5 @@ internal object BeaconTemplateRendererConstants {
   val RoundedCornerSizeLarge = 24.dp
   val RoundedCornerSizeMedium = 16.dp
   val RoundedCornerSizeExtraSmall = 4.dp
+  val SummaryIconAndTextSpacing = 4.dp
 }

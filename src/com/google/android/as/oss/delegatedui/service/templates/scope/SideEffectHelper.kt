@@ -17,6 +17,7 @@
 package com.google.android.`as`.oss.delegatedui.service.templates.scope
 
 import android.content.Context
+import com.google.android.`as`.oss.delegatedui.api.common.DelegatedUiHint
 import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiUsageData
 import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiUsageData.SemanticsType
 import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.delegatedUiUsageData
@@ -43,6 +44,7 @@ interface SideEffectHelper {
 class SideEffectHelperImpl(
   private val logUsageData: suspend (DelegatedUiUsageData) -> Unit,
   private val onDataEgress: suspend (DelegatedUiEgressData) -> Unit,
+  private val onSendHints: suspend (Set<DelegatedUiHint>) -> Unit,
   private val onSessionClose: () -> Unit,
   override val context: Context,
 ) : SideEffectHelper {
@@ -59,7 +61,7 @@ class SideEffectHelperImpl(
       logger
         .atFiner()
         .log("Invoking side-effect %s triggered by interaction %s.", semanticsType, interactionType)
-      SideEffectScopeImpl(onDataEgress, onSessionClose).block()
+      SideEffectScopeImpl(onDataEgress, onSendHints, onSessionClose).block()
       logger
         .atFiner()
         .log("Invoked side-effect %s triggered by interaction %s.", semanticsType, interactionType)

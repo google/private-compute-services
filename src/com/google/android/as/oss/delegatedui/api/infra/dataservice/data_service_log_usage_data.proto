@@ -18,14 +18,16 @@ package com.google.android.as.oss.delegatedui.api.infra.dataservice;
 
 import "src/com/google/android/as/oss/delegatedui/api/common/common.proto";
 import "src/com/google/android/as/oss/delegatedui/api/integration/templates/ui_id_token.proto";
+import "third_party/protobuf/cpp_features.proto";
 
+option features.(pb.cpp).string_type = VIEW;
 option java_package = "com.google.android.as.oss.delegatedui.api.infra.dataservice";
 option java_multiple_files = true;
 
 message DelegatedUiLogUsageDataRequest {
   string session_uuid = 1;
-  common.DelegatedUiClientId client_id = 2;
 
+  common.DelegatedUiClientId client_id = 2;
   DelegatedUiUsageData usage_data = 3;
 }
 
@@ -34,8 +36,10 @@ message DelegatedUiLogUsageDataResponse {}
 message DelegatedUiUsageData {
   // The user interaction that triggered this event.
   InteractionType interaction = 1;
+
   // The semantic meaning of this event.
   SemanticsType semantics = 2;
+
   // The UI elements to be logged. The list can be larger than one only when
   // InteractionType is INTERACTION_TYPE_VIEW.
   repeated integration.templates.UiIdToken ui_id_token = 3;
@@ -43,16 +47,22 @@ message DelegatedUiUsageData {
   // Possible user interactions that can trigger an event.
   enum InteractionType {
     INTERACTION_TYPE_UNSPECIFIED = 0;
+
     // User click.
     INTERACTION_TYPE_CLICK = 1;
+
     // User long-click.
     INTERACTION_TYPE_LONG_CLICK = 2;
+
     // Additional data load.
     INTERACTION_TYPE_LOAD = 3;
+
     // Interop interaction.
     INTERACTION_TYPE_INTEROP = 4;
+
     // Impression of a UI element.
     INTERACTION_TYPE_VIEW = 5;
+
     // User drag.
     INTERACTION_TYPE_DRAG = 6;
   }
@@ -60,19 +70,29 @@ message DelegatedUiUsageData {
   // Possible semantic meanings of an event.
   enum SemanticsType {
     SEMANTICS_TYPE_UNSPECIFIED = 0;
+
     // We sent egress data out of PCC.
     SEMANTICS_TYPE_SEND_EGRESS_DATA = 1;
+
     // We executed an action, possibly sending data out of PCC.
     SEMANTICS_TYPE_EXECUTE_ACTION = 2;
+
     // We displayed a data attribution dialog in PCS.
     SEMANTICS_TYPE_SHOW_DATA_ATTRIBUTION = 3;
+
     // We just log that the interaction was invoked.
     SEMANTICS_TYPE_LOG_USAGE = 4;
+
     // We displayed an entity feedback dialog in PCS.
     SEMANTICS_TYPE_SHOW_ENTITY_FEEDBACK = 5;
+
     // We displayed an multi feedback dialog in PCS.
     SEMANTICS_TYPE_SHOW_MULTI_FEEDBACK = 6;
+
     // We log that the suggestion was dismissed.
     SEMANTICS_TYPE_DISMISS_SUGGESTION = 7;
+
+    // We sent hints about suggestions out of PCC
+    SEMANTICS_TYPE_SEND_HINTS = 8;
   }
 }

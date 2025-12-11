@@ -24,10 +24,10 @@ val AmbientContextPolicy_FederatedCompute =
   ) {
     description =
       """
-        To measure and improve the quality of Ambient Context.
+      To measure and improve the quality of Ambient Context.
 
-        ALLOWED EGRESSES: FederatedCompute.
-        ALLOWED USAGES: Federated analytics, federated learning.
+      ALLOWED EGRESSES: FederatedCompute.
+      ALLOWED USAGES: Federated analytics, federated learning.
       """
         .trimIndent()
 

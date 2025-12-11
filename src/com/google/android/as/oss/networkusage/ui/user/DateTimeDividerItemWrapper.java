@@ -29,7 +29,6 @@ class DateTimeDividerItemWrapper extends LogItemWrapper {
 
   private final String formattedDateTime;
 
-  @SuppressWarnings("AndroidJdkLibsChecker") // We need an oss formatter
   static DateTimeDividerItemWrapper withDateFormat(LocalDate localDate) {
     return new DateTimeDividerItemWrapper(
         localDate.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)));

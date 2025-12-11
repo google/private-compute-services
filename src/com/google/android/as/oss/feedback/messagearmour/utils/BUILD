@@ -21,7 +21,7 @@ android_library(
     srcs = ["MessageArmourDataHelper.kt"],
     deps = [
         "//google/protobuf:timestamp_kt_proto_lite",
-        "//src/com/google/android/as/oss/feedback:feedback_ui_state",
+        "//src/com/google/android/as/oss/feedback/domain:feedback_ui_state",
         "//src/com/google/android/as/oss/feedback/proto:feedback_tag_data_kt_proto_lite",
         "//src/com/google/android/as/oss/feedback/proto/gateway:message_armour_kt_proto_lite",
         "//src/com/google/android/as/oss/feedback/proto/gateway:pixel_apex_api_kt_proto_lite",

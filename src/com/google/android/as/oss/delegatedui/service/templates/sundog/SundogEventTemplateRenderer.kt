@@ -19,6 +19,7 @@ package com.google.android.`as`.oss.delegatedui.service.templates.sundog
 import android.content.Context
 import android.view.View
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +32,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,30 +44,38 @@ import com.google.android.`as`.oss.dataattribution.proto.attributionChipData
 import com.google.android.`as`.oss.delegatedui.api.integration.egress.sundog.sundogEventClickEgressData
 import com.google.android.`as`.oss.delegatedui.api.integration.templates.DelegatedUiTemplateData
 import com.google.android.`as`.oss.delegatedui.api.integration.templates.sundog.SundogEventTemplateData
+import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiInputSpec
 import com.google.android.`as`.oss.delegatedui.service.templates.TemplateRenderer
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.TemplateRendererScope
 import com.google.android.`as`.oss.delegatedui.service.templates.sundog.Common.CARD_SHAPE
 import com.google.android.`as`.oss.delegatedui.utils.ResponseWithParcelables
 import com.google.android.`as`.oss.delegatedui.utils.SerializableBitmap.serializeToByteString
 import javax.inject.Inject
+import kotlinx.coroutines.flow.StateFlow
 
 class SundogEventTemplateRenderer @Inject internal constructor() : TemplateRenderer {
 
   override fun TemplateRendererScope.onCreateTemplateView(
     context: Context,
+    inputSpecFlow: StateFlow<DelegatedUiInputSpec>,
     response: ResponseWithParcelables<DelegatedUiTemplateData>,
   ): View? {
-    val data: SundogEventTemplateData = response.value.sundogEventTemplateData
+    val data: SundogEventTemplateData = response.data.sundogEventTemplateData
     if (!data.hasLocationName()) {
       return null
     }
-    val uiIdToken = response.value.sundogLocationTemplateData.uiIdToken
+    val uiIdToken = data.uiIdToken
 
     val composeView =
       ComposeView(context).apply {
         setContent {
           SundogTheme {
-            Box(modifier = Modifier.fillMaxSize().height(IntrinsicSize.Max)) {
+            Box(
+              modifier =
+                Modifier.background(color = MaterialTheme.colorScheme.surfaceContainerLowest)
+                  .fillMaxSize()
+                  .height(IntrinsicSize.Max)
+            ) {
               Row(
                 modifier =
                   Modifier.fillMaxSize()
@@ -87,12 +97,12 @@ class SundogEventTemplateRenderer @Inject internal constructor() : TemplateRende
                           attributionDialogData = data.attributionDialogData,
                           attributionChipData =
                             attributionChipData {
-                              response.image.value?.serializeToByteString()?.let { image ->
+                              response.image.valueOrNull?.serializeToByteString()?.let { image ->
                                 chipIcon = image
                               }
                               chipLabel = data.title
                             },
-                          sourceDeepLinks = null,
+                          sourceDeepLinks = response.pendingIntentList.valueOrNull?.toTypedArray(),
                         )
                       },
                     )
@@ -101,13 +111,13 @@ class SundogEventTemplateRenderer @Inject internal constructor() : TemplateRende
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically,
               ) {
-                doOnImpression(uiIdToken) { logUsage() }
+                LaunchedEffect(Unit) { doOnImpression(uiIdToken) { logUsage() } }
                 PrimaryRoundedIcon(
                   iconBackgroundWidth = 40.dp,
                   iconWidth = 20.dp,
                   iconColor = MaterialTheme.colorScheme.onSecondary,
                   iconBackgroundColor = MaterialTheme.colorScheme.secondary,
-                  imageBitmap = response.image.value,
+                  imageBitmap = response.image.valueOrNull,
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Column(verticalArrangement = Arrangement.SpaceAround) {
@@ -126,6 +136,7 @@ class SundogEventTemplateRenderer @Inject internal constructor() : TemplateRende
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Normal,
                     overflow = TextOverflow.Ellipsis,
+                    modifier = if (data.enableMarqueeSubtitle) Modifier.basicMarquee() else Modifier,
                   )
                 }
               }

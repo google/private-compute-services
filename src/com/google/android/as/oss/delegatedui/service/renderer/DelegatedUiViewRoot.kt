@@ -22,10 +22,8 @@ import android.os.Bundle
 import android.view.Display
 import android.view.SurfaceControlViewHost
 import android.window.InputTransferToken
-import androidx.annotation.ColorInt
 import androidx.annotation.UiThread
 import androidx.core.view.ViewCompat
-import androidx.core.view.ViewCompat.ScrollAxis
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -38,6 +36,7 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.google.android.`as`.oss.delegatedui.api.common.DelegatedUiNestedScrollEvent
+import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiInputSpec
 import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiRenderSpec
 import com.google.android.`as`.oss.delegatedui.service.common.isExactly
 import com.google.android.`as`.oss.delegatedui.service.common.size
@@ -83,6 +82,10 @@ class DelegatedUiViewRoot(
   /** The parent view that wraps the latest [setContentView]. */
   private val parent = DelegatedUiViewParent(context, onNestedScroll, onRenderError)
 
+  /** The callback to update the view set by [setContentView]. */
+  lateinit var updateInputSpec: suspend (DelegatedUiInputSpec) -> Unit
+    private set
+
   /** The latest spec set by [setContentView]. */
   lateinit var spec: DelegatedUiRenderSpec
     private set
@@ -100,28 +103,27 @@ class DelegatedUiViewRoot(
     host.setView(parent, 0, 0)
   }
 
-  /** Set the background color of the delegated UI view hierarchy. */
-  fun setBackgroundColor(@ColorInt backgroundColor: Int) {
-    parent.setBackgroundColor(backgroundColor)
-  }
-
-  /** Set the nested scroll axes supported by the client. */
-  fun setClientNestedScrollAxes(@ScrollAxis clientNestedScrollAxes: Int) {
-    parent.clientNestedScrollAxes = clientNestedScrollAxes
-  }
-
   /**
    * Set the content of the delegated UI view hierarchy, similar to
-   * [android.app.Activity.setContentView]. The given [renderedView] will be measured using [spec].
+   * [android.app.Activity.setContentView].
+   * - If the given [renderResult] is a [RenderedView], then it will be measured using [spec].
+   * - Attributes on [spec] will be applied.
    */
-  fun setContentView(renderedView: RenderedView, spec: DelegatedUiRenderSpec) {
-    doNotTriggerOnRequestLayoutListener {
-      parent.removeAllViews()
-      parent.addView(renderedView.view)
+  fun setContentView(renderResult: RenderResult, spec: DelegatedUiRenderSpec) {
+    if (renderResult is RenderedView) {
+      doNotTriggerOnRequestLayoutListener {
+        parent.removeAllViews()
+        parent.addView(renderResult.view)
+      }
+
+      ViewCompat.setAccessibilityPaneTitle(parent, renderResult.accessibilityPaneTitle)
+      this.updateInputSpec = renderResult.updateInputSpec
     }
 
-    ViewCompat.setAccessibilityPaneTitle(parent, renderedView.accessibilityPaneTitle)
     this.spec = spec
+    parent.setBackgroundColor(spec.backgroundColor)
+    parent.clientNestedScrollAxes = spec.clientNestedScrollAxes
+    parent.clientNestedScrollAxisLock = spec.clientNestedScrollAxisLock
 
     onContentViewChanged()
   }

@@ -16,10 +16,12 @@
 
 package com.google.android.`as`.oss.feedback.quartz.serviceclient
 
-import com.google.android.`as`.oss.feedback.ViewFeedbackData
 import com.google.android.`as`.oss.feedback.api.dataservice.FeedbackUiRenderingData
 import com.google.android.`as`.oss.feedback.api.dataservice.feedbackUiRenderingData
 import com.google.android.`as`.oss.feedback.api.gateway.QuartzCUJ
+import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory
+import com.google.android.`as`.oss.feedback.domain.DataCollectionCategoryData
+import com.google.android.`as`.oss.feedback.domain.ViewFeedbackData
 import com.google.protobuf.Timestamp
 
 /** Service to provide feedback donation data. */
@@ -37,6 +39,7 @@ data class QuartzKeySummarizationData(
   val uuid: String = "",
   val sbnKey: String = "",
   val asiVersion: String = "",
+  val detectedLanguage: String = "",
   val featureName: String = "",
   val packageName: String = "",
   val modelName: String = "",
@@ -54,6 +57,7 @@ data class QuartzKeyTypeData(
   val sbnKey: String = "",
   val uuid: String = "",
   val asiVersion: String = "",
+  val detectedLanguage: String = "",
   val packageName: String = "",
   val title: String = "",
   val content: String = "",
@@ -102,6 +106,9 @@ data class QuartzKeyTypeData(
   val isThresholdChangedCategory: Boolean = false,
   val classificationExecutedTimeMs: Long = 0L,
   val exemptionExecutedTimeMsString: String = "",
+  val classificationDefaultCategoryResult: String = "",
+  val defaultCategoryCorrectionThreshold: String = "",
+  val isSuppressDuplicate: Boolean = false,
 ) {}
 
 data class QuartzFeedbackDonationData(
@@ -116,6 +123,45 @@ data class QuartzFeedbackDonationData(
   override val viewFeedbackHeader: String = feedbackUiRenderingData.feedbackDialogViewDataHeader
   override val viewFeedbackBody: String = toString()
 
+  override val dataCollectionCategories: Map<DataCollectionCategory, DataCollectionCategoryData>
+    get() {
+      // TODO: b/451840143 - These are all placeholders for UI testing.
+      return mapOf(
+        DataCollectionCategory.TriggeringMessages to
+          DataCollectionCategoryData(
+            header = "What triggered the suggestion",
+            body = "Received message XXXXX XX XXXXXXX XXXX from contact YYYYY YYYYYYYY.".repeat(10),
+          ),
+        DataCollectionCategory.IntentQueries to
+          DataCollectionCategoryData(
+            header = "intent_queries.txt",
+            body =
+              "The query generated from the triggering messages that feeds into the model."
+                .repeat(10),
+          ),
+        DataCollectionCategory.ModelOutputs to
+          DataCollectionCategoryData(
+            header = "model_outputs.txt",
+            body = "The model output to be surfaced to the user.".repeat(10),
+          ),
+        DataCollectionCategory.MemoryEntities to
+          DataCollectionCategoryData(
+            header = "memory_entities.txt",
+            body = "L1 memory entities used to generate suggestions.".repeat(10),
+          ),
+        DataCollectionCategory.SelectedEntityContent to
+          DataCollectionCategoryData(
+            header = "selected_entity_content.txt",
+            body = "Specifies the entity content that the user selects.".repeat(10),
+          ),
+      )
+    }
+
+  // TODO: b/451840143 - This should come from rendering data
+  override val dataCollectionCategoryExpandContentDescription: String = "Expand"
+  // TODO: b/451840143 - This should come from rendering data
+  override val dataCollectionCategoryCollapseContentDescription: String = "Collapse"
+
   override fun toString(): String {
     return buildString {
       appendLine("appId: $appId")
@@ -129,76 +175,93 @@ data class QuartzFeedbackDonationData(
       appendLine("}")
       when (quartzCuj) {
         QuartzCUJ.QUARTZ_CUJ_KEY_SUMMARIZATION -> {
-          appendLine("uuid: ${summarizationData.uuid}")
-          appendLine("sbnKey: ${summarizationData.sbnKey}")
-          appendLine("asiVersion: ${summarizationData.asiVersion}")
-          appendLine("featureName: ${summarizationData.featureName}")
-          appendLine("packageName: ${summarizationData.packageName}")
-          appendLine("modelName: ${summarizationData.modelName}")
-          appendLine("modelVersion: ${summarizationData.modelVersion}")
-          appendLine("isGroupConversation: ${summarizationData.isGroupConversation}")
-          appendLine("conversationTitle: ${summarizationData.conversationTitle}")
-          appendLine("messages: ${summarizationData.messages}")
-          appendLine("notificationCount: ${summarizationData.notificationCount}")
-          appendLine("executionTimeMs: ${summarizationData.executionTimeMs}")
-          appendLine("summaryText: ${summarizationData.summaryText}")
+          // Summarization data is empty, don't append summarization data fields.
+          if (summarizationData.uuid.isNotEmpty() && summarizationData.sbnKey.isNotEmpty()) {
+            appendLine("uuid: ${summarizationData.uuid}")
+            appendLine("sbnKey: ${summarizationData.sbnKey}")
+            appendLine("asiVersion: ${summarizationData.asiVersion}")
+            appendLine("detectedLanguage: ${summarizationData.detectedLanguage}")
+            appendLine("featureName: ${summarizationData.featureName}")
+            appendLine("packageName: ${summarizationData.packageName}")
+            appendLine("modelName: ${summarizationData.modelName}")
+            appendLine("modelVersion: ${summarizationData.modelVersion}")
+            appendLine("isGroupConversation: ${summarizationData.isGroupConversation}")
+            appendLine("conversationTitle: ${summarizationData.conversationTitle}")
+            appendLine("messages: ${summarizationData.messages}")
+            appendLine("notificationCount: ${summarizationData.notificationCount}")
+            appendLine("executionTimeMs: ${summarizationData.executionTimeMs}")
+            appendLine("summaryText: ${summarizationData.summaryText}")
+          }
         }
         QuartzCUJ.QUARTZ_CUJ_KEY_TYPE -> {
-          appendLine("sbnKey: ${typeData.sbnKey}")
-          appendLine("uuid: ${typeData.uuid}")
-          appendLine("asiVersion: ${typeData.asiVersion}")
-          appendLine("packageName: ${typeData.packageName}")
-          appendLine("title: ${typeData.title}")
-          appendLine("content: ${typeData.content}")
-          appendLine("notificationCategory: ${typeData.notificationCategory}")
-          appendLine("notificationTag: ${typeData.notificationTag}")
-          appendLine("isConversation: ${typeData.isConversation}")
-          appendLine("channelId: ${typeData.channelId}")
-          appendLine("channelName: ${typeData.channelName}")
-          appendLine("channelImportance: ${typeData.channelImportance}")
-          appendLine("channelDescription: ${typeData.channelDescription}")
-          appendLine("channelConversationId: ${typeData.channelConversationId}")
-          appendLine("playStoreCategory: ${typeData.playStoreCategory}")
-          appendLine("extraTitle: ${typeData.extraTitle}")
-          appendLine("extraTitleBig: ${typeData.extraTitleBig}")
-          appendLine("extraText: ${typeData.extraText}")
-          appendLine("extraTextLines: ${typeData.extraTextLines}")
-          appendLine("extraSummaryText: ${typeData.extraSummaryText}")
-          appendLine("extraPeopleList: ${typeData.extraPeopleList}")
-          appendLine("extraMessagingPerson: ${typeData.extraMessagingPerson}")
-          appendLine("extraMessages: ${typeData.extraMessages}")
-          appendLine("extraHistoricMessages: ${typeData.extraHistoricMessages}")
-          appendLine("extraConversationTitle: ${typeData.extraConversationTitle}")
-          appendLine("extraBigText: ${typeData.extraBigText}")
-          appendLine("extraInfoText: ${typeData.extraInfoText}")
-          appendLine("extraSubText: ${typeData.extraSubText}")
-          appendLine("extraIsGroupConversation: ${typeData.extraIsGroupConversation}")
-          appendLine("extraPictureContentDescription: ${typeData.extraPictureContentDescription}")
-          appendLine("extraTemplate: ${typeData.extraTemplate}")
-          appendLine(
-            "extraShowBigPictureWhenCollapsed: ${typeData.extraShowBigPictureWhenCollapsed}"
-          )
-          appendLine("extraColorized: ${typeData.extraColorized}")
-          appendLine("extraRemoteInputHistory: ${typeData.extraRemoteInputHistory}")
-          appendLine("locusId: ${typeData.locusId}")
-          appendLine("hasPromotableCharacteristics: ${typeData.hasPromotableCharacteristics}")
-          appendLine("groupKey: ${typeData.groupKey}")
-          appendLine("notificationId: ${typeData.notificationId}")
-          appendLine("postTimestamp: ${typeData.postTimestamp}")
-          appendLine("appCategory: ${typeData.appCategory}")
-          appendLine("modelInfoList: ${typeData.modelInfoList}")
-          appendLine("classificationMethod: ${typeData.classificationMethod}")
-          appendLine(
-            "classificationBertCategoryResult: ${typeData.classificationBertCategoryResult}"
-          )
-          appendLine("classificationBertCategoryScore: ${typeData.classificationBertCategoryScore}")
-          appendLine(
-            "classificationBertCategoryExecutedTimeMs: ${typeData.classificationBertCategoryExecutedTimeMs}"
-          )
-          appendLine("classificationCategory: ${typeData.classificationCategory}")
-          appendLine("isThresholdChangedCategory: ${typeData.isThresholdChangedCategory}")
-          appendLine("classificationExecutedTimeMs: ${typeData.classificationExecutedTimeMs}")
-          appendLine("exemptionExecutedTimeMsString: ${typeData.exemptionExecutedTimeMsString}")
+          // Type data is empty, don't append type data fields.
+          if (typeData.sbnKey.isNotEmpty() && typeData.uuid.isNotEmpty()) {
+            appendLine("sbnKey: ${typeData.sbnKey}")
+            appendLine("uuid: ${typeData.uuid}")
+            appendLine("asiVersion: ${typeData.asiVersion}")
+            appendLine("detectedLanguage: ${typeData.detectedLanguage}")
+            appendLine("packageName: ${typeData.packageName}")
+            appendLine("title: ${typeData.title}")
+            appendLine("content: ${typeData.content}")
+            appendLine("notificationCategory: ${typeData.notificationCategory}")
+            appendLine("notificationTag: ${typeData.notificationTag}")
+            appendLine("isConversation: ${typeData.isConversation}")
+            appendLine("channelId: ${typeData.channelId}")
+            appendLine("channelName: ${typeData.channelName}")
+            appendLine("channelImportance: ${typeData.channelImportance}")
+            appendLine("channelDescription: ${typeData.channelDescription}")
+            appendLine("channelConversationId: ${typeData.channelConversationId}")
+            appendLine("playStoreCategory: ${typeData.playStoreCategory}")
+            appendLine("extraTitle: ${typeData.extraTitle}")
+            appendLine("extraTitleBig: ${typeData.extraTitleBig}")
+            appendLine("extraText: ${typeData.extraText}")
+            appendLine("extraTextLines: ${typeData.extraTextLines}")
+            appendLine("extraSummaryText: ${typeData.extraSummaryText}")
+            appendLine("extraPeopleList: ${typeData.extraPeopleList}")
+            appendLine("extraMessagingPerson: ${typeData.extraMessagingPerson}")
+            appendLine("extraMessages: ${typeData.extraMessages}")
+            appendLine("extraHistoricMessages: ${typeData.extraHistoricMessages}")
+            appendLine("extraConversationTitle: ${typeData.extraConversationTitle}")
+            appendLine("extraBigText: ${typeData.extraBigText}")
+            appendLine("extraInfoText: ${typeData.extraInfoText}")
+            appendLine("extraSubText: ${typeData.extraSubText}")
+            appendLine("extraIsGroupConversation: ${typeData.extraIsGroupConversation}")
+            appendLine("extraPictureContentDescription: ${typeData.extraPictureContentDescription}")
+            appendLine("extraTemplate: ${typeData.extraTemplate}")
+            appendLine(
+              "extraShowBigPictureWhenCollapsed: ${typeData.extraShowBigPictureWhenCollapsed}"
+            )
+            appendLine("extraColorized: ${typeData.extraColorized}")
+            appendLine("extraRemoteInputHistory: ${typeData.extraRemoteInputHistory}")
+            appendLine("locusId: ${typeData.locusId}")
+            appendLine("hasPromotableCharacteristics: ${typeData.hasPromotableCharacteristics}")
+            appendLine("groupKey: ${typeData.groupKey}")
+            appendLine("notificationId: ${typeData.notificationId}")
+            appendLine("postTimestamp: ${typeData.postTimestamp}")
+            appendLine("appCategory: ${typeData.appCategory}")
+            appendLine("modelInfoList: ${typeData.modelInfoList}")
+            appendLine("classificationMethod: ${typeData.classificationMethod}")
+            appendLine(
+              "classificationBertCategoryResult: ${typeData.classificationBertCategoryResult}"
+            )
+            appendLine(
+              "classificationBertCategoryScore: ${typeData.classificationBertCategoryScore}"
+            )
+            appendLine(
+              "classificationBertCategoryExecutedTimeMs: ${typeData.classificationBertCategoryExecutedTimeMs}"
+            )
+            appendLine("classificationCategory: ${typeData.classificationCategory}")
+            appendLine("isThresholdChangedCategory: ${typeData.isThresholdChangedCategory}")
+            appendLine("classificationExecutedTimeMs: ${typeData.classificationExecutedTimeMs}")
+            appendLine("exemptionExecutedTimeMsString: ${typeData.exemptionExecutedTimeMsString}")
+            appendLine(
+              "classificationDefaultCategoryResult: ${typeData.classificationDefaultCategoryResult}"
+            )
+            appendLine(
+              "defaultCategoryCorrectionThreshold: ${typeData.defaultCategoryCorrectionThreshold}"
+            )
+            appendLine("isSuppressDuplicate: ${typeData.isSuppressDuplicate}")
+          }
         }
         else -> {}
       }

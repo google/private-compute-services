@@ -18,21 +18,30 @@ package com.google.android.as.oss;
 
 import android.app.Application;
 import android.content.Context;
+import androidx.work.Configuration;
+import androidx.work.DelegatingWorkerFactory;
+import androidx.work.WorkerFactory;
+import com.google.android.as.oss.common.ExecutorAnnotations.WorkManagerExecutorQualifier;
 import com.google.android.as.oss.common.initializer.PcsInitializer;
 import com.google.common.flogger.GoogleLogger;
 import dagger.hilt.android.HiltAndroidApp;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import java.util.Comparator;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.inject.Inject;
 
+/** Main application class for Private Compute Services. */
 @HiltAndroidApp(Application.class)
-public class PrivateComputeServicesApplication extends Hilt_PrivateComputeServicesApplication {
+public class PrivateComputeServicesApplication extends Hilt_PrivateComputeServicesApplication
+    implements Configuration.Provider {
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
 
   @Inject @ApplicationContext Context context;
   @Inject Set<PcsInitializer> initializers;
+  @Inject Set<WorkerFactory> workerFactories;
+  @Inject @WorkManagerExecutorQualifier Executor workManagerExecutor;
 
   @Override
   public void onCreate() {
@@ -44,5 +53,16 @@ public class PrivateComputeServicesApplication extends Hilt_PrivateComputeServic
     initializers.stream()
         .sorted(Comparator.comparing(PcsInitializer::getPriority).reversed())
         .forEach(PcsInitializer::run);
+  }
+
+  /** Loads the configuration used by WorkManager. */
+  @Override
+  public Configuration getWorkManagerConfiguration() {
+    DelegatingWorkerFactory delegatingFactory = new DelegatingWorkerFactory();
+    workerFactories.forEach(delegatingFactory::addFactory);
+    return new Configuration.Builder()
+        .setWorkerFactory(delegatingFactory)
+        .setExecutor(workManagerExecutor)
+        .build();
   }
 }

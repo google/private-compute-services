@@ -24,10 +24,10 @@ val SmartSelectLearningPolicy_FederatedCompute =
   ) {
     description =
       """
-        To train and improve SmartSelect ML models that correctly select and classify actionable text.
+      To train and improve SmartSelect ML models that correctly select and classify actionable text.
 
-        ALLOWED EGRESSES: FederatedCompute.
-        ALLOWED USAGES: Federated learning.
+      ALLOWED EGRESSES: FederatedCompute.
+      ALLOWED USAGES: Federated learning.
       """
         .trimIndent()
 

@@ -42,9 +42,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,6 +65,9 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiUsageData.InteractionType.INTERACTION_TYPE_CLICK
+import com.google.android.`as`.oss.delegatedui.api.integration.egress.beacon.beaconEgressData
+import com.google.android.`as`.oss.delegatedui.api.integration.egress.beacon.suggestMoreClickEvent
 import com.google.android.`as`.oss.delegatedui.api.integration.templates.UiIdToken
 import com.google.android.`as`.oss.delegatedui.api.integration.templates.beacon.BeaconAiDisclaimer
 import com.google.android.`as`.oss.delegatedui.api.integration.templates.beacon.BeaconWidget
@@ -76,30 +81,32 @@ internal fun TemplateRendererScope.BeaconWidgetContainer(
   widget: BeaconWidget,
   pendingIntentList: List<PendingIntent>,
 ) {
-  ScrollableContainer {
+  val scrollState = rememberScrollState()
+  ScrollableContainer(scrollState = scrollState) {
     Box(modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp)) {
-      BeaconWidgetContent(widget, pendingIntentList)
+      when (widget.displayUiVersion) {
+        1 -> {
+          BeaconWidgetContentV1(widget, pendingIntentList, scrollState)
+        }
+        else -> {
+          BeaconWidgetContent(widget, pendingIntentList, scrollState)
+        }
+      }
     }
   }
 }
 
 /** The container for the Beacon widget. This is the entrypoint to the widget. */
 @Composable
-private fun TemplateRendererScope.BeaconWidgetContent(
+private fun TemplateRendererScope.BeaconWidgetContentV1(
   widget: BeaconWidget,
   pendingIntentList: List<PendingIntent>,
+  scrollState: ScrollState,
 ) {
   val detailedCardsList = widget.detailedCardsList
-  val generalCardsDeprecated = widget.generalCardsList
   val generalCardsEmails = widget.generalCardsEmailsList
   val generalCardsMessages = widget.generalCardsMessagesList
-  val generalCardsUsesNewApi = generalCardsEmails.isNotEmpty() || generalCardsMessages.isNotEmpty()
-  val generalCardsMerged =
-    if (generalCardsUsesNewApi) {
-      generalCardsEmails + generalCardsMessages
-    } else {
-      generalCardsDeprecated
-    }
+  val generalCardsMerged = generalCardsEmails + generalCardsMessages
 
   val isOnlyDisplayingGeneralCards = detailedCardsList.isEmpty() && generalCardsMerged.isNotEmpty()
   val isDisplayMoreResultsEnabled =
@@ -114,6 +121,14 @@ private fun TemplateRendererScope.BeaconWidgetContent(
         BeaconWidgetConstants.DEFAULT_MAX_GENERAL_CARDS_TO_DISPLAY
     }
   var isDisplayingMoreResults by remember { mutableStateOf(false) }
+  var shouldScrollToBottom by remember { mutableStateOf(false) }
+
+  LaunchedEffect(shouldScrollToBottom) {
+    if (shouldScrollToBottom) {
+      runCatching { scrollState.animateScrollTo(scrollState.maxValue) }
+      shouldScrollToBottom = false
+    }
+  }
 
   val generalCardsEmailsNumToDisplay =
     if (isDisplayingMoreResults) {
@@ -128,41 +143,37 @@ private fun TemplateRendererScope.BeaconWidgetContent(
       BeaconWidgetConstants.DEFAULT_MAX_GENERAL_CARDS_TO_DISPLAY
     }
 
-  Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-    if (detailedCardsList.size > 0) {
-      for (detailedCard in detailedCardsList) {
-        BeaconDetailedCardContainer(
-          card = detailedCard,
-          genericContentDescriptions = widget.genericContentDescriptions,
-          pendingIntentList = pendingIntentList,
-          uiIdToken = widget.detailedCardUiId,
-        )
-      }
+  val generalCardsToDisplay =
+    if (widget.displayAllCards) {
+      generalCardsMerged
     } else if (isOnlyDisplayingGeneralCards) {
-      BeaconGeneralCardsContainer(
-        cards =
-          if (generalCardsUsesNewApi) {
-            generalCardsEmails.take(generalCardsEmailsNumToDisplay) +
-              generalCardsMessages.take(generalCardsMessagesNumToDisplay)
-          } else {
-            generalCardsDeprecated
-          },
+      generalCardsEmails.take(generalCardsEmailsNumToDisplay) +
+        generalCardsMessages.take(generalCardsMessagesNumToDisplay)
+    } else if (detailedCardsList.isNotEmpty() && isDisplayingMoreResults) {
+      generalCardsMerged
+    } else {
+      emptyList()
+    }
+
+  Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    for (detailedCard in detailedCardsList) {
+      BeaconDetailedCardContainer(
+        card = detailedCard,
         genericContentDescriptions = widget.genericContentDescriptions,
-        pendingIntents = pendingIntentList,
-        uiIdToken = widget.generalCardUiId,
+        pendingIntentList = pendingIntentList,
       )
     }
-    if (!isOnlyDisplayingGeneralCards && isDisplayMoreResultsEnabled && isDisplayingMoreResults) {
-      // Only enter this block if there were detailed cards. This will produce another "card" area
-      BeaconGeneralCardsContainer(
-        cards = generalCardsMerged,
-        genericContentDescriptions = widget.genericContentDescriptions,
-        pendingIntents = pendingIntentList,
-        uiIdToken = widget.generalCardUiId,
-      )
-    }
+
+    BeaconGeneralCardsContainer(
+      cards = generalCardsToDisplay,
+      genericContentDescriptions = widget.genericContentDescriptions,
+      pendingIntents = pendingIntentList,
+    )
+
     WidgetAiDisclaimer(widget.aiDisclaimerWithLink, widget.disclaimerButtonUiId, pendingIntentList)
-    if (isDisplayMoreResultsEnabled) {
+
+    if (!widget.displayAllCards && isDisplayMoreResultsEnabled) {
+      val scope = rememberCoroutineScope()
       WidgetShowAllResultsButton(
         if (isDisplayingMoreResults) {
           widget.ctaDisplayFewerResults
@@ -170,10 +181,124 @@ private fun TemplateRendererScope.BeaconWidgetContent(
           widget.ctaDisplayMoreResults
         },
         onClick = {
-          doOnInterop(widget.showMoreResultsButtonUiId) {
-            launch { logUsage() }
-            isDisplayingMoreResults = !isDisplayingMoreResults
+          scope.launch {
+            doOnInterop(
+              widget.showMoreResultsButtonUiId,
+              interactionType = INTERACTION_TYPE_CLICK,
+            ) {
+              launch { logUsage() }
+              if (widget.disableExpandOnSuggestMore) {
+                sendEgressData {
+                  beaconEgressData = beaconEgressData {
+                    suggestMoreClickEvent = suggestMoreClickEvent {}
+                  }
+                }
+              }
+            }
           }
+          if (!widget.disableExpandOnSuggestMore) {
+            isDisplayingMoreResults = !isDisplayingMoreResults
+            shouldScrollToBottom = true
+          }
+        },
+      )
+    }
+  }
+}
+
+/** The container for the Beacon widget. This is the entrypoint to the widget. */
+@Composable
+private fun TemplateRendererScope.BeaconWidgetContent(
+  widget: BeaconWidget,
+  pendingIntentList: List<PendingIntent>,
+  scrollState: ScrollState,
+) {
+  val detailedCardsList = widget.detailedCardsList
+  val generalCardsEmails = widget.generalCardsEmailsList
+  val generalCardsMessages = widget.generalCardsMessagesList
+  val generalCardsMerged = generalCardsEmails + generalCardsMessages
+
+  val isOnlyDisplayingGeneralCards = detailedCardsList.isEmpty() && generalCardsMerged.isNotEmpty()
+  val isDisplayMoreResultsEnabled =
+    if (detailedCardsList.isNotEmpty()) {
+      // If there is a detailed card and there are also general cards, display the "more results"
+      // button.
+      generalCardsMerged.isNotEmpty()
+    } else {
+      // If there is no detailed card but there are more than DEFAULT_MAX_GENERAL_CARDS_TO_DISPLAY
+      // general cards of a single type, display the "more results" button.
+      Math.max(generalCardsEmails.size, generalCardsMessages.size) >
+        BeaconWidgetConstants.DEFAULT_MAX_GENERAL_CARDS_TO_DISPLAY
+    }
+  var isDisplayingMoreResults by remember { mutableStateOf(false) }
+  var shouldScrollToBottom by remember { mutableStateOf(false) }
+
+  LaunchedEffect(shouldScrollToBottom) {
+    if (shouldScrollToBottom) {
+      runCatching { scrollState.animateScrollTo(scrollState.maxValue) }
+      shouldScrollToBottom = false
+    }
+  }
+
+  val generalCardsEmailsNumToDisplay =
+    if (isDisplayingMoreResults) {
+      generalCardsEmails.size
+    } else {
+      BeaconWidgetConstants.DEFAULT_MAX_GENERAL_CARDS_TO_DISPLAY
+    }
+  val generalCardsMessagesNumToDisplay =
+    if (isDisplayingMoreResults) {
+      generalCardsMessages.size
+    } else {
+      BeaconWidgetConstants.DEFAULT_MAX_GENERAL_CARDS_TO_DISPLAY
+    }
+
+  val generalCardsToDisplay =
+    if (isOnlyDisplayingGeneralCards) {
+      generalCardsEmails.take(generalCardsEmailsNumToDisplay) +
+        generalCardsMessages.take(generalCardsMessagesNumToDisplay)
+    } else if (detailedCardsList.isNotEmpty() && isDisplayingMoreResults) {
+      generalCardsMerged
+    } else {
+      emptyList()
+    }
+
+  Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    for (detailedCard in detailedCardsList) {
+      BeaconDetailedCardContainer(
+        card = detailedCard,
+        genericContentDescriptions = widget.genericContentDescriptions,
+        pendingIntentList = pendingIntentList,
+      )
+    }
+
+    BeaconGeneralCardsContainer(
+      cards = generalCardsToDisplay,
+      genericContentDescriptions = widget.genericContentDescriptions,
+      pendingIntents = pendingIntentList,
+    )
+
+    WidgetAiDisclaimer(widget.aiDisclaimerWithLink, widget.disclaimerButtonUiId, pendingIntentList)
+
+    if (isDisplayMoreResultsEnabled) {
+      val scope = rememberCoroutineScope()
+      WidgetShowAllResultsButton(
+        if (isDisplayingMoreResults) {
+          widget.ctaDisplayFewerResults
+        } else {
+          widget.ctaDisplayMoreResults
+        },
+        onClick = {
+          scope.launch {
+            doOnInterop(
+              widget.showMoreResultsButtonUiId,
+              interactionType = INTERACTION_TYPE_CLICK,
+            ) {
+              launch { logUsage() }
+            }
+          }
+          isDisplayingMoreResults = !isDisplayingMoreResults
+          shouldScrollToBottom = true
         },
       )
     }
@@ -192,6 +317,7 @@ private fun TemplateRendererScope.WidgetAiDisclaimer(
     Icon(
       modifier = Modifier.size(IconSizeNormal),
       painter = painterResource(R.drawable.gs_info_vd_theme_24),
+      tint = MaterialTheme.colorScheme.onSurface,
       contentDescription = null,
     )
     Spacer(modifier = Modifier.width(8.dp))
@@ -251,6 +377,7 @@ private fun TemplateRendererScope.buildAiDisclaimerText(
       aiDisclaimer.urlStartIndex >= 0 &&
       aiDisclaimer.urlEndIndex >= 0
   ) {
+    val scope = rememberCoroutineScope()
     val linkAnnotation =
       LinkAnnotation.Url(
         url = aiDisclaimer.url,
@@ -265,7 +392,11 @@ private fun TemplateRendererScope.buildAiDisclaimerText(
       ) { linkAnnotationUrl ->
         val pendingIntent = pendingIntentList.getOrNull(aiDisclaimer.pendingIntentIndex - 1)
         if (pendingIntent != null) {
-          doOnInterop(disclaimerButtonUiId) { executeAction { pendingIntent.toAction() } }
+          scope.launch {
+            doOnInterop(disclaimerButtonUiId, interactionType = INTERACTION_TYPE_CLICK) {
+              executeAction { pendingIntent.toAction() }
+            }
+          }
         }
       }
     addLink(

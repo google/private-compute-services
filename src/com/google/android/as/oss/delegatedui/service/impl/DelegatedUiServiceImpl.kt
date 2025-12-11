@@ -32,6 +32,7 @@ import androidx.core.view.ViewCompat.SCROLL_AXIS_HORIZONTAL
 import androidx.core.view.ViewCompat.SCROLL_AXIS_VERTICAL
 import androidx.core.view.doOnPreDraw
 import com.google.android.`as`.oss.common.ExecutorAnnotations.IoExecutorQualifier
+import com.google.android.`as`.oss.delegatedui.api.common.DelegatedUiHint
 import com.google.android.`as`.oss.delegatedui.api.common.DelegatedUiNestedScrollEvent
 import com.google.android.`as`.oss.delegatedui.api.common.DelegatedUiNestedScrollEvent.NestedScrollDelta
 import com.google.android.`as`.oss.delegatedui.api.common.DelegatedUiNestedScrollEvent.NestedScrollStartEvent
@@ -44,10 +45,13 @@ import com.google.android.`as`.oss.delegatedui.api.infra.uiservice.DelegatedUiPr
 import com.google.android.`as`.oss.delegatedui.api.infra.uiservice.DelegatedUiRequest
 import com.google.android.`as`.oss.delegatedui.api.infra.uiservice.DelegatedUiResponse
 import com.google.android.`as`.oss.delegatedui.api.infra.uiservice.DelegatedUiServiceGrpcKt
-import com.google.android.`as`.oss.delegatedui.api.infra.uiservice.DelegatedUiServiceParcelableKeys
+import com.google.android.`as`.oss.delegatedui.api.infra.uiservice.DelegatedUiServiceParcelableKeys.CONFIGURATION_KEY
+import com.google.android.`as`.oss.delegatedui.api.infra.uiservice.DelegatedUiServiceParcelableKeys.INPUT_TRANSFER_TOKEN_KEY
+import com.google.android.`as`.oss.delegatedui.api.infra.uiservice.DelegatedUiServiceParcelableKeys.SURFACE_PACKAGE_KEY
 import com.google.android.`as`.oss.delegatedui.api.infra.uiservice.DelegatedUiUpdateRequest
 import com.google.android.`as`.oss.delegatedui.api.infra.uiservice.delegatedUiCreateResponse
 import com.google.android.`as`.oss.delegatedui.api.infra.uiservice.delegatedUiDataEgressResponse
+import com.google.android.`as`.oss.delegatedui.api.infra.uiservice.delegatedUiHintsResponse
 import com.google.android.`as`.oss.delegatedui.api.infra.uiservice.delegatedUiInvalidateResponse
 import com.google.android.`as`.oss.delegatedui.api.infra.uiservice.delegatedUiNestedScrollResponse
 import com.google.android.`as`.oss.delegatedui.api.infra.uiservice.delegatedUiPrepareResponse
@@ -59,9 +63,11 @@ import com.google.android.`as`.oss.delegatedui.api.infra.uiservice.nestedScrollS
 import com.google.android.`as`.oss.delegatedui.api.infra.uiservice.nestedScrollStop
 import com.google.android.`as`.oss.delegatedui.api.integration.egress.DelegatedUiEgressData
 import com.google.android.`as`.oss.delegatedui.service.common.ConnectLifecycle
+import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiDataSpec
 import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiExceptions.InvalidDataProviderServiceError
 import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiExceptions.InvalidTemplateRendererError
 import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiExceptions.NullTemplateRenderedError
+import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiInputSpec
 import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiLifecycle
 import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiRenderSpec
 import com.google.android.`as`.oss.delegatedui.service.common.PrepareLifecycle
@@ -71,8 +77,8 @@ import com.google.android.`as`.oss.delegatedui.service.impl.ActiveSessionRequest
 import com.google.android.`as`.oss.delegatedui.service.impl.ActiveSessionRequest.ExternalRequest
 import com.google.android.`as`.oss.delegatedui.service.renderer.DelegatedUiRenderer
 import com.google.android.`as`.oss.delegatedui.service.renderer.DelegatedUiViewRoot
-import com.google.android.`as`.oss.delegatedui.utils.ParcelableOverRpcUtils.attachParcelableToResponse
-import com.google.android.`as`.oss.delegatedui.utils.ParcelableOverRpcUtils.receiveParcelableFromRequest
+import com.google.android.`as`.oss.delegatedui.service.renderer.SkippedRender
+import com.google.android.`as`.oss.delegatedui.utils.ParcelableOverRpcUtils
 import com.google.common.flogger.GoogleLogger
 import com.google.common.flogger.StackSize
 import com.google.common.flogger.android.AndroidLogTag
@@ -108,6 +114,7 @@ internal constructor(
   @ApplicationContext private val appContext: Context,
   @IoExecutorQualifier ioExecutor: Executor,
   private val renderer: DelegatedUiRenderer,
+  private val parcelableOverRpcUtils: ParcelableOverRpcUtils,
 ) : DelegatedUiServiceGrpcKt.DelegatedUiServiceCoroutineImplBase() {
 
   private val uiDispatcher = AndroidUiDispatcher.Main
@@ -125,6 +132,7 @@ internal constructor(
   override suspend fun prepareDelegatedUiSession(
     request: DelegatedUiPrepareRequest
   ): DelegatedUiPrepareResponse {
+    var sessionUuid: String? = null
     try {
       logger
         .atInfo()
@@ -133,18 +141,18 @@ internal constructor(
           request,
         )
       val configuration =
-        receiveParcelableFromRequest(DelegatedUiServiceParcelableKeys.CONFIGURATION_KEY)
+        with(parcelableOverRpcUtils) { receiveParcelableFromRequest(CONFIGURATION_KEY) }
       val spec = request.toRenderSpec(configuration)
+      sessionUuid = spec.sessionUuid
 
       val view =
         withContext(uiDispatcher) {
-          renderer.render(lifecycle = PrepareLifecycle(), context = spec.context, spec = spec)?.view
+          renderer.render(lifecycle = PrepareLifecycle(), context = spec.context, spec = spec).view
         }
 
       val isExactSize = spec.measureSpecWidth.isExactly() && spec.measureSpecHeight.isExactly()
       val measuredSize =
         when {
-          view == null -> null
           isExactSize -> IntSize(spec.measureSpecWidth.size, spec.measureSpecHeight.size)
           view is ComposeView -> null
           else ->
@@ -157,29 +165,19 @@ internal constructor(
             }
         }
 
-      val isContentAvailable = view != null
       val response = delegatedUiPrepareResponse {
-        this.isContentAvailable = isContentAvailable
+        this.isContentAvailable = true
         measuredSize?.let { this.desiredWidth = it.width }
         measuredSize?.let { this.desiredHeight = it.height }
         this.sessionUuid = spec.sessionUuid
       }
 
-      if (isContentAvailable) {
-        logger
-          .atInfo()
-          .log(
-            "[DelegatedUILifecycle] DUI-Service sending prepare response: isContentAvailable: true, %s\n^^^^^^^^^^",
-            response,
-          )
-      } else {
-        logger
-          .atInfo()
-          .log(
-            "[DelegatedUILifecycle] DUI-Service sending prepare response: isContentAvailable: false, %s\n^^^^^^^^^^",
-            response,
-          )
-      }
+      logger
+        .atInfo()
+        .log(
+          "[DelegatedUILifecycle] DUI-Service sending prepare response: isContentAvailable: true, %s\n^^^^^^^^^^",
+          response,
+        )
       return response
     } catch (e: Throwable) {
       when (e) {
@@ -234,7 +232,10 @@ internal constructor(
             )
         }
       }
-      return delegatedUiPrepareResponse { this.isContentAvailable = false }
+      return delegatedUiPrepareResponse {
+        this.isContentAvailable = false
+        sessionUuid?.let { this.sessionUuid = it }
+      }
     }
   }
 
@@ -248,9 +249,9 @@ internal constructor(
 
       try {
         val token =
-          receiveParcelableFromRequest(DelegatedUiServiceParcelableKeys.INPUT_TRANSFER_TOKEN_KEY)
+          with(parcelableOverRpcUtils) { receiveParcelableFromRequest(INPUT_TRANSFER_TOKEN_KEY) }
         val configuration =
-          receiveParcelableFromRequest(DelegatedUiServiceParcelableKeys.CONFIGURATION_KEY)
+          with(parcelableOverRpcUtils) { receiveParcelableFromRequest(CONFIGURATION_KEY) }
 
         val connectRequests = requests.map { ConnectRequest(it) }
         val externalRequests =
@@ -292,6 +293,7 @@ internal constructor(
                   },
                   onNestedScroll = { sendNestedScroll(it) },
                   onDataEgress = { sendEgressData(it) },
+                  onSendHints = { sendHints(it) },
                   onSessionClose = { closeSession(it) },
                 )
 
@@ -313,6 +315,7 @@ internal constructor(
                 spec = spec,
                 root = root,
                 onDataEgress = { sendEgressData(it) },
+                onSendHints = { sendHints(it) },
                 onSessionClose = { closeSession() },
               )
 
@@ -321,6 +324,13 @@ internal constructor(
                 .log("[DelegatedUILifecycle] DUI-Service completed update request.\n^^^^^^^^^^")
             }
             r is ExternalRequest.InvalidateRequest -> {
+              logger
+                .atInfo()
+                .log(
+                  "vvvvvvvvvv\n[DelegatedUILifecycle] DUI-Service invalidate request received: %s",
+                  r,
+                )
+
               onInvalidateRequest(
                 lifecycle = lifecycle,
                 spec = root.spec,
@@ -328,6 +338,10 @@ internal constructor(
                 onDataEgress = { sendEgressData(it) },
                 onSessionClose = { closeSession() },
               )
+
+              logger
+                .atInfo()
+                .log("[DelegatedUILifecycle] DUI-Service completed invalidate request.\n^^^^^^^^^^")
             }
           }
         }
@@ -486,6 +500,13 @@ internal constructor(
     )
   }
 
+  private suspend fun ProducerScope<DelegatedUiResponse>.sendHints(hints: Set<DelegatedUiHint>) {
+    logger.atFiner().log("Sending hints response: %s", hints)
+    send(
+      delegatedUiResponse { this.hintResponse = delegatedUiHintsResponse { this.hints += hints } }
+    )
+  }
+
   /**
    * Cancels the DUI session with a server-side close. This raises a [CancellationException] in the
    * receiver's coroutine.
@@ -513,6 +534,7 @@ internal constructor(
     onSizeChange: (Int, Int) -> Unit,
     onNestedScroll: (DelegatedUiNestedScrollEvent) -> Unit,
     onDataEgress: suspend (DelegatedUiEgressData) -> Unit,
+    onSendHints: suspend (Set<DelegatedUiHint>) -> Unit,
     onSessionClose: (Exception?) -> Unit,
   ): DelegatedUiViewRoot {
     val display =
@@ -527,12 +549,10 @@ internal constructor(
         onNestedScroll = onNestedScroll,
         onRenderError = onSessionClose,
       )
-    root.setBackgroundColor(spec.backgroundColor)
-    root.setClientNestedScrollAxes(spec.clientNestedScrollAxes)
-    attachParcelableToResponse(
-      DelegatedUiServiceParcelableKeys.SURFACE_PACKAGE_KEY,
-      root.surfacePackage,
-    )
+
+    with(parcelableOverRpcUtils) {
+      attachParcelableToResponse(SURFACE_PACKAGE_KEY, root.surfacePackage)
+    }
 
     logger.atFiner().log("Rendering view for create request: %s", spec.sessionUuid)
     val renderedView =
@@ -541,8 +561,9 @@ internal constructor(
         context = spec.context,
         spec = spec,
         onDataEgress = onDataEgress,
+        onSendHints = onSendHints,
         onSessionClose = { onSessionClose(null) },
-      ) ?: throw NullTemplateRenderedError
+      )
     root.setContentView(renderedView, spec)
 
     renderedView.view.awaitNextPreDraw()
@@ -561,11 +582,31 @@ internal constructor(
     spec: DelegatedUiRenderSpec,
     root: DelegatedUiViewRoot,
     onDataEgress: suspend (DelegatedUiEgressData) -> Unit,
+    onSendHints: suspend (Set<DelegatedUiHint>) -> Unit,
     onSessionClose: () -> Unit,
   ) {
-    val view = onUpdateOrInvalidateRequest(lifecycle, spec, root, onDataEgress, onSessionClose)
+    if (root.spec.dataSpec != spec.dataSpec) {
+      logger.atFiner().log("Rendering view for update request: %s", spec.sessionUuid)
+      val renderedView =
+        renderer.render(
+          lifecycle = lifecycle,
+          context = spec.context,
+          spec = spec,
+          onDataEgress = onDataEgress,
+          onSendHints = onSendHints,
+          onSessionClose = onSessionClose,
+        )
+      root.setContentView(renderedView, spec)
+      logger.atFiner().log("Rendered view %s for update request: %s", renderedView.view, spec)
 
-    view.awaitNextPreDraw()
+      renderedView.view.awaitNextPreDraw()
+    } else {
+      logger.atFiner().log("Updating existing view for update request: %s", spec.sessionUuid)
+      root.updateInputSpec(spec.inputSpec)
+      root.setContentView(SkippedRender, spec)
+      logger.atFiner().log("Updated existing view for update request: %s", spec)
+    }
+
     logger.atFiner().log("Sending update response")
     send(delegatedUiResponse { this.updateResponse = delegatedUiUpdateResponse {} })
   }
@@ -577,19 +618,7 @@ internal constructor(
     onDataEgress: suspend (DelegatedUiEgressData) -> Unit,
     onSessionClose: () -> Unit,
   ) {
-    val unused = onUpdateOrInvalidateRequest(lifecycle, spec, root, onDataEgress, onSessionClose)
-  }
-
-  private suspend fun SendChannel<DelegatedUiResponse>.onUpdateOrInvalidateRequest(
-    lifecycle: DelegatedUiLifecycle,
-    spec: DelegatedUiRenderSpec,
-    root: DelegatedUiViewRoot,
-    onDataEgress: suspend (DelegatedUiEgressData) -> Unit,
-    onSessionClose: () -> Unit,
-  ): View {
-    root.setBackgroundColor(spec.backgroundColor)
-
-    logger.atFiner().log("Rendering view for update/invalidate request: %s", spec.sessionUuid)
+    logger.atFiner().log("Rendering view for invalidate request: %s", spec.sessionUuid)
     val renderedView =
       renderer.render(
         lifecycle = lifecycle,
@@ -597,13 +626,9 @@ internal constructor(
         spec = spec,
         onDataEgress = onDataEgress,
         onSessionClose = onSessionClose,
-      ) ?: throw NullTemplateRenderedError
+      )
     root.setContentView(renderedView, spec)
-    logger
-      .atFiner()
-      .log("Rendered view %s for update/invalidate request: %s", renderedView.view, spec)
-
-    return renderedView.view
+    logger.atFiner().log("Rendered view %s for invalidate request: %s", renderedView.view, spec)
   }
 
   private fun DelegatedUiPrepareRequest.toRenderSpec(
@@ -613,43 +638,64 @@ internal constructor(
       configuration = configuration,
       clientId = this.clientId,
       sessionUuid = generateSessionUuid(),
-      ingressData = this.ingressData,
       dataProviderInfo = this.dataProviderInfo,
       measureSpecWidth = this.measureSpecWidth,
       measureSpecHeight = this.measureSpecHeight,
       backgroundColor = Color.TRANSPARENT,
       clientNestedScrollAxes = SCROLL_AXIS_HORIZONTAL or SCROLL_AXIS_VERTICAL,
+      clientNestedScrollAxisLock = true,
+      inputSpec = DelegatedUiInputSpec(noTouchHint = false),
+      dataSpec = DelegatedUiDataSpec(ingressData = this.ingressData),
     )
 
   private fun DelegatedUiCreateRequest.toRenderSpec(
     configuration: Configuration
   ): DelegatedUiRenderSpec =
-    DelegatedUiRenderSpec(
-      configuration = configuration,
-      clientId = this.clientId,
-      sessionUuid = this.sessionUuid.ifEmpty { generateSessionUuid() },
-      ingressData = this.clientInputs.ingressData,
-      dataProviderInfo = this.clientInputs.dataProviderInfo,
-      measureSpecWidth = this.clientInputs.measureSpecWidth,
-      measureSpecHeight = this.clientInputs.measureSpecHeight,
-      backgroundColor = this.clientInputs.backgroundColor,
-      clientNestedScrollAxes = this.clientInputs.clientNestedScrollAxes,
-    )
+    this.clientInputs.run {
+      DelegatedUiRenderSpec(
+        configuration = configuration,
+        clientId = clientId,
+        sessionUuid = sessionUuid.ifEmpty { generateSessionUuid() },
+        dataProviderInfo = dataProviderInfo,
+        measureSpecWidth = measureSpecWidth,
+        measureSpecHeight = measureSpecHeight,
+        backgroundColor = backgroundColor,
+        clientNestedScrollAxes = clientNestedScrollAxes,
+        clientNestedScrollAxisLock =
+          when (hasClientNestedScrollAxisLock()) {
+            true -> clientNestedScrollAxisLock
+            else -> true
+          },
+        inputSpec = DelegatedUiInputSpec(noTouchHint = noTouchHint),
+        dataSpec = DelegatedUiDataSpec(ingressData = this.ingressData),
+      )
+    }
 
   private fun DelegatedUiUpdateRequest.toRenderSpec(
     spec: DelegatedUiRenderSpec
   ): DelegatedUiRenderSpec =
     this.clientInputs.run {
       spec.copy(
-        ingressData = if (hasIngressData()) ingressData else spec.ingressData,
-        dataProviderInfo =
-          if (hasDataProviderInfo()) clientInputs.dataProviderInfo else spec.dataProviderInfo,
+        dataProviderInfo = if (hasDataProviderInfo()) dataProviderInfo else spec.dataProviderInfo,
         measureSpecWidth = if (hasMeasureSpecWidth()) measureSpecWidth else spec.measureSpecWidth,
         measureSpecHeight =
           if (hasMeasureSpecHeight()) measureSpecHeight else spec.measureSpecHeight,
         backgroundColor = if (hasBackgroundColor()) backgroundColor else spec.backgroundColor,
         clientNestedScrollAxes =
           if (hasClientNestedScrollAxes()) clientNestedScrollAxes else spec.clientNestedScrollAxes,
+        clientNestedScrollAxisLock =
+          when (hasClientNestedScrollAxisLock()) {
+            true -> clientNestedScrollAxisLock
+            else -> spec.clientNestedScrollAxisLock
+          },
+        inputSpec =
+          DelegatedUiInputSpec(
+            noTouchHint = if (hasNoTouchHint()) noTouchHint else spec.inputSpec.noTouchHint
+          ),
+        dataSpec =
+          DelegatedUiDataSpec(
+            ingressData = if (hasIngressData()) ingressData else spec.dataSpec.ingressData
+          ),
       )
     }
 

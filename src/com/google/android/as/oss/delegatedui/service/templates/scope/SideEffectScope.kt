@@ -16,6 +16,7 @@
 
 package com.google.android.`as`.oss.delegatedui.service.templates.scope
 
+import com.google.android.`as`.oss.delegatedui.api.common.DelegatedUiHint
 import com.google.android.`as`.oss.delegatedui.api.integration.egress.DelegatedUiEgressData
 
 /**
@@ -32,11 +33,15 @@ sealed interface SideEffectScope {
    */
   val onDataEgress: suspend (DelegatedUiEgressData) -> Unit
 
+  /** Sends the given set of [DelegatedUiHint] to the local client. */
+  val onSendHints: suspend (Set<DelegatedUiHint>) -> Unit
+
   /** Closes the delegated UI session. */
   val onSessionClose: () -> Unit
 }
 
 internal class SideEffectScopeImpl(
   override val onDataEgress: suspend (DelegatedUiEgressData) -> Unit,
+  override val onSendHints: suspend (Set<DelegatedUiHint>) -> Unit,
   override val onSessionClose: () -> Unit,
 ) : SideEffectScope

@@ -22,55 +22,58 @@ import android.view.View
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
+import com.google.android.`as`.oss.common.config.ConfigReader
 import com.google.android.`as`.oss.delegatedui.api.integration.templates.DelegatedUiTemplateData
+import com.google.android.`as`.oss.delegatedui.config.beacon.BeaconConfig
+import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiInputSpec
 import com.google.android.`as`.oss.delegatedui.service.templates.TemplateRenderer
+import com.google.android.`as`.oss.delegatedui.service.templates.fonts.FlexFontUtils.withFlexFont
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.TemplateRendererScope
 import com.google.android.`as`.oss.delegatedui.utils.ResponseWithParcelables
 import javax.inject.Inject
+import kotlinx.coroutines.flow.StateFlow
+
+val LocalConfigReader =
+  staticCompositionLocalOf<ConfigReader<BeaconConfig>> { error("No ConfigReader provided") }
 
 /**
  * A [TemplateRenderer] for the Beacon template. This is the entry point for rendering the template.
  */
-class BeaconTemplateRenderer @Inject internal constructor() : TemplateRenderer {
+class BeaconTemplateRenderer
+@Inject
+internal constructor(val configReader: ConfigReader<BeaconConfig>) : TemplateRenderer {
   override fun TemplateRendererScope.onCreateTemplateView(
     context: Context,
+    inputSpecFlow: StateFlow<DelegatedUiInputSpec>,
     response: ResponseWithParcelables<DelegatedUiTemplateData>,
   ): View? {
-    if (!response.value.beaconTemplateData.hasWidget()) {
+    if (!response.data.beaconTemplateData.hasWidget()) {
       return null
     }
 
-    val widget = response.value.beaconTemplateData.widget
-    val pendingIntentList: List<PendingIntent> = response.pendingIntentList.value ?: emptyList()
+    val widget = response.data.beaconTemplateData.widget
+    val pendingIntentList: List<PendingIntent> =
+      response.pendingIntentList.valueOrNull ?: emptyList()
 
     return ComposeView(context).apply {
       setContent {
-        val nestedScrollInterop = rememberNestedScrollInteropConnection()
-        Box(modifier = Modifier.nestedScroll(nestedScrollInterop)) {
-          MainTheme {
-            Surface(
-              color =
-                if (widget.hasBackgroundColor()) {
-                  Color(widget.backgroundColor)
-                } else {
-                  MaterialTheme.colorScheme.surfaceContainerHigh
-                }
-            ) {
-              BeaconWidgetContainer(widget, pendingIntentList)
-            }
+        CompositionLocalProvider(LocalConfigReader provides configReader) {
+          val nestedScrollInterop = rememberNestedScrollInteropConnection()
+          Box(modifier = Modifier.nestedScroll(nestedScrollInterop)) {
+            MainTheme { BeaconWidgetContainer(widget, pendingIntentList) }
           }
         }
       }
@@ -96,5 +99,5 @@ fun MainTheme(
       else -> lightColorScheme()
     }
 
-  MaterialTheme(colorScheme = colorScheme, typography = Typography()) { content() }
+  MaterialTheme(colorScheme = colorScheme, typography = Typography().withFlexFont()) { content() }
 }

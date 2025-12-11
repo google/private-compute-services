@@ -16,16 +16,13 @@ edition = "2023";
 
 package com.google.android.as.oss.delegatedui.api.integration.egress.bugle;
 
-
 option java_package = "com.google.android.as.oss.delegatedui.api.integration.egress.bugle";
 option java_multiple_files = true;
 
 // This is for search term data as well as bugle suggestion data.
 message BugleEgressData {
   oneof data {
-    string suggestion_text = 1
-       ;  // bugle suggestion text
-    string photo_search_query = 2
-       ;  // bugle photo search query
+    string suggestion_text = 1;     // bugle suggestion text
+    string photo_search_query = 2;  // bugle photo search query
   }
 }

@@ -46,9 +46,6 @@ class PcsAttestationMeasurementConfigReader
   static final LongFlag DELAY_SECONDS =
       LongFlag.create("PcsAttestationMeasurement__delay_seconds_from_hour", 5L);
 
-  static final BooleanFlag ENABLE_CONTENT_BINDING_AS_CHALLENGE =
-      BooleanFlag.create("PcsAttestationMeasurement__enable_content_binding_as_challenge", false);
-
   private final FlagManager flagManager;
 
   static PcsAttestationMeasurementConfigReader create(FlagManager flagManager) {
@@ -77,7 +74,6 @@ class PcsAttestationMeasurementConfigReader
         .setMinDelaySeconds(flagManager.get(MIN_DELAY_SECONDS))
         .setMaxDelaySeconds(flagManager.get(MAX_DELAY_SECONDS))
         .setDelaySeconds(flagManager.get(DELAY_SECONDS))
-        .setEnableContentBindingAsChallenge(flagManager.get(ENABLE_CONTENT_BINDING_AS_CHALLENGE))
         .build();
   }
 

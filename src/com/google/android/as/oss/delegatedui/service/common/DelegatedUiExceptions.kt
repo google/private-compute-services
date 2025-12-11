@@ -23,7 +23,7 @@ object DelegatedUiExceptions {
 
   /** Represents the DUI failure case when the TemplateRenderer cannot be found. */
   class InvalidTemplateRendererError(val templateType: DelegatedUiTemplateType) :
-    Exception("No template renderer found for template type $templateType.")
+    Exception("No template renderer found for template type ${templateType.name}.")
 
   /** Represents the DUI failure case when the TemplateRenderer rendered a null view. */
   object NullTemplateRenderedError :

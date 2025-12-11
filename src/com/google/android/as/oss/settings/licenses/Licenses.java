@@ -59,7 +59,8 @@ public final class Licenses {
       String[] licenseLocation = entry.substring(0, delimiter).split(":");
       Preconditions.checkState(
           licenseLocation.length == 2 && delimiter > 0,
-          "Invalid license meta-data line:\n" + entry);
+          "Invalid license meta-data line:\n%s",
+          entry);
       long licenseOffset = Long.parseLong(licenseLocation[0]);
       int licenseLength = Integer.parseInt(licenseLocation[1]);
       licenses.add(

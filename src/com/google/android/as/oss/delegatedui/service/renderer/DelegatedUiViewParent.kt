@@ -59,6 +59,13 @@ internal class DelegatedUiViewParent(
   /** The nested scroll axes supported by the client. */
   @ScrollAxis var clientNestedScrollAxes: Int = SCROLL_AXIS_HORIZONTAL or SCROLL_AXIS_VERTICAL
 
+  /**
+   * Whether the DUI session should report a specific axis when a nested scroll gesture is detected,
+   * and whether that axis should be locked such that subsequent nested scroll events are only
+   * reported for that axis.
+   */
+  var clientNestedScrollAxisLock: Boolean = true
+
   // region Size changes
   // -----------------------------------------------------------------------------------------------
 
@@ -106,18 +113,18 @@ internal class DelegatedUiViewParent(
         }
 
         override fun onScroll(
-          e1: MotionEvent?,
-          e2: MotionEvent,
+          downEvent: MotionEvent?,
+          moveEvent: MotionEvent,
           deltaX: Float,
           deltaY: Float,
         ): Boolean {
           logger.atFiner().log("GestureDetector.onScroll: %f, %f", deltaX, deltaY)
 
-          if (e1 == null) return true
+          if (downEvent == null) return true
 
           if (!isScrollingIntercept) {
-            val distanceX = abs(e2.x - e1.x)
-            val distanceY = abs(e2.y - e1.y)
+            val distanceX = abs(downEvent.rawX - moveEvent.rawX)
+            val distanceY = abs(downEvent.rawY - moveEvent.rawY)
 
             val isHorizontallyScrolling =
               distanceX > touchSlop && clientNestedScrollAxes.hasFlag(SCROLL_AXIS_HORIZONTAL)
@@ -135,8 +142,8 @@ internal class DelegatedUiViewParent(
         }
 
         override fun onFling(
-          e1: MotionEvent?,
-          e2: MotionEvent,
+          downEvent: MotionEvent?,
+          moveEvent: MotionEvent,
           flingX: Float,
           flingY: Float,
         ): Boolean {
@@ -412,7 +419,12 @@ internal class DelegatedUiViewParent(
   }
 
   private fun reportScrollDelta(scrollX: Float, scrollY: Float) {
-    reportGestureStart(getNonZeroAxes(scrollX, scrollY)) // From reportScrollDelta()
+    reportGestureStart( // From reportScrollDelta()
+      when (clientNestedScrollAxisLock) {
+        true -> getPrimaryScrollAxis(scrollX, scrollY)
+        else -> getNonZeroScrollAxes(scrollX, scrollY)
+      }
+    )
 
     val eventScrollX = if (nestedScrollAxesReported.hasFlag(SCROLL_AXIS_HORIZONTAL)) scrollX else 0f
     val eventScrollY = if (nestedScrollAxesReported.hasFlag(SCROLL_AXIS_VERTICAL)) scrollY else 0f
@@ -455,11 +467,29 @@ internal class DelegatedUiViewParent(
   }
 
   @ScrollAxis
-  private fun getNonZeroAxes(x: Float, y: Float): Int {
+  private fun getNonZeroScrollAxes(x: Float, y: Float): Int {
     var axes = SCROLL_AXIS_NONE
     if (x != 0f) axes = axes or SCROLL_AXIS_HORIZONTAL
     if (y != 0f) axes = axes or SCROLL_AXIS_VERTICAL
     return axes
+  }
+
+  /**
+   * Determines the single dominant scroll axis based on magnitude. In case of a tie, vertical is
+   * prioritized.
+   */
+  @ScrollAxis
+  private fun getPrimaryScrollAxis(x: Float, y: Float): Int {
+    val canScrollHorizontally = clientNestedScrollAxes.hasFlag(SCROLL_AXIS_HORIZONTAL)
+    val canScrollVertically = clientNestedScrollAxes.hasFlag(SCROLL_AXIS_VERTICAL)
+
+    return when {
+      abs(x) > abs(y) && canScrollHorizontally -> SCROLL_AXIS_HORIZONTAL
+      abs(y) > abs(x) && canScrollVertically -> SCROLL_AXIS_VERTICAL
+      y != 0f && canScrollVertically -> SCROLL_AXIS_VERTICAL
+      x != 0f && canScrollHorizontally -> SCROLL_AXIS_HORIZONTAL
+      else -> SCROLL_AXIS_NONE
+    }
   }
 
   // -----------------------------------------------------------------------------------------------

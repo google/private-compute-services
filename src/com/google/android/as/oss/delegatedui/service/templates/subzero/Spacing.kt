@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 
 /** Spacing constants for Compose UI elements. */
 object SubZeroSpacing {
+  val xxsmall: Dp = 2.dp
   val xsmall: Dp = 4.dp
   val small: Dp = 6.dp
   val normal: Dp = 8.dp
@@ -34,8 +35,9 @@ object SubZeroSpacing {
 
 /** Radius constants for Compose UI elements. */
 object SubZeroRadius {
-  val xxsmall: Dp = 8.dp
-  val xsmall: Dp = 16.dp
+  val xxxsmall: Dp = 4.dp
+  val xxsmall: Dp = 16.dp
+  val xsmall: Dp = 20.dp
   val small: Dp = 24.dp
   val medium: Dp = 28.dp
   val normal: Dp = 30.dp

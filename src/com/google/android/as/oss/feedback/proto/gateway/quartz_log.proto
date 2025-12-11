@@ -79,6 +79,7 @@ message QuartzCommonData {
   string locus_id = 35;
   bool has_promotable_characteristics = 36;
   string group_key = 37;
+  string detected_language = 38;
 }
 
 message QuartzKeyTypeData {
@@ -97,6 +98,8 @@ message QuartzKeyTypeData {
     CLASSIFICATION_METHOD_PREDICT_EXEMPTION_SENDER_FROM_CONTACTS = 9;
     CLASSIFICATION_METHOD_PREDICT_EXEMPTION_UNSUPPORTED_LANGUAGE = 10;
     CLASSIFICATION_METHOD_PREDICT_DEFAULT_BUNDLE_CORRECTION = 11;
+    CLASSIFICATION_METHOD_PREDICT_EXEMPTION_WORK_PROFILE_MESSAGE = 12;
+    CLASSIFICATION_METHOD_PREDICT_EXEMPTION_MESSAGING_STYLE = 13;
   }
 
   QuartzCommonData quartz_common_data = 1;
@@ -116,6 +119,9 @@ message QuartzKeyTypeData {
   string exemption_executed_time_ms_string = 13;
   string feedback_category = 14;
   string feedback_input_category = 15;
+  string classification_default_category_result = 16;
+  string default_category_correction_threshold = 17;
+  bool is_suppress_duplicate = 18;
 }
 
 message QuartzKeySummarizationData {

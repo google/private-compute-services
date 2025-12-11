@@ -25,4 +25,5 @@ data class DelegatedUiConfig(
   val dataServiceConfigList: DelegatedUiDataServiceConfigList,
   // Only used for testing.
   val bypassAllSecurityPolicies: Boolean,
+  val enableBugleOutlineAnimationV2: Boolean,
 )

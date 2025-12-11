@@ -16,11 +16,13 @@
 
 package com.google.android.`as`.oss.feedback.serviceclient
 
-import com.google.android.`as`.oss.feedback.ViewFeedbackData
 import com.google.android.`as`.oss.feedback.api.dataservice.FeedbackUiRenderingData
 import com.google.android.`as`.oss.feedback.api.dataservice.feedbackUiRenderingData
 import com.google.android.`as`.oss.feedback.api.gateway.QuartzCUJ
 import com.google.android.`as`.oss.feedback.api.gateway.SpoonCUJ
+import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory
+import com.google.android.`as`.oss.feedback.domain.DataCollectionCategoryData
+import com.google.android.`as`.oss.feedback.domain.ViewFeedbackData
 
 /** Service to provide feedback donation data. */
 interface FeedbackDataServiceClient {
@@ -46,6 +48,39 @@ data class FeedbackDonationData(
 ) : ViewFeedbackData {
   override val viewFeedbackHeader: String? = feedbackUiRenderingData.feedbackDialogViewDataHeader
   override val viewFeedbackBody: String = toString()
+
+  override val dataCollectionCategories: Map<DataCollectionCategory, DataCollectionCategoryData>
+    get() {
+      return mapOf(
+        DataCollectionCategory.TriggeringMessages to
+          DataCollectionCategoryData(
+            header = feedbackUiRenderingData.feedbackViewDataCategoryTitles.triggeringMessagesTitle,
+            body = triggeringMessages.joinToString("\n"),
+          ),
+        DataCollectionCategory.IntentQueries to
+          DataCollectionCategoryData(
+            header = feedbackUiRenderingData.feedbackViewDataCategoryTitles.intentQueriesTitle,
+            body = intentQueries.joinToString("\n"),
+          ),
+        DataCollectionCategory.ModelOutputs to
+          DataCollectionCategoryData(
+            header = feedbackUiRenderingData.feedbackViewDataCategoryTitles.modelOutputsTitle,
+            body = modelOutputs.joinToString("\n"),
+          ),
+        DataCollectionCategory.MemoryEntities to
+          DataCollectionCategoryData(
+            header = feedbackUiRenderingData.feedbackViewDataCategoryTitles.memoryEntitiesTitle,
+            body = memoryEntities.joinToString("\n"),
+          ),
+      )
+    }
+
+  override val dataCollectionCategoryExpandContentDescription: String =
+    feedbackUiRenderingData.feedbackViewDataCategoryTitles.expandCategoryButtonSemanticsDescription
+
+  override val dataCollectionCategoryCollapseContentDescription: String =
+    feedbackUiRenderingData.feedbackViewDataCategoryTitles
+      .collapseCategoryButtonSemanticsDescription
 
   override fun toString(): String {
     return buildString {

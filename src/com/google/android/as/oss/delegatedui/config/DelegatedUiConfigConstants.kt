@@ -46,6 +46,11 @@ internal object DelegatedUiConfigConstants {
           allowedReleaseKeys +=
             listOf("d801de6b2c6cdfe425f29537b11f3d6ba4195bc7c76d03d23449ad1c1aa78eb4")
         },
+        packageSecurityInfo {
+          packageName = "com.google.android.apps.pixel.relationships"
+          allowedReleaseKeys +=
+            listOf("910c19fa15058698a0bf6cdc9bb1ecdb3fa92d91d20c86721ec22a2f8052eb30")
+        },
       )
   }
 }

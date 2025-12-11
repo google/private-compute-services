@@ -24,7 +24,6 @@ import android.content.Context;
 import android.os.Build;
 import android.os.IBinder;
 import com.google.android.as.oss.common.config.ConfigReader;
-import com.google.android.as.oss.common.security.api.PackageSecurityInfo;
 import com.google.android.as.oss.common.security.config.PccSecurityConfig;
 import com.google.android.apps.miphone.pcs.grpc.GrpcServerEndpointConfiguration;
 import com.google.android.apps.miphone.pcs.grpc.GrpcServerEndpointConfigurator;
@@ -41,7 +40,6 @@ import io.grpc.binder.IBinderReceiver;
 import io.grpc.binder.InboundParcelablePolicy;
 import io.grpc.binder.ServerSecurityPolicy;
 import java.io.IOException;
-import java.util.List;
 import javax.inject.Inject;
 
 /**
@@ -83,10 +81,9 @@ final class GrpcServerEndpointConfiguratorImpl implements GrpcServerEndpointConf
     PccSecurityConfig pccSecurityConfig = pccSecurityConfigReader.getConfig();
     ServerSecurityPolicy serverSecurityPolicy;
     if (pccSecurityConfig.enableAllowlistedOnly()) {
-      List<PackageSecurityInfo> packageSecurityInfos =
-          pccSecurityConfig.securityInfoList().getPackageSecurityInfosList();
       serverSecurityPolicy =
-          buildServerSecurityPolicy(allowlistedOnly(context, packageSecurityInfos), configuration);
+          buildServerSecurityPolicy(
+              allowlistedOnly(context, pccSecurityConfig.securityInfoList()), configuration);
     } else {
       serverSecurityPolicy = buildServerSecurityPolicy(untrustedPolicy(), configuration);
     }

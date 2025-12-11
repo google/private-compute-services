@@ -24,10 +24,10 @@ val LiveTranslatePolicy_FederatedCompute =
   ) {
     description =
       """
-        To measure and improve the quality of Live Translate.
+      To measure and improve the quality of Live Translate.
 
-        ALLOWED EGRESSES: FederatedCompute.
-        ALLOWED USAGES: Federated analytics, federated learning.
+      ALLOWED EGRESSES: FederatedCompute.
+      ALLOWED USAGES: Federated analytics, federated learning.
       """
         .trimIndent()
 

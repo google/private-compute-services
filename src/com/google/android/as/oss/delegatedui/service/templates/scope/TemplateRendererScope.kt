@@ -22,10 +22,11 @@ import android.view.View
 import androidx.compose.ui.Modifier
 import com.google.android.`as`.oss.dataattribution.proto.AttributionChipData
 import com.google.android.`as`.oss.dataattribution.proto.AttributionDialogData
+import com.google.android.`as`.oss.delegatedui.api.common.DelegatedUiHint
 import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiUsageData
+import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiUsageData.InteractionType
 import com.google.android.`as`.oss.delegatedui.api.integration.egress.DelegatedUiEgressData
 import com.google.android.`as`.oss.delegatedui.api.integration.egress.DelegatedUiEgressDataKt
-import com.google.android.`as`.oss.delegatedui.api.integration.templates.DelegatedUiAdditionalData
 import com.google.android.`as`.oss.delegatedui.api.integration.templates.UiIdToken
 import com.google.android.`as`.oss.delegatedui.service.common.ConnectLifecycle
 import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiLifecycle
@@ -37,8 +38,6 @@ import com.google.android.`as`.oss.delegatedui.service.templates.scope.interacti
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.interactions.ImpressionInteractionImpl
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.interactions.InteropInteraction
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.interactions.InteropInteractionImpl
-import com.google.android.`as`.oss.delegatedui.service.templates.scope.interactions.LoadInteraction
-import com.google.android.`as`.oss.delegatedui.service.templates.scope.interactions.LoadInteractionImpl
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.sideeffects.CloseSessionSideEffect
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.sideeffects.CloseSessionSideEffectImpl
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.sideeffects.DismissSuggestionSideEffect
@@ -50,15 +49,15 @@ import com.google.android.`as`.oss.delegatedui.service.templates.scope.sideeffec
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.sideeffects.LogUsageSideEffectImpl
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.sideeffects.SendEgressDataSideEffect
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.sideeffects.SendEgressDataSideEffectImpl
+import com.google.android.`as`.oss.delegatedui.service.templates.scope.sideeffects.SendHintsSideEffect
+import com.google.android.`as`.oss.delegatedui.service.templates.scope.sideeffects.SendHintsSideEffectImpl
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.sideeffects.ShowDataAttributionSideEffect
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.sideeffects.ShowDataAttributionSideEffectImpl
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.sideeffects.ShowFeedbackSideEffect
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.sideeffects.ShowFeedbackSideEffectImpl
-import com.google.android.`as`.oss.delegatedui.utils.ResponseWithParcelables
 import com.google.android.`as`.oss.feedback.api.EntityFeedbackDialogData
 import com.google.android.`as`.oss.feedback.api.MultiFeedbackDialogData
 import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.Deferred
 
 /**
  * Scoped environment provided for [TemplateRenderer] that grants access to
@@ -69,17 +68,17 @@ import kotlinx.coroutines.Deferred
  * | Interactions | Side-Effects        |
  * |--------------|---------------------|
  * | Click        | SendEgressData      |
- * | Load         | ExecuteAction       |
- * | Interop      | ShowDataAttribution |
- * | Impression   | CloseSession        |
- * | Drag         | LogUsage            |
+ * | Interop      | ExecuteAction       |
+ * | Impression   | ShowDataAttribution |
+ * | Drag         | CloseSession        |
+ * |              | LogUsage            |
  * |              | ShowEntityFeedback  |
  * |              | DismissSuggestion   |
+ * |              | SendHints           |
  */
 interface TemplateRendererScope :
   ClickInteraction,
   DragInteraction,
-  LoadInteraction,
   InteropInteraction,
   ImpressionInteraction,
   SendEgressDataSideEffect,
@@ -88,7 +87,8 @@ interface TemplateRendererScope :
   CloseSessionSideEffect,
   LogUsageSideEffect,
   ShowFeedbackSideEffect,
-  DismissSuggestionSideEffect
+  DismissSuggestionSideEffect,
+  SendHintsSideEffect
 
 /**
  * Creates a [TemplateRendererScope] on a create request, or returns a no-op implementation on a
@@ -98,15 +98,16 @@ fun TemplateRendererScope(
   context: Context,
   lifecycle: DelegatedUiLifecycle,
   mainCoroutineContext: CoroutineContext,
-  additionalData: Deferred<ResponseWithParcelables<DelegatedUiAdditionalData>>?,
   logUsageData: suspend (DelegatedUiUsageData) -> Unit,
   onDataEgress: suspend (DelegatedUiEgressData) -> Unit,
+  onSendHints: suspend (Set<DelegatedUiHint>) -> Unit,
   onSessionClose: () -> Unit,
 ): TemplateRendererScope =
   if (lifecycle is ConnectLifecycle) {
     TemplateRendererScopeImpl(
-      interactionHelper = InteractionHelperImpl(lifecycle, mainCoroutineContext, additionalData),
-      sideEffectHelper = SideEffectHelperImpl(logUsageData, onDataEgress, onSessionClose, context),
+      interactionHelper = InteractionHelperImpl(lifecycle, mainCoroutineContext),
+      sideEffectHelper =
+        SideEffectHelperImpl(logUsageData, onDataEgress, onSendHints, onSessionClose, context),
     )
   } else {
     NO_OP_SCOPE
@@ -119,7 +120,6 @@ private class TemplateRendererScopeImpl(
   TemplateRendererScope,
   ClickInteraction by ClickInteractionImpl(interactionHelper),
   DragInteraction by DragInteractionImpl(interactionHelper),
-  LoadInteraction by LoadInteractionImpl(interactionHelper),
   InteropInteraction by InteropInteractionImpl(interactionHelper),
   ImpressionInteraction by ImpressionInteractionImpl(interactionHelper),
   SendEgressDataSideEffect by SendEgressDataSideEffectImpl(sideEffectHelper),
@@ -128,7 +128,8 @@ private class TemplateRendererScopeImpl(
   CloseSessionSideEffect by CloseSessionSideEffectImpl(sideEffectHelper),
   LogUsageSideEffect by LogUsageSideEffectImpl(sideEffectHelper),
   ShowFeedbackSideEffect by ShowFeedbackSideEffectImpl(sideEffectHelper),
-  DismissSuggestionSideEffect by DismissSuggestionSideEffectImpl(sideEffectHelper)
+  DismissSuggestionSideEffect by DismissSuggestionSideEffectImpl(sideEffectHelper),
+  SendHintsSideEffect by SendHintsSideEffectImpl(sideEffectHelper)
 
 private val NO_OP_SCOPE = NoOpTemplateRendererScope()
 
@@ -160,11 +161,13 @@ class NoOpTemplateRendererScope : TemplateRendererScope {
     onDragCompleted: InteractionListener,
   ): Modifier = this
 
-  override fun doOnLoad(onLoad: (ResponseWithParcelables<DelegatedUiAdditionalData>?) -> Unit) {}
+  override suspend fun doOnInterop(
+    uiTokenId: UiIdToken,
+    interactionType: InteractionType,
+    onInteraction: InteractionListener,
+  ) {}
 
-  override fun doOnInterop(uiTokenId: UiIdToken, onInteraction: InteractionListener) {}
-
-  override fun doOnImpression(uiIdToken: UiIdToken, onImpression: InteractionListener) {}
+  override suspend fun doOnImpression(uiIdToken: UiIdToken, onImpression: InteractionListener) {}
 
   override suspend fun InteractionScope.sendEgressData(
     egressDataBuilder: DelegatedUiEgressDataKt.Dsl.() -> Unit
@@ -187,4 +190,6 @@ class NoOpTemplateRendererScope : TemplateRendererScope {
   override suspend fun InteractionScope.showMultiFeedback(data: MultiFeedbackDialogData) {}
 
   override suspend fun InteractionScope.dismissSuggestion() {}
+
+  override suspend fun InteractionScope.sendHints(hints: Set<DelegatedUiHint>) {}
 }

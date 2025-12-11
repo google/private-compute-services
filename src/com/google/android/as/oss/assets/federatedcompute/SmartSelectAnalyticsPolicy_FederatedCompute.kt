@@ -24,10 +24,10 @@ val SmartSelectAnalyticsPolicy_FederatedCompute =
   ) {
     description =
       """
-        To make improvements to the platform Smart Select service - for example, understand selection usage.
+      To make improvements to the platform Smart Select service - for example, understand selection usage.
 
-        ALLOWED EGRESSES: FederatedCompute.
-        ALLOWED USAGES: Federated analytics.
+      ALLOWED EGRESSES: FederatedCompute.
+      ALLOWED USAGES: Federated analytics.
       """
         .trimIndent()
 

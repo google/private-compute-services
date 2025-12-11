@@ -16,6 +16,9 @@ edition = "2023";
 
 package com.google.android.as.oss.feedback.api;
 
+import "third_party/protobuf/cpp_features.proto";
+
+option features.(pb.cpp).string_type = VIEW;
 option java_package = "com.google.android.as.oss.feedback.api";
 option java_multiple_files = true;
 
@@ -23,17 +26,26 @@ option java_multiple_files = true;
 message FeedbackTagData {
   // The label of the tag.
   string label = 1;
+
   // The rating tag enum referenced by rating_tag_ordinal.
-  FeedbackRatingTagSource rating_tag_source = 2;
+  FeedbackRatingTagSource rating_tag_source = 2
+     ;
+
   // The rating tag ordinal of the enum specified by rating_tag_source.
   int32 rating_tag_ordinal = 3;
+
+  repeated string ground_truth_options = 4
+     ;
 }
 
 // The source enum of the rating tag.
 enum FeedbackRatingTagSource {
   RATING_TAG_SOURCE_UNDEFINED = 0;
+
   RATING_TAG_SOURCE_POSITIVE_RATING_TAG = 1;
+
   RATING_TAG_SOURCE_NEGATIVE_RATING_TAG = 2;
+
   RATING_TAG_SOURCE_KEY_TYPE_OPTION_TAG = 3;
 }
 

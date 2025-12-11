@@ -24,11 +24,11 @@ val PecanUsageEventPolicy_FederatedCompute =
   ) {
     description =
       """
-        Monitor usage statistics for People and Conversations. Usage statistics will
-        help improve the People and Conversations infrastructure.
+      Monitor usage statistics for People and Conversations. Usage statistics will
+      help improve the People and Conversations infrastructure.
 
-        ALLOWED EGRESSES: FederatedCompute.
-        ALLOWED USAGES: Federated analytics, federated learning.
+      ALLOWED EGRESSES: FederatedCompute.
+      ALLOWED USAGES: Federated analytics, federated learning.
       """
         .trimIndent()
     flavors(Flavor.ASI_PROD) { minRoundSize(minRoundSize = 1000, minSecAggRoundSize = 0) }

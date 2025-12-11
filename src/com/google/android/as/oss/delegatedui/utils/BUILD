@@ -53,6 +53,41 @@ android_library(
 )
 
 android_library(
+    name = "parcelable_over_rpc_base_module",
+    srcs = ["ParcelableOverRpcUtilsBaseModule.kt"],
+    tags = ["keep_dep"],
+    deps = [
+        ":parcelable_over_rpc",
+        "@maven//:com_google_dagger_dagger",
+        "@maven//:javax_inject_javax_inject",
+    ],
+)
+
+android_library(
+    name = "parcelable_over_rpc_hilt_module",
+    srcs = ["ParcelableOverRpcUtilsHiltModule.kt"],
+    tags = ["keep_dep"],
+    deps = [
+        ":parcelable_over_rpc_base_module",
+        "@maven//:com_google_dagger_dagger",
+        "@maven//:com_google_dagger_hilt-android",
+    ],
+)
+
+android_library(
+    name = "parcelable_over_rpc_testing",
+    srcs = ["FakeParcelableOverRpcUtils.kt"],
+    tags = ["keep_dep"],
+    deps = [
+        ":parcelable_key",
+        ":parcelable_over_rpc",
+        "@maven//:io_grpc_grpc_api",
+        "@maven//:io_grpc_grpc_context",
+        "@maven//:io_grpc_grpc_stub",
+    ],
+)
+
+android_library(
     name = "response_with_parcelables",
     srcs = ["ResponseWithParcelables.kt"],
     deps = [

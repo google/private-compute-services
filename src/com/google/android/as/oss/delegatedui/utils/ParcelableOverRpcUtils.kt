@@ -24,7 +24,7 @@ import io.grpc.stub.AbstractStub
 import io.grpc.stub.MetadataUtils
 import java.util.concurrent.atomic.AtomicReference
 
-object ParcelableOverRpcUtils {
+interface ParcelableOverRpcUtils {
 
   /** Helper to be called on the client for sending single parcelables over request headers. */
   fun <Stub : AbstractStub<Stub>, P : Parcelable> AbstractStub<Stub>.sendParcelableInRequest(
@@ -50,7 +50,7 @@ object ParcelableOverRpcUtils {
     delegate: ParcelableOverRpcDelegate<P>,
   ): Stub {
     val headerCapture = AtomicReference<Metadata>()
-    delegate.setValue { headerCapture.get()?.get(key.metadataKey) }
+    delegate.setValue(key) { headerCapture.get()?.get(key.metadataKey) }
     return withInterceptors(
       MetadataUtils.newCaptureMetadataInterceptor(headerCapture, AtomicReference())
     )
@@ -62,12 +62,7 @@ object ParcelableOverRpcUtils {
     delegate: ParcelableOverRpcDelegate<List<P>>,
   ): Stub {
     val headerCapture = AtomicReference<Metadata>()
-    delegate.setValue {
-      headerCapture.get()?.let { capturedMetadata ->
-        val allValues = capturedMetadata.getAll(key.metadataKey)
-        allValues?.map { it as P }
-      }
-    }
+    delegate.setValue(key) { headerCapture.get()?.getAll(key.metadataKey)?.toList() }
     return withInterceptors(
       MetadataUtils.newCaptureMetadataInterceptor(headerCapture, AtomicReference())
     )
@@ -81,7 +76,7 @@ object ParcelableOverRpcUtils {
   fun <P : Parcelable> BindableService.receiveParcelableFromRequest(
     key: SingleParcelableKey<P>,
     context: Context = Context.current(),
-  ): P = receiveParcelableOrNullFromRequest(key, context) as P
+  ): P = receiveParcelableOrNullFromRequest(key, context) ?: throw NoSuchParcelableException(key)
 
   /**
    * Helper to be called on the server for receiving single parcelables over request headers,
@@ -101,7 +96,8 @@ object ParcelableOverRpcUtils {
   fun <P : Parcelable> BindableService.receiveParcelablesFromRequest(
     key: RepeatedParcelableKey<P>,
     context: Context = Context.current(),
-  ): List<P> = receiveParcelablesOrNullFromRequest(key, context) as List<P>
+  ): List<P> =
+    receiveParcelablesOrNullFromRequest(key, context) ?: throw NoSuchParcelableException(key)
 
   /**
    * Helper to be called on the server for receiving repeated parcelables over request headers,
@@ -128,69 +124,70 @@ object ParcelableOverRpcUtils {
     values: List<P>,
     context: Context = Context.current(),
   ) = key.responseHeaderContextKey.get(context).set(values)
-
-  /** Creates an empty value holder for receiving Parcelables over RPC. */
-  fun <T : Parcelable> delegateOf(): ParcelableOverRpcDelegate<T> = ParcelableOverRpcDelegate()
-
-  /** Creates a value holder for receiving Parcelables over RPC. */
-  fun <T : Parcelable> T?.delegateOf(): ParcelableOverRpcDelegate<T> {
-    val value = this@delegateOf
-    return ParcelableOverRpcDelegate<T>().apply { this.setValue { value } }
-  }
-
-  /** Creates an empty value holder for receiving Parcelables over RPC, structured as a list. */
-  fun <T : Parcelable> delegateListOf(): ParcelableOverRpcDelegate<List<T>> =
-    ParcelableOverRpcDelegate()
-
-  /** Creates a value holder for receiving Parcelables over RPC, structured as a list. */
-  fun <T : Parcelable> List<T>?.delegateListOf(): ParcelableOverRpcDelegate<List<T>> {
-    val value = this@delegateListOf
-    return ParcelableOverRpcDelegate<List<T>>().apply { this.setValue { value } }
-  }
-
-  /**
-   * Converts a [ParcelableOverRpcDelegate<T>] value holder to a [ParcelableOverRpcDelegate<P>]
-   * value holder.
-   */
-  fun <T, P> ParcelableOverRpcDelegate<T>.transform(
-    transform: (T?) -> P?
-  ): ParcelableOverRpcDelegate<P> {
-    val parentDelegate = this
-    return ParcelableOverRpcDelegate<P>().apply { setValue { transform(parentDelegate.value) } }
-  }
 }
+
+/** Thrown to indicate that the parcelable for the given key was not found. */
+class NoSuchParcelableException(key: ParcelableKey<*>?) :
+  RuntimeException("No parcelables found for key: ${key ?: "UNKNOWN"}.")
 
 /** Holds some value [T]. */
 class ParcelableOverRpcDelegate<T> internal constructor() {
+  private var key: ParcelableKey<*>? = null
   private var provider: () -> T? = { null }
+
+  /** Returns the value held by the delegate, or null if there is no value held by the delegate. */
+  val valueOrNull: T?
+    get() = provider()
 
   /**
    * Returns the value held by the delegate.
    *
-   * @throws NullPointerException Throws if there is no valid value held by the delegate.
+   * @throws NoSuchParcelableException Throws if there is no valid value held by the delegate.
    */
-  val value: T?
-    get() = provider()
+  val value: T
+    get() = valueOrNull ?: throw NoSuchParcelableException(key)
 
   /** Sets the value held by the delegate. */
-  internal fun setValue(valueProvider: () -> T?) {
-    provider = valueProvider
+  internal fun setValue(key: ParcelableKey<*>? = null, valueProvider: () -> T?) {
+    this.key = key
+    this.provider = valueProvider
   }
 
   override fun toString(): String {
-    return "ParcelableOverRpcDelegate($value)"
+    return "ParcelableOverRpcDelegate($valueOrNull)"
   }
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is ParcelableOverRpcDelegate<*>) return false
 
-    if (value != other.value) return false
+    if (valueOrNull != other.valueOrNull) return false
 
     return true
   }
 
   override fun hashCode(): Int {
-    return value?.hashCode() ?: 0
+    return valueOrNull?.hashCode() ?: 0
+  }
+
+  companion object {
+    /** Creates an empty value holder for receiving Parcelables over RPC. */
+    fun <T : Parcelable> delegateOf(): ParcelableOverRpcDelegate<T> = ParcelableOverRpcDelegate()
+
+    /** Creates a value holder for receiving Parcelables over RPC. */
+    fun <T : Parcelable> T?.delegateOf(): ParcelableOverRpcDelegate<T> {
+      val value = this@delegateOf
+      return ParcelableOverRpcDelegate<T>().apply { value?.let { this.setValue { it } } }
+    }
+
+    /** Creates an empty value holder for receiving Parcelables over RPC, structured as a list. */
+    fun <T : Parcelable> delegateListOf(): ParcelableOverRpcDelegate<List<T>> =
+      ParcelableOverRpcDelegate()
+
+    /** Creates a value holder for receiving Parcelables over RPC, structured as a list. */
+    fun <T : Parcelable> List<T>?.delegateListOf(): ParcelableOverRpcDelegate<List<T>> {
+      val value = this@delegateListOf
+      return ParcelableOverRpcDelegate<List<T>>().apply { value?.let { this.setValue { it } } }
+    }
   }
 }

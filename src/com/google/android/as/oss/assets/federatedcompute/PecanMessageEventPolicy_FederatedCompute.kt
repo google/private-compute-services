@@ -24,11 +24,11 @@ val PecanMessageEventPolicy_FederatedCompute =
   ) {
     description =
       """
-        Monitor conversation events statistics for People and Conversations. Conversation events
-        statistics will help improve the People and Conversations infrastructure.
+      Monitor conversation events statistics for People and Conversations. Conversation events
+      statistics will help improve the People and Conversations infrastructure.
 
-        ALLOWED EGRESSES: FederatedCompute.
-        ALLOWED USAGES: Federated analytics, federated learning.
+      ALLOWED EGRESSES: FederatedCompute.
+      ALLOWED USAGES: Federated analytics, federated learning.
       """
         .trimIndent()
     flavors(Flavor.ASI_PROD) { minRoundSize(minRoundSize = 1000, minSecAggRoundSize = 0) }

@@ -24,10 +24,10 @@ val GPPServicePolicyV2_FederatedCompute =
   ) {
     description =
       """
-        To detect or identify harmful applications.
+      To detect or identify harmful applications.
 
-        ALLOWED EGRESSES: FederatedCompute.
-        ALLOWED USAGES: Federated analytics, federated learning.
+      ALLOWED EGRESSES: FederatedCompute.
+      ALLOWED USAGES: Federated analytics, federated learning.
       """
         .trimIndent()
 

@@ -26,6 +26,7 @@ android_library(
     deps = [
         "//src/com/google/android/as/oss/delegatedui/api/integration/egress/airflow:airflow_egress_integration_kt_proto_lite",
         "//src/com/google/android/as/oss/delegatedui/api/integration/templates:templates_kt_proto_lite",
+        "//src/com/google/android/as/oss/delegatedui/service/common",
         "//src/com/google/android/as/oss/delegatedui/service/templates",
         "//src/com/google/android/as/oss/delegatedui/service/templates/airflow/data:airflow_data_service_kt_grpc",
         "//src/com/google/android/as/oss/delegatedui/service/templates/airflow/data:airflow_data_service_kt_proto_lite",
@@ -40,6 +41,7 @@ android_library(
         "//third_party/java/androidx/compose/ui/graphics",
         "//third_party/java/androidx/compose/ui/text",
         "//third_party/java/androidx/compose/ui/unit",
+        "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-jvm",
         "@maven//:com_google_flogger_google_extensions",
         "@maven//:io_grpc_grpc_api",
         "@maven//:javax_inject_javax_inject",

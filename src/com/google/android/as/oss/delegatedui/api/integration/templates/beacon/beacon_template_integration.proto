@@ -20,7 +20,9 @@ import "src/com/google/android/as/oss/delegatedui/api/integration/templates/ui_i
 import "src/com/google/android/as/oss/feedback/proto/entity_feedback_dialog_data.proto";
 import "src/com/google/android/as/oss/feedback/proto/feedback_dialog_common_data.proto";
 
+import "third_party/protobuf/cpp_features.proto";
 
+option features.(pb.cpp).string_type = VIEW;
 option features.field_presence = IMPLICIT;
 option java_package = "com.google.android.as.oss.delegatedui.api.integration.templates.beacon";
 option java_multiple_files = true;
@@ -28,62 +30,97 @@ option java_multiple_files = true;
 // Beacon template data.
 message BeaconTemplateData {
   BeaconWidget widget = 1 [features.field_presence = EXPLICIT];
+
   // The unique ID of the remote UI session.
   string session_uuid = 2;
 }
 
 // Represents the entire widget, the entry point to to all beacon template data
-// Next ID: 16
+// Next ID: 19
 message BeaconWidget {
   repeated BeaconGeneralCard general_cards = 1 [deprecated = true];
+
   repeated BeaconGeneralCard general_cards_emails = 10;
   repeated BeaconGeneralCard general_cards_messages = 11;
   repeated BeaconDetailedCard detailed_cards = 2;
   BeaconAiDisclaimer ai_disclaimer_with_link = 13;
+
   // A static string call to action button. When clicked, the widget will expand
   // to show more results
   string cta_display_more_results = 4;
+
   // A static string call to action button. When clicked, the widget will
   // collapse to show fewer results
   string cta_display_fewer_results = 12;
+
   // The background color of the widget
   int64 background_color = 5 [features.field_presence = EXPLICIT];
 
+  // Whether to display all cards initially. If true, there will be no "show
+  // more" button
+  bool display_all_cards = 16;
+
+  // Whether to expand the widget and display more cards upon clicking "Show
+  // more"
+  bool disable_expand_on_suggest_more = 17;
+
   // The UiIdTokens for the widget's UI elements.
-  // TODO: populate these UiIdTokens.
-  UiIdToken general_card_ui_id = 6;
-  UiIdToken detailed_card_ui_id = 7;
   UiIdToken disclaimer_button_ui_id = 8;
   UiIdToken show_more_results_button_ui_id = 9;
-
   BeaconGenericContentDescriptions generic_content_descriptions = 14;
 
   // Deprecated fields
   string ai_disclaimer = 3 [deprecated = true];
+  UiIdToken general_card_ui_id = 6 [deprecated = true];
+  UiIdToken detailed_card_ui_id = 7 [deprecated = true];
+
   feedback.api.FeedbackDialogCommonData feedback_dialog_common_data = 15
       [deprecated = true];
+
+  // The variant of the UI to display. This is used to support backwards
+  // compatibility with older versions where data source's APK is not updated
+  // but rendering APK is already updated. `0` is the initial version / default.
+  // Each subsequent version will increase by 1.
+  int32 display_ui_version = 18 [features.field_presence = EXPLICIT];
 }
 
   // Deprecated fields
   string good_feedback_button_accessibility_content_description = 5
       [deprecated = true];
+
   string bad_feedback_button_accessibility_content_description = 6
       [deprecated = true];
+
   string card_expanded_accessibility_content_description = 7
       [ deprecated = true];
+
   string card_collapsed_accessibility_content_description = 8
       [ deprecated = true];
+
   string card_expanded_accessibility_state_description = 18 [deprecated = true];
+
   string card_collapsed_accessibility_state_description = 19
       [deprecated = true];
+
   string card_collapsed_accessibility_click_label = 20 [deprecated = true];
+
   string card_expanded_accessibility_click_label = 21 [deprecated = true];
+
   string feedback_submitted_state_description = 15 [deprecated = true];
+
   string feedback_not_submitted_state_description = 16 [deprecated = true];
+
+  // The variant of the UI to display. This is used to support backwards
+  // compatibility with older versions where data source's APK is not updated
+  // but rendering APK is already updated. `0` is the initial version / default.
+  // Each subsequent version will increase by 1.
+  int32 display_ui_version = 26 [features.field_presence = EXPLICIT];
+
+  reserved 22, 24;
 }
 
 // Represents a grid-based layout in a more "detailed" view
-// Next ID: 17
+// Next ID: 21
 message BeaconDetailedCard {
   // An icon to be displayed for each card. Helps the user easily understand the
   // type of data in the card
@@ -95,9 +132,12 @@ message BeaconDetailedCard {
     TRANSPORT = 4;
     LODGING = 5;
   }
+
   // The title of the card
   string title = 1;
+
   Icon icon = 2 [deprecated = true];
+
   repeated BeaconRow rows = 3;
   BeaconResponseSource data_source = 4 [features.field_presence = EXPLICIT];
 
@@ -105,6 +145,7 @@ message BeaconDetailedCard {
   UiIdToken good_feedback_button_ui_id = 7;
   UiIdToken bad_feedback_button_ui_id = 8;
   UiIdToken source_navigation_button_ui_id = 9;
+  UiIdToken detailed_card_ui_id = 18;
 
   // The entity feedback data for the card
   feedback.api.EntityFeedbackDialogData thumbs_up_entity_feedback_dialog_data =
@@ -119,16 +160,36 @@ message BeaconDetailedCard {
   // Deprecated fields
   string good_feedback_button_accessibility_content_description = 5
       [deprecated = true];
+
   string bad_feedback_button_accessibility_content_description = 6
       [deprecated = true];
+
   string feedback_submitted_state_description = 12 [deprecated = true];
+
   string feedback_not_submitted_state_description = 13 [deprecated = true];
+
   string card_sentiment_label = 11 [deprecated = true];
+
   string entity_content = 14 [deprecated = true];
+
+  // The variant of the UI to display. This is used to support backwards
+  // compatibility with older versions where data source's APK is not updated
+  // but rendering APK is already updated. `0` is the initial version / default.
+  // Each subsequent version will increase by 1.
+  int32 display_ui_version = 20 [features.field_presence = EXPLICIT];
+
+  reserved 17, 19;
 }
 
 // Represents a row in the widget's grid.
 message BeaconRow {
+  enum BeaconRowLayoutType {
+    UNKNOWN = 0;
+    FULL_LENGTH = 1;
+    HALF_HALF_SPLIT = 2;
+    SEVEN_THREE_SPLIT = 3;
+  }
+
   oneof row_layout {
     BeaconFullLengthRow full_length = 1;
     BeaconTwoItemRow half_half_split = 2;
@@ -152,8 +213,10 @@ message BeaconTwoItemRow {
 message BeaconRowItem {
   // Informs the user what the item represents
   BeaconRowItemText label = 1;
+
   // The main content of the item
   BeaconRowItemText content = 2;
+
   // A quick summary of the content
   BeaconRowItemText content_summary = 3 [features.field_presence = EXPLICIT];
 
@@ -176,17 +239,26 @@ message BeaconRowItemText {
 
   // The raw string to be displayed
   string text = 1;
+
   TextSize text_size = 2;
 }
 
 // The source of the data for a response
+// Next ID: 7
 message BeaconResponseSource {
   enum SourceType {
     UNKNOWN = 0;
     EMAIL = 1;
     MESSAGE = 2;
+    WONDER_CARD = 3;
   }
+
+  // The unique identifier of the source. Can look very different depending on
+  // the source type.
+  string source_id = 6;
+
   SourceType source_type = 1;
+
   // The text to be displayed on the CTA button. If the user clicks this, they
   // will be taken to the source of the data.
   string cta_button_text = 2;
@@ -194,7 +266,6 @@ message BeaconResponseSource {
   /**
    * The index of the pending intent in the list of pending intents. This is
    * used to launch the source of the data when the CTA button is clicked.
-   *
    *
    * ## IMPORTANT
    *
@@ -207,6 +278,8 @@ message BeaconResponseSource {
   string source_package_name = 4 [
     features.field_presence = EXPLICIT
   ];
+
+  int64 date_received = 5;
 }
 
 // A static string that informs the user that the data presented was generated
@@ -217,10 +290,10 @@ message BeaconAiDisclaimer {
   string url = 2;
   int32 url_start_index = 3;
   int32 url_end_index = 4;
+
   /**
    * The index of the pending intent in the list of pending intents. This is
    * used to launch the source of the data when the CTA button is clicked.
-   *
    *
    * ## IMPORTANT
    *
@@ -237,22 +310,30 @@ message BeaconAiDisclaimer {
 message BeaconGenericContentDescriptions {
   // The content description for the good feedback button
   string good_feedback_content_description = 1;
+
   // The content description for the bad feedback button
   string bad_feedback_content_description = 2;
+
   // The state description for feedback buttons when the feedback is submitted
   string feedback_submitted_state_description = 3;
+
   // The state description for feedback buttons when the feedback is not
   // submitted
   string feedback_not_submitted_state_description = 4;
+
   // The label for the sentiment buttons (thumbs up / thumbs down)
   string card_sentiment_label = 5;
+
   // The state description for the expand button when the card is expanded
   string card_expanded_accessibility_state_description = 6;
+
   // The state description for the expand button when the card is collapsed
   string card_collapsed_accessibility_state_description = 7;
+
   // The click label for the expand button when the card is collapsed. User
   // would hear "Double tap to expand"
   string card_collapsed_accessibility_click_label = 8;
+
   // The click label for the expand button when the card is expanded. User would
   // hear "Double tap to collapse"
   string card_expanded_accessibility_click_label = 9;

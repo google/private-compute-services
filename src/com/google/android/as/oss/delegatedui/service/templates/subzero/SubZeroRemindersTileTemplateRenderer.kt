@@ -34,35 +34,34 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import com.google.android.`as`.oss.delegatedui.api.integration.templates.DelegatedUiTemplateData
+import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiInputSpec
 import com.google.android.`as`.oss.delegatedui.service.templates.TemplateRenderer
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.TemplateRendererScope
 import com.google.android.`as`.oss.delegatedui.utils.ResponseWithParcelables
-import com.google.common.flogger.GoogleLogger
 import javax.inject.Inject
+import kotlinx.coroutines.flow.StateFlow
 
 class SubZeroRemindersTileTemplateRenderer @Inject internal constructor() : TemplateRenderer {
   override fun TemplateRendererScope.onCreateTemplateView(
     context: Context,
+    inputSpecFlow: StateFlow<DelegatedUiInputSpec>,
     response: ResponseWithParcelables<DelegatedUiTemplateData>,
   ): View? {
-    val templateData = response.value.subzeroRemindersTileTemplateData
+    val templateData = response.data.subzeroRemindersTileTemplateData
     if (templateData.remindersList.isEmpty()) {
       return null
     }
-    val pendingIntentList = response.pendingIntentList.value?.toList() ?: emptyList()
+    val pendingIntentList = response.pendingIntentList.valueOrNull?.toList() ?: emptyList()
+    val remoteActionList = response.remoteActionList.valueOrNull?.toList() ?: emptyList()
 
     return ComposeView(context).apply {
       setContent {
         val nestedScrollInterop = rememberNestedScrollInteropConnection()
         Box(modifier = Modifier.nestedScroll(nestedScrollInterop)) {
-          MainTheme { SubZeroRemindersTileCards(templateData, pendingIntentList) }
+          MainTheme { SubZeroRemindersTileCards(templateData, pendingIntentList, remoteActionList) }
         }
       }
     }
-  }
-
-  private companion object {
-    val logger = GoogleLogger.forEnclosingClass()
   }
 }
 

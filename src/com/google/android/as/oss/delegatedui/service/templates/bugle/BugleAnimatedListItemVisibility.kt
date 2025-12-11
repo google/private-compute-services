@@ -26,7 +26,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.node.Ref
 
@@ -115,8 +115,9 @@ private fun <T> AnimatedVisibilityAfterInitialComposition(
 
   ref.value = value ?: ref.value
 
-  val visibleState =
-    remember { MutableTransitionState(false) }.apply { targetState = value != null }
+  val visibleState = remember { MutableTransitionState(false) }
+
+  LaunchedEffect(Unit) { visibleState.targetState = true }
 
   AnimatedVisibility(visibleState = visibleState, enter = enter, exit = exit, label = label) {
     ref.value?.let { value -> content(value) }

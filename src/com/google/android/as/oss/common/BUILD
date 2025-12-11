@@ -20,11 +20,13 @@ android_library(
     name = "common",
     srcs =
         [
+            "CoroutineModule.kt",
             "Executors.java",
             "ExecutorsModule.java",
         ],
     deps = [
         ":annotation",
+        "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-android",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",
         "@maven//:com_google_guava_guava",
@@ -35,7 +37,10 @@ android_library(
 android_library(
     name = "annotation",
     srcs =
-        ["ExecutorAnnotations.java"],
+        [
+            "CoroutineQualifiers.kt",
+            "ExecutorAnnotations.java",
+        ],
     deps = [
         "@maven//:com_google_dagger_dagger",
         "@maven//:javax_inject_javax_inject",

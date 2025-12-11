@@ -20,9 +20,7 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 
 import android.content.Context;
 import com.google.android.as.oss.attestation.PccAttestationMeasurementClient;
-import com.google.android.as.oss.attestation.config.PcsAttestationMeasurementConfig;
 import com.google.android.as.oss.common.ExecutorAnnotations.AttestationExecutorQualifier;
-import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.logging.PcsStatsLog;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
 import dagger.Module;
@@ -52,7 +50,6 @@ final class PccAttestationMeasurementClientModule {
       @AttestationExecutorQualifier Executor attestationExecutor,
       NetworkUsageLogRepository networkUsageLogRepository,
       PcsStatsLog pcsStatsLogger,
-      ConfigReader<PcsAttestationMeasurementConfig> configReader,
       @ApplicationContext Context context) {
     ManagedChannel managedChannel =
         OkHttpChannelBuilder.forAddress(ATTESTATION_API_HOST, ATTESTATION_API_PORT)
@@ -60,12 +57,7 @@ final class PccAttestationMeasurementClientModule {
             .idleTimeout(1, MINUTES)
             .build();
     return new PccAttestationMeasurementClientImpl(
-        attestationExecutor,
-        managedChannel,
-        networkUsageLogRepository,
-        pcsStatsLogger,
-        configReader.getConfig().enableContentBindingAsChallenge(),
-        context);
+        attestationExecutor, managedChannel, networkUsageLogRepository, pcsStatsLogger, context);
   }
 
   private PccAttestationMeasurementClientModule() {}

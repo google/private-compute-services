@@ -21,11 +21,13 @@ import android.content.pm.Signature;
 import android.os.Build;
 import androidx.annotation.Nullable;
 import com.google.android.as.oss.common.security.api.PackageSecurityInfo;
+import com.google.android.as.oss.common.security.api.PackageSecurityInfoList;
 import com.google.common.flogger.GoogleLogger;
 import io.grpc.binder.SecurityPolicies;
 import io.grpc.binder.SecurityPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 /** A utility class for security policies related setups */
 public class SecurityPolicyUtils {
@@ -121,6 +123,24 @@ public class SecurityPolicyUtils {
   private static byte[] getSignatureBytes(String signatureHash) {
     Signature signature = new Signature(signatureHash);
     return signature.toByteArray();
+  }
+
+  /**
+   * Checks if the caller is authorized based on a list of security information. It iterates through
+   * security policies, returning true if any policy grants authorization.
+   *
+   * @return {@code true} if the caller is authorized by any policy, {@code false} otherwise.
+   */
+  public static boolean isCallerAuthorized(
+      PackageSecurityInfoList packageSecurityInfoList,
+      Context context,
+      int uid,
+      boolean allowTestKeys) {
+    return packageSecurityInfoList.getPackageSecurityInfosList().stream()
+        .flatMap(
+            packageSecurityInfo ->
+                Stream.ofNullable(makeSecurityPolicy(packageSecurityInfo, context, allowTestKeys)))
+        .anyMatch(securityPolicy -> securityPolicy.checkAuthorization(uid).isOk());
   }
 
   private SecurityPolicyUtils() {}

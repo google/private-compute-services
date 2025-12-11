@@ -69,7 +69,9 @@ sealed class ParcelableKey<P : Parcelable>(
 
 /** Key for sending/receiving a single parcelable over gRPC. */
 class SingleParcelableKey<P : Parcelable>(val name: String, val creator: Parcelable.Creator<P>) :
-  ParcelableKey<P>(name, creator) {}
+  ParcelableKey<P>(name, creator) {
+  override fun toString(): String = "SingleParcelableKey($name)"
+}
 
 /**
  * Key for sending/receiving list of parcelables (repeated values) over gRPC.
@@ -79,4 +81,6 @@ class SingleParcelableKey<P : Parcelable>(val name: String, val creator: Parcela
  * we just offer two separate types for easier use by clients.
  */
 class RepeatedParcelableKey<P : Parcelable>(val name: String, val creator: Parcelable.Creator<P>) :
-  ParcelableKey<P>(name, creator) {}
+  ParcelableKey<P>(name, creator) {
+  override fun toString(): String = "RepeatedParcelableKey($name)"
+}

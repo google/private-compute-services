@@ -153,6 +153,7 @@ class ConnectionManager {
     if (populationOrSessionName.startsWith("PlayProtect/")) {
       return gppsPackageName;
     }
+
     return null;
   }
 

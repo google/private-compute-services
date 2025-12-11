@@ -129,6 +129,9 @@ message IntegrityResponse {
 
   // Status of the integrity check from the client side.
   ClientStatus client_status = 3;
+
+  // Client specific token.
+  bytes client_token = 4;
 }
 
 message ProtectionProofConfig {
@@ -247,4 +250,7 @@ message DownloadBlobResponse {
   }
 
   reserved 3, 4, 5, 7, 8, 9, 10, 11, 15;
+
+  // The release config id of the protection.
+  int64 release_config_id = 16;
 }

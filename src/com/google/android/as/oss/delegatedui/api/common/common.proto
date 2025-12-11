@@ -16,6 +16,9 @@ edition = "2023";
 
 package com.google.android.as.oss.delegatedui.api.common;
 
+import "third_party/protobuf/cpp_features.proto";
+
+option features.(pb.cpp).string_type = VIEW;
 option java_package = "com.google.android.as.oss.delegatedui.api.common";
 option java_multiple_files = true;
 
@@ -25,7 +28,7 @@ message DelegatedUiClientId {
   DelegatedUiUseCase use_case = 2;
 }
 
-// Next ID: 7
+// Next ID: 9
 message DelegatedUiClientInputs {
   // Client data to use to generate remote content.
   common.DelegatedUiIngressData ingress_data = 1;
@@ -44,21 +47,43 @@ message DelegatedUiClientInputs {
   // wherever the delegated UI is not drawing.
   int32 background_color = 4;
 
-  // The client can pass in a bitmasked flag value representing the nested
-  // scroll axes that are supported. This impacts the way the remote UI handles
-  // its internal nested scrolling, and the nested scroll events that the DUI
-  // session sends back to the client.
+  // The bitmasked nested scroll axes supported by the client. This ensures that
+  // the DUI session will only send these nested scroll events back to the
+  // client.
   int32 client_nested_scroll_axes = 5;
+
+  // Whether the DUI session should report a specific axis when a nested scroll
+  // gesture is detected, and whether that axis should be locked such that
+  // subsequent nested scroll events are only reported for that axis. A value of
+  // `true` is typical for Android UIs where scroll axes are locked during a
+  // gesture, while a value of `false` can be used to give the illusion of a 2D
+  // canvas. Only applicable when [clientNestedScrollAxes] is set to
+  // `SCROLL_AXIS_HORIZONTAL or SCROLL_AXIS_VERTICAL`.
+  bool client_nested_scroll_axis_lock = 7;
+
+  // An optional hint to pass to the DUI session, notifying it that it is unable
+  // to receive touch events in its current state. The DUI session may use this
+  // hint to render a UI that communicates this state to the user.
+  //
+  // This hint is typically set when the client's SurfaceView is put in
+  // z-below mode while the user might still interact with it. For example, if
+  // the client's SurfaceView is put into z-below mode when it is overlapping
+  // another native UI component, then you may want to communicate this hint to
+  // the DUI session.
+  bool no_touch_hint = 8;
 }
 
 message DelegatedUiDataProviderInfo {
   enum DelegatedUiDataProvider {
     DATA_PROVIDER_UNSPECIFIED = 0;
+
     // Device Intelligence (PSI)
     DATA_PROVIDER_PSI = 1;
+
     // Android System Intelligence (ASI)
     DATA_PROVIDER_ASI = 2;
   }
+
   DelegatedUiDataProvider data_provider = 1;
 }
 
@@ -72,4 +97,14 @@ message DelegatedUiIngressData {
 // Describes the client's delegated UI use-case.
 message DelegatedUiUseCase {
   extensions 16 to 100;
+}
+
+// Hints from the delegated UI service to the calling client, adding
+// additional information about the currently rendered remote content. The
+// hints would be sent to calling client without any user consent (i.e. click).
+enum DelegatedUiHint {
+  HINT_UNSPECIFIED = 0;
+  // Hint that indicates that the currently rendered remote content may contain
+  // personal identifiable data
+  HINT_PII_SUGGESTION = 1;
 }

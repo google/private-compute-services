@@ -33,6 +33,10 @@ final class PcsAiConfigReader extends AbstractConfigReader<PcsAiConfig> {
       BooleanFlag.create("PcsAi__enable_genai_inference_service", false);
 
   @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+  static final BooleanFlag GENAI_INFERENCE_SERVICE_SECURITY_POLICY_ENABLED =
+      BooleanFlag.create("PccSecurity__enable_genai_inference_service_security_policy", false);
+
+  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
   static final LongFlag GENAI_SERVICE_CONNECTION_TIMEOUT_MS =
       LongFlag.create("PcsAi__genai_service_connection_timeout_ms", 2000L);
 
@@ -59,6 +63,8 @@ final class PcsAiConfigReader extends AbstractConfigReader<PcsAiConfig> {
     return PcsAiConfig.builder()
         .setGenAiInferenceServiceEnabled(flagManager.get(GENAI_INFERENCE_SERVICE_ENABLED))
         .setGenAiServiceConnectionTimeoutMs(flagManager.get(GENAI_SERVICE_CONNECTION_TIMEOUT_MS))
+        .setGenAiInferenceServiceSecurityPolicyEnabled(
+            flagManager.get(GENAI_INFERENCE_SERVICE_SECURITY_POLICY_ENABLED))
         .build();
   }
 

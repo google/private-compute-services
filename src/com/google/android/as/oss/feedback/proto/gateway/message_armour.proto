@@ -16,7 +16,6 @@ edition = "2023";
 
 package com.google.android.as.oss.feedback.api.gateway;
 
-
 option java_multiple_files = true;
 option java_package = "com.google.android.as.oss.feedback.api.gateway";
 
@@ -28,6 +27,9 @@ enum MessageArmourCUJ {
   // CUJ for user-initiated donations to improve the Message Armour model's
   // scam detection capabilities.
   MESSAGE_ARMOUR_CUJ_SCAM_DETECTION = 1;
+
+  // CUJ for user survey on the Message Armour feature.
+  MESSAGE_ARMOUR_CUJ_USER_SURVEY = 2;
 }
 
 // This message allows to store specific data related to the Message Armour CUJ,
@@ -38,6 +40,24 @@ message MessageArmourDataDonation {
   oneof cuj_specific_data_donation {
     // User data related to a message donation.
     MessageArmourUserDataDonation message_armour_user_data_donation = 1;
+
+    // User survey free form text response for Message Armour feature.
+    MessageArmourUserSurveyTextResponse
+        message_armour_user_survey_text_response = 2;
+  }
+}
+
+// This message extends the generic StructuredUserInput message to define
+// Message Armour specific user input data. This proto is used to store the user
+// input and the data included in this proto will be stored in the storage
+// regardless of the user's donation option.
+message MessageArmourUserInput {
+  // This oneof allows to store specific user input based on the Message
+  // Armour CUJ.
+  oneof cuj_specific_user_input {
+    // User survey selection response for Message Armour feature.
+    MessageArmourUserSurveySelectionResponse
+        message_armour_user_survey_selection_response = 1;
   }
 }
 
@@ -46,4 +66,54 @@ message MessageArmourUserDataDonation {
   // The user-donated message.
   // This field contains the raw message text that the user donated.
   string user_donated_message = 1;
+}
+
+// Holds the collected selection based responses from the Message Armour user
+// survey.
+message MessageArmourUserSurveySelectionResponse {
+  // Represents the user's rating of the alert's usefulness (Question 1).
+  enum UsefulnessRating {
+    USEFULNESS_RATING_UNSPECIFIED = 0;  // Default/unset value
+    USEFULNESS_RATING_R1 = 1;  // Corresponds to the leftmost option (1)
+    USEFULNESS_RATING_R2 = 2;  // Corresponds to the second option
+    USEFULNESS_RATING_R3 = 3;  // Corresponds to the third option
+    USEFULNESS_RATING_R4 = 4;  // Corresponds to the fourth option
+    USEFULNESS_RATING_R5 = 5;  // Corresponds to the rightmost option (5)
+  }
+  // Response to: "How useful was the scam detection alert?"
+  UsefulnessRating usefulness_rating = 1;
+
+  // Represents the user's agreement level with the statement (Question 2).
+  enum AgreementRating {
+    AGREEMENT_RATING_UNSPECIFIED = 0;  // Default/unset value
+    AGREEMENT_RATING_R1 = 1;           // Corresponds to the leftmost option (1)
+    AGREEMENT_RATING_R2 = 2;           // Corresponds to the second option
+    AGREEMENT_RATING_R3 = 3;           // Corresponds to the third option
+    AGREEMENT_RATING_R4 = 4;           // Corresponds to the fourth option
+    AGREEMENT_RATING_R5 = 5;  // Corresponds to the rightmost option (5)
+  }
+  // Response to: "Based on the alert, how much do you agree..."
+  AgreementRating agreement_rating = 2;
+
+  // Represents the reason for disliking the alert, if any (Question 3).
+  enum DislikeReason {
+    DISLIKE_REASON_UNSPECIFIED = 0;  // Default/unset value
+    NONE_GREAT = 1;                  // "Nothing, everything was great"
+    TRIGGERED_LEGITIMATE = 2;        // "Triggered for a legitimate message"
+    TOO_DISRUPTIVE = 3;              // "Too disruptive"
+    UNSURE_WHY_ALERTED = 4;          // "Not sure why I got the alert"
+    SOMETHING_ELSE = 5;              // "Something else"
+  }
+  // Response to: "What, if anything, did you dislike..."
+  // Field is optional, especially since this question might only be shown
+  // conditionally based on the answer to question 1.
+  DislikeReason dislike_reason = 3;
+}
+
+// Holds the text based responses from the Message Armour user survey.
+message MessageArmourUserSurveyTextResponse {
+  // Free-form text provided by the user when dislike_reason is SOMETHING_ELSE.
+  // This field should only be populated if dislike_reason is set to
+  // SOMETHING_ELSE.
+  string dislike_reason_other = 1;
 }

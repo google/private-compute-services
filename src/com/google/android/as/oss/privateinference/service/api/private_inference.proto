@@ -1,0 +1,169 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+edition = "2023";
+
+package com.google.android.as.oss.privateinference.service.api;
+
+option java_multiple_files = true;
+option java_package = "com.google.android.as.oss.privateinference.service.api.proto";
+
+// API for interacting with Private Inference service via PCS.
+service PcsPrivateInferenceService {
+  // To be deprecated. Use StartInferenceSession instead.
+  //
+  // Invokes a RPC for private inference.
+  rpc PerformInference(PcsPrivateInferenceRequest)
+      returns (PcsPrivateInferenceResponse) {
+    option deadline = 60.0;
+  }
+
+  // Prepares a session for private inference. Client apps should call this
+  // before starting a private inference session.
+  rpc PrepareInferenceSession(PrivateInferencePrepareRequest)
+      returns (PrivateInferencePrepareResponse) {
+    option deadline = 60.0;
+  }
+
+  // Invokes a streaming session for private inference.
+  rpc StartInferenceSession(stream PrivateInferenceSessionRequest)
+      returns (stream PrivateInferenceSessionResponse) {
+    option deadline = 60.0;
+  }
+}
+
+// Request for a Private Inference session.
+//
+// For each streaming session, the callers should send:
+//   1. An initialization request.
+//   2. A series of inference session requests, after the initialization
+//   response is received.
+message PrivateInferenceSessionRequest {
+  oneof request {
+    SessionInitializationRequest session_initialization_request = 1;
+    PrivateInferenceRequest inference_request = 2;
+  }
+}
+
+// Response for a Private Inference session.
+//
+// For each streaming session, the callers will receive:
+//   1. An initialization response.
+//   2. A series of inference session responses.
+message PrivateInferenceSessionResponse {
+  oneof response {
+    SessionInitializationResponse session_initialization_response = 1;
+    PrivateInferenceResponse inference_response = 2;
+  }
+}
+
+// Initialization request for a Private Inference session.
+// Next ID: 5
+message SessionInitializationRequest {
+  reserved 1;
+
+  oneof authentication_info {
+    // The API key to use for authentication.
+    string api_key = 2;
+  }
+
+  string android_package_name = 4;
+}
+
+// Initialization response for a Private Inference session.
+message SessionInitializationResponse {
+  enum InitializationError {
+    INITIALIZATION_ERROR_UNSPECIFIED = 0;
+    INITIALIZATION_ERROR_FEATURE_DISABLED = 1;
+    INITIALIZATION_ERROR_KEY_ATTESTATION_FAILED = 2;
+    INITIALIZATION_ERROR_ATTESTATION_VERIFICATION_KEYS_EXPIRED = 3;
+  }
+
+  // Whether the initialization has been done successfully.
+  //
+  // During the initialization, the device needs to start the oak session
+  // and perform the key attestation.
+  //
+  // If returned false, initialization_error will be set. Otherwise,
+  // initialization_error will be unset.
+  bool initialization_succeeded = 1;
+
+  InitializationError initialization_error = 2;
+}
+
+// Request for a Private Inference session.
+// Next ID: 4
+message PrivateInferenceRequest {
+  // The feature name to be used for logging.
+  PcsPrivateInferenceFeatureName feature_name = 3;
+
+  oneof request {
+    // The serialized proto to be send to the Private Inference service.
+    bytes data = 1;
+
+    // The size of the message to read from the ParcelFileDescriptor.
+    //
+    // If set, the service will read the message with the given size from the
+    // ParcelFileDescriptor passed through the gRPC metadata.
+    int32 pfd_data_size = 2;
+  }
+}
+
+// Response for a Private Inference session.
+message PrivateInferenceResponse {
+  oneof response {
+    // The serialized proto received from the Private Inference backend service.
+    bytes data = 1;
+  }
+}
+
+// Request to Private Inference Service of PCS.
+// Next ID: 5
+message PcsPrivateInferenceRequest {
+  // The feature name to be used for logging.
+  PcsPrivateInferenceFeatureName feature_name = 3;
+
+  // The serialized proto to be send to the Private Inference service.
+  bytes data = 1;
+
+  oneof authentication_info {
+    // The API key to use for authentication.
+    string api_key = 2;
+  }
+}
+
+enum PcsPrivateInferenceFeatureName {
+  FEATURE_NAME_UNSPECIFIED = 0;
+
+  // Device Intelligence feature names (100-199)
+  FEATURE_NAME_PSI_MEMORY_GENERATION = 100;
+
+  // Recorder feature names (300-399)
+  FEATURE_NAME_RECORDER_TRANSCRIPT_SUMMARIZATION = 300;
+}
+
+// Response from Private Inference Service of PCS.
+message PcsPrivateInferenceResponse {
+  // The serialized proto received from the Private Inference service.
+  bytes data = 1;
+}
+
+// Request to prepare a Private Inference session.
+message PrivateInferencePrepareRequest {
+  // Client timestamp of the request.
+  // Used to calculate cold start latency.
+  int64 client_timestamp_millis = 1;
+}
+
+message PrivateInferencePrepareResponse {}

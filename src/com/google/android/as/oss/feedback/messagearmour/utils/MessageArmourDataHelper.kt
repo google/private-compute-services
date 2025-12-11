@@ -20,6 +20,7 @@ import com.google.android.`as`.oss.feedback.api.gateway.FeedbackCUJ
 import com.google.android.`as`.oss.feedback.api.gateway.LogFeedbackV2Request
 import com.google.android.`as`.oss.feedback.api.gateway.MessageArmourCUJ
 import com.google.android.`as`.oss.feedback.api.gateway.RuntimeConfig
+import com.google.android.`as`.oss.feedback.api.gateway.StructuredUserInput
 import com.google.android.`as`.oss.feedback.api.gateway.UserDataDonationOption
 import com.google.android.`as`.oss.feedback.api.gateway.UserDonation
 import com.google.common.flogger.GoogleLogger
@@ -46,12 +47,15 @@ class MessageArmourDataHelper @Inject constructor() {
         "${quote("appId")}: ${quote(appId)}, " +
         "${quote("interactionId")}: ${quote(interactionId)}, " +
         "${quote("donationOption")}: ${quote(donationOption.name)}, " +
-        "${quote("appCujType")}: ${getMessageArmourCujTypeString(feedbackCuj)}, " +
-        "${quote("runtimeConfig")}: ${getRuntimeConfigString(runtimeConfig)}"
+        "${quote("appCujType")}: ${getMessageArmourCujTypeString(feedbackCuj)}"
+
+    finalString = finalString.plus(getRuntimeConfigString(runtimeConfig, feedbackCuj))
 
     if (donationOption == UserDataDonationOption.OPT_IN) {
       finalString = finalString.plus(getDonationDataString(userDonation, feedbackCuj))
     }
+
+    finalString = finalString.plus(getStructuredUserInputString(structuredUserInput, feedbackCuj))
 
     finalString =
       finalString.plus(
@@ -63,32 +67,73 @@ class MessageArmourDataHelper @Inject constructor() {
   }
 
   private fun getMessageArmourCujTypeString(appCujType: FeedbackCUJ): String =
-    "{${quote("messageArmourCujType")}: " +
-      "{${quote("messageArmourCuj")}: ${quote(appCujType.messageArmourCuj.name)}}}"
-
-  private fun getRuntimeConfigString(config: RuntimeConfig): String =
     "{" +
-      "${quote("appVersion")}: ${quote(config.appVersion)}, " +
-      "${quote("modelId")}: ${quote(config.modelId)}" +
-      "}"
+      "${quote("messageArmourCujType")}: " +
+      "{" +
+      "${quote("messageArmourCuj")}: ${quote(appCujType.messageArmourCuj.name)}" +
+      "}}"
 
-  private fun getDonationDataString(userDonation: UserDonation, feedbackCuj: FeedbackCUJ): String {
-    var donationString = ""
-    if (feedbackCuj.messageArmourCuj.equals(MessageArmourCUJ.MESSAGE_ARMOUR_CUJ_SCAM_DETECTION)) {
-      donationString =
-        donationString.plus(
+  private fun getRuntimeConfigString(config: RuntimeConfig, feedbackCuj: FeedbackCUJ): String =
+    when (feedbackCuj.messageArmourCuj) {
+      MessageArmourCUJ.MESSAGE_ARMOUR_CUJ_SCAM_DETECTION ->
+        ", ${quote("runtimeConfig")}: " +
+          "{" +
+          "${quote("appVersion")}: ${quote(config.appVersion)}, " +
+          "${quote("modelId")}: ${quote(config.modelId)}" +
+          "}"
+      else -> ""
+    }
+
+  private fun getDonationDataString(userDonation: UserDonation, feedbackCuj: FeedbackCUJ): String =
+    when (feedbackCuj.messageArmourCuj) {
+      MessageArmourCUJ.MESSAGE_ARMOUR_CUJ_SCAM_DETECTION ->
+        if (
+          userDonation.messageArmourDataDonation.messageArmourUserDataDonation.userDonatedMessage
+            .isNotEmpty()
+        ) {
           ", ${quote("userDonation")}: " +
             "{${quote("structuredDataDonation")}: " +
             "{${quote("messageArmourDataDonation")}: " +
             "{${quote("messageArmourUserDataDonation")}: " +
             "{${quote("userDonatedMessage")}: ${quote(userDonation.messageArmourDataDonation.messageArmourUserDataDonation.userDonatedMessage)}" +
-            "}}}"
-        )
-      donationString = donationString.plus("}")
+            "}}}}"
+        } else {
+          ""
+        }
+      MessageArmourCUJ.MESSAGE_ARMOUR_CUJ_USER_SURVEY ->
+        if (
+          userDonation.messageArmourDataDonation.messageArmourUserSurveyTextResponse
+            .dislikeReasonOther
+            .isNotEmpty()
+        ) {
+          ", ${quote("userDonation")}: " +
+            "{${quote("structuredDataDonation")}: " +
+            "{${quote("messageArmourDataDonation")}: " +
+            "{${quote("messageArmourUserSurveyTextResponse")}: " +
+            "{${quote("dislikeReasonOther")}: ${quote(userDonation.messageArmourDataDonation.messageArmourUserSurveyTextResponse.dislikeReasonOther)}" +
+            "}}}}"
+        } else {
+          ""
+        }
+      else -> ""
     }
 
-    return donationString
-  }
+  private fun getStructuredUserInputString(
+    userInput: StructuredUserInput,
+    feedbackCuj: FeedbackCUJ,
+  ): String =
+    when (feedbackCuj.messageArmourCuj) {
+      MessageArmourCUJ.MESSAGE_ARMOUR_CUJ_USER_SURVEY ->
+        ", ${quote("structuredUserInput")}: " +
+          "{${quote("messageArmourUserInput")}: " +
+          "{${quote("messageArmourUserSurveySelectionResponse")}: " +
+          "{" +
+          "${quote("usefulnessRating")}: ${quote(userInput.messageArmourUserInput.messageArmourUserSurveySelectionResponse.usefulnessRating.name)}, " +
+          "${quote("agreementRating")}: ${quote(userInput.messageArmourUserInput.messageArmourUserSurveySelectionResponse.agreementRating.name)}, " +
+          "${quote("dislikeReason")}: ${quote(userInput.messageArmourUserInput.messageArmourUserSurveySelectionResponse.dislikeReason.name)}" +
+          "}}}"
+      else -> ""
+    }
 
   private fun quote(content: Any): String {
     val escapedContent = content.toString().replace("\"", "\\\"")

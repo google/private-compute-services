@@ -18,11 +18,14 @@ package com.google.android.`as`.oss.dataattribution
 
 import android.app.PendingIntent
 import android.os.Bundle
+import android.support.v7.app.AlertDialog
 import android.view.Gravity
 import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.ComposeView
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.google.android.`as`.oss.dataattribution.DataAttributionApi.EXTRA_ATTRIBUTION_CHIP_DATA_PROTO
 import com.google.android.`as`.oss.dataattribution.DataAttributionApi.EXTRA_ATTRIBUTION_DIALOG_DATA_PROTO
 import com.google.android.`as`.oss.dataattribution.DataAttributionApi.EXTRA_ATTRIBUTION_SOURCE_DEEP_LINKS
@@ -38,6 +41,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class DataAttributionActivity : Hilt_DataAttributionActivity() {
 
   private val viewModel: DataAttributionActivityViewModel by viewModels()
+  private var dialog: AlertDialog? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -56,6 +60,10 @@ class DataAttributionActivity : Hilt_DataAttributionActivity() {
           EXTRA_ATTRIBUTION_SOURCE_DEEP_LINKS,
           PendingIntent::class.java,
         ) as Array<PendingIntent?>?
+
+      logger
+        .atInfo()
+        .log("DataAttributionActivity.onCreate() with sourceDeepLinks: %s.", sourceDeepLinks)
 
       val view = createView(attributionDialogData, attributionChipData, sourceDeepLinks)
       showDialog(view)
@@ -77,18 +85,22 @@ class DataAttributionActivity : Hilt_DataAttributionActivity() {
   ) =
     ComposeView(this).apply {
       setContent {
-        DataAttributionDialog(
-          attributionDialogData = attributionDialogData,
-          attributionChipData = attributionChipData,
-          sourceDeepLinks = sourceDeepLinks,
-          onDismissRequest = { finish() },
-        )
+        // We need this to bridge the View dialog builder. We can't use the Compose dialog due to
+        // requirements to not dismiss the keyboard.
+        CompositionLocalProvider(LocalViewModelStoreOwner provides this@DataAttributionActivity) {
+          DataAttributionDialog(
+            attributionDialogData = attributionDialogData,
+            attributionChipData = attributionChipData,
+            sourceDeepLinks = sourceDeepLinks,
+            onDismissRequest = { finish() },
+          )
+        }
       }
     }
 
   private fun showDialog(view: View) {
     val dialogGravity = viewModel.getDialogGravity(window)
-    val dialog =
+    dialog =
       // Use an AlertDialog to keep the keyboard visible when the activity is launched.
       MaterialAlertDialogBuilder(this, R.style.Theme_DataAttribution_Dialog)
         .apply {
@@ -100,9 +112,23 @@ class DataAttributionActivity : Hilt_DataAttributionActivity() {
           }
         }
         .create()
-    val gravity = if (dialogGravity is DialogGravity.AboveIme) Gravity.BOTTOM else Gravity.CENTER
-    dialog.window?.setGravity(gravity)
-    dialog.show()
+        .apply {
+          val gravity =
+            when (dialogGravity) {
+              is DialogGravity.Center -> Gravity.CENTER
+              is DialogGravity.Top -> Gravity.TOP
+              is DialogGravity.AboveIme -> Gravity.BOTTOM
+            }
+          window?.setGravity(gravity)
+          show()
+        }
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+
+    dialog?.dismiss()
+    dialog = null
   }
 
   companion object {

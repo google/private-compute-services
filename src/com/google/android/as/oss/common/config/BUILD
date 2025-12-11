@@ -18,9 +18,13 @@ package(default_visibility = ["//visibility:public"])
 
 android_library(
     name = "config",
-    srcs = glob(["*.java"]),
+    srcs = glob([
+        "*.java",
+        "*.kt",
+    ]),
     deps = [
         "//third_party/java/auto:auto_value",
+        "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-android",
         "@maven//:androidx_annotation_annotation",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",

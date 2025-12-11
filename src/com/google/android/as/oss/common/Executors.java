@@ -31,6 +31,8 @@ public class Executors {
       java.util.concurrent.Executors.newSingleThreadExecutor();
   public static final Executor VIRTUAL_MACHINE_EXECUTOR =
       java.util.concurrent.Executors.newSingleThreadExecutor();
+  public static final Executor WORK_MANAGER_EXECUTOR =
+      java.util.concurrent.Executors.newSingleThreadExecutor();
 
   public static final ListeningScheduledExecutorService FL_EXECUTOR_SERVICE =
       MoreExecutors.listeningDecorator(

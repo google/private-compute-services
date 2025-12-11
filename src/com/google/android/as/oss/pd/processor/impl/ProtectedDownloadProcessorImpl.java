@@ -302,10 +302,11 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
               int approximatedSize = externalResponse.getSerializedSize();
               try {
                 logger.atInfo().log(
-                    "received protection package with protection token %s",
+                    "received protection package with protection token: %s, release config id: %s",
                     BaseEncoding.base16()
                         .lowerCase()
-                        .encode(externalResponse.getProtectionToken().toByteArray()));
+                        .encode(externalResponse.getProtectionToken().toByteArray()),
+                    externalResponse.getReleaseConfigId());
                 return Futures.immediateFuture(
                     DownloadResult.create(
                         toInternalResponse(

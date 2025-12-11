@@ -22,6 +22,8 @@ import android.content.Context;
 import android.net.Uri;
 import com.google.android.as.oss.fl.api.proto.TrainerOptions;
 import com.google.android.as.oss.fl.api.proto.TrainerOptions.TrainingMode;
+import com.google.android.as.oss.fl.fc.service.scheduler.endorsementoptions.EndorsementClientType;
+import com.google.android.as.oss.fl.fc.service.scheduler.endorsementoptions.EndorsementOptionsProvider;
 import com.google.android.as.oss.fl.federatedcompute.config.PcsFcFlags;
 import com.google.android.as.oss.fl.localcompute.PathConversionUtils;
 import com.google.fcp.client.InAppTrainer;
@@ -34,7 +36,6 @@ import com.google.fcp.client.tasks.OnSuccessListener;
 import com.google.fcp.client.tasks.Task;
 import com.google.common.flogger.GoogleLogger;
 import com.google.intelligence.fcp.confidentialcompute.AccessPolicyEndorsementOptions;
-import com.google.protobuf.contrib.android.ProtoParsers;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
@@ -47,16 +48,19 @@ public class FederatedTrainingScheduler implements TrainingScheduler {
   private final Context context;
   private final Optional<PcsFcFlags> fcFlags;
   private final TrainerSupplier trainerSupplier;
+  private final EndorsementOptionsProvider endorsementOptionsProvider;
 
   public FederatedTrainingScheduler(
       Executor executor,
       Context context,
       Optional<PcsFcFlags> fcFlags,
-      TrainerSupplier trainerSupplier) {
+      TrainerSupplier trainerSupplier,
+      EndorsementOptionsProvider endorsementOptionsProvider) {
     this.executor = executor;
     this.context = context;
     this.fcFlags = fcFlags;
     this.trainerSupplier = trainerSupplier;
+    this.endorsementOptionsProvider = endorsementOptionsProvider;
   }
 
   @Override
@@ -77,8 +81,8 @@ public class FederatedTrainingScheduler implements TrainingScheduler {
     }
 
     AccessPolicyEndorsementOptions endorsementOptions =
-        ProtoParsers.parseFromRawRes(
-            context, AccessPolicyEndorsementOptions.parser(), R.raw.pcs_endorsement_options);
+        endorsementOptionsProvider.getEndorsementOptions(
+            context, EndorsementClientType.PRIVATE_COMPUTE_SERVICES_DEFAULT_KEY);
 
     inAppTrainerOptionsBuilder.setAccessPolicyEndorsementOptions(endorsementOptions);
 

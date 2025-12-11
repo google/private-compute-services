@@ -29,6 +29,7 @@ android_library(
         "GrpcServerEndpointConfiguration.java",
         "GrpcServerEndpointConfigurator.java",
     ],
+    manifest = "AndroidManifest.xml",
     deps = [
         "@maven//:androidx_annotation_annotation",
         "@maven//:androidx_lifecycle_lifecycle_service",

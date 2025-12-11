@@ -17,7 +17,7 @@
 package com.google.android.as.oss.attestation.impl;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.protobuf.util.JavaTimeConversions.toProtoDuration;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -33,6 +33,7 @@ import com.google.android.as.oss.logging.PcsStatsLog;
 import com.google.android.as.oss.networkusage.db.NetworkUsageEntity;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogUtils;
+import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.GoogleLogger;
 import com.google.common.hash.Hashing;
 import com.google.common.util.concurrent.Futures;
@@ -52,7 +53,6 @@ import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -74,7 +74,6 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
   private final ManagedChannel managedChannel;
   private final NetworkUsageLogRepository networkUsageLogRepository;
 
-  private final boolean enableContentBindingAsChallenge;
   private final PcsStatsLog pcsStatsLogger;
   private final Context context;
 
@@ -86,19 +85,22 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
   // TODO: Distinguish package names for Attestation request
   private static final String PACKAGE_NAME = "com.google.android.as";
   private static final String DEVICE_ID_FEATURE_NAME = "android.software.device_id_attestation";
+  private static final int EC_KEY_SIZE = 224;
+  private static final int RSA_KEY_SIZE = 2048;
+
+  private static final ImmutableList<String> SUPPORTED_KEY_ALGORITHMS =
+      ImmutableList.of(KeyProperties.KEY_ALGORITHM_EC, KeyProperties.KEY_ALGORITHM_RSA);
 
   public PccAttestationMeasurementClientImpl(
       Executor executor,
       ManagedChannel channel,
       NetworkUsageLogRepository networkUsageLogRepository,
       PcsStatsLog pcsStatsLogger,
-      boolean enableContentBindingAsChallenge,
       Context context) {
     this.executor = executor;
     this.managedChannel = channel;
     this.networkUsageLogRepository = networkUsageLogRepository;
     this.pcsStatsLogger = pcsStatsLogger;
-    this.enableContentBindingAsChallenge = enableContentBindingAsChallenge;
     this.context = context;
   }
 
@@ -107,12 +109,13 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
   public ListenableFuture<AttestationMeasurementResponse> requestAttestationMeasurement(
       AttestationMeasurementRequest attestationMeasurementRequest) {
 
-    checkArgument(
-        attestationMeasurementRequest.ttl().toSeconds() > 0,
-        "TTL less than 1 second is not supported.");
-    checkArgument(
-        attestationMeasurementRequest.ttl().compareTo(Duration.ofHours(24)) < 0,
-        "TTl should be less than 24 hours.");
+    if (attestationMeasurementRequest.keyAlgorithm().isPresent()) {
+      checkArgument(
+          SUPPORTED_KEY_ALGORITHMS.contains(attestationMeasurementRequest.keyAlgorithm().get()),
+          "Requested key algorithm %s is not supported. Supported key algorithms are: %s",
+          attestationMeasurementRequest.keyAlgorithm().get(),
+          SUPPORTED_KEY_ALGORITHMS);
+    }
 
     pcsStatsLogger.logIntelligenceCountReported(
         IntelligenceCountReported.newBuilder()
@@ -142,7 +145,9 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
   private ListenableFuture<AttestationMeasurementResponse> requestAttestationInternal(
       AttestationMeasurementRequest attestationMeasurementRequest, Challenge challenge) {
     // Record challenge request in network usage log
-    insertNetworkUsageLogRow(challenge.getSerializedSize());
+    if (attestationMeasurementRequest.contentBinding().isEmpty()) {
+      insertNetworkUsageLogRow(challenge.getSerializedSize());
+    }
 
     byte[] attestationChallenge = challenge.getChallenge().toByteArray();
 
@@ -151,8 +156,11 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
 
     // Try to generate an attestation response
     try {
+      String keyAlgorithm =
+          attestationMeasurementRequest.keyAlgorithm().orElse(KeyProperties.KEY_ALGORITHM_RSA);
       Pair<KeyPair, List<Certificate>> keyPairWithAttestation =
-          generateKeyPairWithAttestation(attestationMeasurementRequest, attestationChallenge);
+          generateKeyPairWithAttestation(
+              attestationMeasurementRequest, attestationChallenge, keyAlgorithm);
       KeyPair keyPair = keyPairWithAttestation.first;
       // Add public key to response
       attestationResponseBuilder.setPublicKey(
@@ -167,13 +175,12 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
       if (attestationMeasurementRequest.contentBinding().isPresent()) {
         // Sign attestation payload
         byte[] signature =
-            signPayload(keyPair, attestationMeasurementRequest.contentBinding().get());
+            signPayload(
+                keyPair, attestationMeasurementRequest.contentBinding().get(), keyAlgorithm);
         attestationResponseBuilder
             .setPayload(attestationMeasurementRequest.contentBinding().get())
             .setSignatureBytes(ByteString.copyFrom(signature));
-        if (this.enableContentBindingAsChallenge) {
-          attestationResponseBuilder.setContentBindingAsChallenge(true);
-        }
+        attestationResponseBuilder.setContentBindingAsChallenge(true);
       }
     } catch (GeneralSecurityException e) {
       logger.atWarning().withCause(e).log(
@@ -194,22 +201,19 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
   /** Helper method to initiate a grpc request for an attestation challenge. */
   private ListenableFuture<Challenge> requestChallenge(
       AttestationMeasurementRequest attestationRequest) {
-    if (attestationRequest.contentBinding().isPresent() && this.enableContentBindingAsChallenge) {
+    if (attestationRequest.contentBinding().isPresent()) {
       return Futures.immediateFuture(
           Challenge.newBuilder()
               .setChallenge(
                   ByteString.copyFrom(
                       Hashing.sha384()
-                          .hashBytes(attestationRequest.contentBinding().get().getBytes())
+                          .hashString(attestationRequest.contentBinding().get(), UTF_8)
                           .asBytes()))
-              .setTtl(toProtoDuration(attestationRequest.ttl()))
               .build());
     }
-    GenerateChallengeRequest.Builder generateChallengeRequest =
-        GenerateChallengeRequest.newBuilder().setTtl(toProtoDuration(attestationRequest.ttl()));
     KeyAttestationServiceFutureStub futureStub =
         KeyAttestationServiceGrpc.newFutureStub(managedChannel);
-    return futureStub.generateChallenge(generateChallengeRequest.build());
+    return futureStub.generateChallenge(GenerateChallengeRequest.getDefaultInstance());
   }
 
   /**
@@ -225,27 +229,19 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
    */
   @SuppressLint("NewApi")
   private synchronized Pair<KeyPair, List<Certificate>> generateKeyPairWithAttestation(
-      AttestationMeasurementRequest attestationMeasurementRequest, byte[] attestationChallenge)
+      AttestationMeasurementRequest attestationMeasurementRequest,
+      byte[] attestationChallenge,
+      String keyAlgorithm)
       throws GeneralSecurityException, IOException {
 
     boolean includeDeviceProperties =
         (context.getPackageManager().hasSystemFeature(DEVICE_ID_FEATURE_NAME)
             && attestationMeasurementRequest.includeIdAttestation().orElse(false));
 
-    KeyPairGenerator keyPairGenerator =
-        KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, ANDROID_KEY_STORE);
-    keyPairGenerator.initialize(
-        new KeyGenParameterSpec.Builder(
-                ANDROID_KEY_STORE_ALIAS, KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY)
-            .setDigests(KeyProperties.DIGEST_SHA256)
-            .setSignaturePaddings(
-                KeyProperties.SIGNATURE_PADDING_RSA_PSS, KeyProperties.SIGNATURE_PADDING_RSA_PKCS1)
-            .setKeySize(2048)
-            // Request ID Attestation
-            .setDevicePropertiesAttestationIncluded(includeDeviceProperties)
-            // Request an attestation with challenge
-            .setAttestationChallenge(attestationChallenge)
-            .build());
+    KeyGenParameterSpec keyGenParameterSpec =
+        getKeyGenParameterSpec(attestationChallenge, includeDeviceProperties, keyAlgorithm);
+    KeyPairGenerator keyPairGenerator = getKeyPairGeneratorInstance(keyAlgorithm);
+    keyPairGenerator.initialize(keyGenParameterSpec);
 
     // Generate the key pair. This will result in calls to both generate_key() and
     // attest_key() at the keymaster2 HAL.
@@ -265,17 +261,53 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
     return Pair.create(keyPair, attestationRecord);
   }
 
+  private KeyGenParameterSpec getKeyGenParameterSpec(
+      byte[] attestationChallenge, boolean includeDeviceProperties, String keyAlgorithm) {
+    KeyGenParameterSpec.Builder keyGenParameterSpecBuilder =
+        new KeyGenParameterSpec.Builder(
+                ANDROID_KEY_STORE_ALIAS, KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY)
+            .setDigests(KeyProperties.DIGEST_SHA256)
+            // Request ID Attestation
+            .setDevicePropertiesAttestationIncluded(includeDeviceProperties)
+            // Request an attestation with challenge
+            .setAttestationChallenge(attestationChallenge);
+    if (keyAlgorithm.equals(KeyProperties.KEY_ALGORITHM_EC)) {
+      keyGenParameterSpecBuilder.setKeySize(EC_KEY_SIZE);
+    } else {
+      keyGenParameterSpecBuilder
+          .setSignaturePaddings(
+              KeyProperties.SIGNATURE_PADDING_RSA_PSS, KeyProperties.SIGNATURE_PADDING_RSA_PKCS1)
+          .setKeySize(RSA_KEY_SIZE);
+    }
+    return keyGenParameterSpecBuilder.build();
+  }
+
+  private KeyPairGenerator getKeyPairGeneratorInstance(String keyAlgorithm)
+      throws GeneralSecurityException {
+    KeyPairGenerator keyPairGenerator;
+    if (keyAlgorithm.equals(KeyProperties.KEY_ALGORITHM_EC)) {
+      keyPairGenerator =
+          KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, ANDROID_KEY_STORE);
+    } else {
+      keyPairGenerator =
+          KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, ANDROID_KEY_STORE);
+    }
+    return keyPairGenerator;
+  }
+
   /**
    * Sign the {@code attestationPayload}, using the {@link PrivateKey} from the generated asymmetric
    * {@link KeyPair}. The {@link Signature} instance used to sign the payload corresponds to the key
    * generator parameters for the RSA {@link KeyPair}.
    */
-  private byte[] signPayload(KeyPair keyPair, String attestationPayload)
+  private byte[] signPayload(KeyPair keyPair, String attestationPayload, String keyAlgorithm)
       throws GeneralSecurityException {
     PrivateKey privateKey = keyPair.getPrivate();
-    Signature signer = Signature.getInstance("SHA256withRSA");
+    String signatureAlgorithm =
+        keyAlgorithm.equals(KeyProperties.KEY_ALGORITHM_EC) ? "SHA256withECDSA" : "SHA256withRSA";
+    Signature signer = Signature.getInstance(signatureAlgorithm);
     signer.initSign(privateKey);
-    signer.update(attestationPayload.getBytes());
+    signer.update(attestationPayload.getBytes(UTF_8));
 
     return signer.sign();
   }

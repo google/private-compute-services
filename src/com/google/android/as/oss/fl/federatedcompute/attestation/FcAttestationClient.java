@@ -30,7 +30,6 @@ import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import java.time.Duration;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.Random;
@@ -51,11 +50,6 @@ public class FcAttestationClient implements AttestationClient {
 
   private final Random randomGenerator;
 
-  // Specifies how long the generated attestation measurement is valid. For attestation validation,
-  // if the client tries to attest a measurement older than this, then the validation result will be
-  // UNSPOOFABLE_ID_VERIFICATION_RESULT_CHALLENGE_EXPIRED.
-  private static final Duration ATTESTATION_MEASUREMENT_TTL = Duration.ofMinutes(10);
-
   static FcAttestationClient create(
       PccAttestationMeasurementClient attestationMeasurementClient,
       Executor executor,
@@ -72,8 +66,20 @@ public class FcAttestationClient implements AttestationClient {
 
   @Override
   public void requestMeasurement(ResultsCallback resultsCallback) {
+    requestMeasurement(resultsCallback, "");
+  }
+
+  @Override
+  public void requestMeasurement(ResultsCallback resultsCallback, String contentBinding) {
+    AttestationMeasurementRequest.Builder attestationMeasurementRequestBuilder =
+        AttestationMeasurementRequest.builder();
+
+    if (!contentBinding.isEmpty()) {
+      attestationMeasurementRequestBuilder.setContentBinding(contentBinding);
+    }
+
     AttestationMeasurementRequest attestationMeasurementRequest =
-        AttestationMeasurementRequest.builder().setTtl(ATTESTATION_MEASUREMENT_TTL).build();
+        AttestationMeasurementRequest.builder().build();
 
     FluentFuture.from(requestMeasurementDelay())
         .transformAsync(

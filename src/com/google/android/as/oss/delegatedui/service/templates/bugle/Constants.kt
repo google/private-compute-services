@@ -26,6 +26,7 @@ object Constants {
   val CornerRadius = 20.dp
   val IconSize = 20.dp
   val BorderStrokeWidth = 1.dp
+  val InnerBorderStrokeWidth = 4.dp
   val Spacing = 8.dp
   val RowStartPadding = 16.dp
   val RowEndPadding = 16.dp

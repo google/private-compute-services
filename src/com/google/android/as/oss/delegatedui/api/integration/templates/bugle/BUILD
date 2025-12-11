@@ -29,7 +29,9 @@ proto_library(
         "",
         "//src/com/google/android/as/oss/dataattribution/proto:attribution_chip_header_proto",
         "//src/com/google/android/as/oss/dataattribution/proto:attribution_dialog_proto",
+        "//src/com/google/android/as/oss/delegatedui/api/common:common_proto",
         "//src/com/google/android/as/oss/delegatedui/api/integration/templates:ui_id_token_proto",
+        "//third_party/protobuf:cpp_features_proto",
     ],
 )
 

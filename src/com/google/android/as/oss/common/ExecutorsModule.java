@@ -24,6 +24,7 @@ import com.google.android.as.oss.common.ExecutorAnnotations.IoExecutorQualifier;
 import com.google.android.as.oss.common.ExecutorAnnotations.PirExecutorQualifier;
 import com.google.android.as.oss.common.ExecutorAnnotations.ProtectedDownloadExecutorQualifier;
 import com.google.android.as.oss.common.ExecutorAnnotations.VirtualMachineExecutorQualifier;
+import com.google.android.as.oss.common.ExecutorAnnotations.WorkManagerExecutorQualifier;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import dagger.Module;
@@ -77,6 +78,13 @@ abstract class ExecutorsModule {
   @VirtualMachineExecutorQualifier
   static Executor virtualMachineExecutor() {
     return Executors.VIRTUAL_MACHINE_EXECUTOR;
+  }
+
+  @Provides
+  @Singleton
+  @WorkManagerExecutorQualifier
+  static Executor workManagerExecutor() {
+    return Executors.WORK_MANAGER_EXECUTOR;
   }
 
   @Provides

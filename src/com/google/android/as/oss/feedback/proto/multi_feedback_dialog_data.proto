@@ -21,11 +21,12 @@ import "src/com/google/android/as/oss/feedback/proto/feedback_tag_data.proto";
 import "src/com/google/android/as/oss/feedback/proto/gateway/quartz_log.proto";
 import "src/com/google/android/as/oss/feedback/proto/gateway/spoon.proto";
 
+
 option java_package = "com.google.android.as.oss.feedback.api";
 option java_multiple_files = true;
 
 // The data required to populate the feedback UI for multiple entities.
-// Next ID: 12
+// Next ID: 15
 message MultiFeedbackDialogData {
   // The client session ID of the entities.
   string client_session_id = 1;
@@ -38,22 +39,39 @@ message MultiFeedbackDialogData {
   FeedbackEntityCommonData feedback_entity_common_data = 9;
 
   // The entities in this feedback dialog.
-  repeated FeedbackEntityData feedback_entities = 3;
+  repeated FeedbackEntityData feedback_entities = 3
+     ;
 
+  // Content description of the opt-in checkbox shown in the feedback dialog,
+  // which will be read out by screen readers.
+  string opt_in_checkbox_content_description = 12
+     ;
   // Label for opt-in checkbox.
   string opt_in_label = 4;
   // Clickable label substring that links to the privacy policy.
-  string opt_in_label_link_privacy_policy = 5;
+  string opt_in_label_link_privacy_policy = 5
+     ;
   // Clickable label substring that links to the view data screen.
-  string opt_in_label_link_view_data = 11;
+  string opt_in_label_link_view_data = 11
+     ;
   // Label for send button.
   string button_label = 6;
 
   // The toast to show when the feedback is submitted successfully.
-  string feedback_dialog_sent_successfully_toast = 7;
+  string feedback_dialog_sent_successfully_toast = 7
+     ;
 
   // The toast to show when the feedback submission fails.
-  string feedback_dialog_sent_failed_toast = 8;
+  string feedback_dialog_sent_failed_toast = 8
+     ;
+
+  // The title of the view data tile.
+  string feedback_dialog_opt_in_v2_title = 13
+     ;
+
+  // The description of the view data tile.
+  string feedback_dialog_opt_in_v2_description = 14
+     ;
 }
 
 message FeedbackEntityCommonData {
@@ -69,7 +87,8 @@ message FeedbackEntityData {
   oneof cuj_type {
     gateway.SpoonCUJ cuj = 1;
     // The CUJ type of the Quartz entity.
-    gateway.QuartzCUJ quartz_cuj = 7;
+    gateway.QuartzCUJ quartz_cuj = 7
+       ;
   }
   // The content of the entity, uniquely identifies this entity within the same
   // session.
@@ -80,9 +99,11 @@ message FeedbackEntityData {
   string label = 4;
 
   // Optional data to show when the user selects positive feedback.
-  FeedbackRatingData positive_rating_data = 5;
+  FeedbackRatingData positive_rating_data = 5
+     ;
   // Optional data to show when the user selects negative feedback.
-  FeedbackRatingData negative_rating_data = 6;
+  FeedbackRatingData negative_rating_data = 6
+     ;
 }
 
 message FeedbackRatingData {

@@ -49,6 +49,11 @@ message SpoonFeedbackDataDonation {
      ;
 }
 
+message SpoonUserInput {
+  repeated string ground_truth_list = 6
+     ;
+}
+
 message MemoryEntity {
   string entity_data = 1;
   string model_version = 2;

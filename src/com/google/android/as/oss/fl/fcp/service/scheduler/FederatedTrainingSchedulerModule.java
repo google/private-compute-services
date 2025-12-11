@@ -18,6 +18,7 @@ package com.google.android.as.oss.fl.fc.service.scheduler;
 
 import android.content.Context;
 import com.google.android.as.oss.common.ExecutorAnnotations.FlExecutorQualifier;
+import com.google.android.as.oss.fl.fc.service.scheduler.endorsementoptions.EndorsementOptionsProvider;
 import com.google.android.as.oss.fl.federatedcompute.config.PcsFcFlags;
 import com.google.fcp.client.InAppTraining;
 import dagger.BindsOptionalOf;
@@ -39,8 +40,9 @@ abstract class FederatedTrainingSchedulerModule {
   static TrainingScheduler provideTrainingScheduler(
       Optional<PcsFcFlags> fcFlags,
       @ApplicationContext Context context,
-      @FlExecutorQualifier Executor executor) {
+      @FlExecutorQualifier Executor executor,
+      EndorsementOptionsProvider endorsementOptionsProvider) {
     return new FederatedTrainingScheduler(
-        executor, context, fcFlags, InAppTraining::getInAppTrainer);
+        executor, context, fcFlags, InAppTraining::getInAppTrainer, endorsementOptionsProvider);
   }
 }

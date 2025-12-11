@@ -24,22 +24,28 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
+import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiUsageData.InteractionType.INTERACTION_TYPE_CLICK
 import com.google.android.`as`.oss.delegatedui.api.integration.templates.UiIdToken
+import com.google.android.`as`.oss.delegatedui.service.templates.beacon.BeaconCommonComposablesConstants.FEEDBACK_BUTTONS_TAG
 import com.google.android.`as`.oss.delegatedui.service.templates.beacon.BeaconTemplateRendererConstants.IconButtonSizeLarge
 import com.google.android.`as`.oss.delegatedui.service.templates.beacon.BeaconTemplateRendererConstants.IconSizeNormal
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.TemplateRendererScope
 import com.google.android.`as`.oss.feedback.api.EntityFeedbackDialogData
 import com.google.android.`as`.oss.feedback.api.FeedbackRatingSentiment
 import com.google.android.`as`.oss.feedback.api.entityFeedbackDialogData
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun TemplateRendererScope.CardFeedback(
@@ -56,7 +62,7 @@ internal fun TemplateRendererScope.CardFeedback(
     mutableStateOf(FeedbackRatingSentiment.RATING_SENTIMENT_UNDEFINED)
   }
 
-  Row {
+  Row(modifier = Modifier.testTag(FEEDBACK_BUTTONS_TAG)) {
     SentimentFeedbackButton(
       targetFeedbackSentimentState = FeedbackRatingSentiment.RATING_SENTIMENT_THUMBS_UP,
       feedbackSentimentState = feedbackSentiment,
@@ -116,6 +122,9 @@ private fun TemplateRendererScope.SentimentFeedbackButton(
   onFeedbackSentimentChanged: (FeedbackRatingSentiment) -> Unit,
   entityFeedbackDialogData: EntityFeedbackDialogData,
 ) {
+  LaunchedEffect(Unit) { doOnImpression(feedbackButtonUiId) { logUsage() } }
+
+  val scope = rememberCoroutineScope()
   IconButton(
     modifier =
       Modifier.size(IconButtonSizeLarge).semantics {
@@ -132,12 +141,14 @@ private fun TemplateRendererScope.SentimentFeedbackButton(
         }
       },
     onClick = {
-      doOnInterop(feedbackButtonUiId) {
-        if (feedbackSentimentState == targetFeedbackSentimentState) {
-          onFeedbackSentimentChanged(FeedbackRatingSentiment.RATING_SENTIMENT_UNDEFINED)
-        } else {
-          onFeedbackSentimentChanged(targetFeedbackSentimentState)
-          showEntityFeedback(entityFeedbackDialogData)
+      scope.launch {
+        doOnInterop(feedbackButtonUiId, interactionType = INTERACTION_TYPE_CLICK) {
+          if (feedbackSentimentState == targetFeedbackSentimentState) {
+            onFeedbackSentimentChanged(FeedbackRatingSentiment.RATING_SENTIMENT_UNDEFINED)
+          } else {
+            onFeedbackSentimentChanged(targetFeedbackSentimentState)
+            showEntityFeedback(entityFeedbackDialogData)
+          }
         }
       }
     },
@@ -156,4 +167,8 @@ private fun TemplateRendererScope.SentimentFeedbackButton(
       tint = MaterialTheme.colorScheme.onSurfaceVariant,
     )
   }
+}
+
+internal object BeaconCommonComposablesConstants {
+  const val FEEDBACK_BUTTONS_TAG = "FeedbackButtons"
 }

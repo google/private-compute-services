@@ -19,36 +19,25 @@ package com.google.android.`as`.oss.delegatedui.utils
 import android.app.PendingIntent
 import android.app.RemoteAction
 import android.graphics.Bitmap
-import com.google.android.`as`.oss.delegatedui.utils.ParcelableOverRpcUtils.delegateListOf
-import com.google.android.`as`.oss.delegatedui.utils.ParcelableOverRpcUtils.delegateOf
+import com.google.android.`as`.oss.delegatedui.utils.ParcelableOverRpcDelegate.Companion.delegateListOf
+import com.google.android.`as`.oss.delegatedui.utils.ParcelableOverRpcDelegate.Companion.delegateOf
 import com.google.protobuf.MessageLite
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
 
 /**
  * Data class holding the response itself, plus any raw and derived data from Parcelables that may
  * have been sent over RPC.
  */
-data class ResponseWithParcelables<Response : MessageLite>(
-  val value: Response,
+data class ResponseWithParcelables<Data : MessageLite>(
+  val data: Data,
   val image: ParcelableOverRpcDelegate<Bitmap>,
   val pendingIntentList: ParcelableOverRpcDelegate<List<PendingIntent>>,
   val remoteActionList: ParcelableOverRpcDelegate<List<RemoteAction>>,
 ) {
 
   /** Maps a [ResponseWithParcelables] to another by transforming the held response. */
-  fun <R : MessageLite> map(transform: (Response) -> R): ResponseWithParcelables<R> {
-    return transform(value).withParcelablesToReceive(image, pendingIntentList, remoteActionList)
+  fun <T : MessageLite> map(transform: (Data) -> T): ResponseWithParcelables<T> {
+    return transform(data).withParcelablesToReceive(image, pendingIntentList, remoteActionList)
   }
-}
-
-/** Maps a Deferred<ResponseWithParcelables> to another by transforming the held response. */
-fun <T : MessageLite, V : MessageLite> Deferred<ResponseWithParcelables<T>>.map(
-  scope: CoroutineScope?,
-  transform: (T) -> V,
-): Deferred<ResponseWithParcelables<V>>? {
-  return scope?.async { this@map.await().map(transform) }
 }
 
 /**
@@ -61,7 +50,7 @@ fun <T : MessageLite> T.withParcelablesToReceive(
   remoteActionList: ParcelableOverRpcDelegate<List<RemoteAction>> = delegateListOf(),
 ): ResponseWithParcelables<T> {
   return ResponseWithParcelables(
-    value = this,
+    data = this,
     image = image,
     pendingIntentList = pendingIntentList,
     remoteActionList = remoteActionList,
@@ -75,7 +64,7 @@ fun <T : MessageLite> T.withParcelablesToSend(
   remoteActionList: List<RemoteAction>? = null,
 ): ResponseWithParcelables<T> {
   return ResponseWithParcelables(
-    value = this,
+    data = this,
     image = image.delegateOf(),
     pendingIntentList = pendingIntentList.delegateListOf(),
     remoteActionList = remoteActionList.delegateListOf(),

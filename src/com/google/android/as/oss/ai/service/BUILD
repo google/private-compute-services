@@ -36,6 +36,9 @@ android_library(
         "//src/com/google/android/as/oss/common",  #buildcleaner:keep
         "//src/com/google/android/as/oss/common:annotation",
         "//src/com/google/android/as/oss/common/config",
+        "//src/com/google/android/as/oss/common/security:security_policy_utils",
+        "//src/com/google/android/as/oss/common/security/api:package_security_info_java_proto_lite",
+        "//src/com/google/android/as/oss/common/security/config",
         "@maven//:androidx_annotation_annotation",
         "@maven//:androidx_concurrent_futures",
         "@maven//:com_google_dagger_dagger",

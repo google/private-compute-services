@@ -39,6 +39,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -47,6 +49,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiUsageData.InteractionType.INTERACTION_TYPE_CLICK
 import com.google.android.`as`.oss.delegatedui.api.integration.templates.UiIdToken
 import com.google.android.`as`.oss.delegatedui.api.integration.templates.beacon.BeaconDetailedCard
 import com.google.android.`as`.oss.delegatedui.api.integration.templates.beacon.BeaconGenericContentDescriptions
@@ -60,6 +63,7 @@ import com.google.android.`as`.oss.delegatedui.service.templates.beacon.BeaconTe
 import com.google.android.`as`.oss.delegatedui.service.templates.beacon.BeaconTemplateRendererConstants.RoundedCornerSizeMedium
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.TemplateRendererScope
 import com.google.android.`as`.oss.feedback.api.EntityFeedbackDialogData
+import kotlinx.coroutines.launch
 
 /**
  * The container for a single card in the Beacon widget. This is the entry point to the card. Cards
@@ -70,9 +74,8 @@ internal fun TemplateRendererScope.BeaconDetailedCardContainer(
   card: BeaconDetailedCard,
   genericContentDescriptions: BeaconGenericContentDescriptions,
   pendingIntentList: List<PendingIntent>,
-  uiIdToken: UiIdToken,
 ) {
-  doOnImpression(uiIdToken) { logUsage() }
+  LaunchedEffect(Unit) { doOnImpression(card.detailedCardUiId) { logUsage() } }
   Card(
     colors =
       CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
@@ -150,7 +153,7 @@ private fun CardRowItem(rowItem: BeaconRowItem) {
   @Composable
   fun getTextSize(textSize: TextSize): TextStyle =
     when (textSize) {
-      TextSize.SMALL -> MaterialTheme.typography.labelMedium
+      TextSize.SMALL -> MaterialTheme.typography.labelSmall
       TextSize.MEDIUM -> MaterialTheme.typography.titleMedium
       TextSize.LARGE -> MaterialTheme.typography.titleLargeEmphasized
       else -> MaterialTheme.typography.labelMedium
@@ -192,6 +195,7 @@ private fun CardRowItem(rowItem: BeaconRowItem) {
   }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun TemplateRendererScope.CardHeader(
   cardTitle: String,
@@ -207,7 +211,7 @@ private fun TemplateRendererScope.CardHeader(
     Text(
       modifier = Modifier.weight(1f, fill = false),
       text = cardTitle,
-      style = MaterialTheme.typography.titleLarge,
+      style = MaterialTheme.typography.titleLargeEmphasized,
       color = MaterialTheme.colorScheme.onSurface,
     )
     Spacer(modifier = Modifier.width(0.dp))
@@ -262,13 +266,18 @@ private fun TemplateRendererScope.SourceNavigationButton(
   pendingIntent: PendingIntent,
   sourceNavigationButtonUiIdToken: UiIdToken,
 ) {
+  val scope = rememberCoroutineScope()
   IconButton(
     modifier = Modifier.size(IconSizeLarge),
     onClick = {
-      doOnInterop(sourceNavigationButtonUiIdToken) { executeAction { pendingIntent.toAction() } }
+      scope.launch {
+        doOnInterop(sourceNavigationButtonUiIdToken, interactionType = INTERACTION_TYPE_CLICK) {
+          executeAction { pendingIntent.toAction() }
+        }
+      }
     },
   ) {
-    doOnImpression(sourceNavigationButtonUiIdToken) { logUsage() }
+    LaunchedEffect(Unit) { doOnImpression(sourceNavigationButtonUiIdToken) { logUsage() } }
     Icon(
       modifier = Modifier.size(IconSizeLarge),
       painter = painterResource(R.drawable.gs_open_in_new_vd_theme_24),

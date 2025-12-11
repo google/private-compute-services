@@ -18,7 +18,9 @@ package com.google.android.as.oss.delegatedui.api.infra.dataservice;
 
 import "src/com/google/android/as/oss/delegatedui/api/common/common.proto";
 import "src/com/google/android/as/oss/delegatedui/api/integration/templates/template_integration.proto";
+import "third_party/protobuf/cpp_features.proto";
 
+option features.(pb.cpp).string_type = VIEW;
 option java_package = "com.google.android.as.oss.delegatedui.api.infra.dataservice";
 option java_multiple_files = true;
 
@@ -33,6 +35,7 @@ message DelegatedUiGetTemplateDataRequest {
   string session_uuid = 1;
 
   common.DelegatedUiClientId client_id = 2;
+
   // Ingress data used to generate the delegated ui data.
   common.DelegatedUiIngressData client_ingress_data = 3;
 
@@ -42,8 +45,8 @@ message DelegatedUiGetTemplateDataRequest {
 
   // The android.view.View.MeasureSpec of the delegated UI that the client's
   // local UI can support - for the RemoteViews template use case.
-  int32 measure_spec_width = 5;
-  int32 measure_spec_height = 6;
+  int32 measure_spec_width = 5 [deprecated = true];
+  int32 measure_spec_height = 6 [deprecated = true];
 }
 
 message DelegatedUiGetTemplateDataResponse {
@@ -51,12 +54,11 @@ message DelegatedUiGetTemplateDataResponse {
   integration.templates.DelegatedUiTemplateType template_type = 1;
 
   // The data to use to populate the template.
-  integration.templates.DelegatedUiTemplateData template_data = 2
-     ;
+  integration.templates.DelegatedUiTemplateData template_data = 2;
 
   // Whether there is additional data available for a follow-up
   // GetDelegatedUiAdditionalData call.
-  bool has_additional_data = 3;
+  bool has_additional_data = 3 [deprecated = true];
 
   // The title to set on the delegated UI pane / window, for a11y.
   CommonTemplateData common_data = 4;

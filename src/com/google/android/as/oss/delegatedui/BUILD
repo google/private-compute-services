@@ -24,7 +24,9 @@ android_library(
     ],
     exports = [
         "//src/com/google/android/as/oss/delegatedui/config:module",
+        "//src/com/google/android/as/oss/delegatedui/config/beacon:module",
         "//src/com/google/android/as/oss/delegatedui/service/data/serviceconnection:module",
         "//src/com/google/android/as/oss/delegatedui/service/module:grpc_module",
+        "//src/com/google/android/as/oss/delegatedui/utils:parcelable_over_rpc_hilt_module",
     ],
 )

@@ -21,28 +21,25 @@ import android.app.RemoteAction
 import android.graphics.Bitmap
 import com.google.android.`as`.oss.delegatedui.api.common.DelegatedUiDataProviderInfo.DelegatedUiDataProvider
 import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiDataServiceGrpcKt
-import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiDataServiceParcelableKeys
-import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiGetAdditionalDataResponse
+import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiDataServiceParcelableKeys.CONFIGURATION_KEY
+import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiDataServiceParcelableKeys.IMAGE_KEY
+import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiDataServiceParcelableKeys.PENDING_INTENT_LIST_KEY
+import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiDataServiceParcelableKeys.REMOTE_ACTION_LIST_KEY
 import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiGetTemplateDataResponse
-import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.delegatedUiGetAdditionalDataRequest
 import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.delegatedUiGetTemplateDataRequest
 import com.google.android.`as`.oss.delegatedui.api.integration.templates.DelegatedUiTemplateType
 import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiExceptions
 import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiLifecycle
 import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiRenderSpec
 import com.google.android.`as`.oss.delegatedui.service.data.serviceconnection.Annotations.DelegatedUiDataService
-import com.google.android.`as`.oss.delegatedui.utils.ParcelableOverRpcUtils.delegateListOf
-import com.google.android.`as`.oss.delegatedui.utils.ParcelableOverRpcUtils.delegateOf
-import com.google.android.`as`.oss.delegatedui.utils.ParcelableOverRpcUtils.receiveParcelableFromResponse
-import com.google.android.`as`.oss.delegatedui.utils.ParcelableOverRpcUtils.receiveParcelablesFromResponse
-import com.google.android.`as`.oss.delegatedui.utils.ParcelableOverRpcUtils.sendParcelableInRequest
+import com.google.android.`as`.oss.delegatedui.utils.ParcelableOverRpcDelegate.Companion.delegateListOf
+import com.google.android.`as`.oss.delegatedui.utils.ParcelableOverRpcDelegate.Companion.delegateOf
+import com.google.android.`as`.oss.delegatedui.utils.ParcelableOverRpcUtils
 import com.google.android.`as`.oss.delegatedui.utils.ResponseWithParcelables
 import com.google.android.`as`.oss.delegatedui.utils.withParcelablesToReceive
 import com.google.common.flogger.GoogleLogger
 import com.google.common.flogger.android.AndroidLogTag
 import javax.inject.Inject
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
 
 /** A repository for fetching delegated UI data. */
 interface DelegatedUiDataRepository {
@@ -51,16 +48,15 @@ interface DelegatedUiDataRepository {
    * Fetches the template data required to render the delegated UI, and a deferred additional data
    * required to handle clicks.
    */
-  suspend fun getData(
+  suspend fun getTemplateData(
     lifecycle: DelegatedUiLifecycle,
     spec: DelegatedUiRenderSpec,
   ): DelegatedUiDataResponses
 }
 
-/** Data class holding the template data and the deferred additional data. */
+/** Data class holding the template data. */
 data class DelegatedUiDataResponses(
-  val templateData: ResponseWithParcelables<DelegatedUiGetTemplateDataResponse>,
-  val additionalData: Deferred<ResponseWithParcelables<DelegatedUiGetAdditionalDataResponse>>?,
+  val templateData: ResponseWithParcelables<DelegatedUiGetTemplateDataResponse>
 )
 
 class DelegatedUiDataRepositoryImpl
@@ -72,12 +68,13 @@ internal constructor(
       DelegatedUiDataProvider,
       @JvmSuppressWildcards
       DelegatedUiDataServiceGrpcKt.DelegatedUiDataServiceCoroutineStub,
-    >
+    >,
+  private val parcelableOverRpcUtils: ParcelableOverRpcUtils,
 ) : DelegatedUiDataRepository {
   private val templateEntries =
     DelegatedUiTemplateType.entries.filterNot { it == DelegatedUiTemplateType.UNRECOGNIZED }
 
-  override suspend fun getData(
+  override suspend fun getTemplateData(
     lifecycle: DelegatedUiLifecycle,
     spec: DelegatedUiRenderSpec,
   ): DelegatedUiDataResponses {
@@ -86,17 +83,8 @@ internal constructor(
       services[dataProvider]
         ?: throw DelegatedUiExceptions.InvalidDataProviderServiceError(dataProvider)
 
-    // First fetch the template data.
     val templateData = fetchTemplateData(service, spec)
-
-    // Then fetch the additional data.
-    val additionalData =
-      if (templateData.value.hasAdditionalData) {
-        lifecycle.streamScope?.async { fetchAdditionalData(service, spec) }
-      } else {
-        null
-      }
-    return DelegatedUiDataResponses(templateData, additionalData)
+    return DelegatedUiDataResponses(templateData)
   }
 
   private suspend fun fetchTemplateData(
@@ -106,37 +94,28 @@ internal constructor(
     val request = delegatedUiGetTemplateDataRequest {
       this.sessionUuid = spec.sessionUuid
       this.clientId = spec.clientId
-      this.clientIngressData = spec.ingressData
+      this.clientIngressData = spec.dataSpec.ingressData
       this.supportedTemplates += templateEntries
-      this.measureSpecWidth = spec.measureSpecWidth
-      this.measureSpecHeight = spec.measureSpecHeight
     }
     logger
       .atInfo()
       .log(
-        "[DelegatedUILifecycle] DUI-Service calling getDelegatedUiTemplateData() with request: %s",
-        request.clientIngressData,
+        "[DelegatedUILifecycle] DUI-Service calling getDelegatedUiTemplateData() for session: %s",
+        spec.sessionUuid,
       )
 
     val image = delegateOf<Bitmap>()
     val pendingIntentList = delegateListOf<PendingIntent>()
     val remoteActionList = delegateListOf<RemoteAction>()
     val response =
-      service
-        .receiveParcelableFromResponse(DelegatedUiDataServiceParcelableKeys.IMAGE_KEY, image)
-        .receiveParcelablesFromResponse(
-          DelegatedUiDataServiceParcelableKeys.PENDING_INTENT_LIST_KEY,
-          pendingIntentList,
-        )
-        .receiveParcelablesFromResponse(
-          DelegatedUiDataServiceParcelableKeys.REMOTE_ACTION_LIST_KEY,
-          remoteActionList,
-        )
-        .sendParcelableInRequest(
-          DelegatedUiDataServiceParcelableKeys.CONFIGURATION_KEY,
-          spec.configuration,
-        )
-        .getDelegatedUiTemplateData(request)
+      with(parcelableOverRpcUtils) {
+        service
+          .receiveParcelableFromResponse(IMAGE_KEY, image)
+          .receiveParcelablesFromResponse(PENDING_INTENT_LIST_KEY, pendingIntentList)
+          .receiveParcelablesFromResponse(REMOTE_ACTION_LIST_KEY, remoteActionList)
+          .sendParcelableInRequest(CONFIGURATION_KEY, spec.configuration)
+          .getDelegatedUiTemplateData(request)
+      }
     val result =
       response.withParcelablesToReceive(
         image = image,
@@ -147,52 +126,8 @@ internal constructor(
     logger
       .atInfo()
       .log(
-        "[DelegatedUILifecycle] DUI-Service received getDelegatedUiTemplateData() result: %s",
-        result,
-      )
-    return result
-  }
-
-  private suspend fun fetchAdditionalData(
-    service: DelegatedUiDataServiceGrpcKt.DelegatedUiDataServiceCoroutineStub,
-    spec: DelegatedUiRenderSpec,
-  ): ResponseWithParcelables<DelegatedUiGetAdditionalDataResponse> {
-    val request = delegatedUiGetAdditionalDataRequest {
-      this.sessionUuid = spec.sessionUuid
-      this.clientId = spec.clientId
-      this.clientIngressData = spec.ingressData
-    }
-    logger
-      .atInfo()
-      .log(
-        "[DelegatedUILifecycle] DUI-Service calling getDelegatedUiAdditionalData() with request: %s",
-        request,
-      )
-
-    val pendingIntentList = delegateListOf<PendingIntent>()
-    val remoteActionList = delegateListOf<RemoteAction>()
-    val response =
-      service
-        .receiveParcelablesFromResponse(
-          DelegatedUiDataServiceParcelableKeys.PENDING_INTENT_LIST_KEY,
-          pendingIntentList,
-        )
-        .receiveParcelablesFromResponse(
-          DelegatedUiDataServiceParcelableKeys.REMOTE_ACTION_LIST_KEY,
-          remoteActionList,
-        )
-        .getDelegatedUiAdditionalData(request)
-    val result =
-      response.withParcelablesToReceive(
-        pendingIntentList = pendingIntentList,
-        remoteActionList = remoteActionList,
-      )
-
-    logger
-      .atInfo()
-      .log(
-        "[DelegatedUILifecycle] DUI-Service received getDelegatedUiAdditionalData() result: %s",
-        result,
+        "[DelegatedUILifecycle] DUI-Service received getDelegatedUiTemplateData() for session: %s",
+        spec.sessionUuid,
       )
     return result
   }

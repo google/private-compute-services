@@ -28,7 +28,6 @@ android_library(
     name = "connector_module",
     srcs = ["StatsdConnectorModule.java"],
     deps = [
-        "//java/com/google/apps/tiktok/inject:qualifiers",
         "//src/com/google/android/as/oss/common:annotation",
         "//src/com/google/android/as/oss/fl/federatedcompute/statsd",
         "//src/com/google/android/as/oss/logging:api",

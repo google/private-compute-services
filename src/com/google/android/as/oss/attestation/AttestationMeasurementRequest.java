@@ -17,7 +17,6 @@
 package com.google.android.as.oss.attestation;
 
 import com.google.auto.value.AutoValue;
-import java.time.Duration;
 import java.util.Optional;
 
 /** Attestation measurement request builder. */
@@ -26,14 +25,6 @@ public abstract class AttestationMeasurementRequest {
   public static Builder builder() {
     return new AutoValue_AttestationMeasurementRequest.Builder();
   }
-
-  /**
-   * The ttl is used to set how long the requested challenge should be valid. After the set ttl, the
-   * challenge cannot be used to generate a valid {@link
-   * com.google.android.as.oss.attestation.api.proto.AttestationMeasurementResponse}. The ttl must
-   * be less than 24 hours and is required.
-   */
-  public abstract Duration ttl();
 
   /** This is an optional non empty payload string sent alongside an attestation request. */
   public abstract Optional<String> contentBinding();
@@ -45,15 +36,21 @@ public abstract class AttestationMeasurementRequest {
    */
   public abstract Optional<Boolean> includeIdAttestation();
 
+  /**
+   * This is used to specify the key algorithm used for the attestation. The supported algorithms
+   * are, for example, "EC" for Elliptic Curve and "RSA" for RSA.
+   */
+  public abstract Optional<String> keyAlgorithm();
+
   /** Attestation request builder. */
   @AutoValue.Builder
   public abstract static class Builder {
 
-    public abstract Builder setTtl(Duration value);
-
     public abstract Builder setContentBinding(String value);
 
     public abstract Builder setIncludeIdAttestation(boolean value);
+
+    public abstract Builder setKeyAlgorithm(String value);
 
     public abstract AttestationMeasurementRequest build();
   }

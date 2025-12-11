@@ -31,6 +31,7 @@ proto_library(
         "ui_service.proto",
         "ui_service_create.proto",
         "ui_service_data_egress.proto",
+        "ui_service_hints.proto",
         "ui_service_invalidate.proto",
         "ui_service_nested_scroll.proto",
         "ui_service_prepare.proto",

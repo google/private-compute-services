@@ -178,6 +178,7 @@
   <string name="description_universal_search_corpora">Updated the on-device database used for searching your phone</string>
   <string name="url_regex_universal_search_corpora" translatable="false">https://(www.)?gstatic.com/nasa/apps/(non_en_)?pack_(?!spelling_checker)(?!notification).*</string>
   <string name="url_regex_universal_search_corpora_mdd" translatable="false">https://dl.google.com/mdi-serving/aiai-echo-toast-config/.*</string>
+  <string name="url_regex_universal_search_corpora_mdd_edgedl" translatable="false">https://edgedl.me.gvt1.com/edgedl/mdi-serving/aiai-echo-toast-config/.*</string>
 
   <!-- Description of fa score download for the Search feature, displayed in the network usage log. "Search your phone" is the product name. [CHAR_LIMIT=NONE] -->
   <string name="description_toast_search_fa_ranking">Updated the on-device search ranking model</string>
@@ -339,5 +340,55 @@
   <!-- Description of downloads from PSI using Protected Download protocol, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
   <string name="description_psi_ap">Updated the on-device protections for Device Intelligence</string>
 
-</resources>
+  <!-- Private Inference (PI) provides e2e, privacy-preserving inference and compute in Google data centers for AI features. -->
+  <!-- Name of the Transcript Summarization feature, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_pi_transcript_summarization">Recorder transcript summarization</string>
+  <!-- Description of the Transcript Summarization feature, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_pi_transcript_summarization">Recorder transcript summarization was processed in a private compute environment.</string>
+  <!-- Name of the Memory Generation feature, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_pi_memory_generation">Memory generation</string>
+  <!-- Description of the Memory Generation feature, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_pi_memory_generation">Memory generation was processed in a private compute environment.</string>
+  <!-- IP protection for Private Inference. [CHAR LIMIT=NONE] -->
+  <string name="feature_name_ip_protection">IP protection</string>
+  <!-- Description of the request to get the proxy configuration from the token issuance server, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_ipp_get_proxy_config">Updated proxy configuration</string>
+  <!-- Description of the request to get anonymous token(s) from the token issuance server, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_ipp_get_anonymous_token">Fetched anonymous token(s)</string>
+  <!-- Url pattern for the Private Inference server. -->
+  <string name="url_regex_pi_prod" translatable="false">privatearatea.pa.googleapis.com</string>
 
+  <!-- Scam Detection feature -->
+  <!-- Name of the Scam Detection feature which is part of ASI, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_scam_detection">Scam Detection</string>
+  <!-- Description of download consisting of Scam Detection model, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_scam_detection">Updated the on-device scam detection model for Scam Detection</string>
+  <string name="url_regex_scam_detection_mdd" translatable="false">https://edgedl.me.gvt1.com/edgedl/mdi-serving/asi-safecomms-config/.*</string>
+
+  <!-- Notification Organizer -->
+  <!-- Name of the Notification Organizer feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_notification_organizer">Notification Organizer</string>
+  <!-- Description of downloads consisting of Notification Organizer models, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_notification_organizer">Updated the on-device model for Notification Organizer</string>
+  <!-- URL pattern for downloading the Notification Organizer model through MDD for network usage logging. -->
+  <string name="url_regex_notification_organizer_mdd" translatable="false">https://edgedl.me.gvt1.com/edgedl/mdi-serving/asi-bundle-classifier/.*</string>
+
+  <!-- Notification Summaries -->
+  <!-- Name of the Notification Summaries feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_notification_summaries">Notification Summaries</string>
+  <!-- Description of downloads consisting of Notification Summaries models, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_notification_summaries">Updated the on-device model for Notification Summaries</string>
+  <!-- URL pattern for downloading the Notification Summaries model through MDD for network usage logging. -->
+  <string name="url_regex_notification_summaries_mdd" translatable="false">https://edgedl.me.gvt1.com/edgedl/mdi-serving/asi-notification-summaries/.*</string>
+
+  <!-- People-Who-Matter Service (PWM) -->
+  <!-- Name of the Federated Analytics feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_pwm">Android sharing</string>
+  <!-- Description of the upload events of federated analytics results, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_pwm_fa">Contributed to privacy-preserving analytics to improve Android sharing</string>
+
+  <!-- Name of the Notification Intelligence feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_notification_intelligence">Notification Intelligence</string>
+  <!-- Description of the upload events of federated analytics results for Notification Intelligenc, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_notification_intelligence_fa">Contributed to privacy-preserving analytics to improve Notification Intelligence</string>
+</resources>

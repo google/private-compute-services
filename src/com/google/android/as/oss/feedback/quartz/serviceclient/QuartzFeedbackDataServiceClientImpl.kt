@@ -79,6 +79,8 @@ internal constructor(
             asiVersion =
               donationData.quartzDataDonation.quartzKeySummarizationData.quartzCommonData
                 .asiVersion,
+            detectedLanguage =
+              donationData.quartzDataDonation.quartzKeyTypeData.quartzCommonData.detectedLanguage,
             featureName = donationData.quartzDataDonation.quartzKeySummarizationData.featureName,
             packageName =
               donationData.quartzDataDonation.quartzKeySummarizationData.quartzCommonData
@@ -106,6 +108,8 @@ internal constructor(
             uuid = donationData.quartzDataDonation.quartzKeyTypeData.quartzCommonData.uuid,
             asiVersion =
               donationData.quartzDataDonation.quartzKeyTypeData.quartzCommonData.asiVersion,
+            detectedLanguage =
+              donationData.quartzDataDonation.quartzKeyTypeData.quartzCommonData.detectedLanguage,
             packageName =
               donationData.quartzDataDonation.quartzKeyTypeData.quartzCommonData.packageName,
             title = donationData.quartzDataDonation.quartzKeyTypeData.quartzCommonData.title,
@@ -202,6 +206,12 @@ internal constructor(
               donationData.quartzDataDonation.quartzKeyTypeData.classificationExecutedTimeMs,
             exemptionExecutedTimeMsString =
               donationData.quartzDataDonation.quartzKeyTypeData.exemptionExecutedTimeMsString,
+            classificationDefaultCategoryResult =
+              donationData.quartzDataDonation.quartzKeyTypeData.classificationDefaultCategoryResult,
+            defaultCategoryCorrectionThreshold =
+              donationData.quartzDataDonation.quartzKeyTypeData.defaultCategoryCorrectionThreshold,
+            isSuppressDuplicate =
+              donationData.quartzDataDonation.quartzKeyTypeData.isSuppressDuplicate,
           )
         } else {
           QuartzKeyTypeData()

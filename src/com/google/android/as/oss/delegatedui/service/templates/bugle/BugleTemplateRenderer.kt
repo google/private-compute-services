@@ -53,14 +53,19 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
@@ -69,7 +74,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.toArgb
@@ -78,16 +82,34 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.toBitmap
+import com.google.android.`as`.oss.common.config.ConfigReader
 import com.google.android.`as`.oss.dataattribution.proto.attributionChipData
+import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiUsageData
+import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiUsageData.InteractionType.INTERACTION_TYPE_CLICK
+import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiUsageData.InteractionType.INTERACTION_TYPE_LONG_CLICK
 import com.google.android.`as`.oss.delegatedui.api.integration.egress.bugle.bugleEgressData
 import com.google.android.`as`.oss.delegatedui.api.integration.templates.DelegatedUiTemplateData
 import com.google.android.`as`.oss.delegatedui.api.integration.templates.bugle.BugleAction
+import com.google.android.`as`.oss.delegatedui.config.DelegatedUiConfig
+import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiInputSpec
 import com.google.android.`as`.oss.delegatedui.service.templates.TemplateRenderer
+import com.google.android.`as`.oss.delegatedui.service.templates.bugle.BugleTemplateRenderer.Companion.ANIMATED_MERGED_CHIPS_ROW_DISABLE_SIZE_ANIMATION
+import com.google.android.`as`.oss.delegatedui.service.templates.bugle.BugleTemplateRenderer.Companion.ANIMATED_MERGED_CHIPS_ROW_ENABLE_SIZE_ANIMATION
+import com.google.android.`as`.oss.delegatedui.service.templates.bugle.BugleTemplateRenderer.Companion.BUGLE_ACTIONS_CHIPS_TEST_TAG
+import com.google.android.`as`.oss.delegatedui.service.templates.bugle.BugleTemplateRenderer.Companion.BUGLE_SUGGESTIONS_CHIPS_TEST_TAG
+import com.google.android.`as`.oss.delegatedui.service.templates.bugle.BugleTemplateRenderer.Companion.STANDALONE_CHIPS_ROW_TEST_TAG
 import com.google.android.`as`.oss.delegatedui.service.templates.fonts.FlexFontUtils.withFlexFont
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.TemplateRendererScope
 import com.google.android.`as`.oss.delegatedui.utils.IconOrImage
@@ -99,34 +121,47 @@ import com.google.common.flogger.GoogleLogger
 import javax.inject.Inject
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.math.sqrt
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class BugleTemplateRenderer @Inject internal constructor() : TemplateRenderer {
+val LocalConfigReader =
+  staticCompositionLocalOf<ConfigReader<DelegatedUiConfig>> { error("No ConfigReader provided") }
+
+class BugleTemplateRenderer
+@Inject
+internal constructor(val configReader: ConfigReader<DelegatedUiConfig>) : TemplateRenderer {
 
   override fun TemplateRendererScope.onCreateTemplateView(
     context: Context,
+    inputSpecFlow: StateFlow<DelegatedUiInputSpec>,
     response: ResponseWithParcelables<DelegatedUiTemplateData>,
   ): View? {
-    val data = response.value.bugleTemplateData
+    val data = response.data.bugleTemplateData
 
     val suggestionChipRowData =
       if (data.bugleSuggestionsList.isNotEmpty()) {
         SuggestionChipRowData(
-          logoIcon = response.image.value,
+          logoIcon = response.image.valueOrNull,
           bugleSuggestionModelList =
-            getBugleSuggestionModelList(data, response.pendingIntentList.value),
+            getBugleSuggestionModelList(data, response.pendingIntentList.valueOrNull),
         )
       } else {
         null
       }
 
     // get the action chip row data
-    val remoteActionsList = response.remoteActionList.value
+    val remoteActionsList = response.remoteActionList.valueOrNull
     val actionChipRowData =
-      if (
-        data.bugleActionsList.isNotEmpty() && data.bugleActionsList.size == remoteActionsList?.size
-      ) {
-        ActionChipRowData(data.bugleActionsList, remoteActionsList)
+      if (data.bugleActionsList.isNotEmpty()) {
+        if (data.bugleActionsList.size == remoteActionsList?.size) {
+          ActionChipRowData(data.bugleActionsList, remoteActionsList)
+        } else {
+          logger
+            .atWarning()
+            .log("Bugle actions list size is not equal to remote actions list size.")
+          null
+        }
       } else {
         null
       }
@@ -140,23 +175,68 @@ class BugleTemplateRenderer @Inject internal constructor() : TemplateRenderer {
 
     return ComposeView(context).apply {
       setContent {
-        val nestedScrollInterop = rememberNestedScrollInteropConnection()
-        Column(Modifier.fillMaxWidth()) {
-          Box(modifier = Modifier.nestedScroll(nestedScrollInterop)) {
-            BugleChipsRow(
-              isStandaloneRowEnabled = data.isStandaloneRowEnabled,
-              enableSizeAnimation = data.enableSizeAnimation || !data.hasEnableSizeAnimation(),
-              suggestionChipRowData = suggestionChipRowData,
-              actionChipRowData = actionChipRowData,
-            )
+        CompositionLocalProvider(LocalConfigReader provides configReader) {
+          MainTheme {
+            MaterialTheme(
+              colorScheme =
+                MaterialTheme.colorScheme.copy(
+                  outlineVariant =
+                    if (data.hasStrokeColor() && data.strokeColor != 0) {
+                      Color(data.strokeColor)
+                    } else {
+                      MaterialTheme.colorScheme.outlineVariant
+                    },
+                  onSurface =
+                    if (data.hasFontColor() && data.fontColor != 0) {
+                      Color(data.fontColor)
+                    } else {
+                      MaterialTheme.colorScheme.onSurface
+                    },
+                  primary =
+                    if (data.hasIconColor() && data.iconColor != 0) {
+                      Color(data.iconColor)
+                    } else {
+                      MaterialTheme.colorScheme.primary
+                    },
+                )
+            ) {
+              val nestedScrollInterop = rememberNestedScrollInteropConnection()
+              LaunchedEffect(Unit) {
+                doOnInterop(
+                  uiTokenId = data.bugleViewUiIdToken,
+                  interactionType =
+                    DelegatedUiUsageData.InteractionType.INTERACTION_TYPE_UNSPECIFIED,
+                ) {
+                  sendHints(data.hintsList.toSet())
+                }
+              }
+              Column(Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier.nestedScroll(nestedScrollInterop)) {
+                  BugleChipsRow(
+                    isStandaloneRowEnabled = data.isStandaloneRowEnabled,
+                    enableSizeAnimation =
+                      data.enableSizeAnimation || !data.hasEnableSizeAnimation(),
+                    suggestionChipRowData = suggestionChipRowData,
+                    actionChipRowData = actionChipRowData,
+                  )
+                }
+              }
+            }
           }
         }
       }
     }
   }
 
-  private companion object {
-    private val logger = GoogleLogger.forEnclosingClass()
+  internal companion object {
+    val logger = GoogleLogger.forEnclosingClass()
+    const val BUGLE_SUGGESTIONS_CHIPS_TEST_TAG = "BUGLE_SUGGESTIONS_CHIPS_TEST_TAG"
+    const val BUGLE_ACTIONS_CHIPS_TEST_TAG = "BUGLE_ACTIONS_CHIPS_TEST_TAG"
+    const val STANDALONE_CHIPS_ROW_TEST_TAG = "STANDALONE_CHIPS_ROW_TEST_TAG"
+    const val ANIMATED_MERGED_CHIPS_ROW_ENABLE_SIZE_ANIMATION =
+      "ANIMATED_MERGED_CHIPS_ROW_ENABLE_SIZE_ANIMATION"
+    const val ANIMATED_MERGED_CHIPS_ROW_DISABLE_SIZE_ANIMATION =
+      "ANIMATED_MERGED_CHIPS_ROW_DISABLE_SIZE_ANIMATION"
   }
 }
 
@@ -177,7 +257,7 @@ private fun boostChroma(color: Color): Color {
   return if (chroma < 5) {
     color
   } else {
-    Color(ColorUtils.M3HCTToColor(hctColor[0], 120f, hctColor[2]))
+    Color(ColorUtils.M3HCTToColor(hctColor[0], 70f, hctColor[2]))
   }
 }
 
@@ -188,12 +268,10 @@ internal fun TemplateRendererScope.BugleChipsRow(
   suggestionChipRowData: SuggestionChipRowData?,
   actionChipRowData: ActionChipRowData?,
 ) {
-  MainTheme {
-    if (isStandaloneRowEnabled) {
-      StandaloneChipsRow(suggestionChipRowData, actionChipRowData)
-    } else {
-      AnimatedMergedChipsRow(enableSizeAnimation, suggestionChipRowData, actionChipRowData)
-    }
+  if (isStandaloneRowEnabled) {
+    StandaloneChipsRow(suggestionChipRowData, actionChipRowData)
+  } else {
+    AnimatedMergedChipsRow(enableSizeAnimation, suggestionChipRowData, actionChipRowData)
   }
 }
 
@@ -203,7 +281,10 @@ private fun TemplateRendererScope.StandaloneChipsRow(
   actionChipRowData: ActionChipRowData?,
 ) {
   LazyRow(
-    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+    modifier =
+      Modifier.fillMaxWidth()
+        .padding(horizontal = 8.dp, vertical = 4.dp)
+        .testTag(STANDALONE_CHIPS_ROW_TEST_TAG),
     horizontalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.End),
     verticalAlignment = Alignment.Bottom,
   ) {
@@ -241,20 +322,29 @@ private fun TemplateRendererScope.AnimatedMergedChipsRow(
           animationSpec = spring(dampingRatio = 0.6f, stiffness = 800f),
         ),
     ) {
-      MergedChipsRow(suggestionChipRowData, actionChipRowData)
+      MergedChipsRow(
+        Modifier.testTag(ANIMATED_MERGED_CHIPS_ROW_ENABLE_SIZE_ANIMATION),
+        suggestionChipRowData,
+        actionChipRowData,
+      )
     }
   } else {
-    MergedChipsRow(suggestionChipRowData, actionChipRowData)
+    MergedChipsRow(
+      Modifier.testTag(ANIMATED_MERGED_CHIPS_ROW_DISABLE_SIZE_ANIMATION),
+      suggestionChipRowData,
+      actionChipRowData,
+    )
   }
 }
 
 @Composable
 private fun TemplateRendererScope.MergedChipsRow(
+  modifier: Modifier,
   suggestionChipRowData: SuggestionChipRowData?,
   actionChipRowData: ActionChipRowData?,
 ) {
   Row(
-    modifier = Modifier.wrapContentWidth().heightIn(48.dp).padding(vertical = 4.dp),
+    modifier = modifier.wrapContentWidth().heightIn(48.dp).padding(vertical = 4.dp),
     horizontalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.End),
     verticalAlignment = Alignment.Bottom,
   ) {
@@ -305,30 +395,37 @@ internal fun TemplateRendererScope.BugleSuggestionChip(
   suggestionModel: BugleSuggestionModel,
 ) {
   val suggestion = suggestionModel.suggestion
+  val scope = rememberCoroutineScope()
   BugleOutlinedButton(
+    modifier = Modifier.testTag(BUGLE_SUGGESTIONS_CHIPS_TEST_TAG),
     chipOnClick = {
-      doOnInterop(suggestion.uiIdToken) { _ ->
-        sendEgressData {
-          this.bugleEgressData = bugleEgressData { this.suggestionText = suggestion.text }
+      scope.launch {
+        doOnInterop(suggestion.uiIdToken, interactionType = INTERACTION_TYPE_CLICK) {
+          sendEgressData {
+            this.bugleEgressData = bugleEgressData { this.suggestionText = suggestion.text }
+          }
         }
       }
     },
     chipOnLongClick =
       onlyIf(suggestion.hasAttributionDialogData()) {
-        doOnInterop(suggestion.uiIdToken) { _ ->
-          showDataAttribution(
-            attributionDialogData = suggestion.attributionDialogData,
-            attributionChipData =
-              attributionChipData {
-                logoIcon?.serializeToByteString()?.let { this.chipIcon = it }
-                this.chipLabel = suggestion.text
-              },
-            sourceDeepLinks = suggestionModel.pendingIntentList.toTypedArray(),
-          )
+        scope.launch {
+          doOnInterop(suggestion.uiIdToken, interactionType = INTERACTION_TYPE_LONG_CLICK) {
+            showDataAttribution(
+              attributionDialogData = suggestion.attributionDialogData,
+              attributionChipData =
+                attributionChipData {
+                  logoIcon?.serializeToByteString()?.let { this.chipIcon = it }
+                  this.chipLabel = suggestion.text
+                },
+              sourceDeepLinks = suggestionModel.pendingIntentList.toTypedArray(),
+            )
+          }
         }
       },
   ) {
-    doOnImpression(suggestion.uiIdToken) { logUsage() }
+    LaunchedEffect(Unit) { doOnImpression(suggestion.uiIdToken) { logUsage() } }
+
     BugleRowContent(
       icon = logoIcon?.asTintableIcon(tintable = true),
       text = suggestion.text,
@@ -342,39 +439,52 @@ internal fun TemplateRendererScope.BugleSuggestionChip(
 fun TemplateRendererScope.BugleActionChip(bugleAction: BugleAction, remoteAction: RemoteAction) {
   val iconBitmap = remoteAction.iconBitmap
 
+  val scope = rememberCoroutineScope()
   BugleOutlinedButton(
+    modifier = Modifier.testTag(BUGLE_ACTIONS_CHIPS_TEST_TAG),
     chipOnClick = {
-      doOnInterop(bugleAction.actionData.uiIdToken) {
-        // bugleAction.containsQuery definition from [ParsedAction]: True if the action uses a
-        // query instead of an intent.
-        if (bugleAction.containsQuery) {
-          sendEgressData {
-            bugleEgressData = bugleEgressData { photoSearchQuery = bugleAction.actionData.query }
+      scope.launch {
+        doOnInterop(bugleAction.actionData.uiIdToken, interactionType = INTERACTION_TYPE_CLICK) {
+          // bugleAction.containsQuery definition from [ParsedAction]: True if the action uses a
+          // query instead of an intent.
+          if (bugleAction.containsQuery) {
+            sendEgressData {
+              bugleEgressData = bugleEgressData { photoSearchQuery = bugleAction.actionData.query }
+            }
+          } else {
+            executeAction { remoteAction.toAction() }
           }
-        } else {
-          executeAction { remoteAction.toAction() }
         }
       }
     },
     chipOnLongClick =
       onlyIf(bugleAction.actionData.hasAttributionDialogData()) {
-        doOnInterop(bugleAction.actionData.uiIdToken) {
-          showDataAttribution(
-            attributionDialogData = bugleAction.actionData.attributionDialogData,
-            attributionChipData = bugleAction.actionData.attributionChipData,
-            sourceDeepLinks = null,
-          )
+        scope.launch {
+          doOnInterop(
+            bugleAction.actionData.uiIdToken,
+            interactionType = INTERACTION_TYPE_LONG_CLICK,
+          ) {
+            showDataAttribution(
+              attributionDialogData = bugleAction.actionData.attributionDialogData,
+              attributionChipData = bugleAction.actionData.attributionChipData,
+              sourceDeepLinks = null,
+            )
+          }
         }
       },
   ) {
-    doOnImpression(bugleAction.actionData.uiIdToken) { logUsage() }
+    LaunchedEffect(Unit) { doOnImpression(bugleAction.actionData.uiIdToken) { logUsage() } }
     BugleActionChipContents(bugleAction, iconBitmap = iconBitmap)
   }
 }
 
 @Composable
 fun BugleActionChipContents(data: BugleAction, iconBitmap: Bitmap?) {
-  BugleRowContent(icon = iconBitmap?.asTintableIcon(tintable = false), text = data.actionData.title)
+  BugleRowContent(
+    icon = iconBitmap?.asTintableIcon(tintable = false),
+    text = data.actionData.title,
+    description = data.actionData.description,
+  )
 }
 
 private val RemoteAction.iconBitmap: Bitmap?
@@ -406,15 +516,18 @@ fun MainTheme(content: @Composable () -> Unit) {
 
 @Composable
 private fun BugleOutlinedButton(
+  modifier: Modifier,
   chipOnClick: () -> Unit,
   chipOnLongClick: (() -> Unit)? = null,
   chipContents: @Composable () -> Unit,
 ) {
+  val enableBugleOutlineAnimationV2 = LocalConfigReader.current.config.enableBugleOutlineAnimationV2
   val shape = RoundedCornerShape(Constants.CornerRadius)
   val interactionSource = remember { MutableInteractionSource() }
   Box(
     modifier =
-      Modifier.clip(shape)
+      modifier
+        .clip(shape)
         .widthIn(min = 30.dp, max = 320.dp)
         .heightIn(min = 40.dp)
         .background(color = Color.Transparent, shape = shape)
@@ -424,9 +537,18 @@ private fun BugleOutlinedButton(
           interactionSource = interactionSource,
           indication = ripple(color = MaterialTheme.colorScheme.onSurface),
         )
-        .animatedActionBorder(Unit, RoundedCornerShape(Constants.CornerRadius)),
+        .animatedActionBorder(Constants.BorderStrokeWidth, true)
+        .semantics { role = Role.Button },
     contentAlignment = Alignment.Center,
   ) {
+    if (enableBugleOutlineAnimationV2) {
+      Box(
+        modifier =
+          Modifier.matchParentSize()
+            .blur(2.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
+            .animatedActionBorder(strokeWidth = Constants.InnerBorderStrokeWidth, false)
+      )
+    }
     chipContents()
   }
 }
@@ -438,6 +560,8 @@ private fun BugleRowContent(
   attribution: String? = null,
   description: String? = null,
 ) {
+  val modifier =
+    description?.let { Modifier.clearAndSetSemantics { contentDescription = it } } ?: Modifier
   val contentPadding =
     PaddingValues(
       start = Constants.ButtonHorizontalPadding,
@@ -446,7 +570,7 @@ private fun BugleRowContent(
       bottom = Constants.ButtonVerticalPadding,
     )
   Row(
-    modifier = Modifier.padding(contentPadding),
+    modifier = modifier.padding(contentPadding),
     horizontalArrangement = Arrangement.spacedBy(8.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
@@ -454,7 +578,6 @@ private fun BugleRowContent(
     icon?.let {
       IconOrImage(
         icon = icon,
-        contentDescription = description?.split(" ")?.first(),
         modifier = Modifier.size(18.dp).align(Alignment.CenterVertically),
         tint = MaterialTheme.colorScheme.primary,
       )
@@ -470,6 +593,7 @@ private fun BugleRowContent(
           text = attribution,
           style = MaterialTheme.typography.bodyMedium.withFlexFont(weight = 550, round = 0f),
           color = MaterialTheme.colorScheme.onSurfaceVariant,
+          maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
       }
@@ -490,21 +614,20 @@ private fun SuggestionText(text: String, maxLines: Int, modifier: Modifier = Mod
 }
 
 @Composable
-fun Modifier.animatedActionBorder(key: Any? = Unit, shape: Shape): Modifier {
+fun Modifier.animatedActionBorder(strokeWidth: Dp, withSolidColor: Boolean): Modifier {
   val rotationAngle = remember { Animatable(Constants.INITIAL_ROTATION_DEGREES) }
   val fadeProgress = remember { Animatable(0f) } // 0f = full gradient, 1f = full solid
 
-  val strokeWidthPx = with(LocalDensity.current) { Constants.BorderStrokeWidth.toPx() }
+  val strokeWidthPx = with(LocalDensity.current) { strokeWidth.toPx() }
   val halfStroke = strokeWidthPx / 2f
   val topLeft = Offset(halfStroke, halfStroke)
   val solidColor = MaterialTheme.colorScheme.outlineVariant
   val strokeAnimStartColor: Color = boostChroma(MaterialTheme.colorScheme.tertiaryContainer)
-  val strokeAnimMiddleColor: Color =
-    boostChroma(dynamicDarkColorScheme(LocalContext.current).primary)
+  val strokeAnimMiddleColor: Color = boostChroma(MaterialTheme.colorScheme.primaryFixedDim)
   val strokeAnimEndColor: Color = boostChroma(MaterialTheme.colorScheme.primary)
 
   // Trigger animations when the composable enters the composition
-  LaunchedEffect(key) {
+  LaunchedEffect(Unit) {
     launch {
       rotationAngle.animateTo(
         targetValue = Constants.INITIAL_ROTATION_DEGREES + 360f,
@@ -531,7 +654,7 @@ fun Modifier.animatedActionBorder(key: Any? = Unit, shape: Shape): Modifier {
     val solidOutlineFadeIn = fadeProgress.value
 
     val gradientOutlineFadeOut = (1f - solidOutlineFadeIn)
-    val gradientRadius = Constants.CornerRadius.toPx()
+    val gradientRadius = sqrt(size.width * size.width + size.height * size.height) / 2f
 
     val center = size.center
     val strokeStyle = Stroke(width = strokeWidthPx)
@@ -555,22 +678,39 @@ fun Modifier.animatedActionBorder(key: Any? = Unit, shape: Shape): Modifier {
         tileMode = TileMode.Clamp,
       )
 
+    val innerGradientBrush =
+      Brush.linearGradient(
+        Constants.GRADIENT_START_FRACTION to strokeAnimStartColor.copy(alpha = 0.2f),
+        Constants.GRADIENT_MIDDLE_FRACTION to strokeAnimMiddleColor.copy(alpha = 0.2f),
+        Constants.GRADIENT_END_FRACTION to strokeAnimEndColor.copy(alpha = 0.2f),
+        start = startOffset,
+        end = endOffset,
+        tileMode = TileMode.Clamp,
+      )
+
     drawRoundRect(
-      brush = gradientBrush,
+      brush =
+        if (withSolidColor) {
+          gradientBrush
+        } else {
+          innerGradientBrush
+        },
       topLeft = topLeft,
       size = Size(size.width - strokeWidthPx, size.height - strokeWidthPx),
-      cornerRadius = CornerRadius(gradientRadius),
+      cornerRadius = CornerRadius(Constants.CornerRadius.toPx()),
       alpha = gradientOutlineFadeOut,
       style = strokeStyle,
     )
 
-    drawRoundRect(
-      color = solidColor,
-      topLeft = topLeft,
-      size = Size(size.width - strokeWidthPx, size.height - strokeWidthPx),
-      cornerRadius = CornerRadius(gradientRadius),
-      alpha = solidOutlineFadeIn,
-      style = strokeStyle,
-    )
+    if (withSolidColor) {
+      drawRoundRect(
+        color = solidColor,
+        topLeft = topLeft,
+        size = Size(size.width - strokeWidthPx, size.height - strokeWidthPx),
+        cornerRadius = CornerRadius(Constants.CornerRadius.toPx()),
+        alpha = solidOutlineFadeIn,
+        style = strokeStyle,
+      )
+    }
   }
 }

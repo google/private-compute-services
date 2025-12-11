@@ -19,6 +19,7 @@ package com.google.android.as.oss.ai.service;
 import android.os.RemoteException;
 import androidx.annotation.Nullable;
 import com.google.android.apps.aicore.aidl.AIFeature;
+import com.google.android.apps.aicore.aidl.AiCoreException;
 import com.google.android.apps.aicore.aidl.IAICoreService;
 import com.google.android.apps.aicore.aidl.ICancellationCallback;
 import com.google.android.apps.aicore.aidl.ILLMResultCallback;
@@ -145,6 +146,12 @@ final class GenAiServiceUtils {
                             public void onPreparationFailure(@InferenceError int err)
                                 throws RemoteException {
                               callback.onPreparationFailure(err);
+                            }
+
+                            @Override
+                            public void onPreparationFailure2(AiCoreException error)
+                                throws RemoteException {
+                              callback.onPreparationFailure2(error);
                             }
                           }));
           return createCancellationCallback(cancellationCallback);
@@ -354,6 +361,12 @@ final class GenAiServiceUtils {
                             public void onPreparationFailure(@InferenceError int err)
                                 throws RemoteException {
                               callback.onPreparationFailure(err);
+                            }
+
+                            @Override
+                            public void onPreparationFailure2(AiCoreException error)
+                                throws RemoteException {
+                              callback.onPreparationFailure2(error);
                             }
                           }));
           return createCancellationCallback(cancellationCallback);

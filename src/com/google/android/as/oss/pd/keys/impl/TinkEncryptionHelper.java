@@ -20,8 +20,8 @@ import com.google.android.as.oss.pd.keys.EncryptionHelper;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.RegistryConfiguration;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.hybrid.HybridConfigurationV0;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
@@ -50,14 +50,14 @@ class TinkEncryptionHelper implements EncryptionHelper {
     if (!hasPrivateKey) {
       throw new GeneralSecurityException("cannot decrypt without a private key");
     }
-    HybridDecrypt decrypt = handle.getPrimitive(RegistryConfiguration.get(), HybridDecrypt.class);
+    HybridDecrypt decrypt = handle.getPrimitive(HybridConfigurationV0.get(), HybridDecrypt.class);
     return decrypt.decrypt(encryptedData, associatedData);
   }
 
   @Override
   public byte[] encrypt(byte[] plainData, byte[] associatedData) throws GeneralSecurityException {
     HybridEncrypt encrypt =
-        getPublicKeysetHandle().getPrimitive(RegistryConfiguration.get(), HybridEncrypt.class);
+        getPublicKeysetHandle().getPrimitive(HybridConfigurationV0.get(), HybridEncrypt.class);
     return encrypt.encrypt(plainData, associatedData);
   }
 

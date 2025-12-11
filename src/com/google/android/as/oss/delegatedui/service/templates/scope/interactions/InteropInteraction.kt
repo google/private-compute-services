@@ -16,7 +16,7 @@
 
 package com.google.android.`as`.oss.delegatedui.service.templates.scope.interactions
 
-import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiUsageData.InteractionType.INTERACTION_TYPE_INTEROP
+import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiUsageData.InteractionType
 import com.google.android.`as`.oss.delegatedui.api.integration.templates.UiIdToken
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.InteractionHelper
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.InteractionListener
@@ -29,21 +29,31 @@ import com.google.android.`as`.oss.delegatedui.service.templates.scope.Interacti
 interface InteropInteraction {
 
   /**
-   * Invokes [onInteraction] on some external interaction.
+   * Invokes [onInteraction] on some external interaction. Can also be used to execute a side-effect
+   * that is PCC compliant regardless of user interaction.
    *
    * This API is inherently more unsafe than using a native interaction like
    * [doOnClick][com.google.android.as.oss.delegatedui.service.templates.scope.interactions.ClickInteraction].
    * To ensure proper usage, this must be called immediately in the body of the external interaction
    * callback.
+   *
+   * Should be called from a [androidx.compose.runtime.LaunchedEffect] if in a composition, or
+   * [androidx.compose.runtime.rememberCoroutineScope] if in an event callback.
    */
-  fun doOnInterop(uiTokenId: UiIdToken, onInteraction: InteractionListener)
+  suspend fun doOnInterop(
+    uiTokenId: UiIdToken,
+    interactionType: InteractionType,
+    onInteraction: InteractionListener,
+  )
 }
 
 class InteropInteractionImpl(private val helper: InteractionHelper) : InteropInteraction {
 
-  override fun doOnInterop(uiTokenId: UiIdToken, onInteraction: InteractionListener) {
-    with(helper) {
-      onInteraction(uiTokenId, interaction = INTERACTION_TYPE_INTEROP) { onInteraction(it) }
-    }
+  override suspend fun doOnInterop(
+    uiTokenId: UiIdToken,
+    interactionType: InteractionType,
+    onInteraction: InteractionListener,
+  ) {
+    with(helper) { onInteraction(uiTokenId, interaction = interactionType) { onInteraction() } }
   }
 }

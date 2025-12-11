@@ -40,6 +40,8 @@ service DelegatedUiDataService {
     option deadline = 5.0;
   }
 
+  // DEPRECATED: Use GetDelegatedUiTemplateData instead.
+  //
   // Get additional data for handling clicks.
   //
   // Response headers may contain Parcelable PendingIntentList

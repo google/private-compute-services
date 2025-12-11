@@ -20,6 +20,7 @@ import "src/com/google/android/as/oss/delegatedui/api/integration/templates/airf
 import "src/com/google/android/as/oss/delegatedui/api/integration/templates/beacon/beacon_template_integration.proto";
 import "src/com/google/android/as/oss/delegatedui/api/integration/templates/bugle/bugle_template_integration.proto";
 import "src/com/google/android/as/oss/delegatedui/api/integration/templates/example/example_template_integration.proto";
+import "src/com/google/android/as/oss/delegatedui/api/integration/templates/freesia/freesia_template_integration.proto";
 import "src/com/google/android/as/oss/delegatedui/api/integration/templates/subzero/subzero_template_integration.proto";
 import "src/com/google/android/as/oss/delegatedui/api/integration/templates/sundog/sundog_template_integration.proto";
 
@@ -29,7 +30,7 @@ option java_multiple_files = true;
 // Protos encapsulating template data managed by the delegated UI service.
 
 // A list of supported UI templates.
-// Next ID: 10
+// Next ID: 11
 enum DelegatedUiTemplateType {
   TEMPLATE_TYPE_UNSPECIFIED = 0;
   TEMPLATE_TYPE_EXAMPLE_COMPOSE = 1;
@@ -40,6 +41,7 @@ enum DelegatedUiTemplateType {
   TEMPLATE_TYPE_BEACON = 6;
   TEMPLATE_TYPE_EXAMPLE_VIEWS = 8;
   TEMPLATE_TYPE_AIRFLOW = 9;
+  TEMPLATE_TYPE_FREESIA = 10;
   // New CUJ template types should be added above.
 
   // Retired template enums.
@@ -47,7 +49,7 @@ enum DelegatedUiTemplateType {
 }
 
 // Detailed data formats for the UI templates.
-// Next ID: 9
+// Next ID: 10
 message DelegatedUiTemplateData {
   oneof template_data {
     example.ExampleTemplateData example_template_data = 1;
@@ -58,6 +60,7 @@ message DelegatedUiTemplateData {
     sundog.SundogEventTemplateData sundog_event_template_data = 5;
     beacon.BeaconTemplateData beacon_template_data = 6;
     airflow.AirflowTemplateData airflow_template_data = 8;
+    freesia.FreesiaTemplateData freesia_template_data = 9;
     // New CUJ template data types should be added above.
   }
   reserved 7;

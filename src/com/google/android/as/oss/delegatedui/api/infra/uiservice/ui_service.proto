@@ -18,6 +18,7 @@ package com.google.android.as.oss.delegatedui.api.infra.uiservice;
 
 import "src/com/google/android/as/oss/delegatedui/api/infra/uiservice/ui_service_create.proto";
 import "src/com/google/android/as/oss/delegatedui/api/infra/uiservice/ui_service_data_egress.proto";
+import "src/com/google/android/as/oss/delegatedui/api/infra/uiservice/ui_service_hints.proto";
 import "src/com/google/android/as/oss/delegatedui/api/infra/uiservice/ui_service_invalidate.proto";
 import "src/com/google/android/as/oss/delegatedui/api/infra/uiservice/ui_service_nested_scroll.proto";
 import "src/com/google/android/as/oss/delegatedui/api/infra/uiservice/ui_service_prepare.proto";
@@ -74,7 +75,7 @@ message DelegatedUiRequest {
 }
 
 // Response from the delegated UI service to the calling client.
-// Next id: 7
+// Next id: 8
 message DelegatedUiResponse {
   oneof response {
     // Response to create request.
@@ -89,5 +90,7 @@ message DelegatedUiResponse {
     DelegatedUiNestedScrollResponse nested_scroll_response = 4;
     // Asynchronous event - notifies on nested fling event from delegated UI.
     DelegatedUiNestedFlingResponse nested_fling_response = 5;
+    // Asynchronous event - notifies on hints from delegated UI.
+    DelegatedUiHintsResponse hint_response = 7;
   }
 }

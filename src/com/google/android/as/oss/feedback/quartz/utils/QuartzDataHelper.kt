@@ -16,8 +16,6 @@
 
 package com.google.android.`as`.oss.feedback.quartz.utils
 
-import com.google.android.`as`.oss.feedback.FeedbackSubmissionData
-import com.google.android.`as`.oss.feedback.FeedbackUiState
 import com.google.android.`as`.oss.feedback.api.FeedbackRatingSentiment.RATING_SENTIMENT_THUMBS_DOWN
 import com.google.android.`as`.oss.feedback.api.FeedbackRatingSentiment.RATING_SENTIMENT_THUMBS_UP
 import com.google.android.`as`.oss.feedback.api.gateway.FeedbackCUJ
@@ -41,6 +39,8 @@ import com.google.android.`as`.oss.feedback.api.gateway.quartzKeyTypeData
 import com.google.android.`as`.oss.feedback.api.gateway.runtimeConfig
 import com.google.android.`as`.oss.feedback.api.gateway.structuredUserInput
 import com.google.android.`as`.oss.feedback.api.gateway.userDonation
+import com.google.android.`as`.oss.feedback.domain.FeedbackSubmissionData
+import com.google.android.`as`.oss.feedback.domain.FeedbackUiState
 import com.google.android.`as`.oss.feedback.quartz.serviceclient.QuartzFeedbackDonationData
 import com.google.common.flogger.GoogleLogger
 import com.google.protobuf.Timestamp
@@ -102,14 +102,16 @@ class QuartzDataHelper @Inject constructor() {
 
       additionalComment = uiState.freeFormTextMap[selectedEntityContent] ?: ""
       donationOption =
-        if (uiState.optInChecked) {
+        if (uiState.optInChecked.any { it.value }) {
+          // The semantic meaning is changed to mean *any* category opt-in.
           UserDataDonationOption.OPT_IN
         } else {
           UserDataDonationOption.OPT_OUT
         }
       userDonation = userDonation {
         // Only include donation data if user has opted in the consent.
-        if (uiState.optInChecked) {
+        // TODO: b/451840143 - Map opt-in categories to quartz feedback.
+        if (uiState.optInChecked.any { it.value }) {
           quartzDataDonation = quartzDataDonation {
             when (data.quartzCuj) {
               QuartzCUJ.QUARTZ_CUJ_KEY_TYPE -> {
@@ -118,6 +120,7 @@ class QuartzDataHelper @Inject constructor() {
                     sbnKey = data.typeData.sbnKey
                     uuid = data.typeData.uuid
                     asiVersion = data.typeData.asiVersion
+                    detectedLanguage = data.typeData.detectedLanguage
                     packageName = data.typeData.packageName
                     title = data.typeData.title
                     content = data.typeData.content
@@ -171,6 +174,11 @@ class QuartzDataHelper @Inject constructor() {
                   isThresholdChangedCategory = data.typeData.isThresholdChangedCategory
                   classificationExecutedTimeMs = data.typeData.classificationExecutedTimeMs
                   exemptionExecutedTimeMsString = data.typeData.exemptionExecutedTimeMsString
+                  classificationDefaultCategoryResult =
+                    data.typeData.classificationDefaultCategoryResult
+                  defaultCategoryCorrectionThreshold =
+                    data.typeData.defaultCategoryCorrectionThreshold
+                  isSuppressDuplicate = data.typeData.isSuppressDuplicate
                 }
               }
               QuartzCUJ.QUARTZ_CUJ_KEY_SUMMARIZATION -> {
@@ -179,6 +187,7 @@ class QuartzDataHelper @Inject constructor() {
                     sbnKey = data.summarizationData.sbnKey
                     uuid = data.summarizationData.uuid
                     asiVersion = data.summarizationData.asiVersion
+                    detectedLanguage = data.summarizationData.detectedLanguage
                     packageName = data.summarizationData.packageName
                   }
                   featureName = data.summarizationData.featureName
@@ -306,6 +315,9 @@ class QuartzDataHelper @Inject constructor() {
               "${quote("isThresholdChangedCategory")}: ${quartzKeyTypeData.isThresholdChangedCategory}, " +
               "${quote("classificationExecutedTimeMs")}: ${quartzKeyTypeData.classificationExecutedTimeMs}, " +
               "${quote("exemptionExecutedTimeMsString")}: ${quote(quartzKeyTypeData.exemptionExecutedTimeMsString)}, " +
+              "${quote("classificationDefaultCategoryResult")}: ${quote(quartzKeyTypeData.classificationDefaultCategoryResult)}, " +
+              "${quote("defaultCategoryCorrectionThreshold")}: ${quote(quartzKeyTypeData.defaultCategoryCorrectionThreshold)}, " +
+              "${quote("isSuppressDuplicate")}: ${quote(quartzKeyTypeData.isSuppressDuplicate)}, " +
               "${quote("feedbackCategory")}: ${quote(quartzKeyTypeData.feedbackCategory)}, " +
               "${quote("feedbackInputCategory")}: ${quote(quartzKeyTypeData.feedbackInputCategory)}" +
               "}}}"
@@ -351,6 +363,7 @@ class QuartzDataHelper @Inject constructor() {
       "${quote("sbnKey")}: ${quote(commonData.sbnKey)}, " +
       "${quote("uuid")}: ${quote(commonData.uuid)}, " +
       "${quote("asiVersion")}: ${quote(commonData.asiVersion)}, " +
+      "${quote("detectedLanguage")}: ${quote(commonData.detectedLanguage)}, " +
       "${quote("packageName")}: ${quote(commonData.packageName)}, " +
       "${quote("title")}: ${quote(commonData.title)}, " +
       "${quote("content")}: ${quote(commonData.content)}, " +

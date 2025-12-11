@@ -24,10 +24,10 @@ val PlatformLoggingPolicy_FederatedCompute =
   ) {
     description =
       """
-        To enable querying of Android Platform logs in a privacy-preserving way, using federated analytics.
-      
-        ALLOWED EGRESSES: FederatedCompute.
-        ALLOWED USAGES: Federated analytics.
+      To enable querying of Android Platform logs in a privacy-preserving way, using federated analytics.
+
+      ALLOWED EGRESSES: FederatedCompute.
+      ALLOWED USAGES: Federated analytics.
       """
         .trimIndent()
     flavors(Flavor.PCS_RELEASE) { minRoundSize(minRoundSize = 25, minSecAggRoundSize = 25) }

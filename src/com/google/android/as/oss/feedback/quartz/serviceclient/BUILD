@@ -25,7 +25,7 @@ android_library(
     ],
     deps = [
         "//google/protobuf:timestamp_kt_proto_lite",
-        "//src/com/google/android/as/oss/feedback:view_feedback_data",
+        "//src/com/google/android/as/oss/feedback/domain:view_feedback_data",
         "//src/com/google/android/as/oss/feedback/proto:feedback_tag_data_kt_proto_lite",
         "//src/com/google/android/as/oss/feedback/proto/dataservice:data_service_kt_grpc",
         "//src/com/google/android/as/oss/feedback/proto/dataservice:data_service_kt_proto_lite",

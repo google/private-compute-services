@@ -34,6 +34,10 @@ public abstract class PccSecurityConfig {
 
   public abstract PackageSecurityInfo psiPackageSecurityInfo();
 
+  public abstract PackageSecurityInfo gboardPackageSecurityInfo();
+
+  public abstract PackageSecurityInfo agsaPackageSecurityInfo();
+
   public abstract boolean enableAllowlistedOnly();
 
   public abstract PackageSecurityInfoList securityInfoList();
@@ -46,6 +50,11 @@ public abstract class PccSecurityConfig {
     public abstract PccSecurityConfig.Builder setPcsPackageSecurityInfo(PackageSecurityInfo value);
 
     public abstract PccSecurityConfig.Builder setPsiPackageSecurityInfo(PackageSecurityInfo value);
+
+    public abstract PccSecurityConfig.Builder setGboardPackageSecurityInfo(
+        PackageSecurityInfo value);
+
+    public abstract PccSecurityConfig.Builder setAgsaPackageSecurityInfo(PackageSecurityInfo value);
 
     public abstract PccSecurityConfig.Builder setEnableAllowlistedOnly(boolean value);
 

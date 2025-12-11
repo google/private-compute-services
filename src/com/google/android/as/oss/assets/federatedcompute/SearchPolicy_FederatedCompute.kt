@@ -24,11 +24,11 @@ val SearchPolicy_FederatedCompute =
   ) {
     description =
       """
-        To measure and improve the quality of the search feature such as analyzing the ranking
-        quality and the ranking model.
+      To measure and improve the quality of the search feature such as analyzing the ranking
+      quality and the ranking model.
 
-        ALLOWED EGRESSES: FederatedCompute.
-        ALLOWED USAGES: Federated analytics, federated learning.
+      ALLOWED EGRESSES: FederatedCompute.
+      ALLOWED USAGES: Federated analytics, federated learning.
       """
         .trimIndent()
 

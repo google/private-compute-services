@@ -27,6 +27,7 @@ proto_library(
     srcs = ["egress_integration.proto"],
     deps = [
         "//src/com/google/android/as/oss/delegatedui/api/integration/egress/airflow:airflow_egress_integration_proto",
+        "//src/com/google/android/as/oss/delegatedui/api/integration/egress/beacon:beacon_egress_proto",
         "//src/com/google/android/as/oss/delegatedui/api/integration/egress/bugle:bugle_egress_proto",
         "//src/com/google/android/as/oss/delegatedui/api/integration/egress/example:example_egress_proto",
         "//src/com/google/android/as/oss/delegatedui/api/integration/egress/sundog:sundog_egress_proto",

@@ -31,6 +31,7 @@ proto_library(
         "//src/com/google/android/as/oss/delegatedui/api/integration/templates/beacon:beacon_template_proto",
         "//src/com/google/android/as/oss/delegatedui/api/integration/templates/bugle:bugle_template_proto",
         "//src/com/google/android/as/oss/delegatedui/api/integration/templates/example:example_template_proto",
+        "//src/com/google/android/as/oss/delegatedui/api/integration/templates/freesia:freesia_template_proto",
         "//src/com/google/android/as/oss/delegatedui/api/integration/templates/subzero:subzero_template_proto",
         "//src/com/google/android/as/oss/delegatedui/api/integration/templates/sundog:sundog_template_proto",
     ],

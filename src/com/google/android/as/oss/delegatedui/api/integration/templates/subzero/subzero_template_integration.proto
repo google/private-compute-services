@@ -27,6 +27,7 @@ option java_multiple_files = true;
 message SubZeroRemindersTileTemplateData {
   repeated Reminder reminders = 1;
   FunnelStats funnel_stats = 2;
+  bool enable_marquee = 3 [default = false];
 }
 
 message Reminder {
@@ -45,6 +46,12 @@ message Reminder {
   string entity_tag = 7;
 
   string click_label = 8;
+
+  int64 last_update_time_ms = 9;
+
+  string summary = 10;
+
+  repeated ActionData action_data = 11;
 }
 
 message FunnelStats {
@@ -67,4 +74,12 @@ message Candidate {
   string entity_tag = 2;
 
   string data_type = 3;
+}
+
+message ActionData {
+  string title = 1;
+
+  UiIdToken ui_id_token = 2;
+
+  int32 remote_action_index = 3;
 }

@@ -68,6 +68,7 @@ android_library(
         "//third_party/java/androidx/appcompat",
         "//third_party/java/androidx/compose/foundation/layout",
         "//third_party/java/androidx/compose/runtime",
+        "//third_party/java/androidx/lifecycle/viewmodel_compose",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_flogger_google_extensions",
     ],
@@ -80,6 +81,7 @@ android_library(
     manifest = "AndroidManifest.xml",
     resource_files = glob(["res/**"]),
     deps = [
+        ":data_attribution_view_model",
         "//src/com/google/android/as/oss/dataattribution/proto:attribution_chip_header_kt_proto_lite",
         "//src/com/google/android/as/oss/dataattribution/proto:attribution_dialog_kt_proto_lite",
         "//src/com/google/android/as/oss/delegatedui/service/templates/fonts:flex_fonts",
@@ -88,6 +90,7 @@ android_library(
         "//src/com/google/android/as/oss/feedback",
         "//src/com/google/android/as/oss/feedback/proto:entity_feedback_dialog_data_kt_proto_lite",
         "//src/com/google/android/as/oss/feedback/proto:feedback_tag_data_kt_proto_lite",
+        "//src/com/google/android/as/oss/logging/uiusage/api:usage_data_service_kt_proto_lite",
         "//third_party/java/android/android_sdk_linux/platforms/stable:android_platform_feature_flags",
         "//third_party/java/android_libs/material_components:dialog",
         "//third_party/java/androidx/activity/compose",
@@ -100,5 +103,28 @@ android_library(
         "//third_party/java/androidx/compose/ui/graphics",
         "//third_party/java/androidx/compose/ui/text",
         "//third_party/java/androidx/compose/ui/unit",
+        "//third_party/java/androidx/hilt/lifecycle_viewmodel_compose",
+        "//third_party/java/androidx/lifecycle/viewmodel_compose",
+        "@maven//:com_google_flogger_google_extensions",
+    ],
+)
+
+android_library(
+    name = "data_attribution_view_model",
+    srcs = ["DataAttributionDialogViewModel.kt"],
+    deps = [
+        "//src/com/google/android/as/oss/common:annotation",
+        "//src/com/google/android/as/oss/delegatedui/api/integration/templates:ui_id_token_kt_proto_lite",
+        "//src/com/google/android/as/oss/logging/uiusage:internal_only_modules",
+        "//src/com/google/android/as/oss/logging/uiusage/api:usage_data_service_kt_grpc",
+        "//src/com/google/android/as/oss/logging/uiusage/api:usage_data_service_kt_proto_lite",
+        "//third_party/java/androidx/hilt/navigation_compose",
+        "//third_party/java/androidx/lifecycle/viewmodel",
+        "//third_party/java/androidx/lifecycle/viewmodel_compose",
+        "//third_party/java/dagger/hilt:view_model",
+        "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-jvm",
+        "@maven//:com_google_dagger_hilt-android",
+        "@maven//:com_google_flogger_google_extensions",
+        "@maven//:javax_inject_javax_inject",
     ],
 )

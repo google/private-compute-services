@@ -22,8 +22,8 @@ import android.os.Parcel;
 import androidx.annotation.IntDef;
 import com.google.fcp.client.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.fcp.client.common.internal.safeparcel.SafeParcelable;
-import com.google.common.base.Objects;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import java.util.Objects;
 
 /**
  * Training interval settings, required for local computation tasks, optional for federated tasks.
@@ -154,7 +154,7 @@ public class TrainingInterval extends AbstractSafeParcelable {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(schedulingMode, minimumIntervalMillis);
+    return Objects.hash(schedulingMode, minimumIntervalMillis);
   }
 
   private static void validate(@SchedulingMode int schedulingMode, long minimumIntervalMillis) {

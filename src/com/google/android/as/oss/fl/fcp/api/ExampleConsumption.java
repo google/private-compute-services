@@ -21,10 +21,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import android.os.Parcel;
 import com.google.fcp.client.common.internal.safeparcel.AbstractSafeParcelable;
 import com.google.fcp.client.common.internal.safeparcel.SafeParcelable;
-import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.util.Arrays;
+import java.util.Objects;
 import javax.annotation.Nullable;
 
 /**
@@ -180,7 +180,7 @@ public class ExampleConsumption extends AbstractSafeParcelable {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(
+    return Objects.hash(
         collectionName,
         Arrays.hashCode(selectionCriteria),
         exampleCount,

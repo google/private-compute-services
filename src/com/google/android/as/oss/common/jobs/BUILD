@@ -56,3 +56,13 @@ android_library(
         "@maven//:com_google_dagger_hilt-android",
     ],
 )
+
+android_library(
+    name = "worker_factories_module",
+    srcs = ["WorkerFactoriesModule.kt"],
+    deps = [
+        "//third_party/java/androidx/work",
+        "@maven//:com_google_dagger_dagger",
+        "@maven//:com_google_dagger_hilt-android",
+    ],
+)

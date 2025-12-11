@@ -26,6 +26,7 @@ android_library(
     deps = [
         "//java/com/google/common/flogger/android:android_log_tag",
         "//src/com/google/android/as/oss/common:annotation",
+        "//src/com/google/android/as/oss/delegatedui/api/common:common_kt_proto_lite",
         "//src/com/google/android/as/oss/delegatedui/api/common:nested_scroll",
         "//src/com/google/android/as/oss/delegatedui/api/infra/uiservice:parcelable_keys",
         "//src/com/google/android/as/oss/delegatedui/api/infra/uiservice:service_kt_grpc",

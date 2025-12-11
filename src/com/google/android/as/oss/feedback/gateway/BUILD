@@ -31,7 +31,6 @@ android_library(
     deps = [
         ":feedback_http_client",
         ":http_client_helper",
-        "//java/com/google/apps/tiktok/inject:qualifiers",
         "//java/com/google/common/annotations",
         "//src/com/google/android/as/oss/feedback/messagearmour/utils:message_armour_data_helper",
         "//src/com/google/android/as/oss/feedback/proto/gateway:message_armour_kt_proto_lite",
@@ -39,6 +38,10 @@ android_library(
         "//src/com/google/android/as/oss/feedback/proto/gateway:quartz_log_kt_proto_lite",
         "//src/com/google/android/as/oss/feedback/proto/gateway:spoon_kt_proto_lite",
         "//src/com/google/android/as/oss/feedback/quartz/utils:quartz_data_helper",
+        "//src/com/google/android/as/oss/networkusage/config/impl",
+        "//src/com/google/android/as/oss/networkusage/db",
+        "//src/com/google/android/as/oss/networkusage/db:repository",
+        "@maven//:com_google_dagger_hilt-android",
         "@maven//:com_google_flogger_google_extensions",
         "@maven//:com_squareup_okhttp3_okhttp",
         "@maven//:javax_inject_javax_inject",

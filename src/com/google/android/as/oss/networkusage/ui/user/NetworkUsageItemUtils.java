@@ -141,7 +141,6 @@ class NetworkUsageItemUtils {
     };
   }
 
-  @SuppressWarnings("AndroidJdkLibsChecker")
   static String getFormattedTime(Instant instant) {
     DateTimeFormatter formatter =
         DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withZone(ZoneId.systemDefault());

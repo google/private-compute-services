@@ -129,17 +129,12 @@ public final class BlobProtoUtils {
 
   private static IntegrityResponse getIntegrityResponse(AttestationResponse attestationResponse) {
     ClientStatus clientStatus = ClientStatus.STATUS_UNKNOWN;
-    switch (attestationResponse.status()) {
-      case SUCCESS:
-        clientStatus = ClientStatus.STATUS_OK;
-        break;
-      case NOT_RUN:
-        clientStatus = ClientStatus.STATUS_NOT_RUN;
-        break;
-      case FAILED:
-        clientStatus = ClientStatus.STATUS_EXCEPTION_FAILURE;
-        break;
-    }
+    clientStatus =
+        switch (attestationResponse.status()) {
+          case SUCCESS -> ClientStatus.STATUS_OK;
+          case NOT_RUN -> ClientStatus.STATUS_NOT_RUN;
+          case FAILED -> ClientStatus.STATUS_EXCEPTION_FAILURE;
+        };
 
     IntegrityResponse.Builder responseBuilder =
         IntegrityResponse.newBuilder().setClientStatus(clientStatus);
@@ -154,23 +149,18 @@ public final class BlobProtoUtils {
     com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.ClientStatus clientStatus =
         com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.ClientStatus
             .STATUS_UNKNOWN;
-    switch (attestationResponse.status()) {
-      case SUCCESS:
-        clientStatus =
-            com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.ClientStatus
-                .STATUS_OK;
-        break;
-      case NOT_RUN:
-        clientStatus =
-            com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.ClientStatus
-                .STATUS_NOT_RUN;
-        break;
-      case FAILED:
-        clientStatus =
-            com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.ClientStatus
-                .STATUS_EXCEPTION_FAILURE;
-        break;
-    }
+    clientStatus =
+        switch (attestationResponse.status()) {
+          case SUCCESS ->
+              com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.ClientStatus
+                  .STATUS_OK;
+          case NOT_RUN ->
+              com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.ClientStatus
+                  .STATUS_NOT_RUN;
+          case FAILED ->
+              com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.ClientStatus
+                  .STATUS_EXCEPTION_FAILURE;
+        };
 
     com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.Builder responseBuilder =
         com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.newBuilder()
@@ -230,7 +220,8 @@ public final class BlobProtoUtils {
             .setProtectionProofV2(toInternalProof(externalResponse.getProtectionProofV2()))
             .setNextPageToken(externalResponse.getNextPageToken())
             .setDownloadStatusValue(externalResponse.getDownloadStatus().getNumber())
-            .setProtectionToken(externalResponse.getProtectionToken());
+            .setProtectionToken(externalResponse.getProtectionToken())
+            .setReleaseConfigId(externalResponse.getReleaseConfigId());
 
     ByteString outerBlob = externalResponse.getBlob();
     boolean hasOuterBlob = !outerBlob.isEmpty();

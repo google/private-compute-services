@@ -20,6 +20,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Parcel;
 import android.os.RemoteException;
 import androidx.annotation.GuardedBy;
 import androidx.annotation.Nullable;
@@ -40,6 +41,9 @@ import com.google.android.as.oss.ai.aidl.PccTextEmbeddingService;
 import com.google.android.as.oss.ai.config.PcsAiConfig;
 import com.google.android.as.oss.common.ExecutorAnnotations.GenAiExecutorQualifier;
 import com.google.android.as.oss.common.config.ConfigReader;
+import com.google.android.as.oss.common.security.SecurityPolicyUtils;
+import com.google.android.as.oss.common.security.api.PackageSecurityInfoList;
+import com.google.android.as.oss.common.security.config.PccSecurityConfig;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.GoogleLogger;
@@ -65,6 +69,7 @@ public class GenAiInferenceService extends Hilt_GenAiInferenceService {
       ImmutableSet.of(ASI_PACKAGE_NAME);
 
   @Inject ConfigReader<PcsAiConfig> configReader;
+  @Inject ConfigReader<PccSecurityConfig> securityPolicyConfigReader;
   @Inject @GenAiExecutorQualifier ListeningScheduledExecutorService executorService;
 
   private final Object connectionLock = new Object();
@@ -129,10 +134,28 @@ public class GenAiInferenceService extends Hilt_GenAiInferenceService {
     return configReader.getConfig().genAiInferenceServiceEnabled();
   }
 
+  private boolean isSecurityPolicyEnabled() {
+    return configReader.getConfig().genAiInferenceServiceSecurityPolicyEnabled();
+  }
+
+  private boolean isCallerNotAuthorized() {
+    return isSecurityPolicyEnabled()
+        && !SecurityPolicyUtils.isCallerAuthorized(
+            PackageSecurityInfoList.newBuilder()
+                .addPackageSecurityInfos(
+                    securityPolicyConfigReader.getConfig().asiPackageSecurityInfo())
+                .build(),
+            /* context= */ this,
+            Binder.getCallingUid(),
+            /* allowTestKeys= */ true);
+  }
+
   private void validateRequest() throws RemoteException {
     if (!isEnabled()) {
       throw new RemoteException("AICore service forwarding is currently disabled.");
     }
+
+    // TODO: Remove this check once security policy changes are ramped.
     if (!CLIENT_PKG_ALLOWLIST.contains(
         Preconditions.checkNotNull(getPackageManager().getPackagesForUid(Binder.getCallingUid()))[
             0])) {
@@ -149,6 +172,16 @@ public class GenAiInferenceService extends Hilt_GenAiInferenceService {
   }
 
   private class GenAiServiceBinderStub extends IGenAiInferenceService.Stub {
+    @SuppressWarnings("nullness:override.param")
+    @Override
+    public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
+        throws RemoteException {
+      if (isCallerNotAuthorized()) {
+        throw new RemoteException("Caller is not authorized to perform this action.");
+      }
+      return super.onTransact(code, data, reply, flags);
+    }
+
     @Override
     public AIFeature[] listFeatures() throws RemoteException {
       return getServiceOrThrow().listFeatures();

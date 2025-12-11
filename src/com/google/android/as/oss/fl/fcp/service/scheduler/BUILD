@@ -19,10 +19,12 @@ package(default_visibility = ["//visibility:public"])
 android_library(
     name = "scheduler",
     srcs = glob(["*.java"]),
+    manifest = "//src/com/google/android/as/oss/fl/fc/service:AndroidManifest.xml",
     deps = [
-        "//java/com/google/protobuf/contrib/android:proto_parsers",
         "//src/com/google/android/as/oss/common:annotation",
         "//src/com/google/android/as/oss/fl/api:training_java_proto_lite",
+        "//src/com/google/android/as/oss/fl/fc/service/scheduler/endorsementoptions",
+        "//src/com/google/android/as/oss/fl/fc/service/scheduler/endorsementoptions:endorsement_client_type",
         "//src/com/google/android/as/oss/fl/federatedcompute/config",
         "//src/com/google/android/as/oss/fl/federatedcompute/util",
         "//src/com/google/android/as/oss/fl/localcompute:utils",

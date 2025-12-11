@@ -18,15 +18,17 @@ package com.google.android.`as`.oss.delegatedui.service.templates
 
 import android.content.Context
 import android.view.View
+import com.google.android.`as`.oss.delegatedui.api.common.DelegatedUiHint
 import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiUsageData
 import com.google.android.`as`.oss.delegatedui.api.integration.egress.DelegatedUiEgressData
 import com.google.android.`as`.oss.delegatedui.api.integration.templates.DelegatedUiTemplateData
+import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiInputSpec
 import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiLifecycle
 import com.google.android.`as`.oss.delegatedui.service.data.DelegatedUiDataResponses
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.TemplateRendererScope
 import com.google.android.`as`.oss.delegatedui.utils.ResponseWithParcelables
-import com.google.android.`as`.oss.delegatedui.utils.map
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.flow.StateFlow
 
 /** Responsible for constructing the remote template UI for a particular template type. */
 interface TemplateRenderer {
@@ -40,6 +42,7 @@ interface TemplateRenderer {
    */
   fun TemplateRendererScope.onCreateTemplateView(
     context: Context,
+    inputSpecFlow: StateFlow<DelegatedUiInputSpec>,
     response: ResponseWithParcelables<DelegatedUiTemplateData>,
   ): View?
 }
@@ -51,22 +54,25 @@ interface TemplateRenderer {
 fun TemplateRenderer.render(
   lifecycle: DelegatedUiLifecycle,
   context: Context,
+  inputSpecFlow: StateFlow<DelegatedUiInputSpec>,
   responses: DelegatedUiDataResponses,
   logUsageData: suspend (DelegatedUiUsageData) -> Unit,
   onDataEgress: suspend (DelegatedUiEgressData) -> Unit,
+  onSendHints: suspend (Set<DelegatedUiHint>) -> Unit,
   onSessionClose: () -> Unit,
 ): View? {
   return TemplateRendererScope(
       context = context,
       lifecycle = lifecycle,
       mainCoroutineContext = context.mainExecutor.asCoroutineDispatcher(),
-      additionalData = responses.additionalData?.map(lifecycle.streamScope) { it.additionalData },
       logUsageData = logUsageData,
       onDataEgress = onDataEgress,
+      onSendHints = onSendHints,
       onSessionClose = onSessionClose,
     )
     .onCreateTemplateView(
       context = context,
+      inputSpecFlow = inputSpecFlow,
       response = responses.templateData.map { it.templateData },
     )
 }

@@ -39,6 +39,7 @@ import java.util.AbstractMap.SimpleImmutableEntry;
 /** Builder class for NetworkUsageContentMap entries. */
 final class ContentMapEntryBuilder {
   static final String ASI_PACKAGE_NAME = "com.google.android.as";
+  static final String PCS_PACKAGE_NAME = "com.google.android.as.oss";
   static final String STATSD_PACKAGE_NAME = "com.android.os.statsd";
   static final String AICORE_PACKAGE_NAME = "com.google.android.aicore";
   static final String GPPS_PACKAGE_NAME = "com.google.android.PlayProtect";
@@ -149,33 +150,27 @@ final class ContentMapEntryBuilder {
     ConnectionKey.Builder connectionKeyBuilder = ConnectionKey.newBuilder();
 
     switch (connectionType) {
-      case HTTP:
-        connectionKeyBuilder.setHttpConnectionKey(
-            HttpConnectionKey.newBuilder().setUrlRegex(connectionKeyString).build());
-        break;
-      case PIR:
-        connectionKeyBuilder.setPirConnectionKey(
-            PirConnectionKey.newBuilder().setUrlRegex(connectionKeyString).build());
-        break;
-      case FC_TRAINING_START_QUERY:
-        connectionKeyBuilder.setFlConnectionKey(
-            FlConnectionKey.newBuilder().setFeatureName(connectionKeyString).build());
-        break;
-      case PD:
-        connectionKeyBuilder.setPdConnectionKey(
-            PdConnectionKey.newBuilder().setClientId(connectionKeyString).build());
-        break;
-      case ATTESTATION_REQUEST:
-        connectionKeyBuilder.setAttestationConnectionKey(
-            AttestationConnectionKey.newBuilder().setFeatureName(connectionKeyString).build());
-        break;
-      case SURVEY_REQUEST:
-        connectionKeyBuilder.setSurveyConnectionKey(
-            SurveyConnectionKey.newBuilder().setUrlRegex(connectionKeyString).build());
-        break;
-      default:
-        throw new UnsupportedOperationException(
-            String.format("Unsupported connection type '%s'", connectionType.name()));
+      case HTTP ->
+          connectionKeyBuilder.setHttpConnectionKey(
+              HttpConnectionKey.newBuilder().setUrlRegex(connectionKeyString).build());
+      case PIR ->
+          connectionKeyBuilder.setPirConnectionKey(
+              PirConnectionKey.newBuilder().setUrlRegex(connectionKeyString).build());
+      case FC_TRAINING_START_QUERY ->
+          connectionKeyBuilder.setFlConnectionKey(
+              FlConnectionKey.newBuilder().setFeatureName(connectionKeyString).build());
+      case PD ->
+          connectionKeyBuilder.setPdConnectionKey(
+              PdConnectionKey.newBuilder().setClientId(connectionKeyString).build());
+      case ATTESTATION_REQUEST ->
+          connectionKeyBuilder.setAttestationConnectionKey(
+              AttestationConnectionKey.newBuilder().setFeatureName(connectionKeyString).build());
+      case SURVEY_REQUEST ->
+          connectionKeyBuilder.setSurveyConnectionKey(
+              SurveyConnectionKey.newBuilder().setUrlRegex(connectionKeyString).build());
+      default ->
+          throw new UnsupportedOperationException(
+              String.format("Unsupported connection type '%s'", connectionType.name()));
     }
 
     return ConnectionDetails.builder()

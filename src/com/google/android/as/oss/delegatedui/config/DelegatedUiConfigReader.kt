@@ -42,6 +42,8 @@ class DelegatedUiConfigReader(private val flagManager: FlagManager) :
       clientAllowlist = flagManager.get(DelegatedUiFlags.DUI_CLIENT_ALLOWLIST),
       dataServiceConfigList = flagManager.get(DelegatedUiFlags.DUI_DATA_SERVICE_CONFIG_LIST),
       bypassAllSecurityPolicies = flagManager.get(DelegatedUiFlags.BYPASS_ALL_SECURITY_POLICIES),
+      enableBugleOutlineAnimationV2 =
+        flagManager.get(DelegatedUiFlags.ENABLE_BUGLE_OUTLINE_ANIMATION_V2),
     )
   }
 }

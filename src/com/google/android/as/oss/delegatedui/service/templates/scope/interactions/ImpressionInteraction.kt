@@ -27,15 +27,18 @@ interface ImpressionInteraction {
   /**
    * Use [LogUsageSideEffect] to log that the UI element represented by [uiIdToken] has been seen by
    * the user.
+   *
+   * Should be called from a [androidx.compose.runtime.LaunchedEffect] if in a composition, or
+   * [androidx.compose.runtime.rememberCoroutineScope] if in an event callback.
    */
-  fun doOnImpression(uiIdToken: UiIdToken, onImpression: InteractionListener)
+  suspend fun doOnImpression(uiIdToken: UiIdToken, onImpression: InteractionListener)
 }
 
 class ImpressionInteractionImpl(private val helper: InteractionHelper) : ImpressionInteraction {
 
-  override fun doOnImpression(uiIdToken: UiIdToken, onImpression: InteractionListener) {
+  override suspend fun doOnImpression(uiIdToken: UiIdToken, onImpression: InteractionListener) {
     with(helper) {
-      onInteraction(interaction = INTERACTION_TYPE_VIEW, uiIdToken = uiIdToken) { onImpression(it) }
+      onInteraction(interaction = INTERACTION_TYPE_VIEW, uiIdToken = uiIdToken) { onImpression() }
     }
   }
 }
