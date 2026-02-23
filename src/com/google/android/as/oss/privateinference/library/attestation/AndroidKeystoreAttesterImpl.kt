@@ -19,6 +19,7 @@ package com.google.android.`as`.oss.privateinference.library.attestation
 import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import androidx.annotation.VisibleForTesting
 import com.google.common.flogger.GoogleLogger
 import com.google.errorprone.annotations.ThreadSafe
 import com.google.protobuf.ByteString
@@ -34,18 +35,15 @@ import kotlin.concurrent.withLock
  * Generate device attestation against a server-provided challenge using Android KeyStore.
  *
  * @param context The application context.
- *
- * TODO: Remove this class and replace its usages with the common PCC-provided attestation impl.
  */
 @ThreadSafe
 @Singleton
 class AndroidKeystoreAttesterImpl
+@VisibleForTesting
 @Inject
-internal constructor(@ApplicationContext context: Context) {
+constructor(@ApplicationContext context: Context) {
 
   // Lock to prevent concurrent access to the underlying KeyStore.
-  // TODO Make attestation a suspending function, and remove the lock in favor of a
-  // serialized dispatcher/executor. This may be obsoleted by b/435555401
   private val keystoreLock = ReentrantLock()
 
   private val hasDeviceIdFeature = context.packageManager.hasSystemFeature(DEVICE_ID_FEATURE_NAME)

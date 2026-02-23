@@ -27,8 +27,8 @@ import com.google.common.flogger.GoogleLogger
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.KeysetHandle
-import com.google.crypto.tink.RegistryConfiguration
 import com.google.crypto.tink.TinkProtoKeysetFormat
+import com.google.crypto.tink.aead.AeadConfigurationV0
 import com.google.crypto.tink.aead.PredefinedAeadParameters
 import com.google.crypto.tink.config.TinkConfig
 import com.google.crypto.tink.integration.android.AndroidKeystore
@@ -70,7 +70,7 @@ constructor(
       TinkConfig.register()
       try {
         val handle = getOrCreateEncryptedKeysetWithRetry()
-        val aead = handle.getPrimitive(RegistryConfiguration.get(), Aead::class.java)
+        val aead = handle.getPrimitive(AeadConfigurationV0.get(), Aead::class.java)
         aeadState.value = AeadState.Initialized(aead)
         logger.atInfo().log("Initialized successfully")
       } catch (e: Exception) {

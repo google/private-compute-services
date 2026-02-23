@@ -26,6 +26,7 @@ import com.google.android.`as`.oss.privateinference.library.PrivateInferenceRequ
 import com.google.android.`as`.oss.privateinference.transport.ManagedChannelFactory
 import com.google.common.flogger.GoogleLogger
 import com.google.search.mdi.privatearatea.proto.PrivateArateaServiceGrpc
+import dagger.Lazy
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.grpc.Metadata
 import io.grpc.stub.MetadataUtils.newAttachHeadersInterceptor
@@ -38,7 +39,7 @@ open class PrivateInferenceServiceStubFactory
 @Inject
 internal constructor(
   @ApplicationContext private val context: Context,
-  @PrivateInferenceServerGrpcChannel val managedChannelFactory: ManagedChannelFactory,
+  @PrivateInferenceServerGrpcChannel val managedChannelFactory: Lazy<ManagedChannelFactory>,
   @PrivateInferenceWaitForGrpcChannelReady val waitForGrpcChannelToBeReady: Boolean,
   @PrivateInferenceAttachCertificateHeader val attachCertificateHeader: Boolean,
   val deviceInfo: Optional<DeviceInfo>,
@@ -56,9 +57,10 @@ internal constructor(
     var stub =
       if (waitForGrpcChannelToBeReady) {
         logger.atInfo().log("Waiting for gRPC channel to be ready.")
-        PrivateArateaServiceGrpc.newStub(managedChannelFactory.getInstance()).withWaitForReady()
+        PrivateArateaServiceGrpc.newStub(managedChannelFactory.get().getInstance())
+          .withWaitForReady()
       } else {
-        PrivateArateaServiceGrpc.newStub(managedChannelFactory.getInstance())
+        PrivateArateaServiceGrpc.newStub(managedChannelFactory.get().getInstance())
       }
     if (attachCertificateHeader) {
       logger.atInfo().log("Attaching certificate header to the request.")

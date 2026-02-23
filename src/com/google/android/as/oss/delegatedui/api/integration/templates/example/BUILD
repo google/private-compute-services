@@ -25,10 +25,7 @@ package(
 proto_library(
     name = "example_template_proto",
     srcs = ["example_template_integration.proto"],
-    deps = [
-        "",
-        "//third_party/protobuf:cpp_features_proto",
-    ],
+    deps = [""],
 )
 
 java_lite_proto_library(

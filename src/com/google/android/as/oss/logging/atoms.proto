@@ -17,26 +17,34 @@
  * statsd(https://source.android.com/docs/core/ota/modular-system/statsd)
  * from PCS.
  */
-edition = "2023";
+edition = "2024";
 
 package com.google.android.as.oss.logging;
 
 import "src/com/google/android/as/oss/logging/enums.proto";
+
+import option "third_party/java/protobuf/java_features.proto";
 
 option features.utf8_validation = NONE;
 option java_package = "com.google.android.as.oss.logging";
 option java_outer_classname = "PcsAtomsProto";
 
 message IntelligenceCountReported {
+  option features.(pb.java).nest_in_file_class = YES;
+
   CountMetricId count_metric_id = 1;
 }
 
 message IntelligenceValueReported {
+  option features.(pb.java).nest_in_file_class = YES;
+
   ValueMetricId value_metric_id = 1;
   int32 value = 2;
 }
 
 message IntelligenceUnrecognisedNetworkRequestReported {
+  option features.(pb.java).nest_in_file_class = YES;
+
   enum ConnectionType {
     option features.enum_type = CLOSED;
 
@@ -49,32 +57,31 @@ message IntelligenceUnrecognisedNetworkRequestReported {
   }
 
   ConnectionType connection_type = 1;
-  string connection_key = 2
-      ;
+  string connection_key = 2;
 }
 
 message IntelligenceFederatedLearningTrainingLogReported {
-  int64 federated_compute_version = 1
-      ;
+  option features.(pb.java).nest_in_file_class = YES;
+
+  int64 federated_compute_version = 1;
 
   TrainingEventKind kind = 2;
-  string config_name = 3 ;
+  string config_name = 3;
 
   int64 duration_millis = 4;
   int64 example_size = 5;
-  int64 run_id = 6 ;
+  int64 run_id = 6;
 
   TrainingErrorCode error_code = 7;
   int64 native_heap_bytes_allocated = 8;
   int64 java_heap_total_memory = 9;
   int64 java_heap_free_memory = 10;
-  string model_identifier = 11
-      ;
+  string model_identifier = 11;
 
   int64 data_transfer_duration_millis = 12;
   int64 bytes_uploaded = 13;
   int64 bytes_downloaded = 14;
-  string error_message = 15 ;
+  string error_message = 15;
 
   TrainingDataSourceType data_source = 16;
   int64 high_water_mark_memory_bytes = 17;
@@ -87,19 +94,19 @@ message IntelligenceFederatedLearningTrainingLogReported {
 }
 
 message IntelligenceFederatedLearningSecAggClientLogReported {
-  int64 federated_compute_version = 1
-      ;
+  option features.(pb.java).nest_in_file_class = YES;
 
-  int64 run_id = 2 ;
+  int64 federated_compute_version = 1;
 
-  string config_name = 3 ;
+  int64 run_id = 2;
 
-  string model_identifier = 4
-      ;
+  string config_name = 3;
 
-  int64 client_session_id = 5 ;
+  string model_identifier = 4;
 
-  int64 execution_session_id = 6 ;
+  int64 client_session_id = 5;
+
+  int64 execution_session_id = 6;
 
   SecAggClientEventKind kind = 7;
   int64 duration_millis = 8;
@@ -112,9 +119,10 @@ message IntelligenceFederatedLearningSecAggClientLogReported {
 }
 
 message IntelligenceFederatedLearningDiagnosisLogReported {
-  int64 federated_compute_version = 1
-      ;
+  option features.(pb.java).nest_in_file_class = YES;
+
+  int64 federated_compute_version = 1;
 
   int64 diag_code = 2;
-  int64 run_id = 3 ;
+  int64 run_id = 3;
 }

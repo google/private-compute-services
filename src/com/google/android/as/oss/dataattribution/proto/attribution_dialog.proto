@@ -17,7 +17,6 @@ edition = "2023";
 package com.google.android.as.oss.dataattribution.proto;
 
 import "src/com/google/android/as/oss/feedback/proto/feedback_dialog_common_data.proto";
-
 import "third_party/protobuf/cpp_features.proto";
 
 option features.(pb.cpp).string_type = VIEW;
@@ -43,8 +42,7 @@ message AttributionDialogData {
 
   // consists of the attribution data. This data is used for the row present
   // below the attributionHeader. Can be empty.
-  repeated AttributionCardData attributions = 5
-     ;
+  repeated AttributionCardData attributions = 5;
 
   // an identifier for the current suggestion session, used for logging or
   // feedback purposes.

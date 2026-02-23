@@ -27,7 +27,8 @@ option java_package = "com.google.search.mdi.privatearatea.proto";
 message AnonymousTokenRequest {
   // Anonymous token is of type {@link PrivacyPassTokenData}
 
-  bytes anonymous_token = 1;
+  bytes anonymous_token = 1
+      ;
 
   bytes encoded_extensions = 2;
 }

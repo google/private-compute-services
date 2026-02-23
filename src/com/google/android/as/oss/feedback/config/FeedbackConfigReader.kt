@@ -41,8 +41,6 @@ class FeedbackConfigReader(private val flagManager: FlagManager) :
       enableSelectedEntityContent = flagManager.get(FeedbackFlags.ENABLE_SELECTED_ENTITY_CONTENT),
       enableViewDataDialogV2SingleEntity =
         flagManager.get(FeedbackFlags.ENABLE_VIEW_DATA_DIALOG_V2_SINGLE_ENTITY),
-      enableViewDataDialogV2MultiEntity =
-        flagManager.get(FeedbackFlags.ENABLE_VIEW_DATA_DIALOG_V2_MULTI_ENTITY),
       enableOptInUiV2 = flagManager.get(FeedbackFlags.ENABLE_OPT_IN_UI_V2),
       enableGroundTruthSelectorSingleEntity =
         flagManager.get(FeedbackFlags.ENABLE_GROUND_TRUTH_SELECTOR_SINGLE_ENTITY),

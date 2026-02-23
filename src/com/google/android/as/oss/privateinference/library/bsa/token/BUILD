@@ -136,6 +136,7 @@ android_library(
     exports = [
         "//src/com/google/android/as/oss/privateinference/library/bsa/token:module",
         "//src/com/google/android/as/oss/privateinference/library/bsa/token/auth:aratea_token_provider_module",
+        "//src/com/google/android/as/oss/privateinference/library/bsa/token/auth:cacheable_aratea_token_provider_module",
         "//src/com/google/android/as/oss/privateinference/library/bsa/token/auth:proxy_token_provider_module",
         "//src/com/google/android/as/oss/privateinference/library/bsa/token/cache:caching_module",
         "//src/com/google/android/as/oss/privateinference/library/bsa/token/cache:optionals_module",

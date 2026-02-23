@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.List;
 
 /** Listener of changes to flags. */
-@SuppressWarnings("AndroidApiChecker") // TODO
 public interface FlagListener {
   /**
    * Notifies that a set of flags have been updated.

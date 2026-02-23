@@ -48,3 +48,10 @@ data class ArateaTokenParams private constructor(private val challengeBytes: Byt
 
   constructor(challengeBytes: ByteArray) : this(challengeBytes.toByteString())
 }
+
+/**
+ * Parameters to be passed when fetching [ArateaTokenWithoutChallenge] instances from a
+ * [BsaTokenProvider].
+ */
+data class CacheableArateaTokenParams(override val mustBeFresh: Boolean = false) :
+  BsaTokenParams<ArateaTokenWithoutChallenge>

@@ -13,43 +13,13 @@
 # limitations under the License.
 
 load("@bazel_rules_android//android:rules.bzl", "android_library")
-load("//intelligence/fc/build:fc.bzl", "fc_endorsement_options")
 
 package(default_visibility = ["//visibility:public"])
-
-####################################################################################################
-# Endorsement options for PCS.
-#
-# To add new endorsement options for PCS:
-# 1. Follow instructions at [redacted] to create new keys (saving the final step
-# for after 5 below).
-# 2. Create release and internal `fc_endorsement_options` rules below.
-# 3. Create a new `EndorsementClientType` enum value for your new keys.
-# 4. Add the new to the respective modules (ReleaseModule.java and InternalModule.java) pointing to
-#    the `fc_endorsement_options` you defined in 2.
-# 5. Include the new keys in the public GithHub declaration of verifying keys (see @timonvo's
-#    comment http://b/410519159#comment16).
-# 6. Complete the final step of [redacted] once you're absolutely sure you've
-#    checked in both keys .
-####################################################################################################
-
-fc_endorsement_options(
-    name = "pcs_release_endorsement_options",
-    android_manifest = "//src/com/google/android/as/oss/fl/fc/service:AndroidManifest.xml",
-    key = "//intelligence/fc/config/public_keys:78712.access-policy-endorsement-verifying-key.binpb",
-)
-
-fc_endorsement_options(
-    name = "pcs_internal_endorsement_options",
-    android_manifest = "//src/com/google/android/as/oss/fl/fc/service:AndroidManifest.xml",
-    key = "//intelligence/fc/config/public_keys:78712.googler-only-access-policy-endorsement-verifying-key.binpb",
-)
 
 android_library(
     name = "internal",
     srcs = ["InternalModule.java"],
     visibility = [
-        "//intelligence/fc:users",
         "//visibility:public",
     ],
     deps = [

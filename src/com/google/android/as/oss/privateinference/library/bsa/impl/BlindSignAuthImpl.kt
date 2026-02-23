@@ -19,6 +19,7 @@ package com.google.android.`as`.oss.privateinference.library.bsa.impl
 import com.google.android.`as`.oss.privateinference.library.bsa.BlindSignAuth
 import com.google.android.`as`.oss.privateinference.library.bsa.jni.BlindSignAuthJniBridge
 import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaToken
+import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaTokenWithoutChallenge
 import com.google.android.`as`.oss.privateinference.library.bsa.token.ProxyToken
 import com.google.android.`as`.oss.privateinference.library.oakutil.PrivateInferenceClientTimerNames
 import com.google.android.`as`.oss.privateinference.util.timers.TimerSet
@@ -34,7 +35,7 @@ class BlindSignAuthImpl(
   val blindSignAuth = BlindSignAuthJniBridge(messageInterface)
 
   override suspend fun createProxyTokens(numTokens: Int): List<ProxyToken> =
-    timerSet.start(PrivateInferenceClientTimerNames.CREATE_PROXY_TOKEN).use {
+    timerSet.start(PrivateInferenceClientTimerNames.IPP_CREATE_PROXY_TOKEN).use {
       blindSignAuth
         .getAttestationTokens(
           numTokens = numTokens,
@@ -49,7 +50,7 @@ class BlindSignAuthImpl(
     numTokens: Int,
     challengeData: ByteArray,
   ): List<ArateaToken> =
-    timerSet.start(PrivateInferenceClientTimerNames.CREATE_ARATEA_TOKEN).use {
+    timerSet.start(PrivateInferenceClientTimerNames.IPP_CREATE_TERMINAL_TOKEN).use {
       blindSignAuth
         .getAttestationTokens(
           numTokens = numTokens,
@@ -58,5 +59,19 @@ class BlindSignAuthImpl(
           attester = attester,
         )
         .map { token -> ArateaToken(token.token) }
+    }
+
+  override suspend fun createArateaTokensWithoutChallenge(
+    numTokens: Int
+  ): List<ArateaTokenWithoutChallenge> =
+    timerSet.start(PrivateInferenceClientTimerNames.IPP_CREATE_TERMINAL_TOKEN).use {
+      blindSignAuth
+        .getAttestationTokens(
+          numTokens = numTokens,
+          proxyLayer = BlindSignAuthJniBridge.ProxyLayer.TERMINAL_LAYER,
+          tokenChallenge = null,
+          attester = attester,
+        )
+        .map { token -> ArateaTokenWithoutChallenge(token.token, token.expiration) }
     }
 }

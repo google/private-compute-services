@@ -24,6 +24,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandIn
@@ -46,6 +47,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.Typography
@@ -55,6 +57,7 @@ import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -128,6 +131,7 @@ import kotlinx.coroutines.launch
 val LocalConfigReader =
   staticCompositionLocalOf<ConfigReader<DelegatedUiConfig>> { error("No ConfigReader provided") }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 class BugleTemplateRenderer
 @Inject
 internal constructor(val configReader: ConfigReader<DelegatedUiConfig>) : TemplateRenderer {
@@ -175,6 +179,9 @@ internal constructor(val configReader: ConfigReader<DelegatedUiConfig>) : Templa
 
     return ComposeView(context).apply {
       setContent {
+        val inputSpec by inputSpecFlow.collectAsState()
+        val shouldBlur = inputSpec.noTouchHint
+
         CompositionLocalProvider(LocalConfigReader provides configReader) {
           MainTheme {
             MaterialTheme(
@@ -210,7 +217,32 @@ internal constructor(val configReader: ConfigReader<DelegatedUiConfig>) : Templa
                   sendHints(data.hintsList.toSet())
                 }
               }
-              Column(Modifier.fillMaxWidth()) {
+
+              val blurRadius by
+                animateDpAsState(
+                  targetValue = if (shouldBlur) 5.dp else 0.dp,
+                  animationSpec =
+                    if (shouldBlur) {
+                      MaterialTheme.motionScheme.slowEffectsSpec()
+                    } else {
+                      MaterialTheme.motionScheme.defaultEffectsSpec()
+                    },
+                  label = "BlurAnimation",
+                )
+
+              Column(
+                Modifier.fillMaxWidth()
+                  .then(
+                    if (blurRadius > 0.dp) {
+                      Modifier.blur(
+                        radius = blurRadius,
+                        edgeTreatment = BlurredEdgeTreatment.Unbounded,
+                      )
+                    } else {
+                      Modifier
+                    }
+                  )
+              ) {
                 Box(modifier = Modifier.nestedScroll(nestedScrollInterop)) {
                   BugleChipsRow(
                     isStandaloneRowEnabled = data.isStandaloneRowEnabled,

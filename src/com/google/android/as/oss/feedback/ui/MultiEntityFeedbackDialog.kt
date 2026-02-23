@@ -380,9 +380,26 @@ private fun MultiEntityFeedbackEditingScreen(
             selectedSentiment =
               uiState.selectedSentimentMap[entity.entityContent] ?: RATING_SENTIMENT_UNDEFINED,
             tagsSelection = uiState.tagsSelectionMap[entity.entityContent].orEmpty(),
+            tagsGroundTruthOptions =
+              if (uiState.enableGroundTruthSelectorMultiEntity) {
+                entity.negativeRatingData.tagsList.associate { tag ->
+                  val filteredGroundTruthList =
+                    tag.groundTruthOptionsList
+                      .map { optionText -> GroundTruthData(optionText) }
+                      .filter { groundTruthData -> groundTruthData.label != entity.entityContent }
+                  tag to filteredGroundTruthList
+                }
+              } else {
+                emptyMap()
+              },
             tagsGroundTruthSelection =
               uiState.tagsGroundTruthSelectionMap[entity.entityContent].orEmpty(),
             freeFormText = uiState.freeFormTextMap[entity.entityContent].orEmpty(),
+            groundTruthTitle =
+              uiState.feedbackDonationData
+                ?.getOrNull()
+                ?.feedbackUiRenderingData
+                ?.feedbackDialogGroundTruthTitle ?: "",
             onSelectedSentimentChanged = { onEntitySentimentChanged(entity.entityContent, it) },
             onTagSelectionChanged = { entity, sentiment, tag, selected ->
               val singleSelection = foundQuartzCuj == QuartzCUJ.QUARTZ_CUJ_KEY_TYPE
@@ -421,10 +438,12 @@ private fun MultiEntityFeedbackEditingScreen(
 private fun MultiFeedbackEntityEditingContent(
   commonData: FeedbackEntityCommonData,
   entity: FeedbackEntityData,
+  freeFormText: String,
+  groundTruthTitle: String,
   selectedSentiment: FeedbackRatingSentiment,
   tagsSelection: Map<FeedbackRatingSentiment, Map<FeedbackTagData, Boolean>>,
+  tagsGroundTruthOptions: Map<FeedbackTagData, List<GroundTruthData>?>,
   tagsGroundTruthSelection: Map<FeedbackRatingSentiment, Map<FeedbackTagData, GroundTruthData?>>,
-  freeFormText: String,
   onSelectedSentimentChanged: (FeedbackRatingSentiment) -> Unit,
   onTagSelectionChanged:
     (
@@ -470,6 +489,8 @@ private fun MultiFeedbackEntityEditingContent(
         tagsSelection = tagsSelection[selectedSentiment].orEmpty(),
         tagsGroundTruthSelection = tagsGroundTruthSelection[selectedSentiment].orEmpty(),
         freeFormText = freeFormText,
+        tagsGroundTruthOptions = tagsGroundTruthOptions,
+        groundTruthTitle = groundTruthTitle,
         onTagsShown = onTagsShown,
         onTagSelectionChanged = { tag, selected ->
           onTagSelectionChanged(entity.entityContent, selectedSentiment, tag, selected)
@@ -574,8 +595,10 @@ private fun EntityHeaderContent(
 private fun EntityBodyContent(
   ratingData: FeedbackRatingData?,
   tagsSelection: Map<FeedbackTagData, Boolean>,
+  tagsGroundTruthOptions: Map<FeedbackTagData, List<GroundTruthData>?>,
   tagsGroundTruthSelection: Map<FeedbackTagData, GroundTruthData?>,
   freeFormText: String,
+  groundTruthTitle: String,
   onTagsShown: (tags: List<FeedbackTagData>) -> Unit,
   onTagSelectionChanged: (FeedbackTagData, Boolean) -> Unit,
   onTagGroundTruthSelected: (FeedbackTagData, GroundTruthData) -> Unit,
@@ -601,23 +624,14 @@ private fun EntityBodyContent(
       val tags = ratingData.tagsList
 
       FeedbackTagChips(
-        alignment = Alignment.Start,
+        alignment = Alignment.CenterHorizontally,
         tags = tags,
         tagsSelection = tagsSelection,
+        groundTruthTitle = groundTruthTitle,
+        tagsGroupTruthOptions = tagsGroundTruthOptions,
+        tagsGroundTruthSelection = tagsGroundTruthSelection,
         onTagsShown = onTagsShown,
         onTagSelectionChanged = onTagSelectionChanged,
-        // TODO: Replace with the tag's actual title.
-        groundTruthTitle = "What's the correct suggestion?",
-        tagsGroupTruthOptions =
-          // TODO: Replace with the tag's actual options.
-          tags.associateWith {
-            listOf(
-              GroundTruthData("2668 Kerry Way, LA 90017"),
-              GroundTruthData("1385 Winding Brook Lane, Springfield, IL 62704"),
-              GroundTruthData("None of the above"),
-            )
-          },
-        tagsGroundTruthSelection = tagsGroundTruthSelection,
         onTagGroundTruthSelected = onTagGroundTruthSelected,
       )
     }

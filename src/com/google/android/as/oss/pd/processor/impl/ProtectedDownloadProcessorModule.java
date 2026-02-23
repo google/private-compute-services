@@ -16,8 +16,10 @@
 
 package com.google.android.as.oss.pd.processor.impl;
 
+import com.google.android.as.oss.pd.config.IntegrityClientTokenProvider;
 import com.google.android.as.oss.pd.processor.ProtectedDownloadProcessor;
 import dagger.Binds;
+import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.hilt.InstallIn;
 import dagger.hilt.components.SingletonComponent;
@@ -28,4 +30,7 @@ import dagger.hilt.components.SingletonComponent;
 abstract class ProtectedDownloadProcessorModule {
   @Binds
   abstract ProtectedDownloadProcessor bindImpl(ProtectedDownloadProcessorImpl impl);
+
+  @BindsOptionalOf
+  abstract IntegrityClientTokenProvider bindOptionalIntegrityClientTokenProvider();
 }

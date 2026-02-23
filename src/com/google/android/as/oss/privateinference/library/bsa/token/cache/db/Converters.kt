@@ -19,6 +19,7 @@ package com.google.android.`as`.oss.privateinference.library.bsa.token.cache.db
 import androidx.room.TypeConverter
 import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaTokenParams
 import com.google.android.`as`.oss.privateinference.library.bsa.token.BsaTokenParams
+import com.google.android.`as`.oss.privateinference.library.bsa.token.CacheableArateaTokenParams
 import com.google.android.`as`.oss.privateinference.library.bsa.token.ProxyTokenParams
 import com.google.android.`as`.oss.privateinference.library.bsa.token.crypto.EncryptedBsaTokenBytes
 import java.time.Instant
@@ -37,21 +38,22 @@ object Converters {
     when (value) {
       is ArateaTokenParams -> "aratea(${value.challengeBase64})"
       is ProxyTokenParams -> "proxy"
+      is CacheableArateaTokenParams -> "cacheableAratea"
       null -> null
     }
 
   @TypeConverter
   fun convertStringToBsaTokenParams(value: String?): BsaTokenParams<*>? {
-    return if (value == null) {
-      null
-    } else if (value.startsWith("aratea(")) {
-      val challenge =
-        requireNotNull(value.substring(7, value.length - 1).decodeBase64()?.toByteArray())
-      ArateaTokenParams(challenge)
-    } else if (value.startsWith("proxy")) {
-      ProxyTokenParams()
-    } else {
-      null
+    return when {
+      value == null -> null
+      value.startsWith("aratea(") -> {
+        val challenge =
+          requireNotNull(value.substring(7, value.length - 1).decodeBase64()?.toByteArray())
+        ArateaTokenParams(challenge)
+      }
+      value.startsWith("proxy") -> ProxyTokenParams()
+      value.startsWith("cacheableAratea") -> CacheableArateaTokenParams()
+      else -> null
     }
   }
 

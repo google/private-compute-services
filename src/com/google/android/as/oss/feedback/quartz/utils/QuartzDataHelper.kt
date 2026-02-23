@@ -34,8 +34,11 @@ import com.google.android.`as`.oss.feedback.api.gateway.feedbackCUJ
 import com.google.android.`as`.oss.feedback.api.gateway.logFeedbackV2Request
 import com.google.android.`as`.oss.feedback.api.gateway.quartzCommonData
 import com.google.android.`as`.oss.feedback.api.gateway.quartzDataDonation
+import com.google.android.`as`.oss.feedback.api.gateway.quartzDataDonationV2
 import com.google.android.`as`.oss.feedback.api.gateway.quartzKeySummarizationData
 import com.google.android.`as`.oss.feedback.api.gateway.quartzKeyTypeData
+import com.google.android.`as`.oss.feedback.api.gateway.quartzModelData
+import com.google.android.`as`.oss.feedback.api.gateway.quartzNotificationData
 import com.google.android.`as`.oss.feedback.api.gateway.runtimeConfig
 import com.google.android.`as`.oss.feedback.api.gateway.structuredUserInput
 import com.google.android.`as`.oss.feedback.api.gateway.userDonation
@@ -110,98 +113,117 @@ class QuartzDataHelper @Inject constructor() {
         }
       userDonation = userDonation {
         // Only include donation data if user has opted in the consent.
-        // TODO: b/451840143 - Map opt-in categories to quartz feedback.
         if (uiState.optInChecked.any { it.value }) {
-          quartzDataDonation = quartzDataDonation {
-            when (data.quartzCuj) {
-              QuartzCUJ.QUARTZ_CUJ_KEY_TYPE -> {
-                quartzKeyTypeData = quartzKeyTypeData {
-                  quartzCommonData = quartzCommonData {
-                    sbnKey = data.typeData.sbnKey
-                    uuid = data.typeData.uuid
-                    asiVersion = data.typeData.asiVersion
-                    detectedLanguage = data.typeData.detectedLanguage
-                    packageName = data.typeData.packageName
-                    title = data.typeData.title
-                    content = data.typeData.content
-                    notificationCategory = data.typeData.notificationCategory
-                    notificationTag = data.typeData.notificationTag
-                    isConversation = data.typeData.isConversation
-                    channelId = data.typeData.channelId
-                    channelName = data.typeData.channelName
-                    channelImportance =
-                      QuartzCommonData.ChannelImportance.valueOf(data.typeData.channelImportance)
-                    channelDescription = data.typeData.channelDescription
-                    channelConversationId = data.typeData.channelConversationId
-                    playStoreCategory = data.typeData.playStoreCategory
-                    extraTitle = data.typeData.extraTitle
-                    extraTitleBig = data.typeData.extraTitleBig
-                    extraText = data.typeData.extraText
-                    extraTextLines = data.typeData.extraTextLines
-                    extraSummaryText = data.typeData.extraSummaryText
-                    extraPeopleList = data.typeData.extraPeopleList
-                    extraMessagingPerson = data.typeData.extraMessagingPerson
-                    extraMessages = data.typeData.extraMessages
-                    extraHistoricMessages += data.typeData.extraHistoricMessages
-                    extraConversationTitle = data.typeData.extraConversationTitle
-                    extraBigText = data.typeData.extraBigText
-                    extraInfoText = data.typeData.extraInfoText
-                    extraSubText = data.typeData.extraSubText
-                    extraIsGroupConversation = data.typeData.extraIsGroupConversation
-                    extraPictureContentDescription = data.typeData.extraPictureContentDescription
-                    extraTemplate = data.typeData.extraTemplate
-                    extraShowBigPictureWhenCollapsed =
-                      data.typeData.extraShowBigPictureWhenCollapsed
-                    extraColorized = data.typeData.extraColorized
-                    extraRemoteInputHistory += data.typeData.extraRemoteInputHistory
-                    locusId = data.typeData.locusId
-                    hasPromotableCharacteristics = data.typeData.hasPromotableCharacteristics
-                    groupKey = data.typeData.groupKey
-                  }
-                  notificationId = data.typeData.notificationId
-                  postTimestamp = data.typeData.postTimestamp
-                  appCategory = data.typeData.appCategory
-                  modelInfoList += data.typeData.modelInfoList
-                  classificationMethod =
-                    QuartzKeyTypeData.ClassificationMethod.valueOf(
-                      data.typeData.classificationMethod
-                    )
-                  classificationBertCategoryResult = data.typeData.classificationBertCategoryResult
-                  classificationBertCategoryScore = data.typeData.classificationBertCategoryScore
-                  classificationBertCategoryExecutedTimeMs =
-                    data.typeData.classificationBertCategoryExecutedTimeMs
-                  classificationCategory = data.typeData.classificationCategory
-                  isThresholdChangedCategory = data.typeData.isThresholdChangedCategory
-                  classificationExecutedTimeMs = data.typeData.classificationExecutedTimeMs
-                  exemptionExecutedTimeMsString = data.typeData.exemptionExecutedTimeMsString
-                  classificationDefaultCategoryResult =
-                    data.typeData.classificationDefaultCategoryResult
-                  defaultCategoryCorrectionThreshold =
-                    data.typeData.defaultCategoryCorrectionThreshold
-                  isSuppressDuplicate = data.typeData.isSuppressDuplicate
-                }
+          if (data.notificationData != null) {
+            quartzDataDonationV2 = quartzDataDonationV2 {
+              quartzCuj = data.quartzCuj
+              quartzNotificationData = quartzNotificationData {
+                title = data.notificationData!!.title
+                content = data.notificationData!!.content
+                channelId = data.notificationData!!.channelId
+                conversationMessages = data.notificationData!!.conversationMessages
+                conversationHistoricMessages = data.notificationData!!.conversationHistoricMessages
               }
-              QuartzCUJ.QUARTZ_CUJ_KEY_SUMMARIZATION -> {
-                quartzKeySummarizationData = quartzKeySummarizationData {
-                  quartzCommonData = quartzCommonData {
-                    sbnKey = data.summarizationData.sbnKey
-                    uuid = data.summarizationData.uuid
-                    asiVersion = data.summarizationData.asiVersion
-                    detectedLanguage = data.summarizationData.detectedLanguage
-                    packageName = data.summarizationData.packageName
-                  }
-                  featureName = data.summarizationData.featureName
-                  modelName = data.summarizationData.modelName
-                  modelVersion = data.summarizationData.modelVersion
-                  isGroupConversation = data.summarizationData.isGroupConversation
-                  conversationTitle = data.summarizationData.conversationTitle
-                  messages = data.summarizationData.messages
-                  notificationCount = data.summarizationData.notificationCount
-                  executionTimeMs = data.summarizationData.executionTimeMs
-                  summaryText = data.summarizationData.summaryText
+              quartzModelData =
+                if (data.modelData != null) {
+                  quartzModelData { modelInfo = data.modelData!!.modelInfo }
+                } else {
+                  quartzModelData {}
                 }
+            }
+          } else {
+            quartzDataDonation = quartzDataDonation {
+              when (data.quartzCuj) {
+                QuartzCUJ.QUARTZ_CUJ_KEY_TYPE -> {
+                  quartzKeyTypeData = quartzKeyTypeData {
+                    quartzCommonData = quartzCommonData {
+                      sbnKey = data.typeData.sbnKey
+                      uuid = data.typeData.uuid
+                      asiVersion = data.typeData.asiVersion
+                      detectedLanguage = data.typeData.detectedLanguage
+                      packageName = data.typeData.packageName
+                      title = data.typeData.title
+                      content = data.typeData.content
+                      notificationCategory = data.typeData.notificationCategory
+                      notificationTag = data.typeData.notificationTag
+                      isConversation = data.typeData.isConversation
+                      channelId = data.typeData.channelId
+                      channelName = data.typeData.channelName
+                      channelImportance =
+                        QuartzCommonData.ChannelImportance.valueOf(data.typeData.channelImportance)
+                      channelDescription = data.typeData.channelDescription
+                      channelConversationId = data.typeData.channelConversationId
+                      playStoreCategory = data.typeData.playStoreCategory
+                      extraTitle = data.typeData.extraTitle
+                      extraTitleBig = data.typeData.extraTitleBig
+                      extraText = data.typeData.extraText
+                      extraTextLines = data.typeData.extraTextLines
+                      extraSummaryText = data.typeData.extraSummaryText
+                      extraPeopleList = data.typeData.extraPeopleList
+                      extraMessagingPerson = data.typeData.extraMessagingPerson
+                      extraMessages = data.typeData.extraMessages
+                      extraHistoricMessages += data.typeData.extraHistoricMessages
+                      extraConversationTitle = data.typeData.extraConversationTitle
+                      extraBigText = data.typeData.extraBigText
+                      extraInfoText = data.typeData.extraInfoText
+                      extraSubText = data.typeData.extraSubText
+                      extraIsGroupConversation = data.typeData.extraIsGroupConversation
+                      extraPictureContentDescription = data.typeData.extraPictureContentDescription
+                      extraTemplate = data.typeData.extraTemplate
+                      extraShowBigPictureWhenCollapsed =
+                        data.typeData.extraShowBigPictureWhenCollapsed
+                      extraColorized = data.typeData.extraColorized
+                      extraRemoteInputHistory += data.typeData.extraRemoteInputHistory
+                      locusId = data.typeData.locusId
+                      hasPromotableCharacteristics = data.typeData.hasPromotableCharacteristics
+                      groupKey = data.typeData.groupKey
+                    }
+                    notificationId = data.typeData.notificationId
+                    postTimestamp = data.typeData.postTimestamp
+                    appCategory = data.typeData.appCategory
+                    modelInfoList += data.typeData.modelInfoList
+                    classificationMethod =
+                      QuartzKeyTypeData.ClassificationMethod.valueOf(
+                        data.typeData.classificationMethod
+                      )
+                    classificationBertCategoryResult =
+                      data.typeData.classificationBertCategoryResult
+                    classificationBertCategoryScore = data.typeData.classificationBertCategoryScore
+                    classificationBertCategoryExecutedTimeMs =
+                      data.typeData.classificationBertCategoryExecutedTimeMs
+                    classificationCategory = data.typeData.classificationCategory
+                    isThresholdChangedCategory = data.typeData.isThresholdChangedCategory
+                    classificationExecutedTimeMs = data.typeData.classificationExecutedTimeMs
+                    exemptionExecutedTimeMsString = data.typeData.exemptionExecutedTimeMsString
+                    classificationDefaultCategoryResult =
+                      data.typeData.classificationDefaultCategoryResult
+                    defaultCategoryCorrectionThreshold =
+                      data.typeData.defaultCategoryCorrectionThreshold
+                    isSuppressDuplicate = data.typeData.isSuppressDuplicate
+                  }
+                }
+                QuartzCUJ.QUARTZ_CUJ_KEY_SUMMARIZATION -> {
+                  quartzKeySummarizationData = quartzKeySummarizationData {
+                    quartzCommonData = quartzCommonData {
+                      sbnKey = data.summarizationData.sbnKey
+                      uuid = data.summarizationData.uuid
+                      asiVersion = data.summarizationData.asiVersion
+                      detectedLanguage = data.summarizationData.detectedLanguage
+                      packageName = data.summarizationData.packageName
+                    }
+                    featureName = data.summarizationData.featureName
+                    modelName = data.summarizationData.modelName
+                    modelVersion = data.summarizationData.modelVersion
+                    isGroupConversation = data.summarizationData.isGroupConversation
+                    conversationTitle = data.summarizationData.conversationTitle
+                    messages = data.summarizationData.messages
+                    notificationCount = data.summarizationData.notificationCount
+                    executionTimeMs = data.summarizationData.executionTimeMs
+                    summaryText = data.summarizationData.summaryText
+                  }
+                }
+                else -> {}
               }
-              else -> {}
             }
           }
         }

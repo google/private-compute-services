@@ -12,15 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package com.google.android.as.oss.privateinference.library.oakutil;
 
 import "google/protobuf/timestamp.proto";
-import "third_party/protobuf/cpp_features.proto";
 
-option features.(pb.cpp).string_type = VIEW;
-option java_multiple_files = true;
+option java_outer_classname = "PublicKeys";
 option java_package = "com.google.android.as.oss.privateinference.library.oakutil.proto";
 
 message VerificationKeys {

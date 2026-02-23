@@ -47,5 +47,19 @@
         <category android:name="android.intent.category.DEFAULT"/>
       </intent-filter>
     </activity>
+    <!-- This provider is temporarily disabled to avoid authority conflicts
+         It will be re-enabled once the settings search indexing is properly configured. -->
+    <provider
+        android:name="com.google.android.as.oss.networkusage.ui.user.NetworkUsageSearchIndexablesProvider"
+        android:authorities="com.google.android.as.oss"
+        android:exported="true"
+        android:grantUriPermissions="true"
+        android:multiprocess="false"
+        android:enabled="false"
+        android:permission="android.permission.READ_SEARCH_INDEXABLES">
+      <intent-filter>
+        <action android:name="android.content.action.SEARCH_INDEXABLES_PROVIDER" />
+      </intent-filter>
+    </provider>
   </application>
 </manifest>

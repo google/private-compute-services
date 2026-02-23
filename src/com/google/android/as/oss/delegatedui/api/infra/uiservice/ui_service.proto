@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package com.google.android.as.oss.delegatedui.api.infra.uiservice;
 
@@ -25,8 +25,8 @@ import "src/com/google/android/as/oss/delegatedui/api/infra/uiservice/ui_service
 import "src/com/google/android/as/oss/delegatedui/api/infra/uiservice/ui_service_size_change.proto";
 import "src/com/google/android/as/oss/delegatedui/api/infra/uiservice/ui_service_update.proto";
 
+option java_outer_classname = "UiService";
 option java_package = "com.google.android.as.oss.delegatedui.api.infra.uiservice";
-option java_multiple_files = true;
 
 // Service to render protected content using a delegated UI.
 //
@@ -69,6 +69,7 @@ message DelegatedUiRequest {
   oneof request {
     // Create - initialization call to set up remote rendering via delegated UI
     DelegatedUiCreateRequest create_request = 1;
+
     // Update - send updates from client that that may impact the delegated UI
     DelegatedUiUpdateRequest update_request = 2;
   }
@@ -80,17 +81,23 @@ message DelegatedUiResponse {
   oneof response {
     // Response to create request.
     DelegatedUiCreateResponse create_response = 1;
+
     // Response to update request.
     DelegatedUiUpdateResponse update_response = 6;
+
     // Asynchronous event - notifies on size change event from delegated UI.
     DelegatedUiSizeChangeResponse size_change_response = 2;
+
     // Asynchronous event - notifies on consented data egress from delegated UI.
     DelegatedUiDataEgressResponse data_egress_response = 3;
+
     // Asynchronous event - notifies on nested scroll event from delegated UI.
     DelegatedUiNestedScrollResponse nested_scroll_response = 4;
+
     // Asynchronous event - notifies on nested fling event from delegated UI.
     DelegatedUiNestedFlingResponse nested_fling_response = 5;
+
     // Asynchronous event - notifies on hints from delegated UI.
-    DelegatedUiHintsResponse hint_response = 7;
+    DelegatedUiHintsResponse hints_response = 7;
   }
 }

@@ -109,13 +109,23 @@ public class PccSecurityConfigReader extends AbstractConfigReader<PccSecurityCon
               .build(),
           /* merge= */ false);
 
-  public static final ProtoFlag<PackageSecurityInfo> ODAD_PACKAGE_SECURITY_INFO =
+  public static final ProtoFlag<PackageSecurityInfo> PLAYPROTECT_PACKAGE_SECURITY_INFO =
       ProtoFlag.create(
           FLAG_PREFIX + "PlayProtect_package_security_info",
           PackageSecurityInfo.newBuilder()
               .setPackageName("com.google.android.PlayProtect")
               .addAllowedReleaseKeys(
                   "cf9bf16382f8aee84040add3489792db844aa6e3cebf267c50fde12531f0853d")
+              .build(),
+          /* merge= */ false);
+
+  public static final ProtoFlag<PackageSecurityInfo> SAFETYCORE_PACKAGE_SECURITY_INFO =
+      ProtoFlag.create(
+          FLAG_PREFIX + "safetycore_package_security_info",
+          PackageSecurityInfo.newBuilder()
+              .setPackageName("com.google.android.safetycore")
+              .addAllowedReleaseKeys(
+                  "133e1925a9b992d327fa1f6c4ba8d57c3b2ebd1f1da4de6b0bfa0bd0411a7ca4")
               .build(),
           /* merge= */ false);
 
@@ -159,7 +169,8 @@ public class PccSecurityConfigReader extends AbstractConfigReader<PccSecurityCon
                             flagManager.get(AGSA_PACKAGE_SECURITY_INFO),
                             flagManager.get(AICORE_PACKAGE_SECURITY_INFO),
                             flagManager.get(NEXUS_LAUNCHER_PACKAGE_SECURITY_INFO),
-                            flagManager.get(ODAD_PACKAGE_SECURITY_INFO))
+                            flagManager.get(PLAYPROTECT_PACKAGE_SECURITY_INFO),
+                            flagManager.get(SAFETYCORE_PACKAGE_SECURITY_INFO))
                         .collect(toImmutableList()))
                 .build())
         .build();

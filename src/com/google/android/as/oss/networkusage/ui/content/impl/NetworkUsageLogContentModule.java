@@ -84,6 +84,8 @@ abstract class NetworkUsageLogContentModule {
         new ContentMapEntryBuilder(context)
             .packageName(ASI_PACKAGE_NAME)
             .connectionType(SURVEY_REQUEST);
+    ContentMapEntryBuilder feedbackEntryBuilder =
+        new ContentMapEntryBuilder(context).connectionType(FEEDBACK_REQUEST);
     ContentMapEntryBuilder attestationEntryBuilder =
         new ContentMapEntryBuilder(context)
             .packageName(ASI_PACKAGE_NAME)
@@ -404,6 +406,18 @@ abstract class NetworkUsageLogContentModule {
                 .connectionKeyStringId(R.string.url_regex_user_survey_legacy)
                 .featureNameId(R.string.feature_name_user_survey)
                 .descriptionId(R.string.description_user_survey)
+                .build(),
+            feedbackEntryBuilder
+                .packageName(PSI_PACKAGE_NAME)
+                .connectionKeyStringId(R.string.feature_name_feedback_apex_psi)
+                .featureNameId(R.string.feature_name_user_feedback)
+                .descriptionId(R.string.description_user_feedback)
+                .build(),
+            feedbackEntryBuilder
+                .packageName(ASI_PACKAGE_NAME)
+                .connectionKeyStringId(R.string.feature_name_feedback_apex_asi)
+                .featureNameId(R.string.feature_name_user_feedback)
+                .descriptionId(R.string.description_user_feedback)
                 .build(),
             psiHttpEntryBuilder
                 .connectionKeyStringId(R.string.url_regex_device_intelligence_edgedl)

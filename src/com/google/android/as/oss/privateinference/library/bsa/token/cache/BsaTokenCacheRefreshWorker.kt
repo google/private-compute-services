@@ -35,6 +35,7 @@ import com.google.android.`as`.oss.common.config.asFlow
 import com.google.android.`as`.oss.common.initializer.PcsInitializer
 import com.google.android.`as`.oss.privateinference.config.PrivateInferenceConfig
 import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaToken
+import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaTokenWithoutChallenge
 import com.google.android.`as`.oss.privateinference.library.bsa.token.BsaToken
 import com.google.android.`as`.oss.privateinference.library.bsa.token.ProxyToken
 import com.google.android.`as`.oss.privateinference.library.bsa.token.stableTokenClassName
@@ -108,6 +109,7 @@ class BsaTokenCacheRefreshWorker(
           .asFlow()
           .map { config ->
             when (tokenClass) {
+              ArateaTokenWithoutChallenge::class.java,
               ArateaToken::class.java -> config.arateaTokenCacheRefreshIntervalMinutes()
               ProxyToken::class.java -> config.proxyTokenCacheRefreshIntervalMinutes()
               else ->

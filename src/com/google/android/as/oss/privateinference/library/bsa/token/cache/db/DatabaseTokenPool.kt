@@ -19,8 +19,10 @@ package com.google.android.`as`.oss.privateinference.library.bsa.token.cache.db
 import com.google.android.`as`.oss.common.time.TimeSource
 import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaToken
 import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaTokenParams
+import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaTokenWithoutChallenge
 import com.google.android.`as`.oss.privateinference.library.bsa.token.BsaToken
 import com.google.android.`as`.oss.privateinference.library.bsa.token.BsaTokenParams
+import com.google.android.`as`.oss.privateinference.library.bsa.token.CacheableArateaTokenParams
 import com.google.android.`as`.oss.privateinference.library.bsa.token.ProxyToken
 import com.google.android.`as`.oss.privateinference.library.bsa.token.ProxyTokenParams
 import com.google.android.`as`.oss.privateinference.library.bsa.token.cache.TokenPool
@@ -115,6 +117,7 @@ class DatabaseTokenPool<T : BsaToken>(
     return when (params) {
       is ArateaTokenParams -> ArateaToken(data)
       is ProxyTokenParams -> ProxyToken(data, entity.expiration)
+      is CacheableArateaTokenParams -> ArateaTokenWithoutChallenge(data, entity.expiration)
     }
       as T
   }

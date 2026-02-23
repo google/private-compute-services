@@ -17,6 +17,7 @@
 package com.google.android.`as`.oss.privateinference.library.bsa
 
 import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaToken
+import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaTokenWithoutChallenge
 import com.google.android.`as`.oss.privateinference.library.bsa.token.ProxyToken
 import com.google.errorprone.annotations.ThreadSafe
 
@@ -65,4 +66,10 @@ interface BlindSignAuth {
    * Creates and returns [numTokens] instances of [ArateaToken] using the provided [challengeData].
    */
   suspend fun createArateaTokens(numTokens: Int, challengeData: ByteArray): List<ArateaToken>
+
+  /**
+   * Creates and returns [numTokens] instances of [ArateaToken] without using any provided
+   * [challengeData].
+   */
+  suspend fun createArateaTokensWithoutChallenge(numTokens: Int): List<ArateaTokenWithoutChallenge>
 }

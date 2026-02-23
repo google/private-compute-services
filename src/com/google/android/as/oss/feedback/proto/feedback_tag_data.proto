@@ -28,14 +28,12 @@ message FeedbackTagData {
   string label = 1;
 
   // The rating tag enum referenced by rating_tag_ordinal.
-  FeedbackRatingTagSource rating_tag_source = 2
-     ;
+  FeedbackRatingTagSource rating_tag_source = 2;
 
   // The rating tag ordinal of the enum specified by rating_tag_source.
   int32 rating_tag_ordinal = 3;
 
-  repeated string ground_truth_options = 4
-     ;
+  repeated string ground_truth_options = 4;
 }
 
 // The source enum of the rating tag.

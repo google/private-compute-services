@@ -20,7 +20,11 @@ package(default_visibility = [
 
 android_library(
     name = "config",
-    srcs = glob(["*.java"]),
+    srcs = [
+        "ClientBuildVersionReader.java",
+        "IntegrityClientTokenProvider.java",
+        "ProtectedDownloadConfig.java",
+    ],
     deps = [
         "//src/com/google/android/as/oss/pd/api:protected_download_java_proto_lite",
         "//third_party/java/auto:auto_value",

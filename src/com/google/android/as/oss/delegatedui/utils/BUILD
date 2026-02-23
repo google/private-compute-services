@@ -91,8 +91,7 @@ android_library(
     name = "response_with_parcelables",
     srcs = ["ResponseWithParcelables.kt"],
     deps = [
-        "//src/com/google/android/as/oss/delegatedui/utils:parcelable_over_rpc",
-        "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-jvm",
+        ":parcelable_over_rpc",
         "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )

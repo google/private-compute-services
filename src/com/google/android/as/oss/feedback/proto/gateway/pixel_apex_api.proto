@@ -20,6 +20,7 @@ import "src/com/google/android/as/oss/feedback/proto/gateway/message_armour.prot
 import "src/com/google/android/as/oss/feedback/proto/gateway/quartz_log.proto";
 import "src/com/google/android/as/oss/feedback/proto/gateway/spoon.proto";
 
+
 option features.field_presence = IMPLICIT;
 option java_api_version = 2;
 option java_multiple_files = true;
@@ -101,7 +102,8 @@ enum UserDataDonationOption {
 message StructuredUserInput {
   oneof user_input {
     // This is used to corresponds to the notification category.
-    KeyTypeOptionTag key_type_option = 1;
+    KeyTypeOptionTag key_type_option = 1
+       ;
 
     // This is used for user input corresponds to the Message Armour.
     MessageArmourUserInput message_armour_user_input = 2;
@@ -114,9 +116,11 @@ message StructuredUserInput {
 // donation, storage proto defined by each app.
 message UserDonation {
   oneof data_donation {
-    SpoonFeedbackDataDonation structured_data_donation = 1;
+    SpoonFeedbackDataDonation structured_data_donation = 1
+       ;
     QuartzDataDonation quartz_data_donation = 3;
     MessageArmourDataDonation message_armour_data_donation = 4;
+    QuartzDataDonationV2 quartz_data_donation_v2 = 5;
   }
 
   BlobDonation blob_donation = 2;
@@ -130,7 +134,8 @@ message FeedbackCUJ {
 
   QuartzCUJ quartz_cuj = 3;
 
-  MessageArmourCUJ message_armour_cuj = 4;
+  MessageArmourCUJ message_armour_cuj = 4
+     ;
 }
 
 enum PositiveRatingTag {

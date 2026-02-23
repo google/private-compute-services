@@ -182,11 +182,11 @@ internal fun TemplateRendererScope.BeaconSingleGeneralCardContainerV2(
         bottomStart = if (isLastCard) RoundedCornerSizeLarge else RoundedCornerSizeExtraSmall,
         bottomEnd = if (isLastCard) RoundedCornerSizeLarge else RoundedCornerSizeExtraSmall,
       ),
-    modifier = Modifier.testTag(BEACON_GENERAL_CARD_V2_TAG),
   ) {
     Column(
       modifier =
         Modifier.fillMaxWidth()
+          .testTag(BEACON_GENERAL_CARD_V2_TAG)
           .semantics(mergeDescendants = true) {
             this.role = Role.Button
             this.stateDescription =
@@ -254,10 +254,7 @@ internal fun TemplateRendererScope.BeaconSingleGeneralCardContainerV2(
           }
         }
         Spacer(modifier = Modifier.width(4.dp))
-        ExpandIcon(
-          isExpanded = isExpanded,
-          contentDescription = card.cardExpandButtonAccessibilityContentDescription,
-        )
+        ExpandIcon(isExpanded = isExpanded)
       }
 
       if (card.detailedTextV2.isNotBlank()) {
@@ -681,7 +678,7 @@ private fun TemplateRendererScope.AppIcon(
 private fun ExpandIcon(
   modifier: Modifier = Modifier,
   isExpanded: Boolean,
-  contentDescription: String,
+  contentDescription: String? = null,
 ) {
   Icon(
     modifier = modifier.size(IconSizeNormal).testTag(EXPAND_BUTTON_TAG),

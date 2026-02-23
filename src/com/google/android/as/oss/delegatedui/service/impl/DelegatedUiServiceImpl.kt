@@ -31,6 +31,7 @@ import androidx.core.hardware.display.DisplayManagerCompat
 import androidx.core.view.ViewCompat.SCROLL_AXIS_HORIZONTAL
 import androidx.core.view.ViewCompat.SCROLL_AXIS_VERTICAL
 import androidx.core.view.doOnPreDraw
+import com.google.android.`as`.oss.common.ExecutorAnnotations.GeneralExecutorQualifier
 import com.google.android.`as`.oss.common.ExecutorAnnotations.IoExecutorQualifier
 import com.google.android.`as`.oss.delegatedui.api.common.DelegatedUiHint
 import com.google.android.`as`.oss.delegatedui.api.common.DelegatedUiNestedScrollEvent
@@ -89,16 +90,20 @@ import java.time.InstantSource
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlin.coroutines.resume
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.channelFlow
@@ -113,12 +118,14 @@ class DelegatedUiServiceImpl
 internal constructor(
   @ApplicationContext private val appContext: Context,
   @IoExecutorQualifier ioExecutor: Executor,
+  @GeneralExecutorQualifier private val generalExecutor: Executor,
   private val renderer: DelegatedUiRenderer,
   private val parcelableOverRpcUtils: ParcelableOverRpcUtils,
 ) : DelegatedUiServiceGrpcKt.DelegatedUiServiceCoroutineImplBase() {
 
   private val uiDispatcher = AndroidUiDispatcher.Main
   private val ioDispatcher = ioExecutor.asCoroutineDispatcher()
+  private val generalDispatcher = generalExecutor.asCoroutineDispatcher()
 
   /**
    * Stateful cache of all active sessions that maps from session UUID to a mutable flow associated
@@ -401,7 +408,7 @@ internal constructor(
         throw e
       } finally {
         activeSessions.remove(root.spec.sessionUuid)
-        root.destroy()
+        root.destroyGracefully(100.milliseconds)
         lifecycle.streamScope.cancel()
       }
     }
@@ -503,7 +510,7 @@ internal constructor(
   private suspend fun ProducerScope<DelegatedUiResponse>.sendHints(hints: Set<DelegatedUiHint>) {
     logger.atFiner().log("Sending hints response: %s", hints)
     send(
-      delegatedUiResponse { this.hintResponse = delegatedUiHintsResponse { this.hints += hints } }
+      delegatedUiResponse { this.hintsResponse = delegatedUiHintsResponse { this.hints += hints } }
     )
   }
 
@@ -706,6 +713,14 @@ internal constructor(
       val listener = doOnPreDraw { if (cont.isActive) cont.resume(Unit) }
 
       cont.invokeOnCancellation { listener.removeListener() }
+    }
+  }
+
+  private fun DelegatedUiViewRoot.destroyGracefully(delayDuration: Duration) {
+    CoroutineScope(generalDispatcher).launch(NonCancellable) {
+      delay(delayDuration)
+      // Switch to the UI dispatcher to call destroy
+      withContext(uiDispatcher) { destroy() }
     }
   }
 

@@ -23,7 +23,9 @@ import com.google.android.`as`.oss.privateinference.config.impl.ArateaAuthFlag
 import com.google.android.`as`.oss.privateinference.library.PrivateInferenceRequestMetadata
 import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaToken
 import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaTokenParams
+import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaTokenWithoutChallenge
 import com.google.android.`as`.oss.privateinference.library.bsa.token.BsaTokenProvider
+import com.google.android.`as`.oss.privateinference.library.bsa.token.CacheableArateaTokenParams
 import com.google.android.`as`.oss.privateinference.logging.MetricIdMap
 import com.google.android.`as`.oss.privateinference.logging.PcsStatsLogger
 import com.google.android.`as`.oss.privateinference.util.timers.Annotations.PrivateInferenceClientTimers
@@ -38,7 +40,11 @@ import com.google.search.mdi.privatearatea.proto.androidKeyStoreAttestationEvide
 import com.google.search.mdi.privatearatea.proto.anonymousTokenRequest
 import com.google.search.mdi.privatearatea.proto.deviceAttestationRequest
 import com.google.search.mdi.privatearatea.proto.pcsPrivateArateaRequest
+import io.grpc.Status
+import io.grpc.StatusException
 import io.grpc.stub.StreamObserver
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineName
@@ -59,6 +65,8 @@ internal constructor(
   private val deviceAttestationFlag: DeviceAttestationFlag,
   private val arateaAuthFlag: ArateaAuthFlag,
   private val bsaArateaTokenProvider: BsaTokenProvider<@JvmSuppressWildcards ArateaToken>,
+  private val bsaCacheableArateaTokenProvider:
+    BsaTokenProvider<@JvmSuppressWildcards ArateaTokenWithoutChallenge>,
   @param:PrivateInferenceClientTimers private val timers: TimerSet,
   private val pcsStatsLogger: PcsStatsLogger,
 ) {
@@ -122,10 +130,9 @@ internal constructor(
                 deviceAttestationFlag = deviceAttestationFlag,
                 arateaAuthFlag = arateaAuthFlag,
                 timers = timers,
-                sessionStartTimer =
-                  timers.start(PrivateInferenceClientTimerNames.OPEN_NOISE_SESSION),
                 backgroundExecutor = backgroundExecutor,
                 bsaArateaTokenProvider = bsaArateaTokenProvider,
+                bsaCacheableArateaTokenProvider = bsaCacheableArateaTokenProvider,
                 pcsStatsLogger = pcsStatsLogger,
               ),
             streamStarter = { observer ->
@@ -151,18 +158,25 @@ internal constructor(
     private val deviceAttestationFlag: DeviceAttestationFlag,
     private val arateaAuthFlag: ArateaAuthFlag,
     private val timers: Timers,
-    private val sessionStartTimer: Timers.Timer,
     private val backgroundExecutor: ListeningExecutorService,
     private val bsaArateaTokenProvider: BsaTokenProvider<@JvmSuppressWildcards ArateaToken>,
+    private val bsaCacheableArateaTokenProvider:
+      BsaTokenProvider<@JvmSuppressWildcards ArateaTokenWithoutChallenge>,
     private val pcsStatsLogger: PcsStatsLogger,
+    private val e2ePiSessionStartTimer: Timers.Timer =
+      timers.start(PrivateInferenceClientTimerNames.END_TO_END_PI_CHANNEL_SETUP),
+    private val oakSessionOpenTimer: Timers.Timer =
+      timers.start(PrivateInferenceClientTimerNames.OAK_SESSION_ESTABLISH_STREAM),
   ) : StreamObserverSessionClient.OakSessionStreamObserver {
     private val inferenceTimers: InferenceTimers = InferenceTimers(timers)
+    private val onErrorCompleted = AtomicBoolean(false)
 
     override fun onSessionOpen(clientRequests: StreamObserver<ByteString>) {
-      sessionStartTimer.stop()
+      oakSessionOpenTimer.stop()
 
       // The final logic to run in both attested and unattested cases.
       fun openSessionAndStartTimers() {
+        e2ePiSessionStartTimer.stop()
         inferenceTimers.startFirst()
         wrapped.onSessionOpen(clientRequests)
       }
@@ -179,7 +193,7 @@ internal constructor(
             // and key generation can be slow.
             backgroundExecutor.execute {
               val generateKeyPairTimer =
-                timers.start(PrivateInferenceClientTimerNames.GENERATE_KEY_PAIR_WITH_ATTESTATION)
+                timers.start(PrivateInferenceClientTimerNames.DEVICE_ATTESTATION_GENERATE_KEY_PAIR)
               val certificateChain =
                 deviceAttestationGenerator.generateAttestation(
                   sessionBindingToken,
@@ -214,36 +228,63 @@ internal constructor(
         }
         ArateaAuthFlag.Mode.ANONYMOUS_TOKEN -> {
           logger.atFine().log("Fetching anonymous token from server.")
+          val terminalTokenAuthTimer =
+            timers.start(PrivateInferenceClientTimerNames.IPP_ANONYMOUS_TOKEN_AUTH)
           // Get the token from the BsaTokenProvider and send it to the server.
-          val token =
-            pcsStatsLogger.getResultAndLogStatus(METRIC_ID_MAP) {
-              PrivacyPassTokenData.parseFrom(
-                bsaArateaTokenProvider
-                  .fetchTokenFuture(backgroundExecutor, ArateaTokenParams(sessionBindingToken))
-                  .get()
-                  .bytes
-                  .toByteArray()
+          try {
+            val token = fetchArateaToken(sessionBindingToken)
+            logger
+              .atFine()
+              .log(
+                "Received anonymous token from server: {token: %s, encodedExtensions: %s}",
+                token.token,
+                token.encodedExtensions,
               )
-            }
-          logger
-            .atFine()
-            .log(
-              "Received anonymous token from server: {token: %s, encodedExtensions: %s}",
-              token.token,
-              token.encodedExtensions,
-            )
-          clientRequests.onNext(
-            pcsPrivateArateaRequest {
-                anonymousTokenRequest = anonymousTokenRequest {
-                  anonymousToken = ByteString.copyFrom(token.toByteArray())
-                  encodedExtensions = ByteString.copyFromUtf8(token.encodedExtensions)
+            clientRequests.onNext(
+              pcsPrivateArateaRequest {
+                  anonymousTokenRequest = anonymousTokenRequest {
+                    anonymousToken = ByteString.copyFrom(token.toByteArray())
+                    encodedExtensions = ByteString.copyFromUtf8(token.encodedExtensions)
+                  }
                 }
+                .toByteString()
+            )
+            // Call openSessionAndStartTimers() once, *after* any attestation has occurred.
+            openSessionAndStartTimers()
+            terminalTokenAuthTimer.stop()
+          } catch (e: ExecutionException) {
+            logger.atSevere().withCause(e).log("Failed to fetch anonymous token")
+            val errorStatus =
+              if (e.cause is StatusException) {
+                (e.cause as StatusException).status
+              } else {
+                Status.UNKNOWN.withDescription("Failed to fetch anonymous token")
               }
-              .toByteString()
-          )
-          // Call openSessionAndStartTimers() once, *after* any attestation has occurred.
-          openSessionAndStartTimers()
+            // Propagate the specific exception to the wrapped observer.
+            wrapped.onError(errorStatus.asRuntimeException())
+            onErrorCompleted.set(true)
+            // Terminate the clientRequests stream to ensure gRPC stream is closed.
+            clientRequests.onCompleted()
+          }
         }
+      }
+    }
+
+    private fun fetchArateaToken(sessionBindingToken: ByteArray): PrivacyPassTokenData {
+      return pcsStatsLogger.getResultAndLogStatus(METRIC_ID_MAP) {
+        val tokenBytes =
+          if (arateaAuthFlag.isCacheEnabled()) {
+            bsaCacheableArateaTokenProvider
+              .fetchTokenFuture(backgroundExecutor, CacheableArateaTokenParams())
+              .get()
+              .bytes
+          } else {
+            bsaArateaTokenProvider
+              .fetchTokenFuture(backgroundExecutor, ArateaTokenParams(sessionBindingToken))
+              .get()
+              .bytes
+          }
+        PrivacyPassTokenData.parseFrom(tokenBytes.toByteArray())
       }
     }
 
@@ -254,7 +295,10 @@ internal constructor(
 
     override fun onError(t: Throwable) {
       inferenceTimers.stop()
-      wrapped.onError(t)
+      // Avoid double onError calls on [wrapped]
+      if (!onErrorCompleted.get()) {
+        wrapped.onError(t)
+      }
       scope.cancel("OnError during Noise Session", t)
     }
 
@@ -280,13 +324,13 @@ internal constructor(
         logger.atWarning().log("InferenceTimers.startFirst() called multiple times.")
       }
 
-      firstInferenceTimer = timers.start(PrivateInferenceClientTimerNames.FIRST_INFERENCE)
+      firstInferenceTimer = timers.start(PrivateInferenceClientTimerNames.INFERENCE_FIRST)
     }
 
     fun response() {
       if (stableInferenceTimer == null) {
         firstInferenceTimer?.stop()
-        stableInferenceTimer = timers.start(PrivateInferenceClientTimerNames.STABLE_INFERENCE)
+        stableInferenceTimer = timers.start(PrivateInferenceClientTimerNames.INFERENCE_STABLE)
       }
     }
 

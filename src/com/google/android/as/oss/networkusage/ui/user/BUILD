@@ -23,6 +23,7 @@ android_library(
     resource_files = glob(["res/**"]),
     visibility = ["//visibility:public"],
     deps = [
+        "//java/com/google/android/settings/search",
         "//src/com/google/android/as/oss/logging:api",
         "//src/com/google/android/as/oss/logging:atoms_java_proto_lite",
         "//src/com/google/android/as/oss/logging:enums_java_proto_lite",

@@ -35,6 +35,9 @@
   <!-- Name of the survey protocal, which is used to communicate with survey service. [CHAR_LIMIT=NONE]  -->
   <string name="connection_type_survey">Survey</string>
 
+  <!-- Name of the feedback protocal, which is used to communicate with feedback service. Feedback is a generic term for the feedback flow in pcs. [CHAR_LIMIT=NONE]  -->
+  <string name="connection_type_feedback">Feedback</string>
+
   <!-- Feature names and descriptions -->
 
   <!-- Name of the lightweight download events representing attempts to participate in federated computation. [CHAR_LIMIT=NONE] -->
@@ -330,6 +333,15 @@
   <!-- Legacy url pattern for survey request and response [CHAR LIMIT=NONE] -->
   <string name="url_regex_user_survey_legacy" translatable="false">https://scone-pa.googleapis.com/v1/survey/.*</string>
 
+  <!-- Feedback -->
+  <!-- Name of the feedback feature which is used for collecting user feedback, displayed in the network usage log. Feedback is a generic term for the feedback dialog. [CHAR LIMIT=NONE] -->
+  <string name="feature_name_user_feedback">User Feedback</string>
+  <!-- Description of the feedback feature which is used for collecting user feedback, displayed in the network usage log. Feedback is a generic term for the feedback dialog. [CHAR LIMIT=NONE]  -->
+  <string name="description_user_feedback">Collected user feedback for product improvement</string>
+  <!-- Url pattern for feedback request and response[CHAR LIMIT=NONE] -->
+  <string name="feature_name_feedback_apex_psi" translatable="false">feedback_apex_psi</string>
+  <string name="feature_name_feedback_apex_asi" translatable="false">feedback_apex_asi</string>
+
   <!-- Device Intelligence -->
   <!-- Name of the Device Intelligence feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
   <string name="feature_name_device_intelligence">Device Intelligence</string>
@@ -344,11 +356,11 @@
   <!-- Name of the Transcript Summarization feature, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
   <string name="feature_name_pi_transcript_summarization">Recorder transcript summarization</string>
   <!-- Description of the Transcript Summarization feature, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
-  <string name="description_pi_transcript_summarization">Recorder transcript summarization was processed in a private compute environment.</string>
+  <string name="description_pi_transcript_summarization">Recorder transcript summarization was processed in a Private AI Compute environment.</string>
   <!-- Name of the Memory Generation feature, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
   <string name="feature_name_pi_memory_generation">Memory generation</string>
   <!-- Description of the Memory Generation feature, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
-  <string name="description_pi_memory_generation">Memory generation was processed in a private compute environment.</string>
+  <string name="description_pi_memory_generation">Memory generation was processed in a Private AI Compute environment.</string>
   <!-- IP protection for Private Inference. [CHAR LIMIT=NONE] -->
   <string name="feature_name_ip_protection">IP protection</string>
   <!-- Description of the request to get the proxy configuration from the token issuance server, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
@@ -391,4 +403,10 @@
   <string name="feature_name_notification_intelligence">Notification Intelligence</string>
   <!-- Description of the upload events of federated analytics results for Notification Intelligenc, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
   <string name="description_notification_intelligence_fa">Contributed to privacy-preserving analytics to improve Notification Intelligence</string>
+  <!-- Pcs network usage log settings title. [CHAR_LIMIT=NONE] -->
+  <string name="pcs_network_usage_log_title">Network Usage Log</string>
+  <!-- Pcs network usage log settings summary. [CHAR_LIMIT=NONE] -->
+  <string name="pcs_network_usage_log_summary">Display list of server connections by Private Compute Services</string>
+  <!-- Pcs network usage log settings keywords. [CHAR_LIMIT=NONE] -->
+  <string name="pcs_network_usage_log_keywords">network, network usage, network usage log</string>
 </resources>

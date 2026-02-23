@@ -39,6 +39,7 @@ import com.google.android.`as`.oss.privateinference.transport.TransportConstants
 import com.google.android.`as`.oss.privateinference.transport.TransportFlag
 import com.google.android.`as`.oss.privateinference.util.timers.Annotations.PrivateInferenceClientTimers
 import com.google.android.`as`.oss.privateinference.util.timers.TimerSet
+import com.google.android.`as`.oss.privateinference.util.timers.Timers
 import com.google.common.flogger.GoogleLogger
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.privacy.ppn.proto.PrivacyPassTokenData
@@ -47,8 +48,8 @@ import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import io.grpc.cronet.CronetChannelBuilder
 import io.grpc.okhttp.OkHttpChannelBuilder
-import java.util.AbstractMap
 import java.util.Optional
+import java.util.concurrent.ExecutionException
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.sync.Mutex
@@ -109,9 +110,16 @@ constructor(
             val proxyConfig = proxyConfigManager.get().getProxyConfig()
             logger.atInfo().log("Setting proxy options: %s", proxyConfig.toLogString)
             engineBuilder.setProxyOptions(
-              ProxyOptions(
+              ProxyOptions.fromProxyList(
                 proxyConfig.map { config ->
-                  Proxy(Proxy.HTTPS, config.host, config.port, getProxyCallback(config))
+                  Proxy.createHttpProxy(
+                    Proxy.SCHEME_HTTPS,
+                    config.host,
+                    config.port,
+                    // Executor where proxy callbacks will be invoked.
+                    { r -> r.run() },
+                    getProxyCallback(config),
+                  )
                 }
               )
             )
@@ -127,31 +135,44 @@ constructor(
     get() = map { "${it.host}:${it.port}" }.joinToString(",")
 
   private fun getProxyCallback(proxyConfiguration: ProxyConfiguration) =
-    object : Proxy.Callback() {
-      val masqueTunnelSetupTimer =
-        timers.start(PrivateInferenceClientTimerNames.MASQUE_TUNNEL_SETUP)
-      val startTime = System.currentTimeMillis()
+    object : Proxy.HttpConnectCallback() {
+      var masqueTunnelSetupTimer: Timers.Timer? = null
+      var startTime: Long? = null
 
-      override fun onBeforeTunnelRequest(): List<Map.Entry<String, String>> {
-        val authHeader = getProxyTokenAuthHeader(proxyConfiguration)
-        logger.atFine().log("onBeforeTunnelRequest: %s", authHeader)
-        return listOf(AbstractMap.SimpleImmutableEntry("authorization", authHeader))
+      override fun onBeforeRequest(request: Request) {
+        request.use {
+          startTime = System.currentTimeMillis()
+          masqueTunnelSetupTimer =
+            timers.start(PrivateInferenceClientTimerNames.IPP_MASQUE_TUNNEL_SETUP)
+          val authHeader = getProxyTokenAuthHeader(proxyConfiguration)
+          logger.atFine().log("onBeforeRequest: %s", authHeader)
+          // Cancel the request if proxy token is not available. This avoids sending the request
+          // with empty auth header and getting an auth failure from the proxy server.
+          if (authHeader == null) {
+            return
+          }
+          it.proceed(
+            listOf<android.util.Pair<String, String>>(
+              android.util.Pair("authorization", authHeader)
+            )
+          )
+        }
       }
 
-      override fun onTunnelHeadersReceived(
-        responseHeaders: List<Map.Entry<String, String>>,
+      override fun onResponseReceived(
+        responseHeaders: List<android.util.Pair<String, String>>,
         statusCode: Int,
-      ): Boolean {
-        logger
-          .atInfo()
-          .log("onTunnelHeadersReceived: %s statusCode: %s", responseHeaders, statusCode)
-        masqueTunnelSetupTimer.stop()
-        logMasqueTunnelSetupEventMetrics(
-          statusCode,
-          proxyConfiguration.host,
-          System.currentTimeMillis() - startTime,
-        )
-        return true
+      ): Int {
+        logger.atInfo().log("onResponseReceived: %s statusCode: %s", responseHeaders, statusCode)
+        masqueTunnelSetupTimer?.stop()
+        startTime?.let {
+          logMasqueTunnelSetupEventMetrics(
+            statusCode,
+            proxyConfiguration.host,
+            System.currentTimeMillis() - it,
+          )
+        }
+        return Proxy.HttpConnectCallback.RESPONSE_ACTION_PROCEED
       }
     }
 
@@ -193,23 +214,30 @@ constructor(
 
   // TODO: Make this a suspend function once we have a async support for proxy
   // callback functions.
-  private fun getProxyTokenAuthHeader(proxyConfiguration: ProxyConfiguration): String {
+  private fun getProxyTokenAuthHeader(proxyConfiguration: ProxyConfiguration): String? {
     if (proxyAuthFlag.mode() == ProxyAuthFlag.Mode.BASIC) {
       return proxyConfiguration.authHeader
     }
-    val tokenData =
-      pcsStatsLogger.getResultAndLogStatus(METRIC_ID_MAP) {
-        timers.start(PrivateInferenceClientTimerNames.GET_PROXY_TOKEN).use {
-          PrivacyPassTokenData.parseFrom(
-            bsaProxyTokenProvider
-              .fetchTokenFuture(backgroundExecutor, ProxyTokenParams())
-              .get()
-              .bytes
-              .toByteArray()
-          )
+    try {
+      val tokenData =
+        pcsStatsLogger.getResultAndLogStatus(METRIC_ID_MAP) {
+          timers.start(PrivateInferenceClientTimerNames.IPP_GET_PROXY_TOKEN).use {
+            PrivacyPassTokenData.parseFrom(
+              bsaProxyTokenProvider
+                .fetchTokenFuture(backgroundExecutor, ProxyTokenParams())
+                .get()
+                .bytes
+                .toByteArray()
+            )
+          }
         }
-      }
-    return "PrivateToken token=\"${tokenData.token}\" extensions=\"${tokenData.encodedExtensions}\""
+      return "PrivateToken token=\"${tokenData.token}\" extensions=\"${tokenData.encodedExtensions}\""
+    } catch (e: ExecutionException) {
+      logger.atSevere().withCause(e.cause).log("Failed to fetch proxy token")
+    } catch (e: Exception) {
+      logger.atSevere().withCause(e).log("Failed to fetch proxy token")
+    }
+    return null
   }
 
   companion object {

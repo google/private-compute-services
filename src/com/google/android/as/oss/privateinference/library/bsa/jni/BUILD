@@ -29,7 +29,6 @@ android_library(
     # This list should remain restricted to bsa.
     visibility = [
         "//javatests/com/google/android/apps/miphone/pcs/privateinference/library/bsa/impl:__subpackages__",
-        "//javatests/com/google/android/apps/miphone/pcs/privateinference/service:__subpackages__",
         "//src/com/google/android/as/oss/privateinference/library/bsa/impl:__subpackages__",
     ],
     deps = [
@@ -145,10 +144,7 @@ cc_library(
 cc_library(
     name = "blind_sign_auth_jni_lib",
     srcs = ["blind_sign_auth_jni.cc"],
-    visibility = [
-        "//javatests/com/google/android/apps/miphone/pcs/privateinference/library/oakutil:__subpackages__",
-        "//src/com/google/android/as/oss/privateinference/library/oakutil/jni:__subpackages__",
-    ],
+    visibility = ["//src/com/google/android/as/oss/privateinference/library/oakutil/jni:__subpackages__"],
     deps = [
         ":jni_bsa_calls",
         ":jni_helpers",
@@ -162,6 +158,7 @@ cc_library(
 
 android_jni_library(
     name = "blind_sign_auth_jni",
+    visibility = ["//javatests/com/google/android/apps/miphone/pcs/privateinference/arateaipblindingtestclient:__subpackages__"],
     deps = [
         ":blind_sign_auth_jni_lib",
     ],

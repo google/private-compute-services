@@ -58,6 +58,19 @@ android_library(
 )
 
 android_library(
+    name = "latency_logging_timers",
+    srcs = ["LatencyLoggingTimer.kt"],
+    deps = [
+        ":timers",
+        "//src/com/google/android/as/oss/logging:enums_java_proto_lite",
+        "//src/com/google/android/as/oss/privateinference/library/oakutil:private_inference_client_timer_names",
+        "//src/com/google/android/as/oss/privateinference/logging",
+        "@maven//:androidx_annotation_annotation",
+        "@maven//:javax_inject_javax_inject",
+    ],
+)
+
+android_library(
     name = "timer_set",
     srcs = ["TimerSet.kt"],
     deps = [

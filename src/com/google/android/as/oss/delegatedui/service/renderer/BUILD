@@ -39,6 +39,7 @@ android_library(
         "//src/com/google/android/as/oss/delegatedui/service/templates/bugle:module",
         "//src/com/google/android/as/oss/delegatedui/service/templates/subzero:module",
         "//src/com/google/android/as/oss/delegatedui/service/templates/sundog:module",
+        "//third_party/java/android/android_sdk_linux/platforms/stable:android_platform_feature_flags",
         "//third_party/java/androidx/lifecycle",
         "//third_party/java/androidx/lifecycle/viewmodel",
         "//third_party/java/androidx/savedstate",

@@ -18,9 +18,11 @@ package com.google.android.`as`.oss.delegatedui.service.renderer
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.view.Display
 import android.view.SurfaceControlViewHost
+import android.view.View
 import android.window.InputTransferToken
 import androidx.annotation.UiThread
 import androidx.core.view.ViewCompat
@@ -35,12 +37,14 @@ import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import com.android.window.flags.ExportedFlags
 import com.google.android.`as`.oss.delegatedui.api.common.DelegatedUiNestedScrollEvent
 import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiInputSpec
 import com.google.android.`as`.oss.delegatedui.service.common.DelegatedUiRenderSpec
 import com.google.android.`as`.oss.delegatedui.service.common.isExactly
 import com.google.android.`as`.oss.delegatedui.service.common.size
 import com.google.common.flogger.GoogleLogger
+import com.google.common.flogger.StackSize
 
 /**
  * This acts as the lifecycle component that hosts the delegated UI view hierarchy, since it is not
@@ -100,7 +104,7 @@ class DelegatedUiViewRoot(
     parent.setViewTreeSavedStateRegistryOwner(this)
     parent.setViewTreeViewModelStoreOwner(this)
 
-    host.setView(parent, 0, 0)
+    host.setViewCompat(parent, 0, 0)
   }
 
   /**
@@ -142,7 +146,7 @@ class DelegatedUiViewRoot(
       parent.onRequestLayoutListener = ::onRequestLayout
       parent.requestLayout()
     } else {
-      host.relayout(spec.measureSpecWidth.size, spec.measureSpecHeight.size)
+      host.relayoutCompat(spec.measureSpecWidth.size, spec.measureSpecHeight.size)
     }
   }
 
@@ -161,7 +165,7 @@ class DelegatedUiViewRoot(
 
     if (newMeasuredWidth != prevMeasuredWidth || newMeasuredHeight != prevMeasuredHeight) {
       onSizeChange(newMeasuredWidth, newMeasuredHeight)
-      host.relayout(newMeasuredWidth, newMeasuredHeight)
+      host.relayoutCompat(newMeasuredWidth, newMeasuredHeight)
     }
   }
 
@@ -173,6 +177,69 @@ class DelegatedUiViewRoot(
     lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
     savedStateRegistryController.performSave(savedInstanceState)
     viewModelStore.clear()
+  }
+
+  /**
+   * [SurfaceControlViewHost.LayoutParams] is a new API added to 25Q4, which allows client app to
+   * set SurfaceControlViewHost focusable. This provides a proper fix to the bug that would dismiss
+   * keyboard when the users long-press, or scroll on the delegated UI, by setting
+   * [SurfaceControlViewHost] not focusable in #setView.
+   */
+  fun SurfaceControlViewHost.setViewCompat(parent: View, width: Int, height: Int) {
+    if (
+      Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA && ExportedFlags.scvhSetFocusableApi()
+    ) {
+      try {
+        setView(
+          parent,
+          SurfaceControlViewHost.LayoutParams(
+            /* width= */ width,
+            /* height= */ height,
+            /* focusable= */ false,
+          ),
+        )
+      } catch (e: Exception) {
+        logger
+          .atSevere()
+          .withCause(e)
+          .withStackTrace(StackSize.SMALL)
+          .log("Failed to call api to set view focusable")
+        setView(parent, width, height)
+      }
+    } else {
+      setView(parent, width, height)
+    }
+  }
+
+  /**
+   * [SurfaceControlViewHost.LayoutParams] is a new API added to 25Q4, which allows client app to
+   * set SurfaceControlViewHost focusable. This provides a proper fix to the bug that would dismiss
+   * keyboard when the users long-press, or scroll on the delegated UI, by setting
+   * [SurfaceControlViewHost] not focusable in #relayout.
+   */
+  fun SurfaceControlViewHost.relayoutCompat(width: Int, height: Int) {
+    if (
+      Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA && ExportedFlags.scvhSetFocusableApi()
+    ) {
+      try {
+        relayout(
+          SurfaceControlViewHost.LayoutParams(
+            /* width= */ width,
+            /* height= */ height,
+            /* focusable= */ false,
+          )
+        )
+      } catch (e: Exception) {
+        logger
+          .atSevere()
+          .withCause(e)
+          .withStackTrace(StackSize.SMALL)
+          .log("Failed to call API to set view focusable.")
+        relayout(width, height)
+      }
+    } else {
+      relayout(width, height)
+    }
   }
 
   companion object {

@@ -126,7 +126,7 @@ absl::StatusOr<quiche::ProxyLayer> GetQuicheProxyLayer(int proxy_layer) {
 // ErrorCallback interface.
 void OnError(JNIEnv* env, const absl::Status& status, jobject callback) {
   absl::StatusOr<jobject> java_exception =
-      helpers::CreateAbslStatusException(env, status);
+      helpers::CreateStatusException(env, status);
   if (!java_exception.ok()) {
     bsa_log_info("Failed to create Java Exception for error message: %s",
                  status.ToString().c_str());

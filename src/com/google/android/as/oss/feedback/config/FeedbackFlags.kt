@@ -25,8 +25,6 @@ object FeedbackFlags {
     BooleanFlag.create("${PREFIX}enable_selected_entity_content", false)
   val ENABLE_VIEW_DATA_DIALOG_V2_SINGLE_ENTITY =
     BooleanFlag.create("${PREFIX}enable_view_data_dialog_v2_single_entity", false)
-  val ENABLE_VIEW_DATA_DIALOG_V2_MULTI_ENTITY =
-    BooleanFlag.create("${PREFIX}enable_view_data_dialog_v2_multi_entity", false)
   val ENABLE_OPT_IN_UI_V2 = BooleanFlag.create("${PREFIX}enable_opt_in_ui_v2", false)
   val ENABLE_GROUND_TRUTH_SELECTOR_SINGLE_ENTITY =
     BooleanFlag.create("${PREFIX}enable_ground_truth_selector_single_entity", false)

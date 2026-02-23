@@ -34,6 +34,7 @@ import com.google.android.as.oss.pd.api.proto.GetManifestConfigResponse;
 import com.google.android.as.oss.pd.attestation.AttestationClient;
 import com.google.android.as.oss.pd.attestation.AttestationResponse;
 import com.google.android.as.oss.pd.channel.ChannelProvider;
+import com.google.android.as.oss.pd.config.IntegrityClientTokenProvider;
 import com.google.android.as.oss.pd.keys.EncryptionHelper;
 import com.google.android.as.oss.pd.keys.EncryptionHelperFactory;
 import com.google.android.as.oss.pd.manifest.api.proto.ProtectedDownloadServiceGrpc;
@@ -91,6 +92,9 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
   private final BlobProtoUtils blobProtoUtils;
   private final AttestationClient attestationClient;
 
+  /** Optionally bound integrity client token provider. */
+  private final Optional<IntegrityClientTokenProvider> integrityClientTokenProvider;
+
   @Inject
   ProtectedDownloadProcessorImpl(
       ChannelProvider channelProvider,
@@ -101,7 +105,8 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
       EncryptionHelperFactory encryptionHelperFactory,
       PDNetworkUsageLogHelper networkLogHelper,
       BlobProtoUtils blobProtoUtils,
-      AttestationClient attestationClient) {
+      AttestationClient attestationClient,
+      Optional<IntegrityClientTokenProvider> integrityClientTokenProvider) {
     this.channelProvider = channelProvider;
     this.pdExecutor = pdExecutor;
     this.ioExecutor = ioExecutor;
@@ -111,6 +116,7 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
     this.networkLogHelper = networkLogHelper;
     this.blobProtoUtils = blobProtoUtils;
     this.attestationClient = attestationClient;
+    this.integrityClientTokenProvider = integrityClientTokenProvider;
   }
 
   @Override
@@ -138,7 +144,8 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
             == BlobConstraints.ClientVersion.Type.TYPE_ANDROID_CORE_ATTESTED_PKVM;
     return FluentFuture.from(readOrCreatePersistentState(clientId))
         .transformAsync(
-            state -> integrityCheck(state, contentBindingHashFunction, useVmKey), pdExecutor)
+            state -> integrityCheck(state, contentBindingHashFunction, useVmKey, clientId),
+            pdExecutor)
         .transformAsync(
             integrityResponse -> downloadBlob(channel, clientId, request, integrityResponse),
             pdExecutor)
@@ -168,7 +175,8 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
             blobProtoUtils.getManifestConfigMetadataHash(keyBytes, request.getConstraints());
     return FluentFuture.from(readOrCreatePersistentState(clientId))
         .transformAsync(
-            state -> integrityCheck(state, contentBindingHashFunction, /* useVmKey= */ false),
+            state ->
+                integrityCheck(state, contentBindingHashFunction, /* useVmKey= */ false, clientId),
             pdExecutor)
         .transformAsync(
             state -> downloadManifestConfig(channel, clientId, request, state), pdExecutor)
@@ -178,7 +186,8 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
   private ListenableFuture<IntegrityResponse> integrityCheck(
       ClientPersistentState persistentState,
       ContentBindingHashFunction contentBindingHashFunction,
-      boolean useVmKey)
+      boolean useVmKey,
+      String clientId)
       throws GeneralSecurityException, IOException {
     ListenableFuture<EncryptionHelper> externalEncryptionFuture;
     if (useVmKey) {
@@ -199,6 +208,9 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
     }
 
     ClientPersistentState finalClientPersistentState = persistentState;
+    Optional<String> integrityClientToken =
+        integrityClientTokenProvider.flatMap(
+            provider -> provider.getIntegrityClientToken(clientId));
 
     // NOTE: Even if attestation fails, we continue execution. Server will make a decision what to
     // do with the download.
@@ -213,7 +225,10 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
                   .transform(
                       attestationResponse ->
                           IntegrityResponse.create(
-                              finalClientPersistentState, externalEncryption, attestationResponse),
+                              finalClientPersistentState,
+                              externalEncryption,
+                              attestationResponse,
+                              integrityClientToken),
                       pdExecutor)
                   .catching(
                       Exception.class,
@@ -222,7 +237,8 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
                         return IntegrityResponse.create(
                             finalClientPersistentState,
                             externalEncryption,
-                            AttestationResponse.failed());
+                            AttestationResponse.failed(),
+                            integrityClientToken);
                       },
                       pdExecutor);
             },
@@ -295,7 +311,8 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
                     request,
                     externalEncryption.publicKey(),
                     finalClientPersistentState.getPageToken().toByteArray(),
-                    integrityResponse.attestationResponse())))
+                    integrityResponse.attestationResponse(),
+                    integrityResponse.integrityClientToken())))
         .catchingAsync(Exception.class, getFailureLoggingTransform(clientId), pdExecutor)
         .transformAsync(
             externalResponse -> {
@@ -344,7 +361,8 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
                 blobProtoUtils.toExternalRequest(
                     request,
                     externalEncryption.publicKey(),
-                    integrityResponse.attestationResponse())))
+                    integrityResponse.attestationResponse(),
+                    integrityResponse.integrityClientToken())))
         .catchingAsync(Exception.class, getFailureLoggingTransform(clientId), pdExecutor)
         .transformAsync(
             externalResponse -> {
@@ -452,9 +470,10 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
     public static IntegrityResponse create(
         ClientPersistentState state,
         EncryptionHelper externalEncryption,
-        AttestationResponse attestationResponse) {
+        AttestationResponse attestationResponse,
+        Optional<String> integrityClientToken) {
       return new AutoValue_ProtectedDownloadProcessorImpl_IntegrityResponse(
-          state, externalEncryption, attestationResponse);
+          state, externalEncryption, attestationResponse, integrityClientToken);
     }
 
     /** The {@link ClientPersistentState} to store at the end of the download operation. */
@@ -465,6 +484,9 @@ final class ProtectedDownloadProcessorImpl implements ProtectedDownloadProcessor
 
     /** An attestation token for download request. */
     public abstract AttestationResponse attestationResponse();
+
+    /** An integrity client token for download request. */
+    public abstract Optional<String> integrityClientToken();
   }
 
   private interface ContentBindingHashFunction {

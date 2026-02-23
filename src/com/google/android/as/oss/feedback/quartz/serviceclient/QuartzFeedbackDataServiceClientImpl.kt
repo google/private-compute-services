@@ -71,7 +71,10 @@ internal constructor(
         ),
       feedbackUiRenderingData = feedbackUiRenderingData,
       summarizationData =
-        if (quartzCuj == QuartzCUJ.QUARTZ_CUJ_KEY_SUMMARIZATION) {
+        if (
+          donationData.hasQuartzDataDonation() &&
+            quartzCuj == QuartzCUJ.QUARTZ_CUJ_KEY_SUMMARIZATION
+        ) {
           QuartzKeySummarizationData(
             uuid = donationData.quartzDataDonation.quartzKeySummarizationData.quartzCommonData.uuid,
             sbnKey =
@@ -102,7 +105,7 @@ internal constructor(
           QuartzKeySummarizationData()
         },
       typeData =
-        if (quartzCuj == QuartzCUJ.QUARTZ_CUJ_KEY_TYPE) {
+        if (donationData.hasQuartzDataDonation() && quartzCuj == QuartzCUJ.QUARTZ_CUJ_KEY_TYPE) {
           QuartzKeyTypeData(
             sbnKey = donationData.quartzDataDonation.quartzKeyTypeData.quartzCommonData.sbnKey,
             uuid = donationData.quartzDataDonation.quartzKeyTypeData.quartzCommonData.uuid,
@@ -215,6 +218,65 @@ internal constructor(
           )
         } else {
           QuartzKeyTypeData()
+        },
+      notificationData =
+        if (donationData.hasQuartzDataDonationV2()) {
+          QuartzNotificationData(
+            title = donationData.quartzDataDonationV2.quartzNotificationData.title,
+            content = donationData.quartzDataDonationV2.quartzNotificationData.content,
+            channelId = donationData.quartzDataDonationV2.quartzNotificationData.channelId,
+            conversationMessages =
+              donationData.quartzDataDonationV2.quartzNotificationData.conversationMessages,
+            conversationHistoricMessages =
+              donationData.quartzDataDonationV2.quartzNotificationData.conversationHistoricMessages,
+          )
+        } else {
+          null
+        },
+      modelData =
+        if (
+          donationData.hasQuartzDataDonationV2() &&
+            quartzCuj == QuartzCUJ.QUARTZ_CUJ_KEY_SUMMARIZATION
+        ) {
+          QuartzModelData(
+            modelInfo = donationData.quartzDataDonationV2.quartzModelData.modelInfo,
+            featureName = donationData.quartzDataDonationV2.quartzModelData.featureName,
+            summaryText = donationData.quartzDataDonationV2.quartzModelData.summaryText,
+          )
+        } else if (
+          donationData.hasQuartzDataDonationV2() && quartzCuj == QuartzCUJ.QUARTZ_CUJ_KEY_TYPE
+        ) {
+          QuartzModelData(
+            modelInfo = donationData.quartzDataDonationV2.quartzModelData.modelInfo,
+            classificationMethod =
+              donationData.quartzDataDonationV2.quartzModelData.classificationMethod,
+            classificationBertCategoryResult =
+              donationData.quartzDataDonationV2.quartzModelData.classificationBertCategoryResult,
+            classificationBertCategoryScore =
+              donationData.quartzDataDonationV2.quartzModelData.classificationBertCategoryScore,
+            classificationCategory =
+              donationData.quartzDataDonationV2.quartzModelData.classificationCategory,
+            classificationDefaultCategoryResult =
+              donationData.quartzDataDonationV2.quartzModelData.classificationDefaultCategoryResult,
+            defaultCategoryCorrectionThreshold =
+              donationData.quartzDataDonationV2.quartzModelData.defaultCategoryCorrectionThreshold,
+            isSuppressDuplicate =
+              donationData.quartzDataDonationV2.quartzModelData.isSuppressDuplicate,
+          )
+        } else {
+          null
+        },
+      appInfoData =
+        if (donationData.hasQuartzDataDonationV2()) {
+          QuartzAppInfoData(
+            uuid = donationData.quartzDataDonationV2.quartzAppInfoData.uuid,
+            asiVersion = donationData.quartzDataDonationV2.quartzAppInfoData.asiVersion,
+            playStoreCategory =
+              donationData.quartzDataDonationV2.quartzAppInfoData.playStoreCategory,
+            packageName = donationData.quartzDataDonationV2.quartzAppInfoData.packageName,
+          )
+        } else {
+          null
         },
     )
   }

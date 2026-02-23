@@ -12,15 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package com.google.android.as.oss.logging;
+
+import option "third_party/java/protobuf/java_features.proto";
 
 option features.enum_type = CLOSED;
 option java_outer_classname = "PcsStatsEnums";
 option java_package = "com.google.android.as.oss.logging";
 
+// Enum for declaring generic daily count metrics from Pcs.
+// Make sure to discuss your logs with PWG before adding a new type here.
+// Next Id: 264
 enum CountMetricId {
+  option features.(pb.java).nest_in_file_class = YES;
+
   UNKNOWN_COUNT = 0;
   PCS_HTTP_DOWNLOAD_SUCCESS = 13;
   PCS_HTTP_DOWNLOAD_FAILURE = 14;
@@ -74,8 +81,10 @@ enum CountMetricId {
   PCS_PI_IPP_MASQUE_TUNNEL_VIA_CLOUDFLARE_SETUP_FAILURE = 210;
 }
 
-// Next ID: 143
+// Next ID: 158
 enum ValueMetricId {
+  option features.(pb.java).nest_in_file_class = YES;
+
   UNKNOWN_VALUE = 0;
   PCS_STATSMANAGER_QUERY_SUCCESS_LATENCY_MS = 100;
   PCS_STATSMANAGER_QUERY_FAILURE_LATENCY_MS = 101;
@@ -110,11 +119,12 @@ enum ValueMetricId {
   PCS_PI_IPP_MASQUE_TUNNEL_VIA_FASTLY_SETUP_FAILURE_LATENCY_MS = 138;
   PCS_PI_IPP_MASQUE_TUNNEL_VIA_CLOUDFLARE_SETUP_SUCCESS_LATENCY_MS = 139;
   PCS_PI_IPP_MASQUE_TUNNEL_VIA_CLOUDFLARE_SETUP_FAILURE_LATENCY_MS = 140;
-
   PSI_POPULATION_SCHEDULED_COUNT = 142;
 }
 
 enum TrainingEventKind {
+  option features.(pb.java).nest_in_file_class = YES;
+
   TRAIN_UNDEFINED = 0;
   TRAIN_STARTED = 1;
   TRAIN_COMPLETED = 2;
@@ -169,6 +179,8 @@ enum TrainingEventKind {
 }
 
 enum TrainingErrorCode {
+  option features.(pb.java).nest_in_file_class = YES;
+
   TRAIN_ERROR_DEFAULT = 0;
   TRAIN_ERROR_TENSORFLOW = 1;
   TRAIN_ERROR_LOCAL_IO = 2;
@@ -176,12 +188,16 @@ enum TrainingErrorCode {
 }
 
 enum TrainingDataSourceType {
+  option features.(pb.java).nest_in_file_class = YES;
+
   TRAINING_DATA_SOURCE_UNDEFINED = 0;
   FEED = 1;
   DATASET = 2;
 }
 
 enum SecAggClientEventKind {
+  option features.(pb.java).nest_in_file_class = YES;
+
   CLIENT_UNDEFINED_EVENT = 0;
   CLIENT_STARTED = 1;
   CLIENT_COMPLETED = 2;
@@ -195,6 +211,8 @@ enum SecAggClientEventKind {
 }
 
 enum SecAggClientRound {
+  option features.(pb.java).nest_in_file_class = YES;
+
   CLIENT_UNDEFINED_ROUND = 0;
   CLIENT_ADVERTISE_KEYS = 1;
   CLIENT_SHARE_KEYS = 2;
@@ -205,6 +223,8 @@ enum SecAggClientRound {
 }
 
 enum SecAggClientCryptoOperationType {
+  option features.(pb.java).nest_in_file_class = YES;
+
   UNDEFINED_CRYPTO_OPERATION = 0;
   SHAMIR_SHARING = 1;
   KEY_AGREEMENT = 2;
@@ -214,6 +234,8 @@ enum SecAggClientCryptoOperationType {
 }
 
 enum SecAggClientErrorCode {
+  option features.(pb.java).nest_in_file_class = YES;
+
   CLIENT_UNDEFINED_ERROR = 0;
   CLIENT_ERROR_SERVER_INITIATED_ABORT = 1;
   CLIENT_ERROR_ENVIRONMENT_INITIATED_ABORT = 2;
@@ -225,6 +247,8 @@ enum SecAggClientErrorCode {
 }
 
 enum CollectionName {
+  option features.(pb.java).nest_in_file_class = YES;
+
   COLLECTION_NAME_UNDEFINED = 0;
   COLLECTION_NAME_SIMPLESTORAGE = 1;
   COLLECTION_NAME_PLAY_PROTECT = 2;
@@ -233,6 +257,8 @@ enum CollectionName {
 
 /** Enumerations of timer and counter identifiers. */
 enum HistogramCounters {
+  option features.(pb.java).nest_in_file_class = YES;
+
   HISTOGRAM_COUNTER_UNDEFINED = 0;
 
   /**
@@ -551,7 +577,9 @@ enum HistogramCounters {
   /** How long multiple task assignments takes. */
   TRAINING_FL_MULTIPLE_TASK_ASSIGNMENTS_LATENCY = 200007;
 
-  /** The number of rounds between a client's consecutive training sessions on
-   * the same task. */
+  /**
+   * The number of rounds between a client's consecutive training sessions on
+   * the same task.
+   */
   TRAINING_FL_ROUND_SEPARATION = 200008;
 }

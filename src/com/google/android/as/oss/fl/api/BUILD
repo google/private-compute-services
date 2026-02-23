@@ -47,3 +47,33 @@ java_grpc_library(
         ":training_java_proto_lite",
     ],
 )
+
+proto_library(
+    name = "private_logging_proto",
+    srcs = ["private_logging.proto"],
+    has_services = True,
+    deps = [
+        "",
+        "//third_party/fcp/client:selector_context_proto",
+    ],
+)
+
+java_lite_proto_library(
+    name = "private_logging_java_proto_lite",
+    deps = [":private_logging_proto"],
+)
+
+kt_jvm_lite_proto_library(
+    name = "private_logging_kt_proto_lite",
+    deps = [":private_logging_proto"],
+)
+
+java_grpc_library(
+    name = "private_logging_grpc",
+    srcs = [":private_logging_proto"],
+    constraints = ["android"],
+    flavor = "lite",
+    deps = [
+        ":private_logging_java_proto_lite",
+    ],
+)

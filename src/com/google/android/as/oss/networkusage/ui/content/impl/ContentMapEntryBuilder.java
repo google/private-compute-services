@@ -25,6 +25,7 @@ import android.content.res.Resources;
 import androidx.annotation.StringRes;
 import com.google.android.as.oss.networkusage.api.proto.AttestationConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.ConnectionKey;
+import com.google.android.as.oss.networkusage.api.proto.FeedbackConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.FlConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.HttpConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.PdConnectionKey;
@@ -168,6 +169,9 @@ final class ContentMapEntryBuilder {
       case SURVEY_REQUEST ->
           connectionKeyBuilder.setSurveyConnectionKey(
               SurveyConnectionKey.newBuilder().setUrlRegex(connectionKeyString).build());
+      case FEEDBACK_REQUEST ->
+          connectionKeyBuilder.setFeedbackConnectionKey(
+              FeedbackConnectionKey.newBuilder().setFeatureName(connectionKeyString).build());
       default ->
           throw new UnsupportedOperationException(
               String.format("Unsupported connection type '%s'", connectionType.name()));

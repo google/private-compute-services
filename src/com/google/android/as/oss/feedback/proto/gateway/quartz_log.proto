@@ -18,6 +18,7 @@ package com.google.android.as.oss.feedback.api.gateway;
 
 import "google/protobuf/timestamp.proto";
 
+
 option java_multiple_files = true;
 option java_package = "com.google.android.as.oss.feedback.api.gateway";
 
@@ -55,7 +56,8 @@ message QuartzCommonData {
   string channel_name = 11;
   ChannelImportance channel_importance = 12;
   string channel_description = 13;
-  string channel_conversation_id = 14;
+  string channel_conversation_id = 14
+     ;
   string play_store_category = 15;
   string extra_title = 16;
   string extra_title_big = 17;
@@ -65,17 +67,21 @@ message QuartzCommonData {
   string extra_people_list = 21;
   string extra_messaging_person = 22;
   string extra_messages = 23;
-  repeated string extra_historic_messages = 24;
-  string extra_conversation_title = 25;
+  repeated string extra_historic_messages = 24
+     ;
+  string extra_conversation_title = 25
+     ;
   string extra_big_text = 26;
   string extra_info_text = 27;
   string extra_sub_text = 28;
   bool extra_is_group_conversation = 29;
-  string extra_picture_content_description = 30;
+  string extra_picture_content_description = 30
+     ;
   string extra_template = 31;
   bool extra_show_big_picture_when_collapsed = 32;
   bool extra_colorized = 33;
-  repeated string extra_remote_input_history = 34;
+  repeated string extra_remote_input_history = 34
+     ;
   string locus_id = 35;
   bool has_promotable_characteristics = 36;
   string group_key = 37;
@@ -104,23 +110,34 @@ message QuartzKeyTypeData {
 
   QuartzCommonData quartz_common_data = 1;
   string notification_id = 2;
-  .google.protobuf.Timestamp post_timestamp = 3;
+  .google.protobuf.Timestamp post_timestamp = 3
+     ;
   string app_category = 4;
-  repeated string model_info_list = 5;
+  repeated string model_info_list = 5
+     ;
   ClassificationMethod classification_method = 6;
-  string classification_bert_category_result = 7;
+  string classification_bert_category_result = 7
+     ;
   float classification_bert_category_score = 8;
-  int64 classification_bert_category_executed_time_ms = 9;
-  string classification_category = 10;
-  bool is_threshold_changed_category = 11;
-  int64 classification_executed_time_ms = 12;
+  int64 classification_bert_category_executed_time_ms = 9
+     ;
+  string classification_category = 10
+     ;
+  bool is_threshold_changed_category = 11
+     ;
+  int64 classification_executed_time_ms = 12
+     ;
   // A map containing the exemption method and execution time, will be
   // translated into a string to use in code.
-  string exemption_executed_time_ms_string = 13;
+  string exemption_executed_time_ms_string = 13
+     ;
   string feedback_category = 14;
-  string feedback_input_category = 15;
-  string classification_default_category_result = 16;
-  string default_category_correction_threshold = 17;
+  string feedback_input_category = 15
+     ;
+  string classification_default_category_result = 16
+     ;
+  string default_category_correction_threshold = 17
+     ;
   bool is_suppress_duplicate = 18;
 }
 
@@ -136,10 +153,52 @@ message QuartzKeySummarizationData {
   int64 execution_time_ms = 9;
   string summary_text = 10;
   string feedback_type = 11;
-  string feedback_additional_detail = 12;
+  string feedback_additional_detail = 12
+     ;
 }
 
 message QuartzDataDonation {
   QuartzKeyTypeData quartz_key_type_data = 1;
   QuartzKeySummarizationData quartz_key_summarization_data = 2;
+}
+
+message QuartzNotificationData {
+  string title = 1;
+  string content = 2;
+  string channel_id = 3;
+  string conversation_messages = 4;
+  string conversation_historic_messages = 5
+     ;
+}
+
+message QuartzModelData {
+  string model_info = 1;
+  string classification_method = 2;
+  string classification_bert_category_result = 3
+     ;
+  string classification_bert_category_score = 4;
+  string classification_category = 5
+     ;
+  string classification_default_category_result = 6
+     ;
+  string default_category_correction_threshold = 7
+     ;
+  string is_suppress_duplicate = 8;
+  string feature_name = 9;
+  string summary_text = 10;
+}
+
+message QuartzAppInfoData {
+  string uuid = 1;
+  string asi_version = 2;
+  string play_store_category = 3;
+  string package_name = 4;
+}
+
+message QuartzDataDonationV2 {
+  QuartzCUJ quartz_cuj = 1;
+  QuartzNotificationData quartz_notification_data = 2;
+  QuartzModelData quartz_model_data = 3
+     ;
+  QuartzAppInfoData quartz_app_info_data = 4;
 }

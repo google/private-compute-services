@@ -27,9 +27,9 @@
 #include "third_party/absl/types/span.h"
 
 jclass kArrayListClass = nullptr;
-jclass kAbslStatusExceptionClass = nullptr;
+jclass kBlindSignAuthJniBridgeClass = nullptr;
 jmethodID kArrayListConstructor = nullptr;
-jmethodID kAbslStatusExceptionConstructor = nullptr;
+jmethodID kCreateStatusExceptionMethodId = nullptr;
 jmethodID kListAddMethodID = nullptr;
 
 namespace privateinference::bsa::helpers {
@@ -73,9 +73,9 @@ absl::StatusOr<std::string> ByteArrayToString(JNIEnv* env,
   return str;
 }
 
-absl::StatusOr<jobject> CreateAbslStatusException(JNIEnv* env,
-                                                  absl::Status status) {
-  jint code = static_cast<int>(status.code());
+absl::StatusOr<jobject> CreateStatusException(JNIEnv* env,
+                                              absl::Status status) {
+  jint canonical_code = static_cast<int>(status.code());
   // absl::string_view data is not guaranteed to be null terminated.
   // So we copy into a std::string that will provided a null-terminated c_str
   std::string message_str(status.message());
@@ -84,9 +84,10 @@ absl::StatusOr<jobject> CreateAbslStatusException(JNIEnv* env,
     bsa_log_info("Failed to create exception for %s", status.message());
     return absl::InternalError("Failed to create String for exception");
   }
-  jobject exception =
-      env->NewObject(kAbslStatusExceptionClass, kAbslStatusExceptionConstructor,
-                     code, message);
+  jobject exception = env->CallStaticObjectMethod(
+      kBlindSignAuthJniBridgeClass, kCreateStatusExceptionMethodId,
+      canonical_code, message);
+  env->DeleteLocalRef(message);
   return exception;
 }
 
@@ -171,17 +172,17 @@ absl::Status CacheEnums(JNIEnv* env, absl::Span<const EnumSpec> enum_spec) {
 }
 
 absl::Status OnLoad(JNIEnv* env) {
-  absl::Status status = CacheClasses(
-      env, {
-               {
-                   .target = &kArrayListClass,
-                   .class_name = "java/util/ArrayList",
-               },
-               {
-                   .target = &kAbslStatusExceptionClass,
-                   .class_name = helpers::BsaClass("$AbslStatusException"),
-               },
-           });
+  absl::Status status =
+      CacheClasses(env, {
+                            {
+                                .target = &kArrayListClass,
+                                .class_name = "java/util/ArrayList",
+                            },
+                            {
+                                .target = &kBlindSignAuthJniBridgeClass,
+                                .class_name = BsaClass(""),
+                            },
+                        });
   if (!status.ok()) return status;
 
   status = CacheMethodIds(
@@ -200,10 +201,12 @@ absl::Status OnLoad(JNIEnv* env) {
                    .method_signature = "()V",
                },
                {
-                   .target = &kAbslStatusExceptionConstructor,
-                   .class_name = helpers::BsaClass("$AbslStatusException"),
-                   .method_name = "<init>",
-                   .method_signature = "(ILjava/lang/String;)V",
+                   .target = &kCreateStatusExceptionMethodId,
+                   .class_name = BsaClass(""),
+                   .method_name = "createStatusException",
+                   .method_signature =
+                       "(ILjava/lang/String;)Lio/grpc/StatusException;",
+                   .is_static = true,
                },
            });
 
@@ -213,7 +216,7 @@ absl::Status OnLoad(JNIEnv* env) {
 }
 
 absl::Status OnUnload(JNIEnv* env) {
-  for (jobject global_ref : {kArrayListClass, kAbslStatusExceptionClass}) {
+  for (jobject global_ref : {kArrayListClass, kBlindSignAuthJniBridgeClass}) {
     if (global_ref != nullptr) {
       env->DeleteGlobalRef(global_ref);
       global_ref = nullptr;

@@ -100,9 +100,10 @@ public final class BlobProtoUtils {
       DownloadBlobRequest request,
       byte[] publicKey,
       byte[] pageToken,
-      AttestationResponse attestationResponse) {
+      AttestationResponse attestationResponse,
+      Optional<String> integrityClientToken) {
     return com.google.android.as.oss.pd.service.api.proto.DownloadBlobRequest.newBuilder()
-        .setIntegrityResponse(getIntegrityResponse(attestationResponse))
+        .setIntegrityResponse(getIntegrityResponse(attestationResponse, integrityClientToken))
         .setMetadata(toExternalMetadata(ByteString.copyFrom(publicKey), request.getMetadata()))
         .setPageToken(ByteString.copyFrom(pageToken))
         .setProtectionProofConfig(
@@ -113,10 +114,14 @@ public final class BlobProtoUtils {
 
   /** Converts a manifest request from PCS to a server request to get a manifest. */
   public com.google.android.as.oss.pd.manifest.api.proto.GetManifestConfigRequest toExternalRequest(
-      GetManifestConfigRequest request, byte[] publicKey, AttestationResponse attestationResponse) {
+      GetManifestConfigRequest request,
+      byte[] publicKey,
+      AttestationResponse attestationResponse,
+      Optional<String> integrityClientToken) {
     return com.google.android.as.oss.pd.manifest.api.proto.GetManifestConfigRequest.newBuilder()
         .setConstraints(buildConstraints(request.getConstraints()))
-        .setIntegrityResponse(getManifestIntegrityResponse(attestationResponse))
+        .setIntegrityResponse(
+            getManifestIntegrityResponse(attestationResponse, integrityClientToken))
         .setCryptoKeys(
             com.google.android.as.oss.pd.manifest.api.proto.CryptoKeys.newBuilder()
                 .setPublicKey(ByteString.copyFrom(publicKey)))
@@ -127,9 +132,9 @@ public final class BlobProtoUtils {
         .build();
   }
 
-  private static IntegrityResponse getIntegrityResponse(AttestationResponse attestationResponse) {
-    ClientStatus clientStatus = ClientStatus.STATUS_UNKNOWN;
-    clientStatus =
+  private static IntegrityResponse getIntegrityResponse(
+      AttestationResponse attestationResponse, Optional<String> integrityClientToken) {
+    ClientStatus clientStatus =
         switch (attestationResponse.status()) {
           case SUCCESS -> ClientStatus.STATUS_OK;
           case NOT_RUN -> ClientStatus.STATUS_NOT_RUN;
@@ -141,15 +146,15 @@ public final class BlobProtoUtils {
     if (attestationResponse.status() == AttestationResponse.Status.SUCCESS) {
       responseBuilder.setKeyAttestationToken(attestationResponse.attestationToken());
     }
+    integrityClientToken.ifPresent(
+        token -> responseBuilder.setClientToken(ByteString.copyFromUtf8(token)));
     return responseBuilder.build();
   }
 
   private static com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse
-      getManifestIntegrityResponse(AttestationResponse attestationResponse) {
+      getManifestIntegrityResponse(
+          AttestationResponse attestationResponse, Optional<String> integrityClientToken) {
     com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.ClientStatus clientStatus =
-        com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.ClientStatus
-            .STATUS_UNKNOWN;
-    clientStatus =
         switch (attestationResponse.status()) {
           case SUCCESS ->
               com.google.android.as.oss.pd.manifest.api.proto.IntegrityResponse.ClientStatus
@@ -168,6 +173,8 @@ public final class BlobProtoUtils {
     if (attestationResponse.status() == AttestationResponse.Status.SUCCESS) {
       responseBuilder.setKeyAttestationToken(attestationResponse.attestationToken());
     }
+    integrityClientToken.ifPresent(
+        token -> responseBuilder.setClientToken(ByteString.copyFromUtf8(token)));
     return responseBuilder.build();
   }
 

@@ -40,9 +40,11 @@ class RequestLoggingHelpers(private val timers: Timers) {
   private fun logHandshakeRequest(request: SessionRequest) {
     when (request.requestCase) {
       SessionRequest.RequestCase.HANDSHAKE_REQUEST ->
-        handshakeTimer = timers.start(PrivateInferenceClientTimerNames.SESSION_HANDSHAKE)
+        handshakeTimer =
+          timers.start(PrivateInferenceClientTimerNames.OAK_SESSION_PERFORM_HANDSHAKE_STEP)
       SessionRequest.RequestCase.ATTEST_REQUEST ->
-        attestTimer = timers.start(PrivateInferenceClientTimerNames.SESSION_ATTESTATION)
+        attestTimer =
+          timers.start(PrivateInferenceClientTimerNames.OAK_SESSION_EXCHANGE_ATTESTATION_EVIDENCE)
       else -> {}
     }
   }

@@ -23,6 +23,7 @@ proto_library(
     srcs = [
         "enums.proto",
     ],
+    option_deps = ["//third_party/java/protobuf:java_features_proto"],
 )
 
 proto_library(
@@ -30,6 +31,7 @@ proto_library(
     srcs = [
         "atoms.proto",
     ],
+    option_deps = ["//third_party/java/protobuf:java_features_proto"],
     deps = [
         ":enums_proto",
     ],

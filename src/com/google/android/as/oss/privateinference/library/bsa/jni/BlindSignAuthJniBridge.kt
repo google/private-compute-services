@@ -48,15 +48,10 @@ import kotlinx.coroutines.suspendCancellableCoroutine
  */
 @ThreadSafe
 class BlindSignAuthJniBridge(val messageInterface: MessageInterface) {
-  /** An absl::Status result from the underlying C++ library. */
-  @ThreadSafe
-  data class AbslStatusException(val errorCode: Int, val errorMessage: String) : RuntimeException()
-
   /**
    * The proxy layer that we need tokens for.
    *
    * This matches the ProxyLayer enum in the C++ library.
-   * google3/third_party/quiche/blind_sign_auth/blind_sign_auth_interface.h
    */
   enum class ProxyLayer {
     /** Not used by our scheme. */
@@ -71,7 +66,6 @@ class BlindSignAuthJniBridge(val messageInterface: MessageInterface) {
    * The request type used by the [MessageInterface].
    *
    * This matches the BlindSignMessageRequestType enum in the C++ library.
-   * google3/third_party/quiche/blind_sign_auth/blind_sign_message_interface.h
    */
   private enum class BlindSignMessageRequestType {
     UNKNOWN,
@@ -98,7 +92,6 @@ class BlindSignAuthJniBridge(val messageInterface: MessageInterface) {
    * A token returned by the signing logic.
    *
    * This is the counterpart to the BlindSignToken in the C++ library.
-   * google3/third_party/quiche/blind_sign_auth/blind_sign_auth_interface.h
    *
    * Our use case doesn't use the geo_hint field, so we don't expose it here.
    */
@@ -113,7 +106,6 @@ class BlindSignAuthJniBridge(val messageInterface: MessageInterface) {
    * A callback from the signing library that provides the signed attestated tokens.
    *
    * This is the counterpart to the SignedTokenCallback in the C++ library.
-   * google3/third_party/quiche/blind_sign_auth/blind_sign_message_interface.h
    *
    * This is a single-use callback, so calling it more than once will throw an exception.
    */
@@ -130,7 +122,6 @@ class BlindSignAuthJniBridge(val messageInterface: MessageInterface) {
    * A callback from the signing library that requests attestation for the given challenge.
    *
    * This is the counterpart to the SignedTokenCallback in the C++ library.
-   * google3/third_party/quiche/blind_sign_auth/blind_sign_message_interface.h
    *
    * This is a single-use callback, so calling it more than once will throw an exception.
    */
@@ -323,7 +314,6 @@ class BlindSignAuthJniBridge(val messageInterface: MessageInterface) {
    * The call to begin the token fetching process. The callback returns a challenge for attestation.
    *
    * This is the counterpart to the GetAttestationTokens in the C++ library.
-   * google3/third_party/quiche/blind_sign_auth/blind_sign_message_interface.h
    *
    * @param numTokens The number of tokens to request.
    * @param proxyLayer The proxy layer to request tokens for.
@@ -375,7 +365,6 @@ class BlindSignAuthJniBridge(val messageInterface: MessageInterface) {
 
     private fun Throwable.toStatusCode(): Int {
       return when (this) {
-        is AbslStatusException -> this.errorCode
         is StatusException -> this.status.code.value()
         is IllegalArgumentException -> Status.Code.INVALID_ARGUMENT.value()
         else -> Status.Code.UNKNOWN.value()
@@ -390,5 +379,11 @@ class BlindSignAuthJniBridge(val messageInterface: MessageInterface) {
       attestationDataCallback: AttestationDataCallback,
       signedTokenCallback: SignedTokenCallback,
     )
+
+    @JvmStatic
+    fun createStatusException(code: Int, message: String): StatusException {
+      val status = Status.fromCodeValue(code).withDescription(message)
+      return StatusException(status)
+    }
   }
 }

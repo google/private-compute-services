@@ -33,6 +33,11 @@ public final class Annotations {
   @Retention(RetentionPolicy.RUNTIME)
   public @interface PrivateInferenceWaitForGrpcChannelReady {}
 
+  /** Annotation for aratea token cache enabled state. */
+  @Qualifier
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface PrivateInferenceEnableArateaTokenCache {}
+
   /** Annotation for whether to attach Android package name and certificate to the request. */
   @Qualifier
   @Retention(RetentionPolicy.RUNTIME)

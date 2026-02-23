@@ -95,7 +95,9 @@ public abstract class ConnectionDetails implements Parcelable {
     ATTESTATION_REQUEST,
     /** A survey request using HTTPS */
     SURVEY_REQUEST
+    FEEDBACK_REQUEST
   }
+
 
   /** All the connection types related to federated computations. */
   public static final ImmutableSet<ConnectionType> FC_CONNECTION_TYPES =

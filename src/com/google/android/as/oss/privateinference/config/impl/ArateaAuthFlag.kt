@@ -27,4 +27,6 @@ interface ArateaAuthFlag {
   }
 
   fun mode(): Mode
+
+  fun isCacheEnabled(): Boolean = false
 }

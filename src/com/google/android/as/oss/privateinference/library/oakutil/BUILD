@@ -18,17 +18,12 @@ load("//third_party/protobuf/bazel:java_lite_proto_library.bzl", "java_lite_prot
 load("//third_party/protobuf/bazel:java_proto_library.bzl", "java_proto_library")
 load("//third_party/protobuf/bazel:proto_library.bzl", "proto_library")
 
-package(default_visibility = [
-    "//visibility:public",
-])
+package(default_visibility = ["//visibility:public"])
 
 proto_library(
     name = "public_keys_proto",
     srcs = ["public_keys.proto"],
-    deps = [
-        "//third_party/protobuf:cpp_features_proto",
-        "@com_google_protobuf//:timestamp_proto",
-    ],
+    deps = ["@com_google_protobuf//:timestamp_proto"],
 )
 
 cc_proto_library(
@@ -68,6 +63,7 @@ android_library(
         "//src/com/google/android/as/oss/privateinference/library:private_inference_request_metadata",
         "//src/com/google/android/as/oss/privateinference/transport:managed_channel_factory",
         "//third_party/java/grpc:okhttp_android",  # unuseddeps: keep buildcleaner: keep Runtime dependency for gRPC ManagedChannel
+        "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",
         "@maven//:com_google_flogger_google_extensions",
         "@maven//:io_grpc_grpc_api",
@@ -113,8 +109,10 @@ android_library(
         "//src/com/google/android/as/oss/privateinference/logging",
         "//src/com/google/android/as/oss/privateinference/util/timers",
         "//src/com/google/android/as/oss/privateinference/util/timers:annotations",
+        "//src/com/google/android/as/oss/privateinference/util/timers:latency_logging_timers",
         "//src/com/google/android/as/oss/privateinference/util/timers:pi_debug_log_timers",
         "//src/com/google/android/as/oss/privateinference/util/timers:timer_set",
+        "//src/com/google/android/as/oss/privateinference/util/timers:trace_timers",
         "//third_party/kotlin/kotlinx_atomicfu:kotlinx_atomicfu-jvm",
         "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-android",
         "//third_party/oak/java/src/main/java/com/google/oak/client/grpc:stream_observer_session_client_no_jni_android",
@@ -126,6 +124,7 @@ android_library(
         "@maven//:com_google_flogger_google_extensions",
         "@maven//:com_google_guava_guava",
         "@maven//:com_google_protobuf_protobuf_javalite",
+        "@maven//:io_grpc_grpc_api",
         "@maven//:io_grpc_grpc_stub",
         "@maven//:javax_inject_javax_inject",
     ],

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package google.internal.ppn.phosphor.v1;
 
@@ -20,8 +20,8 @@ import "privacy/net/common/proto/attest_and_sign.proto";
 import "privacy/net/common/proto/get_initial_data.proto";
 import "privacy/net/common/proto/get_proxy_config.proto";
 
+option java_outer_classname = "Arateaipblinding";
 option java_api_version = 2;
-option java_multiple_files = true;
 option java_package = "com.google.android.as.oss.privateinference.library.bsa.proto";
 
 // ArateaIPBlindingService handles the attestation and blind signing for the

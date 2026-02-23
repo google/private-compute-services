@@ -48,6 +48,7 @@ android_library(
         "//third_party/java/androidx/compose/ui/text",
         "//third_party/java/androidx/compose/ui/unit",
         "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-jvm",
+        "@maven//:androidx_annotation_annotation",
         "@maven//:com_google_flogger_google_extensions",
         "@maven//:javax_inject_javax_inject",
     ],

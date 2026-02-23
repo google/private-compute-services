@@ -58,6 +58,7 @@ class ConfigurableBsaTokenProvider<T : BsaToken>(
         .asFlow()
         .map { config ->
           when (tokenClass) {
+            ArateaTokenWithoutChallenge::class.java -> config.arateaTokenCacheMode()
             ArateaToken::class.java -> config.arateaTokenCacheMode()
             ProxyToken::class.java -> config.proxyTokenCacheMode()
             else -> throw IllegalArgumentException("Bad tokenClass value")

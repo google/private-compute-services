@@ -41,6 +41,12 @@ public interface NetworkUsageLogContentMap {
   Optional<ConnectionDetails> getSurveyConnectionDetails(String url);
 
   /**
+   * Returns the ConnectionDetails object for FEEDBACK_REQUEST connections with the url regex
+   * corresponding to the given url.
+   */
+  Optional<ConnectionDetails> getFeedbackConnectionDetails(String featureName);
+
+  /**
    * Returns the ConnectionDetails object for PIR connections with the url regex corresponding to
    * the given url.
    */

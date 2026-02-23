@@ -21,8 +21,6 @@ data class FeedbackConfig(
   val enableSelectedEntityContent: Boolean,
   // Whether to enable the view data dialog v2 for single entity feedback.
   val enableViewDataDialogV2SingleEntity: Boolean,
-  // Whether to enable the view data dialog v2 for multi entity feedback.
-  val enableViewDataDialogV2MultiEntity: Boolean,
   // Whether to enable the opt in ui v2 for multi entity feedback.
   val enableOptInUiV2: Boolean,
   // Whether to enable the ground truth selector for single entity feedback.

@@ -23,6 +23,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import arcs.core.data.proto.PolicyProto;
 import com.google.android.as.oss.networkusage.api.proto.AttestationConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.ConnectionKey;
+import com.google.android.as.oss.networkusage.api.proto.FeedbackConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.FlConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.HttpConnectionKey;
 import com.google.android.as.oss.networkusage.api.proto.PirConnectionKey;
@@ -74,6 +75,18 @@ public final class NetworkUsageLogUtils {
             ConnectionKey.newBuilder()
                 .setSurveyConnectionKey(
                     SurveyConnectionKey.newBuilder().setUrlRegex(urlRegex).build())
+                .build())
+        .build();
+  }
+
+  public static ConnectionDetails createFeedbackConnectionDetails(
+      String featureName, String packageName) {
+    checkArgument(!Strings.isNullOrEmpty(featureName));
+    return getDefaultConnectionDetailsBuilder(ConnectionType.FEEDBACK_REQUEST, packageName)
+        .setConnectionKey(
+            ConnectionKey.newBuilder()
+                .setFeedbackConnectionKey(
+                    FeedbackConnectionKey.newBuilder().setFeatureName(featureName).build())
                 .build())
         .build();
   }
@@ -187,6 +200,16 @@ public final class NetworkUsageLogUtils {
     checkArgument(
         url.matches(connectionDetails.connectionKey().getSurveyConnectionKey().getUrlRegex()));
     return getNetworkUsageEntityForUrl(connectionDetails, status, downloadSize, url);
+  }
+
+  public static NetworkUsageEntity createFeedbackNetworkUsageEntity(
+      ConnectionDetails connectionDetails, Status status, long downloadSize, String featureName) {
+    checkArgument(connectionDetails.type() == ConnectionType.FEEDBACK_REQUEST);
+    checkArgument(connectionDetails.connectionKey().hasFeedbackConnectionKey());
+    checkArgument(
+        featureName.matches(
+            connectionDetails.connectionKey().getFeedbackConnectionKey().getFeatureName()));
+    return getNetworkUsageEntityForUrl(connectionDetails, status, downloadSize, featureName);
   }
 
   private static NetworkUsageEntity getNetworkUsageEntityForUrl(

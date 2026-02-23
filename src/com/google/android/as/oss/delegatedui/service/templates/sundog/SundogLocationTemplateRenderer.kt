@@ -254,8 +254,6 @@ fun SundogTheme(
 internal fun DeletionRow(dragDirection: Float, backgroundColor: Color) =
   Row(
     modifier =
-      // (b/428967877): This Row peeks out slightly at the horizontal edges when stacked in a Box
-      // with another identical Row. Reduce the width slightly to avoid this.
       Modifier.fillMaxWidth(fraction = 0.99f)
         .fillMaxHeight()
         .zIndex(-1f)

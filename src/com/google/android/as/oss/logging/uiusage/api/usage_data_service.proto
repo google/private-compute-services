@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package com.google.android.as.oss.logging.uiusage.api;
 
 import "src/com/google/android/as/oss/logging/uiusage/api/log_usage_data.proto";
 
+option java_outer_classname = "UsageDataServiceOuterClass";
 option java_package = "com.google.android.as.oss.logging.uiusage.api";
-option java_multiple_files = true;
 
 // Service to log usage data for impressions/user interactions with the remote
 // UI.

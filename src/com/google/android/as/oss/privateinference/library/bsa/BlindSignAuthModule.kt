@@ -24,13 +24,13 @@ import com.google.android.`as`.oss.privateinference.library.bsa.impl.PhosphorGrp
 import com.google.android.`as`.oss.privateinference.networkusage.PrivateInferenceNetworkUsageLogHelper
 import com.google.android.`as`.oss.privateinference.util.timers.Annotations.PrivateInferenceClientTimers
 import com.google.android.`as`.oss.privateinference.util.timers.TimerSet
+import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.grpc.ManagedChannel
 import java.util.Optional
-import javax.inject.Provider
 import javax.inject.Singleton
 
 /** Module that provides the BlindSignAuth implementation. */
@@ -41,7 +41,7 @@ internal object BlindSignAuthModule {
   @Provides
   @Singleton
   fun provideBlindSignAuth(
-    @TokenIssuanceServerGrpcChannel managedChannel: Provider<ManagedChannel>,
+    @TokenIssuanceServerGrpcChannel managedChannel: Lazy<ManagedChannel>,
     networkUsageLogHelper: PrivateInferenceNetworkUsageLogHelper,
     androidKeystoreAttester: AndroidKeystoreAttester,
     @PrivateInferenceClientTimers timerSet: TimerSet,

@@ -26,4 +26,9 @@ object BsaAnnotations {
 
   /** Qualifier for [ArateaToken] token fetch error log mapper. */
   @Qualifier @Retention(AnnotationRetention.RUNTIME) annotation class ArateaTokenErrorLogMapper
+
+  /** Qualifier for [ArateaTokenWithoutChallenge] token fetch error log mapper. */
+  @Qualifier
+  @Retention(AnnotationRetention.RUNTIME)
+  annotation class CacheableArateaTokenErrorLogMapper
 }

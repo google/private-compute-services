@@ -19,6 +19,7 @@ package com.google.android.as.oss.delegatedui.api.integration.templates.sundog;
 import "google/protobuf/timestamp.proto";
 import "src/com/google/android/as/oss/dataattribution/proto/attribution_dialog.proto";
 import "src/com/google/android/as/oss/delegatedui/api/integration/templates/ui_id_token.proto";
+
 import "third_party/protobuf/cpp_features.proto";
 
 option features.(pb.cpp).string_type = VIEW;
@@ -37,17 +38,27 @@ message SundogLocationTemplateData {
   string source = 3;
 
   UiIdToken ui_id_token = 4;
-  dataattribution.proto.AttributionDialogData attribution_dialog_data = 5;
+  dataattribution.proto.AttributionDialogData attribution_dialog_data = 5
+     ;
 
   string delete_label = 8;
 
-  bool enable_marquee_subtitle = 9 [default = false];
+  bool enable_marquee_subtitle = 9 [default = false, deprecated = true];
 
   sfixed32 delete_background_color = 10;
 }
 
-// Next Id: 10
+// Next Id: 11
 message SundogEventTemplateData {
+  // To support displaying multiple event suggestions in Sundog, introduce
+  // a new repeated field to store the event data.
+  // When the multiple event suggestions feature is disabled, only the first
+  // event will be displayed.
+  repeated Event events = 10;
+
+  // Keep old fields for backward compatibility.
+  // TODO: Deprecate this field once the multiple event suggestions
+  // feature is fully launched.
   string event_title = 1;
   string title = 6;
   string sub_text = 2;
@@ -58,7 +69,26 @@ message SundogEventTemplateData {
 
   UiIdToken ui_id_token = 7;
 
-  dataattribution.proto.AttributionDialogData attribution_dialog_data = 8;
+  dataattribution.proto.AttributionDialogData attribution_dialog_data = 8
+     ;
 
-  bool enable_marquee_subtitle = 9 [default = false];
+  bool enable_marquee_subtitle = 9 [default = false, deprecated = true];
+}
+
+// Next Id: 10
+message Event {
+  string event_title = 1;
+  string title = 2;
+  string sub_text = 3;
+  string location_name = 4;
+
+  .google.protobuf.Timestamp start_time = 5;
+  .google.protobuf.Timestamp end_time = 6;
+
+  UiIdToken ui_id_token = 7;
+
+  dataattribution.proto.AttributionDialogData attribution_dialog_data = 8
+     ;
+
+  int32 pending_intent_index = 9;
 }

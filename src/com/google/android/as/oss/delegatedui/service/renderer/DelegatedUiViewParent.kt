@@ -213,18 +213,18 @@ internal class DelegatedUiViewParent(
    */
   @CanIgnoreReturnValue
   private inline fun <T> MotionEvent.withDisplayCoordinates(block: (MotionEvent) -> T): T {
-    val event =
-      MotionEvent.obtain(
-        /* downTime = */ downTime,
-        /* eventTime = */ eventTime,
-        /* action = */ action,
-        /* x = */ rawX,
-        /* y = */ rawY,
-        /* metaState = */ 0,
-      )
-    val result = block(event)
-    event.recycle()
-    return result
+    val event = MotionEvent.obtain(this)
+
+    val offsetX = rawX - x
+    val offsetY = rawY - y
+
+    event.offsetLocation(offsetX, offsetY)
+
+    try {
+      return block(event)
+    } finally {
+      event.recycle()
+    }
   }
 
   // -----------------------------------------------------------------------------------------------

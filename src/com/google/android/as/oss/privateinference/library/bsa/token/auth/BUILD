@@ -89,3 +89,40 @@ android_library(
         "@maven//:io_grpc_grpc_api",
     ],
 )
+
+android_library(
+    name = "cacheable_aratea_token_provider",
+    srcs = ["AuthenticatingCacheableArateaTokenProvider.kt"],
+    deps = [
+        "//src/com/google/android/as/oss/common/config",
+        "//src/com/google/android/as/oss/privateinference/config",
+        "//src/com/google/android/as/oss/privateinference/library/bsa:blind_sign_auth",
+        "//src/com/google/android/as/oss/privateinference/library/bsa/token",
+        "//src/com/google/android/as/oss/privateinference/library/bsa/token:token_provider",
+        "//src/com/google/android/as/oss/privateinference/util:result_ext",
+        "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-jvm",
+    ],
+)
+
+android_library(
+    name = "cacheable_aratea_token_provider_module",
+    srcs = [
+        "AuthenticatingCacheableArateaTokenProviderModule.kt",
+    ],
+    deps = [
+        ":cacheable_aratea_token_provider",
+        "//src/com/google/android/as/oss/common:annotation",
+        "//src/com/google/android/as/oss/common/config",
+        "//src/com/google/android/as/oss/logging:enums_java_proto_lite",
+        "//src/com/google/android/as/oss/privateinference/config",
+        "//src/com/google/android/as/oss/privateinference/library/bsa:blind_sign_auth",
+        "//src/com/google/android/as/oss/privateinference/library/bsa/token",
+        "//src/com/google/android/as/oss/privateinference/library/bsa/token:annotations",
+        "//src/com/google/android/as/oss/privateinference/library/bsa/token:token_provider",
+        "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-android",
+        "@maven//:com_google_dagger_dagger",
+        "@maven//:com_google_dagger_hilt-android",
+        "@maven//:io_grpc_grpc_api",
+        "@maven//:javax_inject_javax_inject",
+    ],
+)

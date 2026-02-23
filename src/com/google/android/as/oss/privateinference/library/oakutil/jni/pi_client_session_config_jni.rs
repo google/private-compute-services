@@ -73,7 +73,7 @@ pub fn new_java_session_config_builder(
 }
 
 #[no_mangle]
-    extern "system" fn Java_com_google_android_as_oss_privateinference_library_oakutil_PeerAttestedClientSessionConfigBuilder_nativeGet(
+extern "system" fn Java_com_google_android_as_oss_privateinference_library_oakutil_PeerAttestedClientSessionConfigBuilder_nativeGet(
     mut env: JNIEnv,
     _class: JClass,
     public_keyset_bytes: JByteArray,

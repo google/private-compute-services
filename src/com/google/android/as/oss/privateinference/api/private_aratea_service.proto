@@ -16,8 +16,11 @@ edition = "2023";
 
 package mdi.privatearatea;
 
-import "java/com/google/android/as/oss/privateinference/api/device_attestation_request.proto";
 import "src/com/google/android/as/oss/privateinference/api/anonymous_token_request.proto";
+
+import
+"java/com/google/android/as/oss/privateinference/api/device_attestation_request.proto";
+
 import "third_party/oak/proto/session/session.proto";
 
 option java_multiple_files = true;
@@ -37,11 +40,14 @@ service PrivateArateaService {
 
 // An open-sourced, binary-compatible subset of the PrivateArateaRequest
 // message, containing only the request types needed from within PCS.
-message PcsPrivateArateaRequest {
+  message PcsPrivateArateaRequest {
   oneof request {
     // This is the only request type that we use directly in pcs.
-    DeviceAttestationRequest device_attestation_request = 6;
+    DeviceAttestationRequest device_attestation_request = 6
+        ;
 
-    AnonymousTokenRequest anonymous_token_request = 8;
+    AnonymousTokenRequest anonymous_token_request = 8
+        ;
   }
 }
+

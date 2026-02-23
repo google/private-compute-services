@@ -16,33 +16,96 @@
 
 package com.google.android.`as`.oss.privateinference.library.oakutil
 
-/** The names of the timers used by the client. */
+/**
+ * The names of the timers used by the client to measure the latency of setting up the Private
+ * Inference (Pcs) channel.
+ *
+ * Private Inference Channel Setup Process
+ *
+ * The setup process generally follows this sequence:
+ * 1. **Proxy Setup:** Fetch configuration and establish tokens (`IPP_FETCH_PROXY_CONFIG`,
+ *    `IPP_CREATE_PROXY_TOKEN`).
+ * 2. **Tunneling:** Set up the MASQUE tunnel (`IPP_MASQUE_TUNNEL_SETUP`).
+ * 3. **Oak Session Establishment:**
+ *     * Fetch and verify attestation evidence (`OAK_SESSION_EXCHANGE_ATTESTATION_EVIDENCE`).
+ *     * Perform the noise handshake to exchange keys (`OAK_SESSION_PERFORM_HANDSHAKE_STEP`).
+ *     * These combined steps are measured by `OAK_SESSION_ESTABLISH_STREAM`.
+ * 4. **Authentication:** Authenticate the terminal token (`IPP_ANONYMOUS_TOKEN_AUTH`).
+ * 5. **Inference:** The channel is ready for the first inference request (`INFERENCE_FIRST`).
+ */
 object PrivateInferenceClientTimerNames {
-  const val OPEN_NOISE_SESSION = "OpenNoiseSession"
+  /**
+   * Timer for the entire process of setting up the Private Inference channel. This measures the
+   * total time from initiation until the client is ready to make its first inference request.
+   */
+  const val END_TO_END_PI_CHANNEL_SETUP = "END_TO_END_PI_CHANNEL_SETUP"
 
-  const val SESSION_HANDSHAKE = "SessionHandshake"
+  /**
+   * Timer for establishing an encrypted, attested channel (The Oak Session).
+   *
+   * This encompasses two sub-phases:
+   * 1. **Attestation Step:** Peers exchange identity evidence.
+   * 2. **Noise Handshake Step:** Peers exchange encryption keys.
+   */
+  const val OAK_SESSION_ESTABLISH_STREAM = "OAK_SESSION_ESTABLISH_STREAM"
 
-  const val SESSION_ATTESTATION = "SessionAttestation"
+  /**
+   * Timer for the first phase of the oak session establishment. Measures the time spent fetching
+   * the attestation evidence from the server and verifying it.
+   */
+  const val OAK_SESSION_EXCHANGE_ATTESTATION_EVIDENCE = "OAK_SESSION_EXCHANGE_ATTESTATION_EVIDENCE"
 
-  const val GENERATE_KEY_PAIR_WITH_ATTESTATION = "GenerateKeyPairWithAttestation"
+  /**
+   * Timer for the second phase of the oak session establishment. Measures the time spent performing
+   * the peer encryption key exchange.
+   */
+  const val OAK_SESSION_PERFORM_HANDSHAKE_STEP = "OAK_SESSION_PERFORM_HANDSHAKE_STEP"
 
-  const val GET_INITIAL_DATA = "GetInitialData"
+  /**
+   * Timer for terminal token authentication.
+   *
+   * This occurs after the Oak session is open. It is effectively the first request sent in the
+   * opened session on behalf of the client before the client actually receives the stream.
+   */
+  const val IPP_ANONYMOUS_TOKEN_AUTH = "IPP_ANONYMOUS_TOKEN_AUTH"
 
-  const val ATTEST_AND_SIGN = "AttestAndSign"
+  /** Timer for generating a key pair with attestation. */
+  const val DEVICE_ATTESTATION_GENERATE_KEY_PAIR = "GENERATE_KEY_PAIR_WITH_ATTESTATION_AUTH"
 
-  const val CREATE_ARATEA_TOKEN = "CreateArateaToken"
+  /** Timer for getting initial data. */
+  const val IPP_GET_INITIAL_DATA = "IPP_GET_INITIAL_DATA"
 
-  const val CREATE_PROXY_TOKEN = "CreateProxyToken"
+  /** Timer for attesting and signing. */
+  const val IPP_ATTEST_AND_SIGN = "IPP_ATTEST_AND_SIGN"
 
-  const val GET_PROXY_TOKEN = "GetProxyToken"
+  /** Timer for creating a terminal token. */
+  const val IPP_CREATE_TERMINAL_TOKEN = "IPP_CREATE_TERMINAL_TOKEN"
 
-  const val GET_PROXY_CONFIG = "GetProxyConfig"
+  /**
+   * Timer for creating a proxy token. This operation currently occurs in the background off the
+   * critical session establishment path.
+   */
+  const val IPP_CREATE_PROXY_TOKEN = "IPP_CREATE_PROXY_TOKEN"
 
-  const val FETCH_PROXY_CONFIG = "FetchProxyConfig"
+  /** Timer for getting a proxy token. */
+  const val IPP_GET_PROXY_TOKEN = "IPP_GET_PROXY_TOKEN"
 
-  const val MASQUE_TUNNEL_SETUP = "MasqueTunnelSetup"
+  /**
+   * Timer for getting the proxy configuration. This operation currently occurs when the proxy
+   * tunnel is being setup. This is usually once per the PI service lifetime on the first call to
+   * perform private inference.
+   */
+  const val IPP_GET_PROXY_CONFIG = "IPP_GET_PROXY_CONFIG"
 
-  const val FIRST_INFERENCE = "FirstInferenceLatency"
+  /** Timer for fetching the proxy configuration. This should also happen at tunnel setup time. */
+  const val IPP_FETCH_PROXY_CONFIG = "IPP_FETCH_PROXY_CONFIG"
 
-  const val STABLE_INFERENCE = "StableInferenceLatency"
+  /** Timer for setting up the MASQUE tunnel. */
+  const val IPP_MASQUE_TUNNEL_SETUP = "IPP_MASQUE_TUNNEL_SETUP"
+
+  /** Timer for the latency of the first inference. */
+  const val INFERENCE_FIRST = "INFERENCE_FIRST"
+
+  /** Timer for the latency of stable inferences. */
+  const val INFERENCE_STABLE = "INFERENCE_STABLE"
 }

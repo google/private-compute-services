@@ -50,7 +50,30 @@ data class ProxyToken(override val bytes: BsaTokenBytes, override val expiration
   @javax.inject.Qualifier @Retention(AnnotationRetention.RUNTIME) annotation class Qualifier
 }
 
-/** [BsaToken] intended for use when sending inference requests to Aratea. */
+/**
+ * [BsaToken] intended for use when sending inference requests to Aratea without an oak session
+ * bound nonce.
+ */
+data class ArateaTokenWithoutChallenge(
+  override val bytes: BsaTokenBytes,
+  override val expirationTime: Instant,
+) : BsaToken {
+  constructor(
+    bytes: ByteArray,
+    expirationTime: Instant,
+  ) : this(BsaTokenBytes(bytes), expirationTime)
+
+  /**
+   * Qualifier for [ArateaTokenWithoutChallenge]-based things, when type-parameters aren't enough to
+   * disambiguate.
+   */
+  @javax.inject.Qualifier @Retention(AnnotationRetention.RUNTIME) annotation class Qualifier
+}
+
+/**
+ * [BsaToken] intended for use when sending inference requests to Aratea with an oak session bound
+ * nonce.
+ */
 data class ArateaToken(override val bytes: BsaTokenBytes) : BsaToken {
   constructor(bytes: ByteArray) : this(BsaTokenBytes(bytes))
 
@@ -70,6 +93,7 @@ data class ArateaToken(override val bytes: BsaTokenBytes) : BsaToken {
 val Class<*>.stableTokenClassName: String
   get() =
     when (this) {
+      ArateaTokenWithoutChallenge::class.java -> "ArateaTokenWithoutChallenge"
       ArateaToken::class.java -> "ArateaToken"
       ProxyToken::class.java -> "ProxyToken"
       else -> throw IllegalArgumentException("Bad tokenClass value")

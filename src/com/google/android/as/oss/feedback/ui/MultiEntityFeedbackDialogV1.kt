@@ -258,7 +258,7 @@ private fun MultiFeedbackBottomSheet(
             selectedSentimentMap = uiState.selectedSentimentMap,
             tagsSelectionMap = uiState.tagsSelectionMap,
             freeFormTextMap = uiState.freeFormTextMap,
-            optInChecked = uiState.optInChecked.getOrDefault(LegacyV1, false),
+            optInChecked = uiState.optInChecked.any { it.value },
             onSelectedSentimentChanged = { feedbackEntityContent, feedbackRatingSentiment ->
               viewModel.logUiEvent(
                 uiElementType = FeedbackUiElementType.FEEDBACK_THUMBS_UP_BUTTON.id,

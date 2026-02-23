@@ -18,10 +18,12 @@ package com.google.android.`as`.oss.feedback.domain
 
 import com.google.android.`as`.oss.feedback.api.FeedbackRatingSentiment
 import com.google.android.`as`.oss.feedback.api.FeedbackTagData
+import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.AppInfo
 import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.IntentQueries
 import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.LegacyV1
 import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.MemoryEntities
 import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.ModelOutputs
+import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.NotificationContent
 import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.SelectedEntityContent
 import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.TriggeringMessages
 import com.google.android.`as`.oss.feedback.quartz.serviceclient.QuartzFeedbackDonationData
@@ -44,11 +46,13 @@ data class FeedbackUiState(
   val optInChecked: Map<DataCollectionCategory, Boolean> =
     mapOf(
       LegacyV1 to false,
+      NotificationContent to false,
       TriggeringMessages to false,
       IntentQueries to false,
       ModelOutputs to false,
       MemoryEntities to false,
       SelectedEntityContent to false,
+      AppInfo to false,
     ),
   val feedbackDialogMode: FeedbackDialogMode = FeedbackDialogMode.EDITING_FEEDBACK,
   val feedbackSubmitStatus: FeedbackSubmitState = FeedbackSubmitState.DRAFT,

@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package com.google.android.as.oss.pir.api;
 
 import "private_retrieval/java/proto/private_retrieval_log.proto";
 
+option java_outer_classname = "Pir";
 option features.utf8_validation = NONE;
-option java_multiple_files = true;
 option java_package = "com.google.android.as.oss.pir.api.pir.proto";
 
 message PirDownloadRequest {

@@ -16,6 +16,7 @@ load("@bazel_rules_android//android:rules.bzl", "android_library", "kt_jvm_libra
 
 package(default_visibility = [
     "//java/com/google/android/libraries/mdi/privatearatea:__subpackages__",
+    "//javatests/com/google/android/apps/miphone/pcs/privateinference/arateaipblindingtestclient:__subpackages__",
     "//javatests/com/google/android/apps/miphone/pcs/privateinference/library/bsa:__subpackages__",
     "//javatests/com/google/android/apps/miphone/pcs/privateinference/library/oakutil:__subpackages__",
     "//javatests/com/google/android/apps/miphone/pcs/privateinference/service:__subpackages__",
@@ -60,6 +61,7 @@ android_library(
         "//src/com/google/android/as/oss/privateinference/library/oakutil:private_inference_client_timer_names",
         "//src/com/google/android/as/oss/privateinference/networkusage",
         "//src/com/google/android/as/oss/privateinference/util/timers:timer_set",
+        "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:com_google_flogger_google_extensions",
         "@maven//:io_grpc_grpc_api",
@@ -85,6 +87,7 @@ kt_jvm_library_with_nullness_check(
         "//src/com/google/android/as/oss/privateinference/util/timers:timer_set_jvm",
         "//third_party/java/flogger",
         "//third_party/java/grpc:core",
+        "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:javax_inject_javax_inject",
     ],

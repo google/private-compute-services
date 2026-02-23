@@ -21,6 +21,7 @@ import com.google.android.`as`.oss.common.config.ConfigReader
 import com.google.android.`as`.oss.logging.PcsStatsEnums.CountMetricId
 import com.google.android.`as`.oss.privateinference.config.PrivateInferenceConfig
 import com.google.android.`as`.oss.privateinference.library.bsa.token.BsaAnnotations.ArateaTokenErrorLogMapper
+import com.google.android.`as`.oss.privateinference.library.bsa.token.BsaAnnotations.CacheableArateaTokenErrorLogMapper
 import com.google.android.`as`.oss.privateinference.library.bsa.token.BsaAnnotations.ProxyTokenErrorLogMapper
 import com.google.android.`as`.oss.privateinference.library.bsa.token.BsaTokenProvider.Authenticating
 import com.google.android.`as`.oss.privateinference.library.bsa.token.BsaTokenProvider.DiskCached
@@ -71,11 +72,6 @@ internal object BsaTokenProviderModule {
     @ApplicationScope scope: CoroutineScope,
     configReader: ConfigReader<@JvmSuppressWildcards PrivateInferenceConfig>,
     @Authenticating authenticatingProvider: BsaTokenProvider<@JvmSuppressWildcards ArateaToken>,
-    @MemoryCached
-    memoryCacheProvider: Optional<BsaTokenProvider<@JvmSuppressWildcards ArateaToken>>,
-    @DiskCached diskCacheProvider: Optional<BsaTokenProvider<@JvmSuppressWildcards ArateaToken>>,
-    @MultilevelCached
-    multilevelCacheProvider: Optional<BsaTokenProvider<@JvmSuppressWildcards ArateaToken>>,
     pcsStatsLogger: PcsStatsLogger,
     @ArateaTokenErrorLogMapper
     tokenFetchErrorLogMapper: @JvmSuppressWildcards (Throwable) -> CountMetricId?,
@@ -84,6 +80,38 @@ internal object BsaTokenProviderModule {
       coroutineScope = scope,
       configReader = configReader,
       tokenClass = ArateaToken::class.java,
+      authenticatingProvider = authenticatingProvider,
+      memoryCacheProvider = null,
+      diskCacheProvider = null,
+      multilevelCacheProvider = null,
+      pcsStatsLogger = pcsStatsLogger,
+      tokenFetchErrorLogMapper = tokenFetchErrorLogMapper,
+    )
+
+  @Provides
+  @Singleton
+  fun provideArateaTokenProviderWithoutChallenge(
+    @ApplicationScope scope: CoroutineScope,
+    configReader: ConfigReader<@JvmSuppressWildcards PrivateInferenceConfig>,
+    @Authenticating
+    authenticatingProvider: BsaTokenProvider<@JvmSuppressWildcards ArateaTokenWithoutChallenge>,
+    @MemoryCached
+    memoryCacheProvider:
+      Optional<BsaTokenProvider<@JvmSuppressWildcards ArateaTokenWithoutChallenge>>,
+    @DiskCached
+    diskCacheProvider:
+      Optional<BsaTokenProvider<@JvmSuppressWildcards ArateaTokenWithoutChallenge>>,
+    @MultilevelCached
+    multilevelCacheProvider:
+      Optional<BsaTokenProvider<@JvmSuppressWildcards ArateaTokenWithoutChallenge>>,
+    pcsStatsLogger: PcsStatsLogger,
+    @CacheableArateaTokenErrorLogMapper
+    tokenFetchErrorLogMapper: @JvmSuppressWildcards (Throwable) -> CountMetricId?,
+  ): BsaTokenProvider<ArateaTokenWithoutChallenge> =
+    ConfigurableBsaTokenProvider(
+      coroutineScope = scope,
+      configReader = configReader,
+      tokenClass = ArateaTokenWithoutChallenge::class.java,
       authenticatingProvider = authenticatingProvider,
       memoryCacheProvider = memoryCacheProvider.getOrNull(),
       diskCacheProvider = diskCacheProvider.getOrNull(),

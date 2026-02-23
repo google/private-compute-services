@@ -27,16 +27,16 @@ import com.google.common.flogger.GoogleLogger
 import com.google.errorprone.annotations.ThreadSafe
 import com.google.privacy.ppn.proto.AttestAndSignRequest
 import com.google.privacy.ppn.proto.GetInitialDataRequest
+import dagger.Lazy
 import io.grpc.ManagedChannel
 import java.util.Optional
-import javax.inject.Provider
 import kotlin.jvm.optionals.getOrNull
 
 /** [MessageInterface] that uses gRPC to communicate with a Phosphor server for token issuance. */
 @ThreadSafe
 class PhosphorGrpcMessageInterface(
   @field:ThreadSafe.Suppress(reason = "ManagedChannel is thread-safe after creation")
-  private val channel: Provider<ManagedChannel>,
+  private val channel: Lazy<ManagedChannel>,
   private val networkUsageLogHelper: PrivateInferenceNetworkUsageLogHelper,
   @field:ThreadSafe.Suppress(reason = "Timers are thread-safe") private val timerSet: TimerSet,
   @field:ThreadSafe.Suppress(reason = "DeviceInfo is thread-safe after creation")
@@ -55,7 +55,7 @@ class PhosphorGrpcMessageInterface(
   }
 
   override suspend fun initialData(request: ByteArray): ByteArray =
-    timerSet.start(PrivateInferenceClientTimerNames.GET_INITIAL_DATA).use {
+    timerSet.start(PrivateInferenceClientTimerNames.IPP_GET_INITIAL_DATA).use {
       val requestSize = request.size.toLong()
       try {
         logger.atInfo().log("Sent GetInitialData request to server with size: %d", requestSize)
@@ -73,7 +73,7 @@ class PhosphorGrpcMessageInterface(
     }
 
   override suspend fun attestAndSign(request: ByteArray): ByteArray =
-    timerSet.start(PrivateInferenceClientTimerNames.ATTEST_AND_SIGN).use {
+    timerSet.start(PrivateInferenceClientTimerNames.IPP_ATTEST_AND_SIGN).use {
       val requestSize = request.size.toLong()
       try {
         logger.atInfo().log("Sent AttestAndSign request to server with size: %d", requestSize)

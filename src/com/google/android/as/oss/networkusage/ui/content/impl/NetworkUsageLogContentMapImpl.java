@@ -102,6 +102,19 @@ public final class NetworkUsageLogContentMapImpl implements NetworkUsageLogConte
   }
 
   @Override
+  public Optional<ConnectionDetails> getFeedbackConnectionDetails(String featureName) {
+    for (ConnectionDetails details : entryContentMap.keySet()) {
+      if (details.connectionKey().hasFeedbackConnectionKey()
+          && featureName.equals(
+              details.connectionKey().getFeedbackConnectionKey().getFeatureName())) {
+        return Optional.of(details);
+      }
+    }
+    logger.atWarning().log("Unauthorized Feedback request for url '%s'", featureName);
+    return Optional.empty();
+  }
+
+  @Override
   public Optional<ConnectionDetails> getPdConnectionDetails(String clientId) {
     for (ConnectionDetails details : entryContentMap.keySet()) {
       if (details.connectionKey().hasPdConnectionKey()
@@ -166,6 +179,7 @@ public final class NetworkUsageLogContentMapImpl implements NetworkUsageLogConte
       case PD -> context.getString(R.string.connection_type_ap);
       case ATTESTATION_REQUEST -> context.getString(R.string.connection_type_attestation);
       case SURVEY_REQUEST -> context.getString(R.string.connection_type_survey);
+      case FEEDBACK_REQUEST -> context.getString(R.string.connection_type_feedback);
       default ->
           throw new UnsupportedOperationException(
               String.format("Unsupported connection type '%s'", connectionDetails.type().name()));

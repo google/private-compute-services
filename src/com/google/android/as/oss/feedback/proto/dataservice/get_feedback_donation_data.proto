@@ -58,62 +58,46 @@ message GetFeedbackDonationDataResponse {
   repeated string ground_truth_options = 8 [deprecated = true];
 }
 
+// The notification view data screen V2 requires non-null categories for both
+// Spoon and Quartz. If any of the categories is null, we will block the view
+// data screen V2 for notification and use V1 instead. It's determined by data
+// suppliers rather than a configuration flag.
+//
 // Next ID: 26
 message FeedbackUiRenderingData {
-  string feedback_dialog_good_feedback_title = 5
-     ;
-  string feedback_dialog_bad_feedback_title = 6
-     ;
-  string feedback_dialog_fallback_title = 19
-     ;
-  string feedback_dialog_free_form_label = 7
-     ;
-  string feedback_dialog_free_form_hint = 8
-     ;
-  string feedback_dialog_opt_in_checkbox_content_description = 21
-     ;
-  string feedback_dialog_opt_in_label = 9
-     ;
-  string feedback_dialog_opt_in_label_generic_info_label = 20
-     ;
-  string feedback_dialog_opt_in_label_link_privacy_policy = 18
-     ;
-  string feedback_dialog_opt_in_label_link_view_data = 10
-     ;
-  string feedback_dialog_button_label = 11
-     ;
+  string feedback_dialog_good_feedback_title = 5;
+  string feedback_dialog_bad_feedback_title = 6;
+  string feedback_dialog_fallback_title = 19;
+  string feedback_dialog_free_form_label = 7;
+  string feedback_dialog_free_form_hint = 8;
+  string feedback_dialog_opt_in_checkbox_content_description = 21;
+  string feedback_dialog_opt_in_label = 9;
+  string feedback_dialog_opt_in_label_generic_info_label = 20;
+  string feedback_dialog_opt_in_label_link_privacy_policy = 18;
+  string feedback_dialog_opt_in_label_link_view_data = 10;
+  string feedback_dialog_button_label = 11;
   repeated FeedbackTagData feedback_chips = 12;
-  string feedback_dialog_view_data_title = 13
-     ;
-  string feedback_dialog_view_data_back_button_content_description = 14
-     ;
-  string feedback_dialog_view_data_header = 15
-      [ deprecated = true];
-  string feedback_dialog_sent_successfully_toast = 16
-     ;
-  string feedback_dialog_sent_failed_toast = 17
-     ;
-  string feedback_dialog_opt_in_v2_title = 23
-     ;
-  string feedback_dialog_opt_in_v2_description = 24
-     ;
-  string feedback_dialog_ground_truth_title = 25
-     ;
+  string feedback_dialog_view_data_title = 13;
+  string feedback_dialog_view_data_back_button_content_description = 14;
+  string feedback_dialog_view_data_header = 15 [deprecated = true];
+  string feedback_dialog_sent_successfully_toast = 16;
+  string feedback_dialog_sent_failed_toast = 17;
+  string feedback_dialog_opt_in_v2_title = 23;
+  string feedback_dialog_opt_in_v2_description = 24;
+  string feedback_dialog_ground_truth_title = 25;
 
   FeedbackViewDataCategoryTitles feedback_view_data_category_titles = 22;
 }
 
-// Next ID: 8
+// Next ID: 10
 message FeedbackViewDataCategoryTitles {
-  string triggering_messages_title = 1
-     ;
+  string triggering_messages_title = 1;
   string intent_queries_title = 2;
   string model_outputs_title = 3;
   string memory_entities_title = 4;
-  string selected_entity_content_title = 5
-     ;
-  string expand_category_button_semantics_description = 6
-     ;
-  string collapse_category_button_semantics_description = 7
-     ;
+  string selected_entity_content_title = 5;
+  string expand_category_button_semantics_description = 6;
+  string collapse_category_button_semantics_description = 7;
+  string notification_content_title = 8;
+  string app_info_title = 9;
 }

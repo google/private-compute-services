@@ -22,7 +22,7 @@ import com.google.android.`as`.oss.common.CoroutineQualifiers
 import com.google.android.`as`.oss.common.config.ConfigReader
 import com.google.android.`as`.oss.common.initializer.PcsInitializer
 import com.google.android.`as`.oss.privateinference.config.PrivateInferenceConfig
-import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaToken
+import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaTokenWithoutChallenge
 import com.google.android.`as`.oss.privateinference.library.bsa.token.BsaTokenProvider
 import com.google.android.`as`.oss.privateinference.library.bsa.token.ProxyToken
 import dagger.Module
@@ -82,14 +82,16 @@ internal object WorkerModule {
   fun provideArateaTokenWorkerFactory(
     configReader: ConfigReader<@JvmSuppressWildcards PrivateInferenceConfig>,
     @BsaTokenProvider.MemoryCached
-    memoryTokenProvider: Optional<BsaTokenProvider<@JvmSuppressWildcards ArateaToken>>,
+    memoryTokenProvider:
+      Optional<BsaTokenProvider<@JvmSuppressWildcards ArateaTokenWithoutChallenge>>,
     @BsaTokenProvider.DiskCached
-    diskTokenProvider: Optional<BsaTokenProvider<@JvmSuppressWildcards ArateaToken>>,
+    diskTokenProvider:
+      Optional<BsaTokenProvider<@JvmSuppressWildcards ArateaTokenWithoutChallenge>>,
     @BsaTokenProvider.MultilevelCached
-    multilevelCached: Optional<BsaTokenProvider<@JvmSuppressWildcards ArateaToken>>,
+    multilevelCached: Optional<BsaTokenProvider<@JvmSuppressWildcards ArateaTokenWithoutChallenge>>,
   ): WorkerFactory {
     fun getCacheControlPlane(): BsaTokenCacheControlPlane? {
-      return when (configReader.config.proxyTokenCacheMode()) {
+      return when (configReader.config.arateaTokenCacheMode()) {
         TokenCacheFlag.Mode.NO_CACHE -> null
         TokenCacheFlag.Mode.MEMORY_ONLY -> memoryTokenProvider.getOrNull()
         TokenCacheFlag.Mode.DURABLE_ONLY -> diskTokenProvider.getOrNull()
@@ -97,9 +99,8 @@ internal object WorkerModule {
       }
         as? BsaTokenCacheControlPlane
     }
-
     return BsaTokenCacheRefreshWorker.Factory(
-      tokenClass = ArateaToken::class.java,
+      tokenClass = ArateaTokenWithoutChallenge::class.java,
       cacheControl =
         object : BsaTokenCacheControlPlane {
           override suspend fun invalidate() {
@@ -139,7 +140,7 @@ internal object WorkerModule {
     BsaTokenCacheRefreshWorker.Initializer(
       appContext = context,
       configReader = configReader,
-      tokenClass = ArateaToken::class.java,
+      tokenClass = ArateaTokenWithoutChallenge::class.java,
       coroutineScope = coroutineScope,
     )
 }

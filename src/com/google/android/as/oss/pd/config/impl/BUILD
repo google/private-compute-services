@@ -20,8 +20,13 @@ package(default_visibility = [
 
 android_library(
     name = "impl",
-    srcs = glob(["*.java"]),
+    srcs = [
+        "ClientBuildVersionReaderImpl.java",
+        "ProtectedDownloadConfigModule.java",
+        "ProtectedDownloadConfigReader.java",
+    ],
     deps = [
+        ":flag_reader",
         "//src/com/google/android/as/oss/common:annotation",
         "//src/com/google/android/as/oss/common/config",
         "//src/com/google/android/as/oss/pd/api:protected_download_java_proto_lite",
@@ -32,4 +37,12 @@ android_library(
         "@maven//:com_google_guava_guava",
         "@maven//:javax_inject_javax_inject",
     ],
+)
+
+android_library(
+    name = "flag_reader",
+    srcs = [
+        "FlagReader.java",
+    ],
+    deps = ["//src/com/google/android/as/oss/common/config"],
 )

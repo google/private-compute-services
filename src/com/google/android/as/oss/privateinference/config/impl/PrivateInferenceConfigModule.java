@@ -21,6 +21,7 @@ import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.common.config.FlagManagerFactory;
 import com.google.android.as.oss.common.config.FlagNamespace;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceAttachCertificateHeader;
+import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceEnableArateaTokenCache;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceEndpointUrl;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceWaitForGrpcChannelReady;
 import com.google.android.as.oss.privateinference.Annotations.TokenIssuanceEndpointUrl;
@@ -95,5 +96,11 @@ interface PrivateInferenceConfigModule {
   @TokenIssuanceEndpointUrl
   static String provideTokenIssuanceEndpointUrl(ConfigReader<PrivateInferenceConfig> configReader) {
     return configReader.getConfig().tokenIssuanceEndpointUrl();
+  }
+
+  @Provides
+  @PrivateInferenceEnableArateaTokenCache
+  static boolean providesEnableArateaTokenCache(ConfigReader<PrivateInferenceConfig> configReader) {
+    return configReader.getConfig().enableArateaTokenCache();
   }
 }

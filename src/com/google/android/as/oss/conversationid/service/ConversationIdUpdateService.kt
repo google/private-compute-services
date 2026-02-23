@@ -35,8 +35,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 /**
- * Service to update conversation id. This is only used by AiAi to update conversation id. So we
- * check whether the caller is AiAi in onTransact.
+ * Service to update conversation id. This is only used by ASI to update conversation id. So we
+ * check whether the caller is ASI in onTransact.
  */
 @AndroidEntryPoint(Service::class)
 @RequiresApi(VERSION_CODES.BAKLAVA)
@@ -59,12 +59,12 @@ class ConversationIdUpdateService : Hilt_ConversationIdUpdateService() {
   }
 
   private inner class ConversationIdServiceBinderStub : IConversationIdUpdateService.Stub() {
-    // Only AiAi can update the conversation id.
+    // Only ASI can update the conversation id.
     override fun onTransact(code: Int, data: Parcel, reply: Parcel?, flags: Int): Boolean {
       if (!configReader.config.enableConversationId) {
         throw RemoteException("Conversation id feature is disabled.")
       }
-      if (!validator.validateAiAiCaller(context, Binder.getCallingUid())) {
+      if (!validator.validateAsiCaller(context, Binder.getCallingUid())) {
         throw SecurityException("ConversationIdUpdateService: Caller is not allowlisted.")
       }
       return super.onTransact(code, data, reply, flags)

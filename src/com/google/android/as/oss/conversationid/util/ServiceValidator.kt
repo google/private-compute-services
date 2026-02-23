@@ -26,7 +26,7 @@ import com.google.android.`as`.oss.common.security.config.PccSecurityConfig
 import com.google.android.`as`.oss.conversationid.config.ConversationIdConfig
 
 /**
- * Validates binder caller's app signature. Only allow Gboard and AiAi to call the ConversationId
+ * Validates binder caller's app signature. Only allow Gboard and ASI to call the ConversationId
  * service at this moment.
  */
 class ServiceValidator(
@@ -45,7 +45,7 @@ class ServiceValidator(
     )
   }
 
-  fun validateAiAiCaller(context: Context, callingUid: Int): Boolean {
+  fun validateAsiCaller(context: Context, callingUid: Int): Boolean {
     return validateCaller(
       context,
       callingUid,

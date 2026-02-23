@@ -35,6 +35,34 @@ interface QuartzFeedbackDataServiceClient {
   ): Result<QuartzFeedbackDonationData>
 }
 
+data class QuartzNotificationData(
+  val title: String = "",
+  val content: String = "",
+  val channelId: String = "",
+  val conversationMessages: String = "",
+  val conversationHistoricMessages: String = "",
+)
+
+data class QuartzModelData(
+  val modelInfo: String = "",
+  val classificationMethod: String = "",
+  val classificationBertCategoryResult: String = "",
+  val classificationBertCategoryScore: String = "",
+  val classificationCategory: String = "",
+  val classificationDefaultCategoryResult: String = "",
+  val defaultCategoryCorrectionThreshold: String = "",
+  val isSuppressDuplicate: String = "",
+  val featureName: String = "",
+  val summaryText: String = "",
+)
+
+data class QuartzAppInfoData(
+  val uuid: String = "",
+  val asiVersion: String = "",
+  val playStoreCategory: String = "",
+  val packageName: String = "",
+)
+
 data class QuartzKeySummarizationData(
   val uuid: String = "",
   val sbnKey: String = "",
@@ -117,6 +145,9 @@ data class QuartzFeedbackDonationData(
   val quartzCuj: QuartzCUJ = QuartzCUJ.QUARTZ_CUJ_UNSPECIFIED,
   val summarizationData: QuartzKeySummarizationData = QuartzKeySummarizationData(),
   val typeData: QuartzKeyTypeData = QuartzKeyTypeData(),
+  val notificationData: QuartzNotificationData? = null,
+  val modelData: QuartzModelData? = null,
+  val appInfoData: QuartzAppInfoData? = null,
   val runtimeConfig: QuartzRuntimeConfig = QuartzRuntimeConfig(),
   val feedbackUiRenderingData: FeedbackUiRenderingData = feedbackUiRenderingData {},
 ) : ViewFeedbackData {
@@ -125,42 +156,97 @@ data class QuartzFeedbackDonationData(
 
   override val dataCollectionCategories: Map<DataCollectionCategory, DataCollectionCategoryData>
     get() {
-      // TODO: b/451840143 - These are all placeholders for UI testing.
       return mapOf(
-        DataCollectionCategory.TriggeringMessages to
+        DataCollectionCategory.NotificationContent to
           DataCollectionCategoryData(
-            header = "What triggered the suggestion",
-            body = "Received message XXXXX XX XXXXXXX XXXX from contact YYYYY YYYYYYYY.".repeat(10),
-          ),
-        DataCollectionCategory.IntentQueries to
-          DataCollectionCategoryData(
-            header = "intent_queries.txt",
-            body =
-              "The query generated from the triggering messages that feeds into the model."
-                .repeat(10),
+            header =
+              feedbackUiRenderingData.feedbackViewDataCategoryTitles.notificationContentTitle,
+            body = getNotificationDataBody(),
           ),
         DataCollectionCategory.ModelOutputs to
           DataCollectionCategoryData(
-            header = "model_outputs.txt",
-            body = "The model output to be surfaced to the user.".repeat(10),
+            header = feedbackUiRenderingData.feedbackViewDataCategoryTitles.modelOutputsTitle,
+            body = getModelOutputsBody(),
           ),
-        DataCollectionCategory.MemoryEntities to
+        DataCollectionCategory.AppInfo to
           DataCollectionCategoryData(
-            header = "memory_entities.txt",
-            body = "L1 memory entities used to generate suggestions.".repeat(10),
-          ),
-        DataCollectionCategory.SelectedEntityContent to
-          DataCollectionCategoryData(
-            header = "selected_entity_content.txt",
-            body = "Specifies the entity content that the user selects.".repeat(10),
+            header = feedbackUiRenderingData.feedbackViewDataCategoryTitles.appInfoTitle,
+            body = getAppInfoBody(),
           ),
       )
     }
 
-  // TODO: b/451840143 - This should come from rendering data
-  override val dataCollectionCategoryExpandContentDescription: String = "Expand"
-  // TODO: b/451840143 - This should come from rendering data
-  override val dataCollectionCategoryCollapseContentDescription: String = "Collapse"
+  private fun getNotificationDataBody(): String {
+    if (notificationData == null) {
+      return ""
+    }
+    return buildString {
+      appendLine(notificationData.title)
+      appendLine(notificationData.content)
+      appendLine(notificationData.channelId)
+      if (notificationData.conversationMessages.isNotEmpty()) {
+        appendLine(notificationData.conversationMessages)
+      }
+      if (notificationData.conversationHistoricMessages.isNotEmpty()) {
+        appendLine(notificationData.conversationHistoricMessages)
+      }
+    }
+  }
+
+  private fun getModelOutputsBody(): String {
+    if (modelData == null) {
+      return ""
+    }
+    return buildString {
+      appendLine(modelData.modelInfo)
+      if (modelData.classificationMethod.isNotEmpty()) {
+        appendLine(modelData.classificationMethod)
+      }
+      if (modelData.classificationBertCategoryResult.isNotEmpty()) {
+        appendLine(modelData.classificationBertCategoryResult)
+      }
+      if (modelData.classificationBertCategoryScore.isNotEmpty()) {
+        appendLine(modelData.classificationBertCategoryScore)
+      }
+      if (modelData.classificationCategory.isNotEmpty()) {
+        appendLine(modelData.classificationCategory)
+      }
+      if (modelData.classificationDefaultCategoryResult.isNotEmpty()) {
+        appendLine(modelData.classificationDefaultCategoryResult)
+      }
+      if (modelData.defaultCategoryCorrectionThreshold.isNotEmpty()) {
+        appendLine(modelData.defaultCategoryCorrectionThreshold)
+      }
+      if (modelData.isSuppressDuplicate.isNotEmpty()) {
+        appendLine(modelData.isSuppressDuplicate)
+      }
+      if (modelData.featureName.isNotEmpty()) {
+        appendLine(modelData.featureName)
+      }
+      if (modelData.summaryText.isNotEmpty()) {
+        appendLine(modelData.summaryText)
+      }
+    }
+  }
+
+  private fun getAppInfoBody(): String {
+    if (appInfoData == null) {
+      return ""
+    }
+    return buildString {
+      appendLine(appInfoData.uuid)
+      appendLine(appInfoData.asiVersion)
+      appendLine(appInfoData.playStoreCategory)
+      appendLine(appInfoData.packageName)
+    }
+  }
+
+  override val dataCollectionCategoryExpandContentDescription: String =
+    feedbackUiRenderingData.feedbackViewDataCategoryTitles.expandCategoryButtonSemanticsDescription
+
+  override val dataCollectionCategoryCollapseContentDescription: String =
+    feedbackUiRenderingData.feedbackViewDataCategoryTitles
+      .collapseCategoryButtonSemanticsDescription
 
   override fun toString(): String {
     return buildString {

@@ -26,7 +26,9 @@ android_library(
     ],
     manifest = ":AndroidManifest.xml",
     deps = [
+        "//java/com/google/common/annotations",
         "//third_party/kotlin/kotlinx_atomicfu:kotlinx_atomicfu-android",
+        "@maven//:androidx_annotation_annotation",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",
         "@maven//:com_google_flogger_google_extensions",

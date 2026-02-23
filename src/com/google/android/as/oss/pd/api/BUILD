@@ -32,13 +32,11 @@ proto_library(
         "protected_download.proto",
     ],
     has_services = 1,
+    option_deps = ["//third_party/protobuf:cpp_features_proto"],
     visibility = [
         "//visibility:public",
     ],
-    deps = [
-        "",
-        "//third_party/protobuf:cpp_features_proto",
-    ],
+    deps = [""],
 )
 
 java_lite_proto_library(

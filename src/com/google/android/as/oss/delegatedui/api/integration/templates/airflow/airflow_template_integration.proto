@@ -17,7 +17,6 @@ edition = "2023";
 package com.google.android.as.oss.delegatedui.api.integration.templates.airflow;
 
 import "src/com/google/android/as/oss/delegatedui/api/integration/templates/ui_id_token.proto";
-
 import "third_party/protobuf/cpp_features.proto";
 
 option features.(pb.cpp).string_type = VIEW;

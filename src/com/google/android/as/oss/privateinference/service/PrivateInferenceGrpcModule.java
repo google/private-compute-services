@@ -20,6 +20,7 @@ import com.google.android.apps.miphone.pcs.grpc.Annotations.GrpcService;
 import com.google.android.apps.miphone.pcs.grpc.Annotations.GrpcServiceName;
 import com.google.android.as.oss.privateinference.service.api.proto.PcsPrivateInferenceServiceGrpc;
 import com.google.android.as.oss.privateinference.util.timers.Annotations.PrivateInferenceServiceTimers;
+import com.google.android.as.oss.privateinference.util.timers.LatencyLoggingTimer;
 import com.google.android.as.oss.privateinference.util.timers.PiDebugLogTimers;
 import com.google.android.as.oss.privateinference.util.timers.TimerSet;
 import com.google.android.as.oss.privateinference.util.timers.Timers;
@@ -69,6 +70,11 @@ abstract class PrivateInferenceGrpcModule {
   @IntoSet
   @PrivateInferenceServiceTimers
   abstract Timers bindsTraceTimers(TraceTimers timers);
+
+  @Binds
+  @IntoSet
+  @PrivateInferenceServiceTimers
+  abstract Timers bindLatencyLoggingTimers(LatencyLoggingTimer loggingTimer);
 
   @Binds
   @IntoSet

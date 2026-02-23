@@ -18,6 +18,7 @@ package com.google.android.as.oss.feedback.api;
 
 import "src/com/google/android/as/oss/feedback/proto/feedback_dialog_common_data.proto";
 import "src/com/google/android/as/oss/feedback/proto/feedback_tag_data.proto";
+
 import "third_party/protobuf/cpp_features.proto";
 
 option features.(pb.cpp).string_type = VIEW;
@@ -35,7 +36,8 @@ message EntityFeedbackDialogData {
   string client_session_id = 2;
 
   // The rating sentiment of the feedback.
-  FeedbackRatingSentiment rating_sentiment = 3;
+  FeedbackRatingSentiment rating_sentiment = 3
+     ;
 
   // The common dialog data.
   FeedbackDialogCommonData dialog_common_data = 4;

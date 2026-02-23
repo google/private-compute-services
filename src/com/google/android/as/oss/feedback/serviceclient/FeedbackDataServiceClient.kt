@@ -70,7 +70,10 @@ data class FeedbackDonationData(
         DataCollectionCategory.MemoryEntities to
           DataCollectionCategoryData(
             header = feedbackUiRenderingData.feedbackViewDataCategoryTitles.memoryEntitiesTitle,
-            body = memoryEntities.joinToString("\n"),
+            body =
+              memoryEntities
+                .map { entity -> "modelVersion: ${entity.modelVersion}\n${entity.entityData}" }
+                .joinToString("\n" + "-".repeat(50) + "\n"),
           ),
       )
     }

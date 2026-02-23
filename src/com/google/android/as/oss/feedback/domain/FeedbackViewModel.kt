@@ -217,6 +217,8 @@ constructor(
     loadDonationDataJob =
       viewModelScope.launch {
         _uiStateFlow.update { it.copy(feedbackDonationData = null) }
+
+        var blockViewDataV2ForNotification = false
         if (loadSpoonData) {
           val response =
             feedbackDataServiceClient.getFeedbackDonationData(
@@ -225,6 +227,13 @@ constructor(
               uiElementIndex = 0,
             )
           _uiStateFlow.update { it.copy(feedbackDonationData = response) }
+          blockViewDataV2ForNotification =
+            blockViewDataV2ForNotification or
+              !(response
+                .getOrNull()
+                ?.feedbackUiRenderingData
+                ?.feedbackViewDataCategoryTitles
+                ?.hasTriggeringMessagesTitle() ?: false)
         }
 
         if (quartzCuj != null) {
@@ -236,6 +245,16 @@ constructor(
               quartzCuj = quartzCuj,
             )
           _uiStateFlow.update { it.copy(quartzFeedbackDonationData = quartzResponse) }
+          blockViewDataV2ForNotification =
+            blockViewDataV2ForNotification or
+              !(quartzResponse
+                .getOrNull()
+                ?.feedbackUiRenderingData
+                ?.feedbackViewDataCategoryTitles
+                ?.hasNotificationContentTitle() ?: false)
+        }
+        _uiStateFlow.update {
+          it.copy(enableViewDataDialogV2MultiEntity = !blockViewDataV2ForNotification)
         }
       }
   }
@@ -457,7 +476,6 @@ constructor(
     private fun FeedbackUiState(configReader: ConfigReader<FeedbackConfig>) =
       FeedbackUiState(
         enableViewDataDialogV2SingleEntity = configReader.config.enableViewDataDialogV2SingleEntity,
-        enableViewDataDialogV2MultiEntity = configReader.config.enableViewDataDialogV2MultiEntity,
         enableOptInUiV2 = configReader.config.enableOptInUiV2,
         enableGroundTruthSelectorSingleEntity =
           configReader.config.enableGroundTruthSelectorSingleEntity,

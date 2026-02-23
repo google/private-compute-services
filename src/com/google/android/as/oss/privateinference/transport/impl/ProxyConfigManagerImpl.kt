@@ -64,7 +64,7 @@ internal constructor(
   }
 
   override suspend fun getProxyConfig(): List<ProxyConfiguration> =
-    timers.start(PrivateInferenceClientTimerNames.GET_PROXY_CONFIG).use {
+    timers.start(PrivateInferenceClientTimerNames.IPP_GET_PROXY_CONFIG).use {
       when (configReader.config.proxyConfigProviderType()) {
         ProxyConfigProviderType.Mode.DEVICE_CONFIG -> {
           listOf(configReader.config.proxyConfiguration())
@@ -95,7 +95,7 @@ internal constructor(
     try {
       val response =
         pcsStatsLogger.getResultAndLogStatusAsync(METRIC_ID_MAP) {
-          timers.start(PrivateInferenceClientTimerNames.FETCH_PROXY_CONFIG).use {
+          timers.start(PrivateInferenceClientTimerNames.IPP_FETCH_PROXY_CONFIG).use {
             stub.getProxyConfig(request)
           }
         }

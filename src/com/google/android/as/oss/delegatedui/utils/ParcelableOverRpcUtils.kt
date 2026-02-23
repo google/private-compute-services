@@ -17,7 +17,6 @@
 package com.google.android.`as`.oss.delegatedui.utils
 
 import android.os.Parcelable
-import io.grpc.BindableService
 import io.grpc.Context
 import io.grpc.Metadata
 import io.grpc.stub.AbstractStub
@@ -73,7 +72,7 @@ interface ParcelableOverRpcUtils {
    * an exception if not found.
    */
   @Suppress("UnusedReceiverParameter")
-  fun <P : Parcelable> BindableService.receiveParcelableFromRequest(
+  fun <P : Parcelable> receiveParcelableFromRequest(
     key: SingleParcelableKey<P>,
     context: Context = Context.current(),
   ): P = receiveParcelableOrNullFromRequest(key, context) ?: throw NoSuchParcelableException(key)
@@ -83,7 +82,7 @@ interface ParcelableOverRpcUtils {
    * returns null if not found.
    */
   @Suppress("UnusedReceiverParameter")
-  fun <P : Parcelable> BindableService.receiveParcelableOrNullFromRequest(
+  fun <P : Parcelable> receiveParcelableOrNullFromRequest(
     key: SingleParcelableKey<P>,
     context: Context = Context.current(),
   ): P? = key.contextKey.get(context)?.firstOrNull()
@@ -93,7 +92,7 @@ interface ParcelableOverRpcUtils {
    * throws an exception if not found.
    */
   @Suppress("UnusedReceiverParameter")
-  fun <P : Parcelable> BindableService.receiveParcelablesFromRequest(
+  fun <P : Parcelable> receiveParcelablesFromRequest(
     key: RepeatedParcelableKey<P>,
     context: Context = Context.current(),
   ): List<P> =
@@ -104,14 +103,14 @@ interface ParcelableOverRpcUtils {
    * returns null if not found.
    */
   @Suppress("UnusedReceiverParameter")
-  fun <P : Parcelable> BindableService.receiveParcelablesOrNullFromRequest(
+  fun <P : Parcelable> receiveParcelablesOrNullFromRequest(
     key: RepeatedParcelableKey<P>,
     context: Context = Context.current(),
   ): List<P>? = key.contextKey.get(context)
 
   /** Helper to be called on the server for sending single parcelables over response headers. */
   @Suppress("UnusedReceiverParameter")
-  fun <P : Parcelable> BindableService.attachParcelableToResponse(
+  fun <P : Parcelable> attachParcelableToResponse(
     key: SingleParcelableKey<P>,
     value: P,
     context: Context = Context.current(),
@@ -119,7 +118,7 @@ interface ParcelableOverRpcUtils {
 
   /** Helper to be called on the server for sending repeated parcelables over response headers. */
   @Suppress("UnusedReceiverParameter")
-  fun <P : Parcelable> BindableService.attachParcelablesToResponse(
+  fun <P : Parcelable> attachParcelablesToResponse(
     key: RepeatedParcelableKey<P>,
     values: List<P>,
     context: Context = Context.current(),

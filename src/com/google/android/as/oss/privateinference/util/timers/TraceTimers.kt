@@ -56,10 +56,19 @@ class TraceTimers @Inject internal constructor() : Timers {
       listOf(
         PrivateInferenceGrpcTimerNames.PRIVATE_INFERENCE_TIMER_NAME,
         PrivateInferenceGrpcTimerNames.PRIVATE_INFERENCE_SESSION_TIMER_NAME,
-        PrivateInferenceClientTimerNames.CREATE_PROXY_TOKEN,
-        PrivateInferenceClientTimerNames.CREATE_ARATEA_TOKEN,
-        PrivateInferenceClientTimerNames.GET_INITIAL_DATA,
-        PrivateInferenceClientTimerNames.ATTEST_AND_SIGN,
+        PrivateInferenceClientTimerNames.END_TO_END_PI_CHANNEL_SETUP,
+        PrivateInferenceClientTimerNames.OAK_SESSION_ESTABLISH_STREAM,
+        PrivateInferenceClientTimerNames.OAK_SESSION_EXCHANGE_ATTESTATION_EVIDENCE,
+        PrivateInferenceClientTimerNames.OAK_SESSION_PERFORM_HANDSHAKE_STEP,
+        PrivateInferenceClientTimerNames.IPP_ANONYMOUS_TOKEN_AUTH,
+        PrivateInferenceClientTimerNames.IPP_GET_PROXY_TOKEN,
+        PrivateInferenceClientTimerNames.IPP_CREATE_PROXY_TOKEN,
+        PrivateInferenceClientTimerNames.IPP_CREATE_TERMINAL_TOKEN,
+        PrivateInferenceClientTimerNames.IPP_GET_INITIAL_DATA,
+        PrivateInferenceClientTimerNames.IPP_ATTEST_AND_SIGN,
+        PrivateInferenceClientTimerNames.IPP_GET_PROXY_CONFIG,
+        PrivateInferenceClientTimerNames.IPP_FETCH_PROXY_CONFIG,
+        PrivateInferenceClientTimerNames.IPP_MASQUE_TUNNEL_SETUP,
       )
   }
 }

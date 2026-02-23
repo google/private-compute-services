@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package com.google.android.as.oss.pd.api;
 
-import "third_party/protobuf/cpp_features.proto";
+import option "third_party/protobuf/cpp_features.proto";
 
-option features.(pb.cpp).string_type = VIEW;
+option java_outer_classname = "ProtectedDownload";
+option features.enforce_naming_style = STYLE_LEGACY;
+option features.(pb.cpp).enum_name_uses_string_view = false;
 option features.field_presence = IMPLICIT;
-option java_multiple_files = true;
 option java_package = "com.google.android.as.oss.pd.api.proto";
 
 // Request to download a blob.
@@ -63,7 +64,7 @@ message Metadata {
 message BlobConstraints {
   // The tier this device is in, which gives some hint about the HW capabilities
   // of the device.
-  enum DeviceTier {
+  export enum DeviceTier {
     UNKNOWN = 0;
     ULTRA_LOW = 1;
     LOW = 2;
@@ -171,7 +172,7 @@ message BlobConstraints {
   ClientVersion client_version = 1004;
 
   // Variants that differentiate device types
-  enum Variant {
+  export enum Variant {
     VARIANT_UNSPECIFIED = 0;
     OEM = 1;
 
@@ -239,6 +240,7 @@ enum ProtectionType {
   TYPE_RULE = 1;
   TYPE_MODEL = 2;
   TYPE_BLM_BLOCK_LIST = 4;
+
   reserved 3, 5, 6;
 }
 

@@ -40,6 +40,7 @@ android_library(
         "//src/com/google/android/as/oss/privateinference/transport:constants",
         "//src/com/google/android/as/oss/privateinference/transport:managed_channel_factory",
         "//src/com/google/android/as/oss/privateinference/transport:proxy_config_manager",
+        "//src/com/google/android/as/oss/privateinference/util/timers",
         "//src/com/google/android/as/oss/privateinference/util/timers:annotations",
         "//src/com/google/android/as/oss/privateinference/util/timers:timer_set",
         "//third_party/java/android_libs/cronet",

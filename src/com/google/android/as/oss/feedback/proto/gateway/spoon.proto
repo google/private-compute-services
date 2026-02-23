@@ -16,7 +16,6 @@ edition = "2023";
 
 package com.google.android.as.oss.feedback.api.gateway;
 
-
 option java_multiple_files = true;
 option java_package = "com.google.android.as.oss.feedback.api.gateway";
 
@@ -39,19 +38,15 @@ enum SpoonCUJ {
 }
 
 message SpoonFeedbackDataDonation {
-  repeated string triggering_messages = 1
-     ;
-  repeated string intent_queries = 2
-     ;
+  repeated string triggering_messages = 1;
+  repeated string intent_queries = 2;
   repeated string model_outputs = 3;
   repeated MemoryEntity memory_entities = 4;
-  string selected_entity_content = 5
-     ;
+  string selected_entity_content = 5;
 }
 
 message SpoonUserInput {
-  repeated string ground_truth_list = 6
-     ;
+  repeated string ground_truth_list = 6;
 }
 
 message MemoryEntity {

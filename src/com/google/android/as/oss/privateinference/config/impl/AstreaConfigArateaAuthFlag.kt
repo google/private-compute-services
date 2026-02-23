@@ -27,4 +27,8 @@ internal constructor(val config: ConfigReader<PrivateInferenceConfig>) : ArateaA
   override fun mode(): ArateaAuthFlag.Mode {
     return config.config.arateaAuthMode()
   }
+
+  override fun isCacheEnabled(): Boolean {
+    return config.config.enableArateaTokenCache()
+  }
 }

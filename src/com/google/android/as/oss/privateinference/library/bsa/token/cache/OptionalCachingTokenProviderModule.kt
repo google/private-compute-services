@@ -16,7 +16,7 @@
 
 package com.google.android.`as`.oss.privateinference.library.bsa.token.cache
 
-import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaToken
+import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaTokenWithoutChallenge
 import com.google.android.`as`.oss.privateinference.library.bsa.token.BsaTokenProvider
 import com.google.android.`as`.oss.privateinference.library.bsa.token.BsaTokenProvider.DiskCached
 import com.google.android.`as`.oss.privateinference.library.bsa.token.BsaTokenProvider.MemoryCached
@@ -37,11 +37,13 @@ internal interface OptionalCachingTokenProviderModule {
 
   @BindsOptionalOf
   @MemoryCached
-  fun bindArateaTokenMemoryCacheProvider(): BsaTokenProvider<ArateaToken>
+  fun bindArateaTokenMemoryCacheProvider(): BsaTokenProvider<ArateaTokenWithoutChallenge>
 
   @BindsOptionalOf @DiskCached fun bindProxyTokenDiskCacheProvider(): BsaTokenProvider<ProxyToken>
 
-  @BindsOptionalOf @DiskCached fun bindArateaTokenDiskCacheProvider(): BsaTokenProvider<ArateaToken>
+  @BindsOptionalOf
+  @DiskCached
+  fun bindArateaTokenDiskCacheProvider(): BsaTokenProvider<ArateaTokenWithoutChallenge>
 
   @BindsOptionalOf
   @MultilevelCached
@@ -49,13 +51,13 @@ internal interface OptionalCachingTokenProviderModule {
 
   @BindsOptionalOf
   @MultilevelCached
-  fun bindArateaTokenMultilevelCacheProvider(): BsaTokenProvider<ArateaToken>
+  fun bindArateaTokenMultilevelCacheProvider(): BsaTokenProvider<ArateaTokenWithoutChallenge>
 
   @Multibinds
   @ProxyToken.Qualifier
   fun bindProxyTokenCacheControlPlanes(): Set<BsaTokenCacheControlPlane>
 
   @Multibinds
-  @ArateaToken.Qualifier
+  @ArateaTokenWithoutChallenge.Qualifier
   fun bindArateaTokenCacheControlPlanes(): Set<BsaTokenCacheControlPlane>
 }

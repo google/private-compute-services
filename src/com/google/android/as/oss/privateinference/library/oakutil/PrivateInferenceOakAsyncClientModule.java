@@ -19,9 +19,11 @@ package com.google.android.as.oss.privateinference.library.oakutil;
 import com.google.android.as.oss.common.ExecutorAnnotations.PiExecutorQualifier;
 import com.google.android.as.oss.common.time.TimeSource;
 import com.google.android.as.oss.privateinference.util.timers.Annotations.PrivateInferenceClientTimers;
+import com.google.android.as.oss.privateinference.util.timers.LatencyLoggingTimer;
 import com.google.android.as.oss.privateinference.util.timers.PiDebugLogTimers;
 import com.google.android.as.oss.privateinference.util.timers.TimerSet;
 import com.google.android.as.oss.privateinference.util.timers.Timers;
+import com.google.android.as.oss.privateinference.util.timers.TraceTimers;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.oak.client.grpc.StreamObserverSessionClient;
@@ -83,4 +85,14 @@ abstract class PrivateInferenceOakAsyncClientModule {
   @IntoSet
   @PrivateInferenceClientTimers
   abstract Timers bindsLogTimers(PiDebugLogTimers timers);
+
+  @Binds
+  @IntoSet
+  @PrivateInferenceClientTimers
+  abstract Timers bindsTraceTimers(TraceTimers timers);
+
+  @Binds
+  @IntoSet
+  @PrivateInferenceClientTimers
+  abstract Timers bindsStatsdTimers(LatencyLoggingTimer timers);
 }
