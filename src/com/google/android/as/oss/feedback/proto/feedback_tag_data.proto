@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package com.google.android.as.oss.feedback.api;
 
-import "third_party/protobuf/cpp_features.proto";
 
-option features.(pb.cpp).string_type = VIEW;
+import option "third_party/protobuf/cpp_features.proto";
+
+option java_outer_classname = "FeedbackTagDataOuterClass";
+option features.(pb.cpp).enum_name_uses_string_view = false;
 option java_package = "com.google.android.as.oss.feedback.api";
-option java_multiple_files = true;
 
 // Represents a feedback chip.
 message FeedbackTagData {
@@ -28,12 +29,14 @@ message FeedbackTagData {
   string label = 1;
 
   // The rating tag enum referenced by rating_tag_ordinal.
-  FeedbackRatingTagSource rating_tag_source = 2;
+  FeedbackRatingTagSource rating_tag_source = 2
+     ;
 
   // The rating tag ordinal of the enum specified by rating_tag_source.
   int32 rating_tag_ordinal = 3;
 
-  repeated string ground_truth_options = 4;
+  repeated string ground_truth_options = 4
+     ;
 }
 
 // The source enum of the rating tag.

@@ -20,6 +20,7 @@ import com.google.android.`as`.oss.common.ExecutorAnnotations.GeneralExecutorQua
 import com.google.android.`as`.oss.common.config.ConfigReader
 import com.google.android.`as`.oss.common.config.FlagManagerFactory
 import com.google.android.`as`.oss.common.config.FlagNamespace
+import com.google.android.`as`.oss.common.flavor.BuildFlavor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,8 +35,10 @@ internal object FeedbackConfigModule {
   fun provideFeedbackConfigReader(
     flagManagerFactory: FlagManagerFactory,
     @GeneralExecutorQualifier executor: Executor,
+    buildFlavor: BuildFlavor,
   ): ConfigReader<FeedbackConfig> =
     FeedbackConfigReader(
-      flagManagerFactory.create(FlagNamespace.DEVICE_PERSONALIZATION_SERVICES, executor)
+      flagManagerFactory.create(FlagNamespace.DEVICE_PERSONALIZATION_SERVICES, executor),
+      buildFlavor,
     )
 }

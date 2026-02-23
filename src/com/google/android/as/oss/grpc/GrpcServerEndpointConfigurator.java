@@ -17,7 +17,6 @@
 package com.google.android.apps.miphone.pcs.grpc;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.IBinder;
 import io.grpc.Server;
 import io.grpc.binder.IBinderReceiver;

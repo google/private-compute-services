@@ -20,6 +20,7 @@ import com.google.android.as.oss.common.ExecutorAnnotations.GeneralExecutorQuali
 import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.common.config.FlagManagerFactory;
 import com.google.android.as.oss.common.config.FlagNamespace;
+import com.google.android.as.oss.privateinference.Annotations.PiServerChannelIdleTimeoutMinutes;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceAttachCertificateHeader;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceEnableArateaTokenCache;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceEndpointUrl;
@@ -102,5 +103,12 @@ interface PrivateInferenceConfigModule {
   @PrivateInferenceEnableArateaTokenCache
   static boolean providesEnableArateaTokenCache(ConfigReader<PrivateInferenceConfig> configReader) {
     return configReader.getConfig().enableArateaTokenCache();
+  }
+
+  @Provides
+  @PiServerChannelIdleTimeoutMinutes
+  static long providePiServerChannelIdleTimeoutMinutes(
+      ConfigReader<PrivateInferenceConfig> configReader) {
+    return configReader.getConfig().piServerChannelIdleTimeoutMinutes();
   }
 }

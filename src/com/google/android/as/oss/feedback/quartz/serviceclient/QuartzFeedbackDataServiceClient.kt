@@ -156,24 +156,35 @@ data class QuartzFeedbackDonationData(
 
   override val dataCollectionCategories: Map<DataCollectionCategory, DataCollectionCategoryData>
     get() {
-      return mapOf(
-        DataCollectionCategory.NotificationContent to
-          DataCollectionCategoryData(
-            header =
-              feedbackUiRenderingData.feedbackViewDataCategoryTitles.notificationContentTitle,
-            body = getNotificationDataBody(),
-          ),
-        DataCollectionCategory.ModelOutputs to
-          DataCollectionCategoryData(
-            header = feedbackUiRenderingData.feedbackViewDataCategoryTitles.modelOutputsTitle,
-            body = getModelOutputsBody(),
-          ),
-        DataCollectionCategory.AppInfo to
+      return buildMap {
+        if (notificationData != null) {
+          put(
+            DataCollectionCategory.NotificationContent,
+            DataCollectionCategoryData(
+              header =
+                feedbackUiRenderingData.feedbackViewDataCategoryTitles.notificationContentTitle,
+              body = getNotificationDataBody(),
+            ),
+          )
+        }
+        if (modelData != null) {
+          put(
+            DataCollectionCategory.QuartzModelOutputs,
+            DataCollectionCategoryData(
+              header =
+                feedbackUiRenderingData.feedbackViewDataCategoryTitles.quartzModelOutputsTitle,
+              body = getModelOutputsBody(),
+            ),
+          )
+        }
+        put(
+          DataCollectionCategory.AppInfo,
           DataCollectionCategoryData(
             header = feedbackUiRenderingData.feedbackViewDataCategoryTitles.appInfoTitle,
             body = getAppInfoBody(),
           ),
-      )
+        )
+      }
     }
 
   private fun getNotificationDataBody(): String {

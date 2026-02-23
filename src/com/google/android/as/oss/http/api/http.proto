@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package com.google.android.apps.miphone.pcs.http.api;
 
+option java_outer_classname = "Http";
 option features.utf8_validation = NONE;
-option java_multiple_files = true;
 option java_package = "com.google.android.as.oss.http.api.proto";
 
 // Struct representing a key/value pair (e.g. HTTP request property / response

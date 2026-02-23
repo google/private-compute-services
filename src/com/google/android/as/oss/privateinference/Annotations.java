@@ -48,6 +48,11 @@ public final class Annotations {
   @Retention(RetentionPolicy.RUNTIME)
   public @interface PrivateInferenceServerGrpcChannel {}
 
+  /** Annotation for the idle timeout of the Private Inference server gRPC channel. */
+  @Qualifier
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface PiServerChannelIdleTimeoutMinutes {}
+
   /** Annotation for the proxy configuration. */
   @Qualifier
   @Retention(RetentionPolicy.RUNTIME)

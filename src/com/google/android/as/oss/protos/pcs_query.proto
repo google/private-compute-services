@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package com.google.android.as.oss.proto;
 
 import "google/protobuf/any.proto";
 import "src/com/google/android/as/oss/protos/pcs_feature-enum.proto";
 import "third_party/java/arcs/policy.proto";
+
+import option "third_party/java/protobuf/java_features.proto";
 
 option features.field_presence = IMPLICIT;
 option java_package = "com.google.android.as.oss.proto";
@@ -28,6 +30,8 @@ option java_outer_classname = "PcsProtos";
 // selection criteria.
 
 message PcsQuery {
+  option features.(pb.java).nest_in_file_class = YES;
+
   // Client to which the query needs to be routed (Google Play Protect
   // Service/ASI/StatsD).
   string client_name = 1;

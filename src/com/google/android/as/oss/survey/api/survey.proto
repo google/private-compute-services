@@ -12,35 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package com.google.android.as.oss.survey.api;
 
+option java_outer_classname = "Survey";
 option features.field_presence = IMPLICIT;
-option java_multiple_files = true;
 option java_package = "com.google.android.as.oss.survey.api.proto";
 
 // Struct representing a key/value pair (e.g. HTTP request property / response
 // headers).
 message HttpProperty {
-  string key = 1;
+  string key = 1 ;
 
   repeated string value = 2;
 }
 
 message HttpSurveyTriggerRequest {
-  string url = 1;
+  string url = 1 ;
 
   repeated HttpProperty request_property = 2;
-  SurveyTriggerId survey_trigger_id = 3;
+  SurveyTriggerId survey_trigger_id = 3 ;
 
-  bool testing_mode = 4;
+  bool testing_mode = 4 ;
 
-  int32 library_version = 5;
+  int32 library_version = 5 ;
 
-  int32 app_version = 6;
+  int32 app_version = 6 ;
 
-  SurveyAppId survey_app_id = 7;
+  SurveyAppId survey_app_id = 7 ;
 }
 
 enum SurveyTriggerId {
@@ -56,15 +56,15 @@ enum SurveyAppId {
 }
 
 message SurveyQuestion {
-  string question_ordinal = 1;
+  string question_ordinal = 1 ;
 
-  string question_text = 2;
+  string question_text = 2 ;
 
-  string question_suffix_text = 3;
+  string question_suffix_text = 3 ;
 }
 
 message HttpSurveyRecordEventRequest {
-  string url = 1;
+  string url = 1 ;
 
   repeated HttpProperty request_property = 2;
   Event event = 3;
@@ -77,17 +77,17 @@ message HttpSurveyRecordEventRequestList {
 message HttpUploadSurveyRequest {
   HttpSurveyRecordEventRequestList request_list = 1;
   repeated SurveyQuestion questions = 2;
-  SurveyTriggerId survey_trigger_id = 3;
+  SurveyTriggerId survey_trigger_id = 3 ;
 }
 
 message ResponseHeaders {
-  int32 response_code = 1;
+  int32 response_code = 1 ;
 
   repeated HttpProperty header = 2;
 }
 
 message ResponseBodyChunk {
-  bytes response_bytes = 1;
+  bytes response_bytes = 1 ;
 }
 
 message HttpSurveyResponse {
@@ -96,14 +96,14 @@ message HttpSurveyResponse {
 }
 
 message UnrecognizedUrlException {
-  string url = 1;
+  string url = 1 ;
 }
 
 message HttpSurveyStartupConfigRequest {
-  string url = 1;
+  string url = 1 ;
 
   repeated HttpProperty request_property = 2;
-  StartupConfigId startup_config_id = 3;
+  StartupConfigId startup_config_id = 3 ;
 }
 
 enum StartupConfigId {
@@ -139,7 +139,7 @@ message TriggerContext {
   // List of languages at the trigger in order of preference. A language
   // matching algorithm is used to determine the most suitable survey language,
   // if any.
-  repeated string language = 2;
+  repeated string language = 2 ;
 
   // Whether the session was triggered in testing mode.
   bool testing_mode = 3;
@@ -169,25 +169,25 @@ message ClientContext {
 
     message MobileInfo {
       // The device model.
-      string device_model = 1;
+      string device_model = 1 ;
 
       // The brand (e.g. carrier) the software is customized for, if any.
-      string device_brand = 2;
+      string device_brand = 2 ;
 
       // Device OS type.
-      OsType os_type = 3;
+      OsType os_type = 3 ;
 
       // The version of the OS the application is running on.
-      string os_version = 4;
+      string os_version = 4 ;
 
       // Name of the running application.
       string app_name = 5;
 
       // App identifier. e.g. bundle ID for iOS or package name for Android.
-      string app_id = 6;
+      string app_id = 6 ;
 
       // Version of the running application.
-      string app_version = 7;
+      string app_version = 7 ;
 
       reserved 8;
 
@@ -211,7 +211,7 @@ message ClientContext {
     reserved 2;
 
     repeated ClientCapability supported_capability = 3;
-    int32 library_version_int = 4;
+    int32 library_version_int = 4 ;
 
     // Supported client platforms.
     enum Platform {
@@ -245,11 +245,13 @@ enum ClientCapability {
   CLIENT_CAPABILITY_PII = 1;
 
   // Larger rating scale support for 10- and 11-point scales
-  CLIENT_CAPABILITY_RATING_SCALE_10_11 = 2;
+  CLIENT_CAPABILITY_RATING_SCALE_10_11 = 2
+      ;
 }
 
 // SurveyRecordEventRequest
 message SurveyRecordEventRequest {
+
   Event event = 1;
   Session session = 2;
 }
@@ -275,7 +277,8 @@ message Event {
       SURVEY_PROMPT_TYPE_NON_MODAL = 3;
     }
 
-    SurveyPromptType survey_prompt_type = 1;
+    SurveyPromptType survey_prompt_type = 1
+        ;
   }
 
   // Metadata for when a survey is accepted, which occurs when the user
@@ -324,9 +327,9 @@ message Event {
       // 0.
       AnswerType answer_type = 1;
       uint32 answer_ordinal = 2;
-      string text = 3;
+      string text = 3 ;
 
-      bool write_in = 4;  // DEPRECATED
+      bool write_in = 4 ;  // DEPRECATED
 
       enum AnswerType {
         ANSWER_TYPE_UNSPECIFIED = 0;
@@ -351,11 +354,11 @@ message Event {
 
 message Session {
   // The server-generated session ID.
-  string session_id = 1;
+  string session_id = 1 ;
 
   // Opaque token associated with the session and required to be supplied back
   // to the server.
-  bytes session_token = 2;
+  bytes session_token = 2 ;
 }
 
 message SurveyTriggerResponse {

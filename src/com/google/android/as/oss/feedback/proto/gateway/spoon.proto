@@ -12,15 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package com.google.android.as.oss.feedback.api.gateway;
 
-option java_multiple_files = true;
+
+option java_outer_classname = "Spoon";
 option java_package = "com.google.android.as.oss.feedback.api.gateway";
 
 enum SpoonCUJ {
   SPOON_CUJ_UNKNOWN = 0;
+
   SPOON_CUJ_MR_NOTIFICATION = 1;
   SPOON_CUJ_MR_KEYBOARD = 2;
   SPOON_CUJ_MA_NOTIFICATION = 3;
@@ -38,18 +40,26 @@ enum SpoonCUJ {
 }
 
 message SpoonFeedbackDataDonation {
-  repeated string triggering_messages = 1;
-  repeated string intent_queries = 2;
+  repeated string triggering_messages = 1
+     ;
+
+  repeated string intent_queries = 2
+     ;
+
   repeated string model_outputs = 3;
+
   repeated MemoryEntity memory_entities = 4;
-  string selected_entity_content = 5;
+  string selected_entity_content = 5
+     ;
 }
 
 message SpoonUserInput {
-  repeated string ground_truth_list = 6;
+  repeated string ground_truth_list = 6
+     ;
 }
 
 message MemoryEntity {
   string entity_data = 1;
+
   string model_version = 2;
 }

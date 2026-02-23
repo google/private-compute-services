@@ -27,11 +27,13 @@ import com.google.android.as.oss.common.ExecutorAnnotations.VirtualMachineExecut
 import com.google.android.as.oss.common.ExecutorAnnotations.WorkManagerExecutorQualifier;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
 import dagger.hilt.components.SingletonComponent;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import javax.inject.Singleton;
 
 /** Module to provide {@link Executor} instances. */
@@ -100,6 +102,11 @@ abstract class ExecutorsModule {
   static ListeningScheduledExecutorService flExecutorService() {
     return Executors.FL_EXECUTOR_SERVICE;
   }
+
+  @Binds
+  @FlExecutorQualifier
+  abstract ExecutorService bindFlExecutorService(
+      @FlExecutorQualifier ListeningScheduledExecutorService flExecutor);
 
   @Provides
   @Singleton

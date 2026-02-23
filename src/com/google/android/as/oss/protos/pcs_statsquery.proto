@@ -12,14 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package com.google.android.as.oss.proto;
 
-option features.field_presence = IMPLICIT;
+import option "third_party/java/protobuf/java_features.proto";
+
+option java_outer_classname = "PcsStatsquery";
 option java_package = "com.google.android.as.oss.proto";
 
 message PcsStatsQuery {
+  option features.(pb.java).nest_in_file_class = YES;
+
   // SQL query for querying statsd platform logs.
-  string sql_query = 1;
+  string sql_query = 1 [features.field_presence = IMPLICIT];
 }

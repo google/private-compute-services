@@ -101,14 +101,16 @@ public final class PcsOakServerStreamResponseObserver extends BaseOakServerStrea
     logger.atWarning().log(
         "[startInferenceSession] onError[%s] from server for feature: %s.",
         t.getMessage(), featureName.get().name());
-    logInferenceFailureLatency(featureName.get(), latencyMs);
+    logInferenceLatency(
+        loggingMetricIdProvider.getInferenceFailureLatencyValueMetricId(featureName.get()),
+        latencyMs);
     networkUsageLogHelper.logPrivateInferenceRequest(
         featureName.get().name(),
         callingPackageName,
         /* isSuccess= */ false,
         totalRequestSize.get(),
         totalResponseSize.get());
-    logInferenceFailureEvent(featureName.get());
+    logInferenceEvent(loggingMetricIdProvider.getInferenceFailureCountMetricId(featureName.get()));
     logInferenceFailureErrorCode(t);
     super.onError(t);
   }
@@ -118,24 +120,21 @@ public final class PcsOakServerStreamResponseObserver extends BaseOakServerStrea
     logger.atInfo().log(
         "[startInferenceSession] onCompleted from server for feature: %s.",
         featureName.get().name());
-    // Will integrate with the Timer API to measure the latency.
-    logInferenceSuccessLatency(
-        featureName.get(), System.currentTimeMillis() - inferenceStartMillis);
+    logInferenceLatency(
+        loggingMetricIdProvider.getInferenceSuccessLatencyValueMetricId(featureName.get()),
+        System.currentTimeMillis() - inferenceStartMillis);
     networkUsageLogHelper.logPrivateInferenceRequest(
         featureName.get().name(),
         callingPackageName,
         /* isSuccess= */ true,
         totalRequestSize.get(),
         totalResponseSize.get());
-    logInferenceSuccessEvent(featureName.get());
+    logInferenceEvent(loggingMetricIdProvider.getInferenceSuccessCountMetricId(featureName.get()));
     inferenceSessionTimer.stop();
     super.onCompleted();
   }
 
-  // TODO: Merge duplicate helper methods.
-  private void logInferenceSuccessEvent(PcsPrivateInferenceFeatureName featureName) {
-    CountMetricId countMetricId =
-        loggingMetricIdProvider.getInferenceSuccessCountMetricId(featureName);
+  private void logInferenceEvent(CountMetricId countMetricId) {
     pcsStatsLogger.logEventCount(countMetricId);
   }
 
@@ -155,23 +154,7 @@ public final class PcsOakServerStreamResponseObserver extends BaseOakServerStrea
     pcsStatsLogger.logEventCount(countMetricId);
   }
 
-  private void logInferenceFailureEvent(PcsPrivateInferenceFeatureName featureName) {
-    CountMetricId countMetricId =
-        loggingMetricIdProvider.getInferenceFailureCountMetricId(featureName);
-    pcsStatsLogger.logEventCount(countMetricId);
-  }
-
-  private void logInferenceSuccessLatency(
-      PcsPrivateInferenceFeatureName featureName, long latencyMs) {
-    ValueMetricId valueMetricId =
-        loggingMetricIdProvider.getInferenceSuccessLatencyValueMetricId(featureName);
-    pcsStatsLogger.logEventLatency(valueMetricId, latencyMs);
-  }
-
-  private void logInferenceFailureLatency(
-      PcsPrivateInferenceFeatureName featureName, long latencyMs) {
-    ValueMetricId valueMetricId =
-        loggingMetricIdProvider.getInferenceFailureLatencyValueMetricId(featureName);
+  private void logInferenceLatency(ValueMetricId valueMetricId, long latencyMs) {
     pcsStatsLogger.logEventLatency(valueMetricId, latencyMs);
   }
 }

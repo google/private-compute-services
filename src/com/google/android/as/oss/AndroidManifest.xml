@@ -20,7 +20,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.google.android.as.oss">
 
-  <uses-sdk android:minSdkVersion="35" android:targetSdkVersion="35"/>
+  <uses-sdk android:minSdkVersion="36" android:targetSdkVersion="36"/>
 
   <uses-permission android:name="android.permission.INTERNET" />
 
@@ -40,6 +40,107 @@
 
   <!-- Required in V+ for correct grammatical gender in translated strings. -->
   <uses-permission android:name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER" />
+
+  <!-- Required to act as a Private Compute Service (PCS) Gateway App -->
+  <uses-permission android:name="android.permission.PROVIDE_PRIVATE_COMPUTE_SERVICES" />
+
+  <!-- Required to write to system settings -->
+  <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+
+  <!-- App-declared Allow Associations -->
+  <allow-component-access>
+    <package android:name="com.android.providers.settings" />
+    <package android:name="com.android.systemui" />
+
+    <!-- Core Intelligence Services -->
+    <package android:name="com.google.android.as"
+        android:certDigest="3af39ab967aaa5d279e49b5f769cb66e40799838bc8799343ee57ae435d2455b"> <!-- Prod -->
+      <additional-certificate android:certDigest="8a99842f792551717d3a19e155a6d6a6e375bd1e19fbceff438e20d2f78d8dbe" /> <!-- Test -->
+    </package>
+
+    <package android:name="com.google.android.aicore"
+        android:certDigest="b7971ccc10a03932e14a3557a1b4c2a84be0ecb506777f0c72dd46cf5d7093c6"> <!-- Prod -->
+      <additional-certificate android:certDigest="c7870fac601063935c039de169cdfbbcc6316fb7d62ef116c62cc32f6b4672cf" /> <!-- Test -->
+    </package>
+
+    <package android:name="com.google.android.PlayProtect"
+        android:certDigest="cf9bf16382f8aee84040add3489792db844aa6e3cebf267c50fde12531f0853d"> <!-- Prod -->
+      <additional-certificate android:certDigest="33b94845ed35910c90b2bd970ce0724dbf40fcb67e9db051cad6d66943966d97" /> <!-- Test -->
+    </package>
+
+    <!-- System & Settings Intelligence -->
+    <package android:name="com.google.android.settings.intelligence"
+        android:certDigest="d9882b784173aa98c32ad7848ff38bf16bddc61c636883f940d85e2f059aa249"> <!-- Prod -->
+      <additional-certificate android:certDigest="d4418fa2261c104e8cce39b0acbb02d69102227b5624f77602c2b112269fcc30" /> <!-- Test -->
+    </package>
+
+    <!-- 1P Google Apps -->
+    <package android:name="com.google.android.apps.messaging"
+        android:certDigest="cc75526d6c0f80ac3b3a84eb44838440dbbe6b124443a7c7d7bd19182ac022c9"> <!-- Prod -->
+      <additional-certificate android:certDigest="f7e73d4edc2b7f55eecd3f898d3cca7da9cbbf51694eba14f816e2eccf015035" /> <!-- Test -->
+      <additional-certificate android:certDigest="e8d0ae7cc3c4e0f3be9a8dd9a50667b3eaa54b4333b9bbb35a4151a7988ee26b" /> <!-- Test -->
+    </package>
+
+    <package android:name="com.google.android.dialer"
+        android:certDigest="e2d049f3a01192f620b1240615fa8c13badc553c22bc6fddfca45c84d8fc545d"> <!-- Prod -->
+      <additional-certificate android:certDigest="5859f2ff42b831b87bd78002e2b8de35ea0fc35adb57813fc10f2b9b87d7ada9" /> <!-- Test -->
+    </package>
+
+    <package android:name="com.google.android.inputmethod.latin"
+        android:certDigest="7ce83c1b71f3d572fed04c8d40c5cb10ff75e6d87d9df6fbd53f0468c2905053"> <!-- Prod -->
+      <additional-certificate android:certDigest="d22cc500299fb22873a01a010de1c82fbe4d061119b94814dd301dab50cb7678" /> <!-- Test -->
+      <additional-certificate android:certDigest="f0fd6c5b410f25cb25c3b53346c8972fae30f8ee7411df910480ad6b2d60db83" /> <!-- Legacy Prod -->
+      <additional-certificate android:certDigest="1975b2f17177bc89a5dff31f9e64a6cae281a53dc1d1d59b1d147fe1c82afa00" /> <!-- Legacy Test -->
+    </package>
+
+    <package android:name="com.google.android.apps.weather"
+        android:certDigest="7751c458da05ba9100ad73926e3e50aae3ca63183c6aaeb21d225883439f8aa1"> <!-- Prod -->
+      <additional-certificate android:certDigest="798b33175e674ab36d9a46fa912191ab79b6aad4973c0cf2757c64493959d1e5" /> <!-- Test -->
+    </package>
+
+    <package android:name="com.google.android.apps.nexuslauncher"
+        android:certDigest="a86bdb059f28f265162d64ce6c8d9772901d227e741581d1f04a5ed132a574d0"> <!-- Prod -->
+      <additional-certificate android:certDigest="4b4d9abde8f3d6987558c76e261e6fe9d3c7cc299ebef22d56df6321dbae3562" /> <!-- Test -->
+    </package>
+
+    <package android:name="com.google.android.apps.pixel.nowplaying"
+        android:certDigest="48dad75d430f1b6b18b55a968f0e990c1f7bf29f2c627ca947f6e2b65c724c93"> <!-- Prod -->
+      <additional-certificate android:certDigest="3f52c865e49f069a950df49066385be1de43fe09af8312690056080d9da1dc45" /> <!-- Test -->
+    </package>
+
+    <package android:name="com.google.android.googlequicksearchbox"
+        android:certDigest="7ce83c1b71f3d572fed04c8d40c5cb10ff75e6d87d9df6fbd53f0468c2905053"> <!-- Prod -->
+      <additional-certificate android:certDigest="d22cc500299fb22873a01a010de1c82fbe4d061119b94814dd301dab50cb7678" /> <!-- Test -->
+      <additional-certificate android:certDigest="f0fd6c5b410f25cb25c3b53346c8972fae30f8ee7411df910480ad6b2d60db83" /> <!-- Legacy Prod -->
+      <additional-certificate android:certDigest="1975b2f17177bc89a5dff31f9e64a6cae281a53dc1d1d59b1d147fe1c82afa00" /> <!-- Legacy Test -->
+    </package>
+
+    <package android:name="com.google.android.apps.pixel.psi"
+        android:certDigest="d439bedff4c060a637ffc07c33ea9fa04a091165c40ee883717c2a89bd5a908f"> <!-- Prod -->
+      <additional-certificate android:certDigest="9311c8d7198d1be7a7fc1152c8c300921a904858f5aebc787f9cecc5e41468fa" /> <!-- Test -->
+    </package>
+
+    <!-- Gboard Canary -->
+    <package android:name="com.google.android.inputmethod.latin.canary"
+        android:certDigest="7ce83c1b71f3d572fed04c8d40c5cb10ff75e6d87d9df6fbd53f0468c2905053"> <!-- Prod -->
+      <additional-certificate android:certDigest="d22cc500299fb22873a01a010de1c82fbe4d061119b94814dd301dab50cb7678" /> <!-- Test -->
+      <additional-certificate android:certDigest="f0fd6c5b410f25cb25c3b53346c8972fae30f8ee7411df910480ad6b2d60db83" /> <!-- Legacy Prod -->
+      <additional-certificate android:certDigest="1975b2f17177bc89a5dff31f9e64a6cae281a53dc1d1d59b1d147fe1c82afa00" /> <!-- Legacy Test -->
+    </package>
+
+    <!-- Subzero -->
+    <package android:name="com.google.android.apps.pixel.subzero"
+        android:certDigest="d801de6b2c6cdfe425f29537b11f3d6ba4195bc7c76d03d23449ad1c1aa78eb4"> <!-- Prod -->
+      <additional-certificate android:certDigest="c4bc5144986e96ed94001e63658465524c57c3b8dda4a39d1957d9a72e689690" /> <!-- Test -->
+    </package>
+
+    <!-- SafetyCore -->
+    <package android:name="com.google.android.safetycore"
+        android:certDigest="133e1925a9b992d327fa1f6c4ba8d57c3b2ebd1f1da4de6b0bfa0bd0411a7ca4"> <!-- Prod -->
+      <additional-certificate android:certDigest="8A3A2ABEA3CDE54C7A86B373316FC0B2D3C026CF1BDD73F6E3825C1222A25965" /> <!-- Test -->
+    </package>
+  </allow-component-access>
+
 
   <application
       android:name="com.google.android.as.oss.PrivateComputeServicesApplication"

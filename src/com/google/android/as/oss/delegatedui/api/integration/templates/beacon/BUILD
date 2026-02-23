@@ -26,12 +26,12 @@ package(
 proto_library(
     name = "beacon_template_proto",
     srcs = ["beacon_template_integration.proto"],
+    option_deps = ["//third_party/protobuf:cpp_features_proto"],
     deps = [
         "",
         "//src/com/google/android/as/oss/delegatedui/api/integration/templates:ui_id_token_proto",
         "//src/com/google/android/as/oss/feedback/proto:entity_feedback_dialog_data_proto",
         "//src/com/google/android/as/oss/feedback/proto:feedback_dialog_common_data_proto",
-        "//third_party/protobuf:cpp_features_proto",
     ],
 )
 

@@ -23,15 +23,20 @@ import com.google.android.`as`.oss.feedback.api.gateway.KeyTypeOptionTag
 import com.google.android.`as`.oss.feedback.api.gateway.LogFeedbackV2Request
 import com.google.android.`as`.oss.feedback.api.gateway.NegativeRatingTag
 import com.google.android.`as`.oss.feedback.api.gateway.PositiveRatingTag
+import com.google.android.`as`.oss.feedback.api.gateway.QuartzAppInfoData
 import com.google.android.`as`.oss.feedback.api.gateway.QuartzCUJ
 import com.google.android.`as`.oss.feedback.api.gateway.QuartzCommonData
+import com.google.android.`as`.oss.feedback.api.gateway.QuartzKeySummarizationData
 import com.google.android.`as`.oss.feedback.api.gateway.QuartzKeyTypeData
+import com.google.android.`as`.oss.feedback.api.gateway.QuartzModelData
+import com.google.android.`as`.oss.feedback.api.gateway.QuartzNotificationData
 import com.google.android.`as`.oss.feedback.api.gateway.Rating
 import com.google.android.`as`.oss.feedback.api.gateway.RuntimeConfig
 import com.google.android.`as`.oss.feedback.api.gateway.UserDataDonationOption
 import com.google.android.`as`.oss.feedback.api.gateway.UserDonation
 import com.google.android.`as`.oss.feedback.api.gateway.feedbackCUJ
 import com.google.android.`as`.oss.feedback.api.gateway.logFeedbackV2Request
+import com.google.android.`as`.oss.feedback.api.gateway.quartzAppInfoData
 import com.google.android.`as`.oss.feedback.api.gateway.quartzCommonData
 import com.google.android.`as`.oss.feedback.api.gateway.quartzDataDonation
 import com.google.android.`as`.oss.feedback.api.gateway.quartzDataDonationV2
@@ -42,6 +47,9 @@ import com.google.android.`as`.oss.feedback.api.gateway.quartzNotificationData
 import com.google.android.`as`.oss.feedback.api.gateway.runtimeConfig
 import com.google.android.`as`.oss.feedback.api.gateway.structuredUserInput
 import com.google.android.`as`.oss.feedback.api.gateway.userDonation
+import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.AppInfo
+import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.ModelOutputs
+import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.NotificationContent
 import com.google.android.`as`.oss.feedback.domain.FeedbackSubmissionData
 import com.google.android.`as`.oss.feedback.domain.FeedbackUiState
 import com.google.android.`as`.oss.feedback.quartz.serviceclient.QuartzFeedbackDonationData
@@ -113,10 +121,10 @@ class QuartzDataHelper @Inject constructor() {
         }
       userDonation = userDonation {
         // Only include donation data if user has opted in the consent.
-        if (uiState.optInChecked.any { it.value }) {
-          if (data.notificationData != null) {
-            quartzDataDonationV2 = quartzDataDonationV2 {
-              quartzCuj = data.quartzCuj
+        if (data.notificationData != null) {
+          quartzDataDonationV2 = quartzDataDonationV2 {
+            quartzCuj = data.quartzCuj
+            if (uiState.optInChecked.any { it.key == NotificationContent && it.value }) {
               quartzNotificationData = quartzNotificationData {
                 title = data.notificationData!!.title
                 content = data.notificationData!!.content
@@ -124,106 +132,130 @@ class QuartzDataHelper @Inject constructor() {
                 conversationMessages = data.notificationData!!.conversationMessages
                 conversationHistoricMessages = data.notificationData!!.conversationHistoricMessages
               }
+            }
+            if (uiState.optInChecked.any { it.key == ModelOutputs && it.value }) {
               quartzModelData =
                 if (data.modelData != null) {
-                  quartzModelData { modelInfo = data.modelData!!.modelInfo }
+                  quartzModelData {
+                    modelInfo = data.modelData!!.modelInfo
+                    featureName = data.modelData!!.featureName
+                    classificationMethod = data.modelData!!.classificationMethod
+                    classificationBertCategoryResult =
+                      data.modelData!!.classificationBertCategoryResult
+                    classificationBertCategoryScore =
+                      data.modelData!!.classificationBertCategoryScore
+                    classificationCategory = data.modelData!!.classificationCategory
+                    classificationDefaultCategoryResult =
+                      data.modelData!!.classificationDefaultCategoryResult
+                    defaultCategoryCorrectionThreshold =
+                      data.modelData!!.defaultCategoryCorrectionThreshold
+                    isSuppressDuplicate = data.modelData!!.isSuppressDuplicate
+                    summaryText = data.modelData!!.summaryText
+                  }
                 } else {
                   quartzModelData {}
                 }
             }
-          } else {
-            quartzDataDonation = quartzDataDonation {
-              when (data.quartzCuj) {
-                QuartzCUJ.QUARTZ_CUJ_KEY_TYPE -> {
-                  quartzKeyTypeData = quartzKeyTypeData {
-                    quartzCommonData = quartzCommonData {
-                      sbnKey = data.typeData.sbnKey
-                      uuid = data.typeData.uuid
-                      asiVersion = data.typeData.asiVersion
-                      detectedLanguage = data.typeData.detectedLanguage
-                      packageName = data.typeData.packageName
-                      title = data.typeData.title
-                      content = data.typeData.content
-                      notificationCategory = data.typeData.notificationCategory
-                      notificationTag = data.typeData.notificationTag
-                      isConversation = data.typeData.isConversation
-                      channelId = data.typeData.channelId
-                      channelName = data.typeData.channelName
-                      channelImportance =
-                        QuartzCommonData.ChannelImportance.valueOf(data.typeData.channelImportance)
-                      channelDescription = data.typeData.channelDescription
-                      channelConversationId = data.typeData.channelConversationId
-                      playStoreCategory = data.typeData.playStoreCategory
-                      extraTitle = data.typeData.extraTitle
-                      extraTitleBig = data.typeData.extraTitleBig
-                      extraText = data.typeData.extraText
-                      extraTextLines = data.typeData.extraTextLines
-                      extraSummaryText = data.typeData.extraSummaryText
-                      extraPeopleList = data.typeData.extraPeopleList
-                      extraMessagingPerson = data.typeData.extraMessagingPerson
-                      extraMessages = data.typeData.extraMessages
-                      extraHistoricMessages += data.typeData.extraHistoricMessages
-                      extraConversationTitle = data.typeData.extraConversationTitle
-                      extraBigText = data.typeData.extraBigText
-                      extraInfoText = data.typeData.extraInfoText
-                      extraSubText = data.typeData.extraSubText
-                      extraIsGroupConversation = data.typeData.extraIsGroupConversation
-                      extraPictureContentDescription = data.typeData.extraPictureContentDescription
-                      extraTemplate = data.typeData.extraTemplate
-                      extraShowBigPictureWhenCollapsed =
-                        data.typeData.extraShowBigPictureWhenCollapsed
-                      extraColorized = data.typeData.extraColorized
-                      extraRemoteInputHistory += data.typeData.extraRemoteInputHistory
-                      locusId = data.typeData.locusId
-                      hasPromotableCharacteristics = data.typeData.hasPromotableCharacteristics
-                      groupKey = data.typeData.groupKey
-                    }
-                    notificationId = data.typeData.notificationId
-                    postTimestamp = data.typeData.postTimestamp
-                    appCategory = data.typeData.appCategory
-                    modelInfoList += data.typeData.modelInfoList
-                    classificationMethod =
-                      QuartzKeyTypeData.ClassificationMethod.valueOf(
-                        data.typeData.classificationMethod
-                      )
-                    classificationBertCategoryResult =
-                      data.typeData.classificationBertCategoryResult
-                    classificationBertCategoryScore = data.typeData.classificationBertCategoryScore
-                    classificationBertCategoryExecutedTimeMs =
-                      data.typeData.classificationBertCategoryExecutedTimeMs
-                    classificationCategory = data.typeData.classificationCategory
-                    isThresholdChangedCategory = data.typeData.isThresholdChangedCategory
-                    classificationExecutedTimeMs = data.typeData.classificationExecutedTimeMs
-                    exemptionExecutedTimeMsString = data.typeData.exemptionExecutedTimeMsString
-                    classificationDefaultCategoryResult =
-                      data.typeData.classificationDefaultCategoryResult
-                    defaultCategoryCorrectionThreshold =
-                      data.typeData.defaultCategoryCorrectionThreshold
-                    isSuppressDuplicate = data.typeData.isSuppressDuplicate
-                  }
-                }
-                QuartzCUJ.QUARTZ_CUJ_KEY_SUMMARIZATION -> {
-                  quartzKeySummarizationData = quartzKeySummarizationData {
-                    quartzCommonData = quartzCommonData {
-                      sbnKey = data.summarizationData.sbnKey
-                      uuid = data.summarizationData.uuid
-                      asiVersion = data.summarizationData.asiVersion
-                      detectedLanguage = data.summarizationData.detectedLanguage
-                      packageName = data.summarizationData.packageName
-                    }
-                    featureName = data.summarizationData.featureName
-                    modelName = data.summarizationData.modelName
-                    modelVersion = data.summarizationData.modelVersion
-                    isGroupConversation = data.summarizationData.isGroupConversation
-                    conversationTitle = data.summarizationData.conversationTitle
-                    messages = data.summarizationData.messages
-                    notificationCount = data.summarizationData.notificationCount
-                    executionTimeMs = data.summarizationData.executionTimeMs
-                    summaryText = data.summarizationData.summaryText
-                  }
-                }
-                else -> {}
+            if (uiState.optInChecked.any { it.key == AppInfo && it.value }) {
+              quartzAppInfoData = quartzAppInfoData {
+                uuid = data.appInfoData!!.uuid
+                asiVersion = data.appInfoData!!.asiVersion
+                playStoreCategory = data.appInfoData!!.playStoreCategory
+                packageName = data.appInfoData!!.packageName
               }
+            }
+          }
+        } else {
+          quartzDataDonation = quartzDataDonation {
+            when (data.quartzCuj) {
+              QuartzCUJ.QUARTZ_CUJ_KEY_TYPE -> {
+                quartzKeyTypeData = quartzKeyTypeData {
+                  quartzCommonData = quartzCommonData {
+                    sbnKey = data.typeData.sbnKey
+                    uuid = data.typeData.uuid
+                    asiVersion = data.typeData.asiVersion
+                    detectedLanguage = data.typeData.detectedLanguage
+                    packageName = data.typeData.packageName
+                    title = data.typeData.title
+                    content = data.typeData.content
+                    notificationCategory = data.typeData.notificationCategory
+                    notificationTag = data.typeData.notificationTag
+                    isConversation = data.typeData.isConversation
+                    channelId = data.typeData.channelId
+                    channelName = data.typeData.channelName
+                    channelImportance =
+                      QuartzCommonData.ChannelImportance.valueOf(data.typeData.channelImportance)
+                    channelDescription = data.typeData.channelDescription
+                    channelConversationId = data.typeData.channelConversationId
+                    playStoreCategory = data.typeData.playStoreCategory
+                    extraTitle = data.typeData.extraTitle
+                    extraTitleBig = data.typeData.extraTitleBig
+                    extraText = data.typeData.extraText
+                    extraTextLines = data.typeData.extraTextLines
+                    extraSummaryText = data.typeData.extraSummaryText
+                    extraPeopleList = data.typeData.extraPeopleList
+                    extraMessagingPerson = data.typeData.extraMessagingPerson
+                    extraMessages = data.typeData.extraMessages
+                    extraHistoricMessages += data.typeData.extraHistoricMessages
+                    extraConversationTitle = data.typeData.extraConversationTitle
+                    extraBigText = data.typeData.extraBigText
+                    extraInfoText = data.typeData.extraInfoText
+                    extraSubText = data.typeData.extraSubText
+                    extraIsGroupConversation = data.typeData.extraIsGroupConversation
+                    extraPictureContentDescription = data.typeData.extraPictureContentDescription
+                    extraTemplate = data.typeData.extraTemplate
+                    extraShowBigPictureWhenCollapsed =
+                      data.typeData.extraShowBigPictureWhenCollapsed
+                    extraColorized = data.typeData.extraColorized
+                    extraRemoteInputHistory += data.typeData.extraRemoteInputHistory
+                    locusId = data.typeData.locusId
+                    hasPromotableCharacteristics = data.typeData.hasPromotableCharacteristics
+                    groupKey = data.typeData.groupKey
+                  }
+                  notificationId = data.typeData.notificationId
+                  postTimestamp = data.typeData.postTimestamp
+                  appCategory = data.typeData.appCategory
+                  modelInfoList += data.typeData.modelInfoList
+                  classificationMethod =
+                    QuartzKeyTypeData.ClassificationMethod.valueOf(
+                      data.typeData.classificationMethod
+                    )
+                  classificationBertCategoryResult = data.typeData.classificationBertCategoryResult
+                  classificationBertCategoryScore = data.typeData.classificationBertCategoryScore
+                  classificationBertCategoryExecutedTimeMs =
+                    data.typeData.classificationBertCategoryExecutedTimeMs
+                  classificationCategory = data.typeData.classificationCategory
+                  isThresholdChangedCategory = data.typeData.isThresholdChangedCategory
+                  classificationExecutedTimeMs = data.typeData.classificationExecutedTimeMs
+                  exemptionExecutedTimeMsString = data.typeData.exemptionExecutedTimeMsString
+                  classificationDefaultCategoryResult =
+                    data.typeData.classificationDefaultCategoryResult
+                  defaultCategoryCorrectionThreshold =
+                    data.typeData.defaultCategoryCorrectionThreshold
+                  isSuppressDuplicate = data.typeData.isSuppressDuplicate
+                }
+              }
+              QuartzCUJ.QUARTZ_CUJ_KEY_SUMMARIZATION -> {
+                quartzKeySummarizationData = quartzKeySummarizationData {
+                  quartzCommonData = quartzCommonData {
+                    sbnKey = data.summarizationData.sbnKey
+                    uuid = data.summarizationData.uuid
+                    asiVersion = data.summarizationData.asiVersion
+                    detectedLanguage = data.summarizationData.detectedLanguage
+                    packageName = data.summarizationData.packageName
+                  }
+                  featureName = data.summarizationData.featureName
+                  modelName = data.summarizationData.modelName
+                  modelVersion = data.summarizationData.modelVersion
+                  isGroupConversation = data.summarizationData.isGroupConversation
+                  conversationTitle = data.summarizationData.conversationTitle
+                  messages = data.summarizationData.messages
+                  notificationCount = data.summarizationData.notificationCount
+                  executionTimeMs = data.summarizationData.executionTimeMs
+                  summaryText = data.summarizationData.summaryText
+                }
+              }
+              else -> {}
             }
           }
         }
@@ -321,28 +353,21 @@ class QuartzDataHelper @Inject constructor() {
           donationString.plus(
             ", ${quote("userDonation")}: " +
               "{${quote("structuredDataDonation")}: " +
-              "{${quote(PREFIX + "QuartzDonation")}: " +
-              "{${quote(PREFIX + "QuartzKeyTypeData")}: " +
-              "{${quote(PREFIX + "QuartzCommonData")}: " +
-              "${getQuartzCommonDataString(quartzKeyTypeData.quartzCommonData)}, " +
-              "${quote("notificationId")}: ${quote(quartzKeyTypeData.notificationId)}, " +
-              "${quote("postTimestamp")}: ${quote(timestampToJsonString(quartzKeyTypeData.postTimestamp))}, " +
-              "${quote("modelInfoList")}: ${buildRepeatedMessages(quartzKeyTypeData.modelInfoListList)}, " +
-              "${quote("appCategory")}: ${quote(quartzKeyTypeData.appCategory)}, " +
-              "${quote("classificationMethod")}: ${quote(quartzKeyTypeData.classificationMethod.name)}, " +
-              "${quote("classificationBertCategoryResult")}: ${quote(quartzKeyTypeData.classificationBertCategoryResult)}, " +
-              "${quote("classificationBertCategoryScore")}: ${quartzKeyTypeData.classificationBertCategoryScore}, " +
-              "${quote("classificationBertCategoryExecutedTimeMs")}: ${quartzKeyTypeData.classificationBertCategoryExecutedTimeMs}, " +
-              "${quote("classificationCategory")}: ${quote(quartzKeyTypeData.classificationCategory)}, " +
-              "${quote("isThresholdChangedCategory")}: ${quartzKeyTypeData.isThresholdChangedCategory}, " +
-              "${quote("classificationExecutedTimeMs")}: ${quartzKeyTypeData.classificationExecutedTimeMs}, " +
-              "${quote("exemptionExecutedTimeMsString")}: ${quote(quartzKeyTypeData.exemptionExecutedTimeMsString)}, " +
-              "${quote("classificationDefaultCategoryResult")}: ${quote(quartzKeyTypeData.classificationDefaultCategoryResult)}, " +
-              "${quote("defaultCategoryCorrectionThreshold")}: ${quote(quartzKeyTypeData.defaultCategoryCorrectionThreshold)}, " +
-              "${quote("isSuppressDuplicate")}: ${quote(quartzKeyTypeData.isSuppressDuplicate)}, " +
-              "${quote("feedbackCategory")}: ${quote(quartzKeyTypeData.feedbackCategory)}, " +
-              "${quote("feedbackInputCategory")}: ${quote(quartzKeyTypeData.feedbackInputCategory)}" +
-              "}}}"
+              if (userDonation.hasQuartzDataDonationV2()) {
+                val quartzDataDonationV2 = userDonation.quartzDataDonationV2
+                "{${quote(PREFIX + "QuartzDonationV2")}: {" +
+                  getQuartzNotificationDataString(quartzDataDonationV2.quartzNotificationData) +
+                  ", " +
+                  getQuartzModelDataStringForKeyType(quartzDataDonationV2.quartzModelData) +
+                  ", " +
+                  getQuartzAppInfoDataString(quartzDataDonationV2.quartzAppInfoData) +
+                  "}"
+              } else {
+                "{${quote(PREFIX + "QuartzDonation")}: " +
+                  getQuartzKeyTypeDataString(quartzKeyTypeData) +
+                  "}"
+              } +
+              "}"
           )
         donationString = donationString.plus("}")
         return donationString
@@ -354,22 +379,23 @@ class QuartzDataHelper @Inject constructor() {
           donationString.plus(
             ", ${quote("userDonation")}: " +
               "{${quote("structuredDataDonation")}: " +
-              "{${quote(PREFIX + "QuartzDonation")}: " +
-              "{${quote(PREFIX + "QuartzKeySummarizationData")}: " +
-              "{${quote(PREFIX + "QuartzCommonData")}: " +
-              "${getQuartzCommonDataString(summarizationData.quartzCommonData)}, " +
-              "${quote("featureName")}: ${quote(summarizationData.featureName)}, " +
-              "${quote("modelName")}: ${quote(summarizationData.modelName)}, " +
-              "${quote("modelVersion")}: ${quote(summarizationData.modelVersion)}, " +
-              "${quote("isGroupConversation")}: ${summarizationData.isGroupConversation}, " +
-              "${quote("conversationTitle")}: ${quote(summarizationData.conversationTitle)}, " +
-              "${quote("messages")}: ${quote(summarizationData.messages)}, " +
-              "${quote("notificationCount")}: ${summarizationData.notificationCount}, " +
-              "${quote("executionTimeMs")}: ${summarizationData.executionTimeMs}, " +
-              "${quote("summaryText")}: ${quote(summarizationData.summaryText)}, " +
-              "${quote("feedbackType")}: ${quote(summarizationData.feedbackType)}, " +
-              "${quote("feedbackAdditionalDetail")}: ${quote(summarizationData.feedbackAdditionalDetail)}" +
-              "}}}"
+              if (userDonation.hasQuartzDataDonationV2()) {
+                val quartzDataDonationV2 = userDonation.quartzDataDonationV2
+                "{${quote(PREFIX + "QuartzDonationV2")}: {" +
+                  getQuartzNotificationDataString(quartzDataDonationV2.quartzNotificationData) +
+                  ", " +
+                  getQuartzModelDataStringForKeySummarization(
+                    quartzDataDonationV2.quartzModelData
+                  ) +
+                  ", " +
+                  getQuartzAppInfoDataString(quartzDataDonationV2.quartzAppInfoData) +
+                  "}"
+              } else {
+                "{${quote(PREFIX + "QuartzDonation")}: " +
+                  getQuartzKeySummarizationDataString(summarizationData) +
+                  "}"
+              } +
+              "}"
           )
         donationString = donationString.plus("}")
         return donationString
@@ -378,6 +404,94 @@ class QuartzDataHelper @Inject constructor() {
         return ""
       }
     }
+  }
+
+  private fun getQuartzNotificationDataString(
+    quartzNotificationData: QuartzNotificationData
+  ): String {
+    return "${quote(PREFIX + "QuartzNotificationData")}: {" +
+      "${quote("title")}: ${quote(quartzNotificationData.title)}, " +
+      "${quote("content")}: ${quote(quartzNotificationData.content)}, " +
+      "${quote("channelId")}: ${quote(quartzNotificationData.channelId)}, " +
+      "${quote("conversationMessages")}: ${quote(quartzNotificationData.conversationMessages)}, " +
+      "${quote("conversationHistoricMessages")}: ${quote(quartzNotificationData.conversationHistoricMessages)}" +
+      "}"
+  }
+
+  private fun getQuartzModelDataStringForKeyType(quartzModelData: QuartzModelData): String {
+    return "${quote(PREFIX + "QuartzModelData")}: {" +
+      "${quote("modelInfo")}: ${quote(quartzModelData.modelInfo)}, " +
+      "${quote("classificationMethod")}: ${quote(quartzModelData.classificationMethod)}, " +
+      "${quote("classificationBertCategoryResult")}: ${quote(quartzModelData.classificationBertCategoryResult)}, " +
+      "${quote("classificationBertCategoryScore")}: ${quote(quartzModelData.classificationBertCategoryScore)}, " +
+      "${quote("classificationCategory")}: ${quote(quartzModelData.classificationCategory)}" +
+      "${quote("classificationDefaultCategoryResult")}: ${quote(quartzModelData.classificationDefaultCategoryResult)}, " +
+      "${quote("defaultCategoryCorrectionThreshold")}: ${quote(quartzModelData.defaultCategoryCorrectionThreshold)}, " +
+      "${quote("isSuppressDuplicate")}: ${quote(quartzModelData.isSuppressDuplicate)}" +
+      "}"
+  }
+
+  private fun getQuartzModelDataStringForKeySummarization(
+    quartzModelData: QuartzModelData
+  ): String {
+    return "${quote(PREFIX + "QuartzModelData")}: {" +
+      "${quote("modelInfo")}: ${quote(quartzModelData.modelInfo)}, " +
+      "${quote("featureName")}: ${quote(quartzModelData.featureName)}, " +
+      "${quote("summaryText")}: ${quote(quartzModelData.summaryText)}" +
+      "}"
+  }
+
+  private fun getQuartzAppInfoDataString(quartzAppInfoData: QuartzAppInfoData): String {
+    return "${quote(PREFIX + "QuartzAppInfoData")}: {" +
+      "${quote("uuid")}: ${quote(quartzAppInfoData.uuid)}, " +
+      "${quote("asiVersion")}: ${quote(quartzAppInfoData.asiVersion)}, " +
+      "${quote("playStoreCategory")}: ${quote(quartzAppInfoData.playStoreCategory)}, " +
+      "${quote("packageName")}: ${quote(quartzAppInfoData.packageName)}" +
+      "}"
+  }
+
+  private fun getQuartzKeyTypeDataString(quartzKeyTypeData: QuartzKeyTypeData): String {
+    return "{${quote(PREFIX + "QuartzKeyTypeData")}: " +
+      "{${quote(PREFIX + "QuartzCommonData")}: " +
+      "${getQuartzCommonDataString(quartzKeyTypeData.quartzCommonData)}, " +
+      "${quote("notificationId")}: ${quote(quartzKeyTypeData.notificationId)}, " +
+      "${quote("postTimestamp")}: ${quote(timestampToJsonString(quartzKeyTypeData.postTimestamp))}, " +
+      "${quote("modelInfoList")}: ${buildRepeatedMessages(quartzKeyTypeData.modelInfoListList)}, " +
+      "${quote("appCategory")}: ${quote(quartzKeyTypeData.appCategory)}, " +
+      "${quote("classificationMethod")}: ${quote(quartzKeyTypeData.classificationMethod.name)}, " +
+      "${quote("classificationBertCategoryResult")}: ${quote(quartzKeyTypeData.classificationBertCategoryResult)}, " +
+      "${quote("classificationBertCategoryScore")}: ${quartzKeyTypeData.classificationBertCategoryScore}, " +
+      "${quote("classificationBertCategoryExecutedTimeMs")}: ${quartzKeyTypeData.classificationBertCategoryExecutedTimeMs}, " +
+      "${quote("classificationCategory")}: ${quote(quartzKeyTypeData.classificationCategory)}, " +
+      "${quote("isThresholdChangedCategory")}: ${quartzKeyTypeData.isThresholdChangedCategory}, " +
+      "${quote("classificationExecutedTimeMs")}: ${quartzKeyTypeData.classificationExecutedTimeMs}, " +
+      "${quote("exemptionExecutedTimeMsString")}: ${quote(quartzKeyTypeData.exemptionExecutedTimeMsString)}, " +
+      "${quote("classificationDefaultCategoryResult")}: ${quote(quartzKeyTypeData.classificationDefaultCategoryResult)}, " +
+      "${quote("defaultCategoryCorrectionThreshold")}: ${quote(quartzKeyTypeData.defaultCategoryCorrectionThreshold)}, " +
+      "${quote("isSuppressDuplicate")}: ${quote(quartzKeyTypeData.isSuppressDuplicate)}, " +
+      "${quote("feedbackCategory")}: ${quote(quartzKeyTypeData.feedbackCategory)}, " +
+      "${quote("feedbackInputCategory")}: ${quote(quartzKeyTypeData.feedbackInputCategory)}" +
+      "}"
+  }
+
+  private fun getQuartzKeySummarizationDataString(
+    quartzKeySummarizationData: QuartzKeySummarizationData
+  ): String {
+    return "{${quote(PREFIX + "QuartzKeySummarizationData")}: " +
+      "{${quote(PREFIX + "QuartzCommonData")}: " +
+      "${getQuartzCommonDataString(quartzKeySummarizationData.quartzCommonData)}, " +
+      "${quote("featureName")}: ${quote(quartzKeySummarizationData.featureName)}, " +
+      "${quote("modelName")}: ${quote(quartzKeySummarizationData.modelName)}, " +
+      "${quote("modelVersion")}: ${quote(quartzKeySummarizationData.modelVersion)}, " +
+      "${quote("isGroupConversation")}: ${quartzKeySummarizationData.isGroupConversation}, " +
+      "${quote("conversationTitle")}: ${quote(quartzKeySummarizationData.conversationTitle)}, " +
+      "${quote("messages")}: ${quote(quartzKeySummarizationData.messages)}, " +
+      "${quote("notificationCount")}: ${quartzKeySummarizationData.notificationCount}, " +
+      "${quote("executionTimeMs")}: ${quartzKeySummarizationData.executionTimeMs}, " +
+      "${quote("summaryText")}: ${quote(quartzKeySummarizationData.summaryText)}, " +
+      "${quote("feedbackType")}: ${quote(quartzKeySummarizationData.feedbackType)}, " +
+      "${quote("feedbackAdditionalDetail")}: ${quote(quartzKeySummarizationData.feedbackAdditionalDetail)}" +
+      "}"
   }
 
   private fun getQuartzCommonDataString(commonData: QuartzCommonData): String {

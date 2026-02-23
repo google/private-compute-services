@@ -72,7 +72,8 @@ public abstract class PrivateInferenceConfig {
         .setTransportMode(DEFAULT_TRANSPORT_MODE)
         .setTokenIssuanceEndpointUrl(DEFAULT_TOKEN_ISSUANCE_ENDPOINT_URL)
         .setArateaAuthMode(DEFAULT_ARATEA_AUTH_MODE)
-        .setProxyAuthMode(DEFAULT_PROXY_AUTH_MODE);
+        .setProxyAuthMode(DEFAULT_PROXY_AUTH_MODE)
+        .setPiServerChannelIdleTimeoutMinutes(DEFAULT_PI_SERVER_CHANNEL_IDLE_TIMEOUT_MINUTES);
   }
 
   /** Returns the current attestation publisher mode. */
@@ -161,6 +162,9 @@ public abstract class PrivateInferenceConfig {
 
   public abstract ProxyAuthFlag.Mode proxyAuthMode();
 
+  /** Returns the idle timeout in minutes for the PI Server gRPC channel. */
+  public abstract long piServerChannelIdleTimeoutMinutes();
+
   public static final String PRIVATE_INFERENCE_PROD_ENDPOINT_URL =
       "privatearatea.pa.googleapis.com";
   public static final String TOKEN_ISSUANCE_PROD_ENDPOINT_URL = "phosphor-pa.googleapis.com";
@@ -191,18 +195,18 @@ public abstract class PrivateInferenceConfig {
    */
   public static final int CACHE_REFRESH_INTERVAL_NEVER = -1;
 
-  public static final int DEFAULT_PROXY_TOKEN_BATCH_SIZE = 50;
+  public static final int DEFAULT_PROXY_TOKEN_BATCH_SIZE = 11;
   public static final TokenCacheFlag.Mode DEFAULT_PROXY_TOKEN_CACHE_MODE = Mode.DURABLE_AND_MEMORY;
   public static final int DEFAULT_PROXY_TOKEN_CACHE_REFRESH_INTERVAL_MINUTES = 6 * 60;
   public static final int DEFAULT_PROXY_TOKEN_MEMORY_CACHE_MIN_POOL_SIZE = 2;
   public static final int DEFAULT_PROXY_TOKEN_MEMORY_CACHE_PREFERRED_POOL_SIZE = 10;
   public static final int DEFAULT_PROXY_TOKEN_DURABLE_CACHE_MIN_POOL_SIZE = 2;
-  public static final int DEFAULT_PROXY_TOKEN_DURABLE_CACHE_PREFERRED_POOL_SIZE = 100;
+  public static final int DEFAULT_PROXY_TOKEN_DURABLE_CACHE_PREFERRED_POOL_SIZE = 10;
   public static final int DEFAULT_ARATEA_TOKEN_BATCH_SIZE = 1;
   public static final int DEFAULT_ARATEA_TOKEN_MEMORY_CACHE_MIN_POOL_SIZE = 2;
   public static final int DEFAULT_ARATEA_TOKEN_MEMORY_CACHE_PREFERRED_POOL_SIZE = 10;
   public static final int DEFAULT_ARATEA_TOKEN_DURABLE_CACHE_MIN_POOL_SIZE = 2;
-  public static final int DEFAULT_ARATEA_TOKEN_DURABLE_CACHE_PREFERRED_POOL_SIZE = 100;
+  public static final int DEFAULT_ARATEA_TOKEN_DURABLE_CACHE_PREFERRED_POOL_SIZE = 10;
   public static final TokenCacheFlag.Mode DEFAULT_ARATEA_TOKEN_CACHE_MODE = Mode.NO_CACHE;
   public static final int DEFAULT_ARATEA_TOKEN_CACHE_REFRESH_INTERVAL_MINUTES =
       CACHE_REFRESH_INTERVAL_NEVER;
@@ -218,6 +222,8 @@ public abstract class PrivateInferenceConfig {
       ProxyAuthFlag.Mode.ANONYMOUS_TOKEN;
 
   public static final int DEFAULT_PROXY_CONFIG_REFRESH_INTERVAL_MINUTES = 24 * 60;
+
+  public static final long DEFAULT_PI_SERVER_CHANNEL_IDLE_TIMEOUT_MINUTES = 5L;
 
   /** Builder for {@link PrivateInferenceConfig}. */
   @AutoValue.Builder
@@ -277,6 +283,8 @@ public abstract class PrivateInferenceConfig {
     public abstract Builder setArateaAuthMode(ArateaAuthFlag.Mode mode);
 
     public abstract Builder setProxyAuthMode(ProxyAuthFlag.Mode mode);
+
+    public abstract Builder setPiServerChannelIdleTimeoutMinutes(long minutes);
 
     public abstract PrivateInferenceConfig build();
   }

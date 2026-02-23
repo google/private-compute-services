@@ -22,6 +22,7 @@ import androidx.annotation.RequiresExtension
 import com.google.android.`as`.oss.common.ExecutorAnnotations.PiExecutorQualifier
 import com.google.android.`as`.oss.logging.PcsStatsEnums.CountMetricId
 import com.google.android.`as`.oss.logging.PcsStatsEnums.ValueMetricId
+import com.google.android.`as`.oss.privateinference.Annotations.PiServerChannelIdleTimeoutMinutes
 import com.google.android.`as`.oss.privateinference.Annotations.PrivateInferenceEndpointUrl
 import com.google.android.`as`.oss.privateinference.Annotations.PrivateInferenceProxyConfiguration
 import com.google.android.`as`.oss.privateinference.config.impl.ProxyAuthFlag
@@ -50,6 +51,7 @@ import io.grpc.cronet.CronetChannelBuilder
 import io.grpc.okhttp.OkHttpChannelBuilder
 import java.util.Optional
 import java.util.concurrent.ExecutionException
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.sync.Mutex
@@ -66,6 +68,7 @@ class PrivateInferenceManagedChannelFactory
 constructor(
   @ApplicationContext private val context: Context,
   @PrivateInferenceEndpointUrl private val endpointUrl: String,
+  @PiServerChannelIdleTimeoutMinutes private val channelIdleTimeoutMinutes: Long,
   @PrivateInferenceProxyConfiguration private val proxyConfigManager: Optional<ProxyConfigManager>,
   private val transportFlag: TransportFlag,
   private val bsaProxyTokenProvider: BsaTokenProvider<@JvmSuppressWildcards ProxyToken>,
@@ -128,7 +131,10 @@ constructor(
         }
         else -> ManagedChannelBuilder.forTarget(endpointUrl)
       }
-    return managedChannelBuilder.maxInboundMessageSize(MAX_INBOUND_MESSAGE_SIZE_BYTES).build()
+    return managedChannelBuilder
+      .maxInboundMessageSize(MAX_INBOUND_MESSAGE_SIZE_BYTES)
+      .idleTimeout(channelIdleTimeoutMinutes, TimeUnit.MINUTES)
+      .build()
   }
 
   private val List<ProxyConfiguration>.toLogString: String

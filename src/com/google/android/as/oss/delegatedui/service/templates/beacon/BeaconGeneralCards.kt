@@ -24,6 +24,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -82,6 +83,7 @@ import com.google.android.`as`.oss.delegatedui.service.templates.beacon.BeaconGe
 import com.google.android.`as`.oss.delegatedui.service.templates.beacon.BeaconGeneralCardsConstants.OPEN_APP_BUTTON_TAG
 import com.google.android.`as`.oss.delegatedui.service.templates.beacon.BeaconTemplateRendererConstants.IconButtonSizeMedium
 import com.google.android.`as`.oss.delegatedui.service.templates.beacon.BeaconTemplateRendererConstants.IconSizeLarge
+import com.google.android.`as`.oss.delegatedui.service.templates.beacon.BeaconTemplateRendererConstants.IconSizeMedium
 import com.google.android.`as`.oss.delegatedui.service.templates.beacon.BeaconTemplateRendererConstants.IconSizeNormal
 import com.google.android.`as`.oss.delegatedui.service.templates.beacon.BeaconTemplateRendererConstants.RoundedCornerSizeExtraSmall
 import com.google.android.`as`.oss.delegatedui.service.templates.beacon.BeaconTemplateRendererConstants.RoundedCornerSizeLarge
@@ -273,7 +275,25 @@ internal fun TemplateRendererScope.BeaconSingleGeneralCardContainerV2(
 
       if (pendingIntent != null && isExpanded) {
         Spacer(modifier = Modifier.height(12.dp))
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          CardFeedback(
+            goodFeedbackContentDescription =
+              genericContentDescriptions.goodFeedbackContentDescription,
+            badFeedbackContentDescription =
+              genericContentDescriptions.badFeedbackContentDescription,
+            goodFeedbackButtonUiId = card.goodFeedbackButtonUiId,
+            badFeedbackButtonUiId = card.badFeedbackButtonUiId,
+            feedbackSubmittedStateDescription =
+              genericContentDescriptions.feedbackSubmittedStateDescription,
+            feedbackNotSubmittedStateDescription =
+              genericContentDescriptions.feedbackNotSubmittedStateDescription,
+            thumbsUpEntityFeedbackDialogData = card.thumbsUpEntityFeedbackDialogData,
+            thumbsDownEntityFeedbackDialogData = card.thumbsDownEntityFeedbackDialogData,
+          )
           Button(
             modifier = Modifier.testTag(OPEN_APP_BUTTON_TAG),
             onClick = {
@@ -291,8 +311,20 @@ internal fun TemplateRendererScope.BeaconSingleGeneralCardContainerV2(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
               ),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
           ) {
-            Text(text = card.dataSource.ctaButtonText)
+            Row(
+              horizontalArrangement = Arrangement.spacedBy(8.dp),
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Icon(
+                modifier = Modifier.size(IconSizeMedium),
+                painter = painterResource(R.drawable.gs_open_in_new_vd_theme_24),
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                contentDescription = null,
+              )
+              Text(text = card.dataSource.ctaButtonText)
+            }
           }
         }
       }

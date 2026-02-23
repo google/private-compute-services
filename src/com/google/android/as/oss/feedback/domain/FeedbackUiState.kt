@@ -24,6 +24,7 @@ import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.Legacy
 import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.MemoryEntities
 import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.ModelOutputs
 import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.NotificationContent
+import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.QuartzModelOutputs
 import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.SelectedEntityContent
 import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.TriggeringMessages
 import com.google.android.`as`.oss.feedback.quartz.serviceclient.QuartzFeedbackDonationData
@@ -50,6 +51,7 @@ data class FeedbackUiState(
       TriggeringMessages to false,
       IntentQueries to false,
       ModelOutputs to false,
+      QuartzModelOutputs to false,
       MemoryEntities to false,
       SelectedEntityContent to false,
       AppInfo to false,

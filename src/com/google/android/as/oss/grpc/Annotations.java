@@ -52,4 +52,9 @@ public interface Annotations {
   @Qualifier
   @Retention(RetentionPolicy.RUNTIME)
   @interface PcsGrpcServiceName {}
+
+  /** Annotation for injection of gRPC channel to PCS. */
+  @Qualifier
+  @Retention(RetentionPolicy.RUNTIME)
+  @interface PcsChannel {}
 }

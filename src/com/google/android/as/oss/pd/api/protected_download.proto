@@ -137,7 +137,7 @@ message BlobConstraints {
     PSI_TEXT_INPUT_REGEXT_ONLY_CLASSIFIER_CLIENT = 104;
     PSI_TEXT_OUTPUT_REGEX_ONLY_CLASSIFIER_CLIENT = 105;
 
-    reserved 10000 to 10004, 99997 to 99999;
+       reserved 10000 to 10004, 99997 to 99999;
   }
 
   Client client = 1002;

@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-package com.google.android.`as`.oss.delegatedui.service.templates.beacon
+package com.google.android.as.oss.fl.fc.service.scheduler;
 
-import androidx.compose.ui.unit.dp
+import com.google.android.as.oss.fl.fc.service.scheduler.Annotations.PrivateLoggerFcpInvoker;
+import dagger.Binds;
+import dagger.Module;
+import dagger.hilt.InstallIn;
+import dagger.hilt.components.SingletonComponent;
 
-internal object BeaconTemplateRendererConstants {
-  val IconButtonSizeXLarge = 48.dp
-  val IconButtonSizeLarge = 32.dp
-  val IconButtonSizeMedium = 24.dp
-  val IconSizeNormal = 20.dp
-  val IconSizeLarge = 24.dp
-  val IconSizeMedium = 16.dp
-  val RoundedCornerSizeLarge = 24.dp
-  val RoundedCornerSizeMedium = 16.dp
-  val RoundedCornerSizeExtraSmall = 4.dp
-  val SummaryIconAndTextSpacing = 4.dp
+/** Module for providing {@link FcpLoggerInvoker}. */
+@Module
+@InstallIn(SingletonComponent.class)
+abstract class FcpLoggerInvokerModule {
+
+  @Binds
+  @PrivateLoggerFcpInvoker
+  abstract FcpLoggerInvoker bindFcpLoggerInvoker(FcpLoggerInvokerImpl impl);
+
+  private FcpLoggerInvokerModule() {}
 }

@@ -21,8 +21,10 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import android.content.Context;
 import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.apps.miphone.pcs.grpc.Annotations.GrpcServicePackageName;
+import com.google.android.apps.miphone.pcs.grpc.Annotations.PcsChannel;
 import com.google.android.apps.miphone.pcs.grpc.Annotations.PcsGrpcServiceName;
 import com.google.android.as.oss.grpc.config.PcsGrpcConfig;
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
@@ -42,6 +44,7 @@ import javax.inject.Singleton;
 interface OnDeviceChannelModule {
   @Provides
   @Singleton
+  @PcsChannel
   static Channel providesOnDeviceChannel(
       @ApplicationContext Context context,
       @GrpcServicePackageName String pcsPackageName,
@@ -60,4 +63,8 @@ interface OnDeviceChannelModule {
         .compressorRegistry(CompressorRegistry.newEmptyInstance())
         .build();
   }
+
+  @Binds
+  @Singleton
+  abstract Channel bindsLegacyOnDeviceChannel(@PcsChannel Channel channel);
 }

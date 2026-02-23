@@ -25,6 +25,9 @@ android_library(
     ],
     deps = [
         "//src/com/google/android/as/oss/common/config",
+        "//src/com/google/android/as/oss/common/flavor",
+        "//src/com/google/android/as/oss/feedback/domain:view_feedback_data",
+        "//src/com/google/android/as/oss/feedback/proto/gateway:quartz_log_kt_proto_lite",
         "//third_party/java/android/android_sdk_linux/extras/android/compatibility/v4",
     ],
 )
@@ -38,6 +41,7 @@ android_library(
         ":config",
         "//src/com/google/android/as/oss/common:annotation",
         "//src/com/google/android/as/oss/common/config",
+        "//src/com/google/android/as/oss/common/flavor",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",
         "@maven//:javax_inject_javax_inject",

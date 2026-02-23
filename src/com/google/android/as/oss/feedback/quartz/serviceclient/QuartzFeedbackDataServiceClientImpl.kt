@@ -220,7 +220,10 @@ internal constructor(
           QuartzKeyTypeData()
         },
       notificationData =
-        if (donationData.hasQuartzDataDonationV2()) {
+        if (
+          donationData.hasQuartzDataDonationV2() &&
+            donationData.quartzDataDonationV2.hasQuartzNotificationData()
+        ) {
           QuartzNotificationData(
             title = donationData.quartzDataDonationV2.quartzNotificationData.title,
             content = donationData.quartzDataDonationV2.quartzNotificationData.content,
@@ -236,6 +239,7 @@ internal constructor(
       modelData =
         if (
           donationData.hasQuartzDataDonationV2() &&
+            donationData.quartzDataDonationV2.hasQuartzModelData() &&
             quartzCuj == QuartzCUJ.QUARTZ_CUJ_KEY_SUMMARIZATION
         ) {
           QuartzModelData(
@@ -244,7 +248,9 @@ internal constructor(
             summaryText = donationData.quartzDataDonationV2.quartzModelData.summaryText,
           )
         } else if (
-          donationData.hasQuartzDataDonationV2() && quartzCuj == QuartzCUJ.QUARTZ_CUJ_KEY_TYPE
+          donationData.hasQuartzDataDonationV2() &&
+            donationData.quartzDataDonationV2.hasQuartzModelData() &&
+            quartzCuj == QuartzCUJ.QUARTZ_CUJ_KEY_TYPE
         ) {
           QuartzModelData(
             modelInfo = donationData.quartzDataDonationV2.quartzModelData.modelInfo,

@@ -35,12 +35,12 @@ proto_library(
         "data_service_log_usage_data.proto",
     ],
     has_services = True,
+    option_deps = ["//third_party/protobuf:cpp_features_proto"],
     deps = [
         "",
         "//src/com/google/android/as/oss/delegatedui/api/common:common_proto",
         "//src/com/google/android/as/oss/delegatedui/api/integration/templates:templates_proto",
         "//src/com/google/android/as/oss/delegatedui/api/integration/templates:ui_id_token_proto",
-        "//third_party/protobuf:cpp_features_proto",
     ],
 )
 

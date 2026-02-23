@@ -28,7 +28,6 @@ proto_library(
     deps = [
         "",
         "//src/com/google/android/as/oss/delegatedui/api/integration/templates:ui_id_token_proto",
-        "//third_party/protobuf:cpp_features_proto",
     ],
 )
 

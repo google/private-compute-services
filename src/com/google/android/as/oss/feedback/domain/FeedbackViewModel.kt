@@ -252,6 +252,12 @@ constructor(
                 ?.feedbackUiRenderingData
                 ?.feedbackViewDataCategoryTitles
                 ?.hasNotificationContentTitle() ?: false)
+          val defaultOptInChecked = _uiStateFlow.value.optInChecked.toMutableMap()
+          for (category in
+            configReader.config.dataCollectionCategoryDefaultOptIn[quartzCuj.name] ?: emptyList()) {
+            defaultOptInChecked[category] = true
+          }
+          _uiStateFlow.update { it.copy(optInChecked = defaultOptInChecked) }
         }
         _uiStateFlow.update {
           it.copy(enableViewDataDialogV2MultiEntity = !blockViewDataV2ForNotification)

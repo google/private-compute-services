@@ -12,18 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package com.google.android.as.oss.feedback.api;
 
 import "src/com/google/android/as/oss/feedback/proto/feedback_dialog_common_data.proto";
 import "src/com/google/android/as/oss/feedback/proto/feedback_tag_data.proto";
 
-import "third_party/protobuf/cpp_features.proto";
 
-option features.(pb.cpp).string_type = VIEW;
+option java_outer_classname = "EntityFeedbackDialogDataOuterClass";
 option java_package = "com.google.android.as.oss.feedback.api";
-option java_multiple_files = true;
 
 // The data required to populate the feedback UI for a single entity.
 // Next ID: 5

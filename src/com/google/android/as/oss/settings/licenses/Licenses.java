@@ -16,6 +16,8 @@
 
 package com.google.android.as.oss.settings.licenses;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import android.content.Context;
 import android.content.res.Resources;
 import com.google.common.base.Preconditions;
@@ -126,7 +128,8 @@ public final class Licenses {
       throw new RuntimeException("Failed to read license or metadata text.", e);
     }
     try {
-      return textArray.toString("UTF-8");
+      // ByteArrayOutputStream.toString(Charset) requires API level 33.
+      return textArray.toString(UTF_8.name());
     } catch (UnsupportedEncodingException e) {
       throw new RuntimeException("Unsupported encoding UTF8. This should always be supported.", e);
     }

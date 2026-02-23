@@ -24,7 +24,7 @@ option java_package = "com.google.android.as.oss.logging";
 
 // Enum for declaring generic daily count metrics from Pcs.
 // Make sure to discuss your logs with PWG before adding a new type here.
-// Next Id: 264
+// Next Id: 270
 enum CountMetricId {
   option features.(pb.java).nest_in_file_class = YES;
 
@@ -81,7 +81,7 @@ enum CountMetricId {
   PCS_PI_IPP_MASQUE_TUNNEL_VIA_CLOUDFLARE_SETUP_FAILURE = 210;
 }
 
-// Next ID: 158
+// Next ID: 164
 enum ValueMetricId {
   option features.(pb.java).nest_in_file_class = YES;
 

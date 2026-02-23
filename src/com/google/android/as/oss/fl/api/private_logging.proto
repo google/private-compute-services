@@ -1,0 +1,147 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+edition = "2024";
+
+package com.google.android.as.oss.fl.api;
+
+import "third_party/fcp/client/selector_context.proto";
+
+option java_package = "com.google.android.as.oss.fl.api.proto";
+option java_outer_classname = "PrivateLogging";
+
+
+// A service to enable PCC apps to pass data to PCS for upload via FCP's
+// PrivateLogger API. This service is used to implement a Private Logger that
+// can be used in PCC apps to upload data to be processed via confidential
+// aggregations.
+service PrivateLoggingService {
+  // Initiates and manages a private logging upload session.
+  // This is a bidirectional streaming RPC that allows the service to request
+  // data from the client on-demand during the upload process, effectively
+  // replacing the DataProvider callback mechanism with stream messages.
+  //
+  // Workflow:
+  // 1. Client (PCC app) opens stream and sends one
+  //    ClientStreamMessage with `UploadRequest` populated.
+  // 2. Service (PCS PrivateLoggerService) receives request, starts
+  //    upload via the FCP APIs.
+  // 3. When FCP asks the PCS process for the data to be uploaded, the
+  //    service sends a ServiceStreamMessage with `GetDataRequest` to
+  //    the client.
+  // 4. Client receives `GetDataRequest` and sends a
+  //    ClientStreamMessage with `GetDataResponse` back to the service.
+  // 5. Steps 3-4 may repeat during an upload session (e.g. if FCP requests
+  //    data for multiple tasks).
+  // 6. When FCP upload finishes,
+  //    the service sends one final ServiceStreamMessage with
+  //    `UploadFinishedResponse` populated, and then closes the stream.
+  rpc Upload(stream ClientStreamMessage) returns (stream ServiceStreamMessage) {
+    option deadline = 900;
+  }
+}
+
+// Represents a single log entry containing the logged data and its timestamp.
+// This corresponds to com.google.fcp.client.privatelogger.LogEntry.
+message LogEntry {
+  // The raw data of the log entry, matching LogEntry#value().
+  bytes value = 1;
+
+  // The ISO 8601 timestamp of when the entry was logged, matching
+  // LogEntry#timestamp().
+  string timestamp = 2;
+}
+
+// The outcome of a single task's contribution attempt.
+// This corresponds to com.google.fcp.client.privatelogger.impl.UploadOutcome.
+message UploadOutcome {
+  // The name of the task, matching UploadOutcome#taskName().
+  string task_name = 1;
+
+  // The contribution status of the task.
+  enum Status {
+    STATUS_UNSPECIFIED = 0;
+
+    // The client's contribution was successfully uploaded.
+    CONTRIBUTED = 1;
+
+    // The client's contribution was not uploaded.
+    NOT_CONTRIBUTED = 2;
+  }
+
+  // The status of the upload for this task, matching UploadOutcome#status().
+  Status status = 2;
+}
+
+// Request message sent from a Private Logger in a PCC app to initiate an
+// upload.
+message UploadRequest {
+  // The target private log source name.
+  // This corresponds to the `privateLogSourceName` parameter of
+  // PrivateLoggerConnector#upload.
+  string private_log_source_name = 1;
+}
+
+// Response message sent from gRPC service containing overall upload result.
+message UploadFinishedResponse {
+  // A list of outcomes for each task attempted during upload.
+  repeated UploadOutcome outcomes = 1
+     ;
+}
+
+// Request message sent from PCS back to the PCC app to request data to be
+// uploaded, in response to an UploadRequest.
+message GetDataRequest {
+  // Context for selecting data, e.g., task name for contribution tracking.
+  // This corresponds to the `selectorContext` parameter of
+  // DataProvider#getData.
+  fcp.client.SelectorContext selector_context = 1;
+}
+
+// Response message sent from PCC app back to PCS containing requested data.
+message GetDataResponse {
+  // List of log entries matching the GetDataRequest criteria.
+  repeated LogEntry entries = 1;
+}
+
+// Message wrapping client requests for the Upload stream.
+// This message is sent from the PCC app to PCS.
+message ClientStreamMessage {
+  oneof message_type {
+    // The initial request to start an upload. This must be the first message
+    // sent by the client in the stream.
+    UploadRequest upload_request = 1
+       ;
+
+    // A response containing data requested by the service via GetDataRequest.
+    // This is sent in response to a ServiceStreamMessage containing a
+    // get_data_request.
+    GetDataResponse get_data_response = 2;
+  }
+}
+
+// Message wrapping service responses for the Upload stream.
+// This message is sent from PCS to the calling PCC app.
+message ServiceStreamMessage {
+  oneof message_type {
+    // A request for data from the client. The client is expected to
+    // respond with a ClientStreamMessage containing a get_data_response.
+    GetDataRequest get_data_request = 1;
+
+    // The final response indicating that the upload process has finished,
+    // containing the list of UploadOutcomes. After sending this message,
+    // the service will close the stream from its side.
+    UploadFinishedResponse upload_finished_response = 2;
+  }
+}

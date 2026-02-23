@@ -19,6 +19,7 @@ package(default_visibility = ["//visibility:public"])
 android_library(
     name = "annotations",
     srcs = ["Annotations.java"],
+    visibility = ["//visibility:public"],
     deps = ["@maven//:javax_inject_javax_inject"],
 )
 
@@ -31,7 +32,6 @@ android_library(
     ],
     manifest = "AndroidManifest.xml",
     deps = [
-        "@maven//:androidx_annotation_annotation",
         "@maven//:androidx_lifecycle_lifecycle_service",
         "@maven//:io_grpc_grpc_api",
         "@maven//:io_grpc_grpc_binder",

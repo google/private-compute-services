@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package com.google.android.as.oss.delegatedui.api.integration.templates.bugle;
 
@@ -20,16 +20,16 @@ import "src/com/google/android/as/oss/dataattribution/proto/attribution_chip_hea
 import "src/com/google/android/as/oss/dataattribution/proto/attribution_dialog.proto";
 import "src/com/google/android/as/oss/delegatedui/api/common/common.proto";
 import "src/com/google/android/as/oss/delegatedui/api/integration/templates/ui_id_token.proto";
-import "third_party/protobuf/cpp_features.proto";
 
-option features.(pb.cpp).string_type = VIEW;
+
+option java_outer_classname = "BugleTemplateIntegration";
 option java_package = "com.google.android.as.oss.delegatedui.api.integration.templates.bugle";
-option java_multiple_files = true;
 
 message BugleTemplateData {
   repeated BugleAction bugle_actions = 1;
   repeated BugleSuggestion bugle_suggestions = 2;
-  bool is_standalone_row_enabled = 3;
+  bool is_standalone_row_enabled = 3
+     ;
 
   // Mapping between PendingIntent and attribution index.
   // The size of this list should match the size of the PendingIntent list
@@ -37,16 +37,19 @@ message BugleTemplateData {
   // corresponding attribution card data within the attribution dialog. This
   // index is implicit, determined by the order of BugleSuggestion items and
   // AttributionDialogData.AttributionCardData.
-  repeated int32 pending_intent_to_attribution_map = 4;
+  repeated int32 pending_intent_to_attribution_map = 4
+     ;
 
   bool enable_size_animation = 5;
   int32 stroke_color = 6;
+
   int32 font_color = 7;
+
   int32 icon_color = 8;
 
   repeated api.common.DelegatedUiHint hints = 9;
-
-  UiIdToken bugle_view_ui_id_token = 10;
+  UiIdToken bugle_view_ui_id_token = 10
+     ;
 }
 
 message BugleAdditionalData {}
@@ -66,9 +69,13 @@ message ActionData {
 
   // TODO: populate this UiIdToken.
   UiIdToken ui_id_token = 4;
-  dataattribution.proto.AttributionDialogData attribution_dialog_data = 5;
+  dataattribution.proto.AttributionDialogData attribution_dialog_data = 5
+     ;
 
-  dataattribution.proto.AttributionChipData attribution_chip_data = 6;
+  dataattribution.proto.AttributionChipData attribution_chip_data = 6
+     ;
+
+  string attribution = 7;
 }
 
 message BugleSuggestion {
@@ -80,5 +87,6 @@ message BugleSuggestion {
 
   // TODO: populate this UiIdToken.
   UiIdToken ui_id_token = 4;
-  dataattribution.proto.AttributionDialogData attribution_dialog_data = 5;
+  dataattribution.proto.AttributionDialogData attribution_dialog_data = 5
+     ;
 }

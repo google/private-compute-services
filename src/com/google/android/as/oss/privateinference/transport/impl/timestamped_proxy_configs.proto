@@ -34,6 +34,5 @@ message ProxyConfig {
   string url = 1;
 
   // The proxy port.
-  int32 port = 2
-      ;
+  int32 port = 2;
 }

@@ -35,7 +35,9 @@
   <FrameLayout
       android:id="@+id/settings_fragment_container"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"/>
+      android:layout_height="wrap_content"
+      android:background="?android:attr/colorBackground"
+      android:elevation="2dp"/>
 
   <FrameLayout
       android:id="@+id/log_fragment_container"

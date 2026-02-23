@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package com.google.android.as.oss.feedback.api.gateway;
 
-option java_multiple_files = true;
+
+option java_outer_classname = "MessageArmour";
 option java_package = "com.google.android.as.oss.feedback.api.gateway";
 
 // This enum defines the specific CUJs within Message Armour.
@@ -43,7 +44,8 @@ message MessageArmourDataDonation {
 
     // User survey free form text response for Message Armour feature.
     MessageArmourUserSurveyTextResponse
-        message_armour_user_survey_text_response = 2;
+        message_armour_user_survey_text_response = 2
+       ;
   }
 }
 
@@ -57,7 +59,8 @@ message MessageArmourUserInput {
   oneof cuj_specific_user_input {
     // User survey selection response for Message Armour feature.
     MessageArmourUserSurveySelectionResponse
-        message_armour_user_survey_selection_response = 1;
+        message_armour_user_survey_selection_response = 1
+       ;
   }
 }
 
@@ -80,6 +83,7 @@ message MessageArmourUserSurveySelectionResponse {
     USEFULNESS_RATING_R4 = 4;  // Corresponds to the fourth option
     USEFULNESS_RATING_R5 = 5;  // Corresponds to the rightmost option (5)
   }
+
   // Response to: "How useful was the scam detection alert?"
   UsefulnessRating usefulness_rating = 1;
 
@@ -92,6 +96,7 @@ message MessageArmourUserSurveySelectionResponse {
     AGREEMENT_RATING_R4 = 4;           // Corresponds to the fourth option
     AGREEMENT_RATING_R5 = 5;  // Corresponds to the rightmost option (5)
   }
+
   // Response to: "Based on the alert, how much do you agree..."
   AgreementRating agreement_rating = 2;
 
@@ -104,6 +109,7 @@ message MessageArmourUserSurveySelectionResponse {
     UNSURE_WHY_ALERTED = 4;          // "Not sure why I got the alert"
     SOMETHING_ELSE = 5;              // "Something else"
   }
+
   // Response to: "What, if anything, did you dislike..."
   // Field is optional, especially since this question might only be shown
   // conditionally based on the answer to question 1.

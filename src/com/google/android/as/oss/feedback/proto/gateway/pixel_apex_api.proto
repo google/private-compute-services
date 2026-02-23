@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package com.google.android.as.oss.feedback.api.gateway;
 
@@ -21,9 +21,9 @@ import "src/com/google/android/as/oss/feedback/proto/gateway/quartz_log.proto";
 import "src/com/google/android/as/oss/feedback/proto/gateway/spoon.proto";
 
 
+option java_outer_classname = "PixelApexApi";
 option features.field_presence = IMPLICIT;
 option java_api_version = 2;
-option java_multiple_files = true;
 option java_package = "com.google.android.as.oss.feedback.api.gateway";
 
 message LogFeedbackV2Request {
@@ -107,7 +107,6 @@ message StructuredUserInput {
 
     // This is used for user input corresponds to the Message Armour.
     MessageArmourUserInput message_armour_user_input = 2;
-
     SpoonUserInput spoon_user_input = 3;
   }
 }
@@ -118,6 +117,7 @@ message UserDonation {
   oneof data_donation {
     SpoonFeedbackDataDonation structured_data_donation = 1
        ;
+
     QuartzDataDonation quartz_data_donation = 3;
     MessageArmourDataDonation message_armour_data_donation = 4;
     QuartzDataDonationV2 quartz_data_donation_v2 = 5;

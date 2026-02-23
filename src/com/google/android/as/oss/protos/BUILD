@@ -22,6 +22,7 @@ proto_library(
     srcs = [
         "pcs_feature-enum.proto",
     ],
+    option_deps = ["//third_party/java/protobuf:java_features_proto"],
 )
 
 java_lite_proto_library(
@@ -34,6 +35,7 @@ proto_library(
     srcs = [
         "pcs_statsquery.proto",
     ],
+    option_deps = ["//third_party/java/protobuf:java_features_proto"],
 )
 
 java_lite_proto_library(
@@ -46,6 +48,7 @@ proto_library(
     srcs = [
         "pcs_query.proto",
     ],
+    option_deps = ["//third_party/java/protobuf:java_features_proto"],
     deps = [
         ":pcs_feature_enum_proto",
         "@com_google_protobuf//:any_proto",

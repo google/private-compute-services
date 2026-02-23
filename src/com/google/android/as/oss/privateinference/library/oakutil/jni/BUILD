@@ -24,6 +24,7 @@ package(
 rust_library(
     name = "pi_client_session_config_rust",
     srcs = ["pi_client_session_config_jni.rs"],
+    edition = "2021",
     deps = [
         "//third_party/oak/java/src/main/java/com/google/oak/remote_attestation/jni:oak_jni_attestation_verification_clock",
         "//third_party/oak/java/src/main/java/com/google/oak/session/jni:oak_jni_attestation_publisher",

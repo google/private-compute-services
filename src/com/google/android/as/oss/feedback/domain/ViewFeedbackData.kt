@@ -33,6 +33,7 @@ enum class DataCollectionCategory {
   TriggeringMessages,
   IntentQueries,
   ModelOutputs,
+  QuartzModelOutputs,
   MemoryEntities,
   SelectedEntityContent,
   AppInfo,

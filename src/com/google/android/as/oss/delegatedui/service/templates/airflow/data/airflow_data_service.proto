@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package com.google.android.as.oss.delegatedui.service.templates.airflow.data;
 
-
+option java_outer_classname = "AirflowDataServiceOuterClass";
 option java_package = "com.google.android.as.oss.delegatedui.service.templates.airflow.data";
-option java_multiple_files = true;
 
 service AirflowDataService {
   // Get data to be egressed from Airflow templates.

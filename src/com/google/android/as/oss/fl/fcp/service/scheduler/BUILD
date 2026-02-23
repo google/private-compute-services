@@ -28,10 +28,13 @@ android_library(
         "//src/com/google/android/as/oss/fl/federatedcompute/config",
         "//src/com/google/android/as/oss/fl/federatedcompute/util",
         "//src/com/google/android/as/oss/fl/localcompute:utils",
+        "//third_party/fcp/java_src/main/java/com/google/fcp/client/privatelogger/impl",
         "//third_party/fcp/protos/confidentialcompute:access_policy_endorsement_options_java_proto_lite",
+        "//third_party/java/auto:auto_value",
         "@federated_compute//fcp/client:fl_runner",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",
         "@maven//:com_google_flogger_google_extensions",
+        "@maven//:javax_inject_javax_inject",
     ],
 )

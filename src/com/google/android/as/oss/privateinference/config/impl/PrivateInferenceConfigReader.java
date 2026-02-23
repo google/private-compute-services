@@ -23,6 +23,7 @@ import com.google.android.as.oss.common.config.FlagManager;
 import com.google.android.as.oss.common.config.FlagManager.BooleanFlag;
 import com.google.android.as.oss.common.config.FlagManager.EnumFlag;
 import com.google.android.as.oss.common.config.FlagManager.IntegerFlag;
+import com.google.android.as.oss.common.config.FlagManager.LongFlag;
 import com.google.android.as.oss.common.config.FlagManager.StringFlag;
 import com.google.android.as.oss.privateinference.config.PrivateInferenceConfig;
 import com.google.android.as.oss.privateinference.library.bsa.token.cache.TokenCacheFlag;
@@ -157,6 +158,11 @@ class PrivateInferenceConfigReader extends AbstractConfigReader<PrivateInference
           FLAG_PREFIX + "proxy_config_refresh_interval_minutes",
           PrivateInferenceConfig.DEFAULT_PROXY_CONFIG_REFRESH_INTERVAL_MINUTES);
 
+  static final LongFlag PI_SERVER_CHANNEL_IDLE_TIMEOUT_MINUTES_FLAG =
+      LongFlag.create(
+          FLAG_PREFIX + "pi_server_channel_idle_timeout_minutes",
+          PrivateInferenceConfig.DEFAULT_PI_SERVER_CHANNEL_IDLE_TIMEOUT_MINUTES);
+
   private final FlagManager flagManager;
 
   static PrivateInferenceConfigReader create(FlagManager flagManager) {
@@ -227,6 +233,8 @@ class PrivateInferenceConfigReader extends AbstractConfigReader<PrivateInference
                 flagManager.get(PROXY_AUTH_HEADER_FLAG)))
         .setProxyConfigRefreshIntervalMinutes(
             flagManager.get(PROXY_CONFIG_REFRESH_INTERVAL_MINUTES_FLAG))
+        .setPiServerChannelIdleTimeoutMinutes(
+            flagManager.get(PI_SERVER_CHANNEL_IDLE_TIMEOUT_MINUTES_FLAG))
         .build();
   }
 

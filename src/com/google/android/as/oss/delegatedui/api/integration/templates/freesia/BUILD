@@ -25,10 +25,8 @@ package(
 proto_library(
     name = "freesia_template_proto",
     srcs = ["freesia_template_integration.proto"],
-    deps = [
-        "",
-        "//third_party/protobuf:cpp_features_proto",
-    ],
+    option_deps = ["//third_party/protobuf:cpp_features_proto"],
+    deps = [""],
 )
 
 java_lite_proto_library(

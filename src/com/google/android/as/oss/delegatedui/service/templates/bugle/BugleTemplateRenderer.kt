@@ -515,6 +515,7 @@ fun BugleActionChipContents(data: BugleAction, iconBitmap: Bitmap?) {
   BugleRowContent(
     icon = iconBitmap?.asTintableIcon(tintable = false),
     text = data.actionData.title,
+    attribution = data.actionData.attribution.takeIf { it.isNotEmpty() },
     description = data.actionData.description,
   )
 }

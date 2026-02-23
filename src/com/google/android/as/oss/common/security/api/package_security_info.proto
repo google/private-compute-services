@@ -12,22 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package java.com.google.android.as.oss.common.security.api;
 
 
 option java_package = "com.google.android.as.oss.common.security.api";
-option java_outer_classname = "PackageSecurityInfoProto";
-option java_multiple_files = true;
 
 // The security policy for a package.
 message PackageSecurityInfo {
   // The package name of the app.
   string package_name = 1;
+
   // The list of allowed release keys that the app can be signed with.
   repeated string allowed_release_keys = 2
      ;
+
   // The list of allowed test keys that the app can be signed with.
   // Only used for internal development.
   repeated string allowed_test_keys = 3

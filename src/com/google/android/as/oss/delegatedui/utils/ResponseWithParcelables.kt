@@ -20,6 +20,7 @@ import android.app.PendingIntent
 import android.app.RemoteAction
 import android.content.Intent
 import android.graphics.Bitmap
+import android.widget.RemoteViews
 import com.google.android.`as`.oss.delegatedui.utils.ParcelableOverRpcDelegate.Companion.delegateListOf
 import com.google.android.`as`.oss.delegatedui.utils.ParcelableOverRpcDelegate.Companion.delegateOf
 import com.google.protobuf.MessageLite
@@ -36,6 +37,7 @@ import com.google.protobuf.MessageLite
  * @param actionAttributionIntentList The list of pending intents for action attribution.
  * @param actionIntentList The list of intents to be launched. This is the same list of intents
  *   which are wrapped in the remote action list.
+ * @param remoteViews The RemoteViews to be displayed.
  */
 data class ResponseWithParcelables<Data : MessageLite>(
   val data: Data,
@@ -47,6 +49,7 @@ data class ResponseWithParcelables<Data : MessageLite>(
   val actionAttributionIntentList: ParcelableOverRpcDelegate<List<PendingIntent>> =
     delegateListOf(),
   val actionIntentList: ParcelableOverRpcDelegate<List<Intent>> = delegateListOf(),
+  val remoteViews: ParcelableOverRpcDelegate<RemoteViews> = delegateOf(),
 ) {
 
   /** Maps a [ResponseWithParcelables] to another by transforming the held response. */
@@ -59,6 +62,7 @@ data class ResponseWithParcelables<Data : MessageLite>(
         recallAttributionIntentList,
         actionAttributionIntentList,
         actionIntentList,
+        remoteViews,
       )
   }
 }
@@ -74,6 +78,7 @@ fun <T : MessageLite> T.withParcelablesToReceive(
   recallAttributionIntentList: ParcelableOverRpcDelegate<List<PendingIntent>> = delegateListOf(),
   actionAttributionIntentList: ParcelableOverRpcDelegate<List<PendingIntent>> = delegateListOf(),
   actionIntentList: ParcelableOverRpcDelegate<List<Intent>> = delegateListOf(),
+  remoteViews: ParcelableOverRpcDelegate<RemoteViews> = delegateOf(),
 ): ResponseWithParcelables<T> {
   return ResponseWithParcelables(
     data = this,
@@ -83,6 +88,7 @@ fun <T : MessageLite> T.withParcelablesToReceive(
     recallAttributionIntentList = recallAttributionIntentList,
     actionAttributionIntentList = actionAttributionIntentList,
     actionIntentList = actionIntentList,
+    remoteViews = remoteViews,
   )
 }
 
@@ -94,6 +100,7 @@ fun <T : MessageLite> T.withParcelablesToSend(
   recallAttributionIntentList: List<PendingIntent>? = null,
   actionAttributionIntentList: List<PendingIntent>? = null,
   actionIntentList: List<Intent>? = null,
+  remoteViews: RemoteViews? = null,
 ): ResponseWithParcelables<T> {
   return ResponseWithParcelables(
     data = this,
@@ -103,5 +110,6 @@ fun <T : MessageLite> T.withParcelablesToSend(
     recallAttributionIntentList = recallAttributionIntentList.delegateListOf(),
     actionAttributionIntentList = actionAttributionIntentList.delegateListOf(),
     actionIntentList = actionIntentList.delegateListOf(),
+    remoteViews = remoteViews.delegateOf(),
   )
 }

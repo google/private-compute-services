@@ -12,14 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package com.google.android.as.oss.proto;
 
+import option "third_party/java/protobuf/java_features.proto";
+
+option java_outer_classname = "PcsFeatureEnum";
 option java_package = "com.google.android.as.oss.proto";
 
 // Feature names for which Federated Training can be requested.
 enum FeatureName {
+  option features.(pb.java).nest_in_file_class = YES;
+
   UNDEFINED_FEATURE_NAME = 0;
   SMART_TEXT_SELECTION = 1;
   LIVE_CAPTION = 2;

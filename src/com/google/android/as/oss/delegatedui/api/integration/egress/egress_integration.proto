@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package com.google.android.as.oss.delegatedui.api.integration.egress;
 
@@ -22,8 +22,8 @@ import "src/com/google/android/as/oss/delegatedui/api/integration/egress/bugle/b
 import "src/com/google/android/as/oss/delegatedui/api/integration/egress/example/example_egress_integration.proto";
 import "src/com/google/android/as/oss/delegatedui/api/integration/egress/sundog/sundog_egress_integration.proto";
 
+option java_outer_classname = "EgressIntegration";
 option java_package = "com.google.android.as.oss.delegatedui.api.integration.egress";
-option java_multiple_files = true;
 
 // Approved egress data formats from the delegated UI service.
 
@@ -31,15 +31,16 @@ option java_multiple_files = true;
 message DelegatedUiEgressData {
   oneof egress_data {
     LocalSurfaceViewClick local_click = 7;
-
     example.ExampleSourceClickEgressData example_source_click_egress_data = 1;
     bugle.BugleEgressData bugle_egress_data = 2;
     sundog.SundogEventClickEgressData sundog_event_click_egress_data = 3;
     sundog.SundogLocationClickEgressData sundog_location_click_egress_data = 4;
     airflow.AirflowEgressData airflow_egress_data = 6;
     beacon.BeaconEgressData beacon_egress_data = 8;
+
     // New CUJ data egress types should be added above.
   }
+
   reserved 5;
 }
 

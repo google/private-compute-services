@@ -18,9 +18,11 @@ package google.internal.abuse.ondevicesafety.v2;
 
 import "google/api/annotations.proto";
 
+
 option features.field_presence = IMPLICIT;
 option java_outer_classname = "ProtectedDownloadServiceProto";
 option java_package = "com.google.android.as.oss.pd.manifest.api.proto";
+
 
 // Service API for providing download manifests.
 service ProtectedDownloadService {
@@ -67,8 +69,11 @@ message CryptoKeys {
 }
 
 message IntegrityResponse {
+  reserved 4, 5;
+
   // Response from content binding with Key Attestation.
-  bytes key_attestation_token = 2;
+  bytes key_attestation_token = 2
+     ;
 
   // Status of the integrity check from the client side.
   enum ClientStatus {
@@ -92,7 +97,7 @@ message IntegrityResponse {
   ClientStatus client_status = 3;
 
   // Client specific token.
-  bytes client_token = 4;
+  bytes client_token = 6;
 }
 
 // Request to fetch the ManifestConfig.
@@ -111,7 +116,8 @@ message GetManifestConfigRequest {
 // Response from ProtectedDownloadService.
 message GetManifestConfigResponse {
   // Contains the requested manifest.
-  bytes encrypted_manifest_config = 1;
+  bytes encrypted_manifest_config = 1
+     ;
 
   // Transformations applied to the manifest config.
   ManifestTransformResult manifest_transform_result = 2;

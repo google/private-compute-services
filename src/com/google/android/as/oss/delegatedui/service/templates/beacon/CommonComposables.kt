@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.dp
 import com.google.android.`as`.oss.delegatedui.api.infra.dataservice.DelegatedUiUsageData.InteractionType.INTERACTION_TYPE_CLICK
 import com.google.android.`as`.oss.delegatedui.api.integration.templates.UiIdToken
 import com.google.android.`as`.oss.delegatedui.service.templates.beacon.BeaconCommonComposablesConstants.FEEDBACK_BUTTONS_TAG
-import com.google.android.`as`.oss.delegatedui.service.templates.beacon.BeaconTemplateRendererConstants.IconButtonSizeLarge
+import com.google.android.`as`.oss.delegatedui.service.templates.beacon.BeaconTemplateRendererConstants.IconButtonSizeXLarge
 import com.google.android.`as`.oss.delegatedui.service.templates.beacon.BeaconTemplateRendererConstants.IconSizeNormal
 import com.google.android.`as`.oss.delegatedui.service.templates.scope.TemplateRendererScope
 import com.google.android.`as`.oss.feedback.api.EntityFeedbackDialogData
@@ -127,7 +127,7 @@ private fun TemplateRendererScope.SentimentFeedbackButton(
   val scope = rememberCoroutineScope()
   IconButton(
     modifier =
-      Modifier.size(IconButtonSizeLarge).semantics {
+      Modifier.size(IconButtonSizeXLarge).semantics {
         if (
           feedbackSubmittedStateDescription.isNotBlank() &&
             feedbackNotSubmittedStateDescription.isNotBlank()

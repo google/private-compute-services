@@ -16,6 +16,8 @@
 
 package com.google.android.`as`.oss.feedback.config
 
+import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory
+
 data class FeedbackConfig(
   // Whether to enable the selected entity content in the feedback dialog.
   val enableSelectedEntityContent: Boolean,
@@ -27,4 +29,6 @@ data class FeedbackConfig(
   val enableGroundTruthSelectorSingleEntity: Boolean,
   // Whether to enable the ground truth selector for multi entity feedback.
   val enableGroundTruthSelectorMultiEntity: Boolean,
+  // Default opt-in state for each CUJ's data collection category. .
+  val dataCollectionCategoryDefaultOptIn: Map<String, List<DataCollectionCategory>>,
 )

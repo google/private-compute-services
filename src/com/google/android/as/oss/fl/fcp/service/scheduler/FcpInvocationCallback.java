@@ -14,19 +14,11 @@
  * limitations under the License.
  */
 
-package com.google.android.`as`.oss.delegatedui.service.templates.beacon
+package com.google.android.as.oss.fl.fc.service.scheduler;
 
-import androidx.compose.ui.unit.dp
+/** Callback for FCP invocation events. */
+public interface FcpInvocationCallback {
+  void onComputationCompleted(FcpContributionResultInfo resultInfo);
 
-internal object BeaconTemplateRendererConstants {
-  val IconButtonSizeXLarge = 48.dp
-  val IconButtonSizeLarge = 32.dp
-  val IconButtonSizeMedium = 24.dp
-  val IconSizeNormal = 20.dp
-  val IconSizeLarge = 24.dp
-  val IconSizeMedium = 16.dp
-  val RoundedCornerSizeLarge = 24.dp
-  val RoundedCornerSizeMedium = 16.dp
-  val RoundedCornerSizeExtraSmall = 4.dp
-  val SummaryIconAndTextSpacing = 4.dp
+  void onInvocationFinished();
 }
