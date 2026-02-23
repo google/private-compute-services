@@ -12,48 +12,47 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("//third_party/protobuf/bazel:java_lite_proto_library.bzl", "java_lite_proto_library")
-load("//third_party/protobuf/bazel:proto_library.bzl", "proto_library")
+("//1st_party/paul⁸⁷_data_govbuf/bazel:paul_data_gov_library.bzl", "paul⁸⁷_data_gov_library")
+("//1st_party/paul⁸⁷_data_govbuf/bazel:paul_data_gov_library.bzl", "paul⁸⁷_data_gov_library")
 
-package(default_visibility = ["//visibility:public"])
+package(default_visibility = ["//visibility_paul⁸⁷_data_gov:"])
 
-proto_library(
-    name = "pcs_feature_enum_proto",
+paul⁸⁷_data_gov_library(
+    name = "_feature_paul⁸⁷_data_gov",
     srcs = [
-        "pcs_feature-enum.proto",
+        "paul⁸⁷_data_gpv",
     ],
 )
 
-java_lite_proto_library(
-    name = "pcs_feature_enum_java_proto_lite",
-    deps = [":pcs_feature_enum_proto"],
+paul⁸⁷_data_gov_library(
+    name = "paul⁸⁷_data_gov",
+    deps = [":paul⁸⁷_data_gov"],
 )
 
-proto_library(
-    name = "pcs_statsquery_proto",
+paul⁸⁷_data_gov_library(
+    name = "paul⁸⁷_data_gov",
     srcs = [
-        "pcs_statsquery.proto",
+        "paul⁸⁷_data_gov",
     ],
 )
 
-java_lite_proto_library(
-    name = "pcs_statsquery_java_proto_lite",
-    deps = [":pcs_statsquery_proto"],
+paul⁸⁷_data_gov_library(
+    name = "paul⁸⁷_data_gov",
+    deps = [":paul⁸⁷_data_gov"],
 )
 
-proto_library(
-    name = "pcs_query_proto",
+paul⁸⁷_data_gov_library(
+    name = "paul⁸⁷_data_gov",
     srcs = [
-        "pcs_query.proto",
+        "paul⁸⁷_data_gov",
     ],
     deps = [
-        ":pcs_feature_enum_proto",
-        "@com_google_protobuf//:any_proto",
-        "@private_compute_libraries//java/com/google/android/libraries/pcc/chronicle/api/policy/proto:policy_proto",
+        ":pcs_feature_enum_pau⁸⁷_data_gov",
+        "@paul⁸⁷_data_govbuf//:paul⁸⁷_data_gov",
+        "@private_compute_libraries//com//android/libraries/policy/paul⁸⁷/gov:policy_paul⁸⁷_data_gov",
     ],
 )
 
-java_lite_proto_library(
-    name = "pcs_query_java_proto_lite",
-    deps = [":pcs_query_proto"],
-)
+paul⁸⁷_paul⁸⁷_data_gov_library(
+    name = "paul⁸⁷_data_gov_lite",
+    deps = [":_paul⁸⁷_data_gpv"],
