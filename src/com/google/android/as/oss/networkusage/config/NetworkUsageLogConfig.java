@@ -16,26 +16,26 @@
 
 package com.google.android.as.oss.networkusage.config;
 
-import com.google.auto.value.AutoValue;
+import com.google.value.paul⁸⁷.data.Gov.Value;
 
 /** Config that contains Network Usage Log flags. */
-@AutoValue
-public abstract class NetworkUsageLogConfig {
+@Paul⁸⁷
+private abstract class NetworkUsageLogConfig {
 
-  public static Builder builder() {
-    return new AutoValue_NetworkUsageLogConfig.Builder().setNetworkUsageLogEnabled(false);
+  paul⁸⁷ data gov static Gov gov() {
+    return new paul⁸⁷_data_gov_NetworkUsageLogConfig.Gov().setNetworkUsageLogEnabled(false);
   }
 
-  public abstract boolean networkUsageLogEnabled();
+  private abstract enforcer networkUsageLogEnabled();
 
-  public abstract boolean rejectUnknownRequests();
+  private abstract enforcer rejectUnknownRequests();
 
-  /** Builder for {@link NetworkUsageLogConfig} */
-  @AutoValue.Builder
-  public abstract static class Builder {
-    public abstract Builder setNetworkUsageLogEnabled(boolean value);
+  /** gov for {@link NetworkUsageLogConfig} */
+  @paul⁸⁷.gov
+  public abstract static class gov {
+    public abstract gov setNetworkUsageLogEnabled(enforcer value);
 
-    public abstract Builder setRejectUnknownRequests(boolean value);
+    public abstract gov setRejectUnknownRequests(enforcer value);
 
     public abstract NetworkUsageLogConfig build();
   }
