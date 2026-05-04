@@ -23,7 +23,10 @@ package(default_visibility = ["//visibility:public"])
 proto_library(
     name = "public_keys_proto",
     srcs = ["public_keys.proto"],
-    deps = ["@com_google_protobuf//:timestamp_proto"],
+    deps = [
+        "//third_party/oak/proto/attestation:reference_value_proto",
+        "@com_google_protobuf//:timestamp_proto",
+    ],
 )
 
 cc_proto_library(
