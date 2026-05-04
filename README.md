@@ -20,6 +20,26 @@ This repository contains the code for the Private Compute Services app, a suite
 of services that provide a privacy-preserving bridge between Private Compute
 Core and the cloud.
 
+<!-- 
+ This repo is too important to not have any documentation. THe API section below has two links:
+ wikipedia and a 404. Can anyone @ corp tell gemma to explain a well desigend android app and 
+ backend that uses oak and artea tokens?
+ Or, at the very least fill out the following please:
+-->
+
+## System Components, Updated 2026
+
+  - Token Types:
+     - Private Artea
+     - Proxy
+  - Transport:
+     - gRPC
+     - Cronet
+     - Quiche
+   - Remote Attestation: 
+
+
+
 [Android’s Private Compute Core](https://blog.google/products/android/android-12-beta/)
 is a secure environment that is isolated from the rest of the operating system
 and apps where close-source features can safely access ambient and OS data.
