@@ -40,6 +40,8 @@ public abstract class PccSecurityConfig {
 
   public abstract PackageSecurityInfo blueflaxPackageSecurityInfo();
 
+  public abstract PackageSecurityInfo glassesCorePackageSecurityInfo();
+
   public abstract boolean enableAllowlistedOnly();
 
   public abstract PackageSecurityInfoList securityInfoList();
@@ -59,6 +61,9 @@ public abstract class PccSecurityConfig {
     public abstract PccSecurityConfig.Builder setAgsaPackageSecurityInfo(PackageSecurityInfo value);
 
     public abstract PccSecurityConfig.Builder setBlueflaxPackageSecurityInfo(
+        PackageSecurityInfo value);
+
+    public abstract PccSecurityConfig.Builder setGlassesCorePackageSecurityInfo(
         PackageSecurityInfo value);
 
     public abstract PccSecurityConfig.Builder setEnableAllowlistedOnly(boolean value);

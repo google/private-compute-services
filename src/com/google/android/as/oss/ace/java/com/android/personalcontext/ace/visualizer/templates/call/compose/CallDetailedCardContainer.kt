@@ -58,8 +58,6 @@ import androidx.compose.ui.unit.dp
 import com.android.personalcontext.ace.visualizer.templates.LocalInsightEventReporter
 import com.android.personalcontext.ace.visualizer.templates.LocalPublishedContextInsight
 import com.android.personalcontext.ace.visualizer.templates.LocalRenderToken
-import com.android.personalcontext.ace.visualizer.templates.call.LocalCallWidgetBackgrounds
-import com.android.personalcontext.ace.visualizer.templates.call.LocalInsightGridCompat
 import com.android.personalcontext.ace.visualizer.templates.call.data.CallVisualizerDetailedCard
 import com.android.personalcontext.ace.visualizer.templates.ui.common.grid.JustifiedWrapLayout
 
@@ -107,6 +105,7 @@ private fun CallDetailedCardContent(
         CardItem((item.insight as DisplayInsight).details)
       }
     }
+    Spacer(modifier = Modifier.height(8.dp))
     CardFooter(card)
   }
 }

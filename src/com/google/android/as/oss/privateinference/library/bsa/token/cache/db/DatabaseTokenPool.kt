@@ -42,9 +42,9 @@ import kotlinx.coroutines.sync.withLock
  * A single pool is maintained for each unique instance of [BsaTokenParams] either passed as
  * [refreshParams] or to the [draw] method.
  *
- * If [enableAsyncTokenCacheRefill] is true, then token cache refills will be performed
- * asynchronously and will not block the calling thread. However, any pending tokens needed while
- * drawing from the pool on-demand will be fetched synchronously and will block the calling thread.
+ * Token cache refills will be performed asynchronously and will not block the calling thread.
+ * However, any pending tokens needed while drawing from the pool on-demand will be fetched
+ * synchronously and will block the calling thread.
  *
  * @param refreshParams List of [BsaTokenParams] to use when making requests to a [TokenPoolSource]
  *   when pre-filling the pool to the [preferredPoolSize].
@@ -56,8 +56,6 @@ import kotlinx.coroutines.sync.withLock
  * @param daoProvider Provider for the [BsaTokenDao] used to store/retrieve tokens from the
  *   database.
  * @param timeSource [TimeSource] used to determine token expiration.
- * @param enableAsyncTokenCacheRefill If true, token cache refills will be performed asynchronously
- *   and will not block the calling thread.
  * @param coroutineScope [CoroutineScope] on which any coroutines will be run.
  * @param pcsStatsLogger [PcsStatsLogger] Utility to log PAIC metrics.
  * @param tokenUtilizationMetricId [ValueMetricId] metric ID to log the token utilization ratio.
@@ -69,7 +67,6 @@ class DatabaseTokenPool<T : BsaToken>(
   private val cipher: BsaTokenCipher,
   private val daoProvider: () -> BsaTokenDao,
   private val timeSource: TimeSource,
-  private val enableAsyncTokenCacheRefill: Boolean,
   private val coroutineScope: CoroutineScope,
   private val pcsStatsLogger: PcsStatsLogger,
   private val tokenUtilizationMetricId: ValueMetricId,
@@ -98,40 +95,24 @@ class DatabaseTokenPool<T : BsaToken>(
         0
       }
 
-    if (enableAsyncTokenCacheRefill) {
-      // Synchronously fetch any remaining tokens needed for the result to avoid blocking until
-      // the cache refill completes.
-      if (resultTokensNeeded > 0) {
-        resultTokens.addAll(
-          fallbackSource(params, resultTokensNeeded, BsaTokenDao.tokenValidator(timeSource))
-        )
-        excessDrawCount.addAndGet(resultTokensNeeded)
-      }
-      // Asynchronously fetch tokens to refill the cache, if there isn't a refill already in
-      // progress.
-      coroutineScope.launch {
-        if (dbTokensNeeded > 0 && refillLock.tryLock()) {
-          try {
-            val newTokens =
-              fallbackSource(params, dbTokensNeeded, BsaTokenDao.tokenValidator(timeSource))
-            refilledTokens.addAndGet(dbTokensNeeded)
-            val encryptedEntities = newTokens.mapNotNull { encrypt(params, it) }
-            dbLock.withLock { daoProvider().insertAll(encryptedEntities) }
-          } finally {
-            refillLock.unlock()
-          }
-        }
-      }
-    } else {
-      val totalTokensNeeded = resultTokensNeeded + dbTokensNeeded
-      if (totalTokensNeeded > 0) {
-        refilledTokens.addAndGet(totalTokensNeeded)
-        val newTokens =
-          fallbackSource(params, totalTokensNeeded, BsaTokenDao.tokenValidator(timeSource))
-        resultTokens += newTokens.take(resultTokensNeeded)
-        if (dbTokensNeeded > 0) {
-          daoProvider()
-            .insertAll(newTokens.drop(resultTokensNeeded).mapNotNull { encrypt(params, it) })
+    if (resultTokensNeeded > 0) {
+      resultTokens.addAll(
+        fallbackSource(params, resultTokensNeeded, BsaTokenDao.tokenValidator(timeSource))
+      )
+      excessDrawCount.addAndGet(resultTokensNeeded)
+    }
+    // Asynchronously fetch tokens to refill the cache, if there isn't a refill already in
+    // progress.
+    coroutineScope.launch {
+      if (dbTokensNeeded > 0 && refillLock.tryLock()) {
+        try {
+          val newTokens =
+            fallbackSource(params, dbTokensNeeded, BsaTokenDao.tokenValidator(timeSource))
+          refilledTokens.addAndGet(dbTokensNeeded)
+          val encryptedEntities = newTokens.mapNotNull { encrypt(params, it) }
+          dbLock.withLock { daoProvider().insertAll(encryptedEntities) }
+        } finally {
+          refillLock.unlock()
         }
       }
     }

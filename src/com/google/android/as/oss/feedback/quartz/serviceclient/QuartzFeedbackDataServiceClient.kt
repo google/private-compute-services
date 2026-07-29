@@ -56,6 +56,10 @@ data class QuartzModelData(
   val isSuppressDuplicate: String = "",
   val featureName: String = "",
   val summaryText: String = "",
+  val finalDecisionClassifierType: String = "",
+  val naihResult: String = "",
+  val naihCategory: String = "",
+  val extraIdentifiedResults: List<String> = emptyList(),
 )
 
 data class QuartzAppInfoData(
@@ -161,8 +165,8 @@ data class QuartzFeedbackDonationData(
       val titles = feedbackUiRenderingData.feedbackViewDataCategoryTitles
       return buildMap {
         if (
-          typeData.equals(QuartzKeyTypeData()) ||
-            summarizationData.equals(QuartzKeySummarizationData())
+          !typeData.equals(QuartzKeyTypeData()) ||
+            !summarizationData.equals(QuartzKeySummarizationData())
         ) {
           put(
             DataCollectionCategory.LegacyV1,
@@ -308,6 +312,18 @@ data class QuartzFeedbackDonationData(
       }
       if (modelData.summaryText.isNotEmpty()) {
         appendLine(modelData.summaryText)
+      }
+      if (modelData.finalDecisionClassifierType.isNotEmpty()) {
+        appendLine(modelData.finalDecisionClassifierType)
+      }
+      if (modelData.naihResult.isNotEmpty()) {
+        appendLine(modelData.naihResult)
+      }
+      if (modelData.naihCategory.isNotEmpty()) {
+        appendLine(modelData.naihCategory)
+      }
+      if (modelData.extraIdentifiedResults.isNotEmpty()) {
+        appendLine(modelData.extraIdentifiedResults)
       }
     }
   }

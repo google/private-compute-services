@@ -16,6 +16,7 @@ edition = "2023";
 
 package mdi.privatearatea;
 
+import "src/com/google/android/as/oss/privateinference/api/client_metadata.proto";
 import "third_party/protobuf/cpp_features.proto";
 
 option features.(pb.cpp).string_type = VIEW;
@@ -27,7 +28,12 @@ option java_package = "com.google.search.mdi.privatearatea.proto";
 message AnonymousTokenRequest {
   // Anonymous token is of type {@link PrivacyPassTokenData}
 
-  bytes anonymous_token = 1;
+  bytes anonymous_token = 1
+      ;
 
   bytes encoded_extensions = 2;
+
+  // Session-level metadata for traffic segmentation.
+  // Sent inside the encrypted session, visible only within the TCB.
+  ClientMetadata client_metadata = 15;
 }

@@ -37,6 +37,9 @@ class PcsHttpConfigReader extends AbstractConfigReader<PcsHttpConfig> {
   static final BooleanFlag WRITE_TO_PFD =
       BooleanFlag.create("PcsHttp__write_to_pfd", BuildCompat.isAtLeastT());
 
+  static final BooleanFlag ENABLE_CRONET_MIGRATION =
+      BooleanFlag.create("PcsHttp__enable_cronet_migration", false);
+
   private final FlagManager flagManager;
 
   static PcsHttpConfigReader create(FlagManager flagManager) {
@@ -61,6 +64,7 @@ class PcsHttpConfigReader extends AbstractConfigReader<PcsHttpConfig> {
         .setOnReadyHandlerEnabled(flagManager.get(ENABLE_ON_READY_HANDLER))
         .setIpcStreamingThrottleMs(flagManager.get(IPC_STREAMING_THROTTLE_MS))
         .setWriteToPfd(flagManager.get(WRITE_TO_PFD))
+        .setEnableCronetMigration(flagManager.get(ENABLE_CRONET_MIGRATION))
         .build();
   }
 

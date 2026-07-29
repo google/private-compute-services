@@ -61,6 +61,13 @@ final class ProtoConversionsModule {
 
   @Provides
   @IntoMap
+  @ClientMapKey(Client.PLAY_PROTECT_SERVICE_PROTECTED_DOWNLOAD)
+  static ClientConfig providePlayProtectProtectedDownloadClientConfig() {
+    return ClientConfig.create("com.google.android.PlayProtect:5093149982242605290");
+  }
+
+  @Provides
+  @IntoMap
   @ClientMapKey(Client.AI_CORE_TEXT_INPUT)
   static ClientConfig provideAiCoreTextInputClientConfig() {
     return ClientConfig.create("com.google.android.aicore:3649180271731021675");

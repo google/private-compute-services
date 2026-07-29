@@ -49,7 +49,6 @@ public abstract class PrivateInferenceConfig {
         .setProxyTokenDurableCachePreferredPoolSize(
             DEFAULT_PROXY_TOKEN_DURABLE_CACHE_PREFERRED_POOL_SIZE)
         .setEnableArateaTokenCache(DEFAULT_ENABLE_ARATEA_TOKEN_CACHE)
-        .setEnableAsyncTokenCacheRefill(DEFAULT_ENABLE_ASYNC_TOKEN_CACHE_REFILL)
         .setForceIpTunnelCreationForEverySession(DEFAULT_FORCE_IP_TUNNEL_CREATION_FOR_EVERY_SESSION)
         .setArateaTokenBatchSize(DEFAULT_ARATEA_TOKEN_BATCH_SIZE)
         .setArateaTokenCacheMode(DEFAULT_ARATEA_TOKEN_CACHE_MODE)
@@ -78,7 +77,9 @@ public abstract class PrivateInferenceConfig {
         .setProxyAuthMode(DEFAULT_PROXY_AUTH_MODE)
         .setPiServerChannelIdleTimeoutMinutes(DEFAULT_PI_SERVER_CHANNEL_IDLE_TIMEOUT_MINUTES)
         .setUseEndpointSpecificVerificationKeys(DEFAULT_USE_ENDPOINT_SPECIFIC_VERIFICATION_KEYS)
-        .setIpRelayFallbackMode(DEFAULT_IP_RELAY_FALLBACK_MODE);
+        .setPassForceEzUsageHeader(DEFAULT_PASS_FORCE_EZ_USAGE_HEADER)
+        .setIpRelayFallbackMode(DEFAULT_IP_RELAY_FALLBACK_MODE)
+        .setSendClientMetadata(DEFAULT_SEND_CLIENT_METADATA);
   }
 
   /** Returns the current attestation publisher mode. */
@@ -92,6 +93,9 @@ public abstract class PrivateInferenceConfig {
 
   /** Returns whether to use endpoint specific verification keys. */
   public abstract boolean useEndpointSpecificVerificationKeys();
+
+  /** Returns whether to pass x-use-ez header. */
+  public abstract boolean passForceEzUsageHeader();
 
   // TODO: Remove this flag before launch if needed.
   /** Set to true to send device authentication to the server. */
@@ -108,9 +112,6 @@ public abstract class PrivateInferenceConfig {
    * requests will be cached.
    */
   public abstract boolean enableArateaTokenCache();
-
-  /** Returns true if the Aratea token cache refill should happen asynchronously. */
-  public abstract boolean enableAsyncTokenCacheRefill();
 
   /** Returns true if an IP tunnel should be created for every session. */
   public abstract boolean forceIpTunnelCreationForEverySession();
@@ -185,6 +186,9 @@ public abstract class PrivateInferenceConfig {
    */
   public abstract IpRelayFallbackFlag.Mode ipRelayFallbackMode();
 
+  /** Returns whether client metadata should be sent in the anonymous token request. */
+  public abstract boolean sendClientMetadata();
+
   public static final String PRIVATE_INFERENCE_PROD_ENDPOINT_URL =
       "privatearatea.pa.googleapis.com";
   public static final String TOKEN_ISSUANCE_PROD_ENDPOINT_URL = "phosphor-pa.googleapis.com";
@@ -199,8 +203,7 @@ public abstract class PrivateInferenceConfig {
       DeviceAttestationFlag.Mode.ENABLED_NO_PROPERTIES;
   public static final boolean DEFAULT_ENABLE_WAIT_FOR_GRPC_CHANNEL_READY = true;
   public static final boolean DEFAULT_ATTACH_CERTIFICATE_HEADER = false;
-  public static final boolean DEFAULT_ENABLE_ARATEA_TOKEN_CACHE = false;
-  public static final boolean DEFAULT_ENABLE_ASYNC_TOKEN_CACHE_REFILL = false;
+  public static final boolean DEFAULT_ENABLE_ARATEA_TOKEN_CACHE = true;
   public static final boolean DEFAULT_FORCE_IP_TUNNEL_CREATION_FOR_EVERY_SESSION = false;
   public static final TransportFlag.Mode DEFAULT_TRANSPORT_MODE =
       TransportFlag.Mode.CRONET_MAINLINE_IP_RELAY;
@@ -252,6 +255,10 @@ public abstract class PrivateInferenceConfig {
 
   public static final boolean DEFAULT_USE_ENDPOINT_SPECIFIC_VERIFICATION_KEYS = false;
 
+  public static final boolean DEFAULT_PASS_FORCE_EZ_USAGE_HEADER = false;
+
+  public static final boolean DEFAULT_SEND_CLIENT_METADATA = false;
+
   /** Builder for {@link PrivateInferenceConfig}. */
   @AutoValue.Builder
   public abstract static class Builder {
@@ -268,8 +275,6 @@ public abstract class PrivateInferenceConfig {
     public abstract Builder setAttachCertificateHeader(boolean value);
 
     public abstract Builder setEnableArateaTokenCache(boolean value);
-
-    public abstract Builder setEnableAsyncTokenCacheRefill(boolean value);
 
     public abstract Builder setForceIpTunnelCreationForEverySession(boolean value);
 
@@ -320,6 +325,10 @@ public abstract class PrivateInferenceConfig {
     public abstract Builder setIpRelayFallbackMode(IpRelayFallbackFlag.Mode mode);
 
     public abstract Builder setUseEndpointSpecificVerificationKeys(boolean value);
+
+    public abstract Builder setPassForceEzUsageHeader(boolean value);
+
+    public abstract Builder setSendClientMetadata(boolean value);
 
     public abstract PrivateInferenceConfig build();
   }

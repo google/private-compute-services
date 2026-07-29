@@ -27,5 +27,6 @@ annotation class SuperIconUiType {
     const val CONSENT_DIALOG = 2
     const val CONSENT_TOGGLE = 3
     const val SPELL_CHECKER_CHIP = 4
+    const val SUPER_ICON_IN_PANEL = 5
   }
 }

@@ -44,14 +44,22 @@ import com.android.personalcontext.ace.internal.templates.richcard.common.CardAp
 import com.android.personalcontext.ace.internal.templates.richcard.common.CardTemplateLayout
 import com.android.personalcontext.ace.internal.templates.richcard.common.LoadingBox
 import com.android.personalcontext.ace.internal.templates.richcard.renderer.CardRenderer
+import com.android.personalcontext.ace.visualizer.compat.EnergyEffectsAnimationCompat
 import javax.inject.Inject
 
 /** [CardRenderer] for Flight cards. */
-class FlightCardRenderer @Inject internal constructor() :
+class FlightCardRenderer
+@Inject
+internal constructor(private val energyEffectsAnimationCompat: EnergyEffectsAnimationCompat) :
   CardRenderer<DeprecatedUiFlightCardContext> {
+
   @Composable
   override fun Render(cardUiData: CardUiData<DeprecatedUiFlightCardContext>, modifier: Modifier) {
-    CardTemplateLayout(cardUiData = cardUiData, modifier = modifier) {
+    CardTemplateLayout(
+      cardUiData = cardUiData,
+      energyEffectsAnimationCompat = energyEffectsAnimationCompat,
+      modifier = modifier,
+    ) {
       val attribution = cardUiData.attribution
       val cardContext = cardUiData.cardContext
 

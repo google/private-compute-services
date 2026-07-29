@@ -23,7 +23,8 @@ import androidx.compose.ui.unit.dp
 object Constants {
   val ButtonHorizontalPadding = 12.dp
   val ButtonVerticalPadding = 4.dp
-  val CornerRadius = 20.dp
+  val CornerRadius = 100.dp
+  val MinHeight = 52.dp
   val IconSize = 20.dp
   val BorderStrokeWidth = 1.dp
   val InnerBorderStrokeWidth = 4.dp

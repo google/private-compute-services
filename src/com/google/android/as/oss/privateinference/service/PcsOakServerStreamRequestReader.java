@@ -19,9 +19,11 @@ package com.google.android.as.oss.privateinference.service;
 import androidx.annotation.Nullable;
 import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.common.flavor.BuildFlavor;
+import com.google.android.as.oss.logging.PcsStatsEnums.CountMetricId;
 import com.google.android.as.oss.privateinference.config.PrivateInferenceConfig;
 import com.google.android.as.oss.privateinference.library.BaseOakServerStreamRequestReader;
 import com.google.android.as.oss.privateinference.library.oakutil.PrivateInferenceOakAsyncClient;
+import com.google.android.as.oss.privateinference.logging.PcsStatsLogger;
 import com.google.android.as.oss.privateinference.service.api.proto.PcsPrivateInferenceFeatureName;
 import com.google.android.as.oss.privateinference.service.api.proto.PrivateInferenceSessionRequest;
 import com.google.android.as.oss.privateinference.service.api.proto.PrivateInferenceSessionResponse;
@@ -49,6 +51,8 @@ public class PcsOakServerStreamRequestReader extends BaseOakServerStreamRequestR
   private final StreamObserver<PrivateInferenceSessionResponse> clientSessionResponseObserver;
   private final AtomicLong totalRequestSize;
   private final AtomicReference<PcsPrivateInferenceFeatureName> featureName;
+  private final PcsStatsLogger pcsStatsLogger;
+  private final LoggingMetricIdProvider loggingMetricIdProvider;
 
   public PcsOakServerStreamRequestReader(
       PrivateInferenceOakAsyncClient oakAsyncClient,
@@ -59,7 +63,9 @@ public class PcsOakServerStreamRequestReader extends BaseOakServerStreamRequestR
       BuildFlavor buildFlavor,
       StreamObserver<PrivateInferenceSessionResponse> clientSessionResponseObserver,
       AtomicLong totalRequestSize,
-      AtomicReference<PcsPrivateInferenceFeatureName> featureName) {
+      AtomicReference<PcsPrivateInferenceFeatureName> featureName,
+      PcsStatsLogger pcsStatsLogger,
+      LoggingMetricIdProvider loggingMetricIdProvider) {
     super(
         oakAsyncClient,
         oakServerStreamResponseObserver,
@@ -70,6 +76,8 @@ public class PcsOakServerStreamRequestReader extends BaseOakServerStreamRequestR
     this.clientSessionResponseObserver = clientSessionResponseObserver;
     this.totalRequestSize = totalRequestSize;
     this.featureName = featureName;
+    this.pcsStatsLogger = pcsStatsLogger;
+    this.loggingMetricIdProvider = loggingMetricIdProvider;
   }
 
   @Override
@@ -96,6 +104,7 @@ public class PcsOakServerStreamRequestReader extends BaseOakServerStreamRequestR
       }
       totalRequestSize.getAndAdd(requestSize);
       super.onNext(request);
+      logInferenceRequestEvent(featureName.get());
       logger.atInfo().log(
           "[startInferenceSession] Sent request to server with size: %d.", requestSize);
     } else {
@@ -112,6 +121,11 @@ public class PcsOakServerStreamRequestReader extends BaseOakServerStreamRequestR
         "[startInferenceSession] onCompleted from client for feature: %s.",
         featureName.get().name());
     super.onCompleted();
+  }
+
+  private void logInferenceRequestEvent(PcsPrivateInferenceFeatureName featureName) {
+    CountMetricId countMetricId = loggingMetricIdProvider.getInferenceCountMetricId(featureName);
+    pcsStatsLogger.logEventCount(countMetricId);
   }
 
   private static final PrivateInferenceSessionResponse SESSION_INITIALIZATION_DISABLED_RESPONSE =

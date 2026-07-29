@@ -22,7 +22,10 @@ package(
 
 android_library(
     name = "lookup",
-    srcs = ["LookupHint.kt"],
+    srcs = [
+        "LookupHint.kt",
+        "LookupType.kt",
+    ],
     deps = [
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype:prototype_hint",
     ],

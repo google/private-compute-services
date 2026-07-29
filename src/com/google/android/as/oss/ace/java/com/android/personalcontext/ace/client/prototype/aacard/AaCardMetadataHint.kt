@@ -23,28 +23,18 @@ import com.android.personalcontext.ace.client.prototype.PrototypeHintId.AaCardMe
 /** A hint for the AA Card use case. */
 data class AaCardMetadataHint(
   /* Client session UUID. */
-  val clientSessionId: String,
-  /**
-   * The maximum vertical bound (in pixels). If the Embedded UI is taller than this value, it will
-   * not be rendered. Default is Int.MAX_VALUE (no limit).
-   */
-  val availableHeightPx: Int = Int.MAX_VALUE,
+  val clientSessionId: String
   // TODO: add more fields
 ) : PrototypeHint(AaCardMetadataHintId, this) {
 
   override fun exportDataToBundle(bundle: Bundle) {
     bundle.putString(KEY_CLIENT_SESSION_ID, clientSessionId)
-    bundle.putInt(KEY_AVAILABLE_HEIGHT, availableHeightPx)
   }
 
   companion object : Creator {
     private const val KEY_CLIENT_SESSION_ID = "client_session_id"
-    private const val KEY_AVAILABLE_HEIGHT = "available_height"
 
     override fun create(bundle: Bundle): PrototypeHint =
-      AaCardMetadataHint(
-        clientSessionId = bundle.getString(KEY_CLIENT_SESSION_ID) ?: "",
-        availableHeightPx = bundle.getInt(KEY_AVAILABLE_HEIGHT, Int.MAX_VALUE),
-      )
+      AaCardMetadataHint(clientSessionId = bundle.getString(KEY_CLIENT_SESSION_ID) ?: "")
   }
 }

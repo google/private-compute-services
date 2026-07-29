@@ -88,9 +88,7 @@ android_library(
 android_library(
     name = "cards_decoders",
     exports = [
-        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/addtolist:decoder_module",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/calendar:decoder_module",
-        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/contact:decoder_module",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/decoder:card_decoder_module",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/flight:decoder_module",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/grid:decoder_module",
@@ -103,9 +101,7 @@ android_library(
 android_library(
     name = "cards_renderers",
     exports = [
-        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/addtolist:renderer_module",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/calendar:renderer_module",
-        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/contact:renderer_module",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/flight:renderer_module",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/grid:renderer_module",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/imagegallery:renderer_module",

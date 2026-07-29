@@ -14,28 +14,31 @@
  * limitations under the License.
  */
 
+@file:Suppress("FlaggedApi", "NewApi")
+
 package com.android.personalcontext.ace.internal.templates.richcard.common
 
 import android.app.ActivityOptions
 import android.app.PendingIntent
+import android.service.personalcontext.insight.interaction.InsightEvent
 import android.util.Log
 import androidx.compose.foundation.clickable
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.composed
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.ContextCompat
-import com.google.android.shaderlib.energyeffects.EffectState
-import com.google.android.shaderlib.energyeffects.builder.DefaultCardConfig
-import com.google.android.shaderlib.energyeffects.compose.energyEffects
-import com.google.ux.material.libmonetkt.energy.BaseColorRole
-import com.google.ux.material.libmonetkt.energy.EnergyColors
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsight
+import com.android.personalcontext.ace.client.prototype.serversideclose.ServerSideCloseInsight
+import com.android.personalcontext.ace.internal.templates.richcard.CardContextAction
+import com.android.personalcontext.ace.visualizer.templates.LocalInsightSurfaceClientInfo
+import com.android.personalcontext.ace.visualizer.templates.utils.RemoteActionUtils.execute
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /** Generic extension function for Modifier.clickable that accepts a PendingIntent. */
 fun Modifier.clickable(pendingIntent: PendingIntent?, onClick: () -> Unit): Modifier {
@@ -68,55 +71,34 @@ fun Modifier.clickable(pendingIntent: PendingIntent?): Modifier {
   return this.clickable(pendingIntent = pendingIntent, onClick = {})
 }
 
-@Composable
-fun Modifier.energyCardBackground(
-  color: Color,
-  timeSupplierMs: () -> Long = { System.currentTimeMillis() },
-): Modifier {
+/**
+ * Reusable modifier to make a card clickable using [CardContextAction]. It handles:
+ * - Reporting [InsightEvent.EVENT_USER_TAP] using the insight.
+ * - Executing the remote action.
+ * - Sending [ServerSideCloseInsight] to close the insight on client side.
+ */
+fun Modifier.cardContextActionClickable(action: CardContextAction?): Modifier = composed {
+  if (action == null) return@composed this
   val context = LocalContext.current
-  val mainExecutor = remember { ContextCompat.getMainExecutor(context) }
-  var currentState by remember { mutableStateOf(EffectState.ENTRY) }
+  val info = LocalInsightSurfaceClientInfo.current
+  val reportEvent = rememberInsightEventReporter()
+  val scope = rememberCoroutineScope()
 
-  val primaryColor = MaterialTheme.colorScheme.primary
-  val secondaryColor = MaterialTheme.colorScheme.secondary
-  val tertiaryColor = MaterialTheme.colorScheme.tertiary
-  val surfaceColor = MaterialTheme.colorScheme.surface
-
-  val energyColors =
-    remember(color, primaryColor, secondaryColor, tertiaryColor, surfaceColor) {
-      // We always use dynamic colors, hence isBaseline is always false.
-      val isBaseline = false
-      val colors =
-        EnergyColors.withAccents(
-          baseColor = color.toArgb(),
-          primaryColor = primaryColor.toArgb(),
-          secondaryColor = secondaryColor.toArgb(),
-          tertiaryColor = tertiaryColor.toArgb(),
-          surfaceColor = surfaceColor.toArgb(),
-          isBaseline = isBaseline,
-          baseColorRole = BaseColorRole.SURFACE,
-        )
-      intArrayOf(colors.getOrElse(0) { color.toArgb() }, colors.getOrElse(1) { color.toArgb() })
+  var hasReportedImpression by rememberSaveable(action.insight) { mutableStateOf(false) }
+  LaunchedEffect(action) {
+    if (!hasReportedImpression) {
+      reportEvent(action.insight, InsightEvent.EVENT_SHOW)
+      hasReportedImpression = true
     }
+  }
 
-  val cardConfig =
-    remember(color, energyColors) {
-      DefaultCardConfig(surfaceColor = color.toArgb(), energyColors = energyColors)
+  this.clickable {
+    reportEvent(action.insight, InsightEvent.EVENT_USER_TAP)
+    action.remoteAction.execute(context)
+    scope.launch {
+      // Delay dismissal slightly to allow ripple animation to show.
+      delay(200)
+      info.onReceiveInsight(ServerSideCloseInsight().toContextInsight())
     }
-
-  val baseConfig = remember(cardConfig) { cardConfig.initialConfig() }
-  val stateMap = remember(cardConfig) { cardConfig.createEffectsBuilder().buildKeyframeSequences() }
-
-  return this.energyEffects(
-    initialConfig = baseConfig,
-    state = currentState,
-    stateMap = stateMap,
-    onStateAnimationFinished = { finishedState, _ ->
-      if (finishedState == EffectState.ENTRY) {
-        currentState = EffectState.LOOP
-      }
-    },
-    mainExecutor = mainExecutor,
-    timeSupplierMs = timeSupplierMs,
-  )
+  }
 }

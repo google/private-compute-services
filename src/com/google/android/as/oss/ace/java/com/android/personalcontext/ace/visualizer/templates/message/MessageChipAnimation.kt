@@ -20,11 +20,14 @@ import android.graphics.BlurMaskFilter
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -101,7 +104,7 @@ fun Modifier.animatedActionBorder(
     }
   }
 
-  return drawBehind {
+  return this.clip(RoundedCornerShape(CornerSize(cornerRadius.x))).drawBehind {
     val currentRotationRad = Math.toRadians(rotationAngle.value.toDouble()).toFloat()
     val gradientRadius = sqrt(size.width * size.width + size.height * size.height) / 2f
     val center = size.center

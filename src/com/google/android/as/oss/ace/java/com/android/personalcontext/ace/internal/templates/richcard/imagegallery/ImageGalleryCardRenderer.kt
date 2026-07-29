@@ -42,29 +42,42 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import com.android.personalcontext.ace.internal.templates.richcard.CardUiData
 import com.android.personalcontext.ace.internal.templates.richcard.common.CardTemplateLayout
+import com.android.personalcontext.ace.internal.templates.richcard.common.GoogleSansText
 import com.android.personalcontext.ace.internal.templates.richcard.common.LoadingBox
+import com.android.personalcontext.ace.internal.templates.richcard.common.cardContextActionClickable
 import com.android.personalcontext.ace.internal.templates.richcard.renderer.CardRenderer
+import com.android.personalcontext.ace.visualizer.compat.EnergyEffectsAnimationCompat
 import javax.inject.Inject
 
-class ImageGalleryCardRenderer @Inject internal constructor() :
+class ImageGalleryCardRenderer
+@Inject
+internal constructor(private val energyEffectsAnimationCompat: EnergyEffectsAnimationCompat) :
   CardRenderer<ImageGalleryCardUiData> {
 
   @Composable
   override fun Render(cardUiData: CardUiData<ImageGalleryCardUiData>, modifier: Modifier) {
     val uiContext = cardUiData.cardContext ?: return
-    val attribution = cardUiData.attribution ?: return
+    if (cardUiData.attribution == null) return
 
-    CardTemplateLayout(cardUiData = cardUiData, modifier = modifier) {
+    CardTemplateLayout(
+      cardUiData = cardUiData,
+      energyEffectsAnimationCompat = energyEffectsAnimationCompat,
+      modifier = modifier,
+    ) {
       Box(
         modifier =
           Modifier.fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceBright, RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .cardContextActionClickable(uiContext.action)
             .padding(bottom = 12.dp)
       ) {
         CollageContent(uiContext = uiContext)
@@ -72,99 +85,138 @@ class ImageGalleryCardRenderer @Inject internal constructor() :
     }
   }
 
+  /** Renders the full collage card content by composing info text and images. */
   @Composable
   private fun CollageContent(uiContext: ImageGalleryCardUiData, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     Column(modifier = modifier.fillMaxWidth()) {
-      val subtitleIconBitmap =
-        remember(uiContext.subtitleIcon) {
-          uiContext.subtitleIcon?.loadDrawable(context)?.toBitmap()
+      when (uiContext) {
+        is ImageGalleryCardUiData.LoadingData -> {
+          LoadingInfoText()
+          LoadingImageCollage()
         }
-      val bitmaps =
-        remember(uiContext.images) {
-          uiContext.images?.mapNotNull { it.loadDrawable(context)?.toBitmap() }
+        is ImageGalleryCardUiData.LoadedData -> {
+          val subtitleIconBitmap =
+            remember(uiContext.subtitleIcon) {
+              uiContext.subtitleIcon?.loadDrawable(context)?.toBitmap()
+            }
+          val bitmaps =
+            remember(uiContext.images) {
+              uiContext.images.mapNotNull { it.loadDrawable(context)?.toBitmap() }
+            }
+          InfoText(
+            header = uiContext.header,
+            subtitle = uiContext.subtitle,
+            subtitleIcon = subtitleIconBitmap,
+            subtitleSuffix = uiContext.subtitleSuffix,
+            tertiaryText = uiContext.tertiaryText,
+            subtitleContentDescription = uiContext.subtitleContentDescription,
+          )
+          ImageCollage(images = bitmaps)
         }
-      InfoText(
-        header = uiContext.header,
-        subtitle = uiContext.subtitle,
-        subtitleIcon = subtitleIconBitmap,
-        subtitleSuffix = uiContext.subtitleSuffix,
-        tertiaryText = uiContext.tertiaryText,
-      )
-
-      ImageCollage(images = bitmaps)
+      }
     }
   }
 
+  /** Renders the structured information text section (header, subtitle, tertiary text). */
   @Composable
   private fun InfoText(
-    header: String,
+    header: String?,
     subtitle: String?,
     subtitleIcon: Bitmap?,
     subtitleSuffix: String?,
     tertiaryText: String?,
     modifier: Modifier = Modifier,
+    subtitleContentDescription: String? = null,
   ) {
     Column(modifier = modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp)) {
-      Text(
-        text = header,
-        color = MaterialTheme.colorScheme.onSurface,
-        fontSize = 18.sp,
-        fontWeight = FontWeight.Medium,
-        letterSpacing = 0.sp,
-      )
+      if (header != null) {
+        Text(
+          text = header,
+          style =
+            MaterialTheme.typography.titleLarge.copy(
+              fontSize = 18.sp,
+              lineHeight = 24.sp,
+              fontWeight = FontWeight.Medium,
+              letterSpacing = 0.sp,
+            ),
+          color = MaterialTheme.colorScheme.onSurface,
+        )
+      }
       if (subtitle != null) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          SubduedText(subtitle)
-          SubtitleIcon(subtitleIcon)
-          if (subtitleSuffix != null) {
-            SubduedText(subtitleSuffix)
+        if (subtitle.isNotEmpty() || subtitleIcon != null || !subtitleSuffix.isNullOrEmpty()) {
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier =
+              if (subtitleContentDescription != null) {
+                Modifier.clearAndSetSemantics { contentDescription = subtitleContentDescription }
+              } else {
+                Modifier
+              },
+          ) {
+            if (subtitle.isNotEmpty()) {
+              SubduedText(subtitle)
+            }
+            SubtitleIcon(subtitleIcon)
+            if (!subtitleSuffix.isNullOrEmpty()) {
+              SubduedText(subtitleSuffix)
+            }
           }
         }
-      } else {
-        LoadingBox(modifier = Modifier.fillMaxWidth(0.7f).height(20.dp).padding(bottom = 4.dp))
       }
-      if (tertiaryText != null) {
+      if (tertiaryText != null && tertiaryText.isNotEmpty()) {
         SubduedText(tertiaryText)
-      } else {
-        LoadingBox(modifier = Modifier.fillMaxWidth(0.5f).height(20.dp).padding(bottom = 4.dp))
       }
     }
   }
 
+  /** Renders the loading skeleton placeholder bars for the information text section. */
+  @Composable
+  private fun LoadingInfoText(modifier: Modifier = Modifier) {
+    Column(modifier = modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp)) {
+      LoadingBox(modifier = Modifier.fillMaxWidth(0.5f).height(20.dp).padding(bottom = 4.dp))
+      LoadingBox(modifier = Modifier.fillMaxWidth(0.7f).height(20.dp).padding(bottom = 4.dp))
+      LoadingBox(modifier = Modifier.fillMaxWidth(0.5f).height(20.dp).padding(bottom = 4.dp))
+    }
+  }
+
+  /** Renders subdued grey text for secondary and tertiary labels. */
   @Composable
   private fun SubduedText(text: String, modifier: Modifier = Modifier) {
     Text(
       text = text,
+      style =
+        MaterialTheme.typography.bodyMedium.copy(
+          fontFamily = GoogleSansText,
+          fontSize = 14.sp,
+          lineHeight = 20.sp,
+          fontWeight = FontWeight.W400,
+          letterSpacing = 0.1.sp,
+        ),
       color = MaterialTheme.colorScheme.onSurfaceVariant,
-      fontSize = 14.sp,
-      fontWeight = FontWeight.W400,
-      lineHeight = 20.sp,
-      letterSpacing = 0.1.sp,
       modifier = modifier,
     )
   }
 }
 
+/** Renders the subtitle icon if present. */
 @Composable
 private fun SubtitleIcon(iconBitmap: Bitmap?) {
   if (iconBitmap != null) {
     Image(
       bitmap = iconBitmap.asImageBitmap(),
       contentDescription = null,
-      modifier = Modifier.size(16.dp).padding(end = 8.dp),
+      modifier = Modifier.padding(start = 2.dp, end = 4.dp).size(12.dp),
     )
   }
 }
 
+/** Renders a multi-image collage displaying up to 4 loaded bitmaps. */
 @Composable
-private fun ImageCollage(images: List<Bitmap>?, modifier: Modifier = Modifier) {
-  val displayImages =
-    if (images.isNullOrEmpty()) {
-      listOf(null, null, null)
-    } else {
-      images.take(3)
-    }
+private fun ImageCollage(images: List<Bitmap>, modifier: Modifier = Modifier) {
+  if (images.isEmpty()) return
+
+  val displayImages = images.take(3)
 
   Box(
     modifier =
@@ -216,17 +268,37 @@ private fun ImageCollage(images: List<Bitmap>?, modifier: Modifier = Modifier) {
   }
 }
 
+/** Renders the loading skeleton placeholder layout for the image collage. */
 @Composable
-private fun GalleryImage(bitmap: Bitmap?, modifier: Modifier = Modifier) {
-  val imageModifier = modifier.fillMaxSize().clip(RoundedCornerShape(4.dp))
-  if (bitmap != null) {
-    Image(
-      bitmap = bitmap.asImageBitmap(),
-      contentDescription = null,
-      modifier = imageModifier,
-      contentScale = ContentScale.Crop,
-    )
-  } else {
-    LoadingBox(modifier = imageModifier)
+private fun LoadingImageCollage(modifier: Modifier = Modifier) {
+  Box(
+    modifier =
+      modifier
+        .fillMaxWidth()
+        .height(200.dp)
+        .padding(start = 16.dp, end = 16.dp, top = 16.dp)
+        .clip(RoundedCornerShape(12.dp))
+  ) {
+    Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+      LoadingBox(modifier = Modifier.weight(1f).fillMaxSize().clip(RoundedCornerShape(4.dp)))
+      Column(
+        modifier = Modifier.weight(1f).fillMaxHeight(),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+      ) {
+        LoadingBox(modifier = Modifier.weight(1f).fillMaxSize().clip(RoundedCornerShape(4.dp)))
+        LoadingBox(modifier = Modifier.weight(1f).fillMaxSize().clip(RoundedCornerShape(4.dp)))
+      }
+    }
   }
+}
+
+/** Renders an individual rounded gallery image within a collage grid. */
+@Composable
+private fun GalleryImage(bitmap: Bitmap, modifier: Modifier = Modifier) {
+  Image(
+    bitmap = bitmap.asImageBitmap(),
+    contentDescription = null,
+    modifier = modifier.fillMaxSize().clip(RoundedCornerShape(4.dp)),
+    contentScale = ContentScale.Crop,
+  )
 }

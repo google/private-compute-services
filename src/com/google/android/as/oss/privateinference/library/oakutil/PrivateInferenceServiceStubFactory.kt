@@ -19,6 +19,7 @@ package com.google.android.`as`.oss.privateinference.library.oakutil
 import android.content.Context
 import com.google.android.`as`.oss.feedback.gateway.getCertFingerprint
 import com.google.android.`as`.oss.privateinference.Annotations.PrivateInferenceAttachCertificateHeader
+import com.google.android.`as`.oss.privateinference.Annotations.PrivateInferencePassForceEzUsageHeader
 import com.google.android.`as`.oss.privateinference.Annotations.PrivateInferenceServerGrpcChannel
 import com.google.android.`as`.oss.privateinference.Annotations.PrivateInferenceUseEndpointSpecificVerificationKeys
 import com.google.android.`as`.oss.privateinference.Annotations.PrivateInferenceWaitForGrpcChannelReady
@@ -45,6 +46,7 @@ internal constructor(
   @PrivateInferenceAttachCertificateHeader val attachCertificateHeader: Boolean,
   @PrivateInferenceUseEndpointSpecificVerificationKeys
   val useEndpointSpecificVerificationKeys: Boolean,
+  @PrivateInferencePassForceEzUsageHeader val passForceEzUsageHeader: Boolean,
   val deviceInfo: Optional<DeviceInfo>,
 ) {
 
@@ -90,6 +92,11 @@ internal constructor(
       stub = stub.withInterceptors(ClientVerificationKeyVariantInterceptor("nonprod"))
     }
 
+    if (passForceEzUsageHeader) {
+      logger.atInfo().log("Attaching x-use-ez header to the request.")
+      stub = stub.withInterceptors(UseEzInterceptor())
+    }
+
     return when {
       authInfo.spatulaHeader.isPresent ->
         stub.withInterceptors(SpatulaInterceptor(authInfo.spatulaHeader.get()))
@@ -131,6 +138,12 @@ internal constructor(
         /*extraHeaders=*/ Metadata().apply { put(CLIENT_VERIFICATION_KEY_VARIANT_HEADER, variant) }
       )
 
+    /** gRPC client interceptor that adds a x-use-ez header to each outgoing request. */
+    private fun UseEzInterceptor() =
+      newAttachHeadersInterceptor(
+        /*extraHeaders=*/ Metadata().apply { put(X_USE_EZ_HEADER, "true") }
+      )
+
     private val ANDROID_PACKAGE_HEADER: Metadata.Key<String> =
       Metadata.Key.of("X-Android-Package", Metadata.ASCII_STRING_MARSHALLER)
     private val ANDROID_CERT_HEADER: Metadata.Key<String> =
@@ -147,5 +160,8 @@ internal constructor(
 
     private val CLIENT_VERIFICATION_KEY_VARIANT_HEADER: Metadata.Key<String> =
       Metadata.Key.of("X-Client-Verification-Key-Variant", Metadata.ASCII_STRING_MARSHALLER)
+
+    private val X_USE_EZ_HEADER: Metadata.Key<String> =
+      Metadata.Key.of("x-use-ez", Metadata.ASCII_STRING_MARSHALLER)
   }
 }

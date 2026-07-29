@@ -43,18 +43,22 @@ import android.view.LayoutInflater
 import android.view.SurfaceControlViewHost
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.Switch
 import android.widget.TextView
 import android.window.InputTransferToken
 import androidx.annotation.VisibleForTesting
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.graphics.createBitmap
 import androidx.core.hardware.display.DisplayManagerCompat
+import androidx.core.view.AccessibilityDelegateCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import com.google.android.`as`.oss.common.Executors.PIR_EXECUTOR
 import com.google.android.`as`.oss.common.config.ConfigReader
 import com.google.android.`as`.oss.supericon.aidl.ConversationData
-import com.google.android.`as`.oss.supericon.aidl.IConversationContentCallback
 import com.google.android.`as`.oss.supericon.aidl.ISuperIconRenderCallback
 import com.google.android.`as`.oss.supericon.aidl.ISuperIconRenderService
 import com.google.android.`as`.oss.supericon.aidl.ISuperIconSurfacePackageResultCallback
@@ -64,13 +68,14 @@ import com.google.android.`as`.oss.supericon.config.SuperIconConfig
 import com.google.android.`as`.oss.supericon.utils.ConsentEventConstants
 import com.google.android.`as`.oss.supericon.utils.SuperIconErrorCodes
 import com.google.android.`as`.oss.supericon.utils.SuperIconUiType
+import com.google.android.material.color.DynamicColors
+import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.common.flogger.android.AndroidFluentLogger
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.IOException
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
-import kotlin.coroutines.resume
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -79,9 +84,7 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 
 /** A service that renders a view based on the given view spec. */
 @SuppressLint("NewApi")
@@ -102,7 +105,7 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
 
   @Inject lateinit var configReader: ConfigReader<SuperIconConfig>
   @Inject internal lateinit var consentManager: SuperIconConsentManager
-  @Inject internal lateinit var connectionFactory: ConversationContentConnectionFactory
+  @Inject internal lateinit var callbackHelper: ConversationContentCallbackHelper
   @Inject internal lateinit var surfaceControlViewHostFactory: SurfaceControlViewHostFactory
 
   private lateinit var renderService: SuperIconRenderServiceBinderStub
@@ -315,7 +318,13 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
 
               val view =
                 if (uiType == SuperIconUiType.CONSENT_TOGGLE) {
-                  createConsentToggleView(renderContext, display, hostInputToken, callback)
+                  createConsentToggleView(
+                    renderContext,
+                    display,
+                    params.hostInputToken,
+                    params,
+                    callback,
+                  )
                 } else {
                   val chipView = createChip(renderContext, params, display)
                   chipView.focusable = View.NOT_FOCUSABLE
@@ -347,15 +356,74 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
     }
 
     @SuppressLint("InflateParams")
-    private fun createConsentToggleView(
+    @androidx.annotation.MainThread
+    private suspend fun createConsentToggleView(
       renderContext: Context,
       display: Display,
       hostInputToken: InputTransferToken,
+      params: Params,
       callback: ISuperIconRenderCallback,
     ): View {
+      val themedContext = ContextThemeWrapper(renderContext, R.style.Theme_Material3_DayNight)
+      val monetContext = DynamicColors.wrapContextIfAvailable(themedContext)
       val view =
-        LayoutInflater.from(renderContext).inflate(R.layout.super_icon_consent_toggle, null)
-      val switchView = view.findViewById<Switch>(R.id.consent_toggle_switch)
+        LayoutInflater.from(monetContext)
+          .inflate(R.layout.super_icon_consent_toggle, /* root= */ null)
+
+      val renderOptions = params.renderOptions
+      val labelTextView = view.findViewById<TextView>(R.id.consent_toggle_text)
+      val iconView = view.findViewById<ImageView>(R.id.consent_toggle_icon)
+
+      loadDrawableFromIcon(renderOptions.background, renderContext = renderContext) { background ->
+        if (background != null) {
+          view.background = background
+        }
+      }
+
+      // If a label is provided, configure the label text and make the label and icon container
+      // visible.
+      renderOptions.label
+        ?.takeIf { it.isNotEmpty() }
+        ?.let { label ->
+          labelTextView.text = label
+          labelTextView.visibility = View.VISIBLE
+          iconView.visibility = View.VISIBLE
+
+          // Apply typography options to ensure visual parity with Gboard
+          if (renderOptions.labelColor != RenderOptions.DEFAULT_LABEL_COLOR) {
+            labelTextView.setTextColor(renderOptions.labelColor)
+          }
+          val targetFontFamily = renderOptions.fontFamily ?: RenderOptions.DEFAULT_FONT_FAMILY
+          val currentWeight = labelTextView.typeface?.weight ?: DEFAULT_TYPEFACE_WEIGHT
+          val currentItalic = labelTextView.typeface?.isItalic ?: false
+          labelTextView.typeface =
+            Typeface.create(
+              Typeface.create(targetFontFamily, Typeface.NORMAL),
+              currentWeight,
+              currentItalic,
+            )
+          if (renderOptions.textSizeInPixels > 0) {
+            labelTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, renderOptions.textSizeInPixels)
+          }
+          labelTextView.textScaleX = renderOptions.textScaleX
+          // Force Gboard parity: Material 3 defaults to 0.00714286, but Gboard uses 0.0.
+          labelTextView.letterSpacing = DEFAULT_LETTER_SPACING
+
+          // Load the icon drawable and apply force-dark immunity to ensure consistent rendering.
+          loadDrawableFromIcon(renderOptions.icon, renderContext = renderContext) { drawable ->
+            if (drawable != null) {
+              val immuneDrawable = createForceDarkImmuneDrawable(drawable)
+              iconView.setImageDrawable(immuneDrawable)
+            } else {
+              iconView.setImageDrawable(null)
+            }
+          }
+        }
+
+      val switchView = view.findViewById<MaterialSwitch>(R.id.consent_toggle_switch)
+
+      val initialState = consentManager.consentStateFlow.first()
+      switchView.isChecked = (initialState == ConsentState.GRANTED)
 
       view.addOnAttachStateChangeListener(
         object : View.OnAttachStateChangeListener {
@@ -376,14 +444,15 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
         }
       )
 
-      switchView.setOnClickListener {
+      view.setOnClickListener {
+        switchView.toggle()
         val isChecked = switchView.isChecked
 
         if (isChecked) {
           currentRenderRequests[SuperIconUiType.CONSENT_TOGGLE]?.contentJob =
             backgroundScope.safeLaunch(errorLogMessage = "Failed granting consent") {
               consentManager.recordConsentState(ConsentState.GRANTED)
-              callback.onConsentGranted(awaitCallback(context))
+              callback.onConsentGranted(callbackHelper.awaitCallback(context, backgroundScope))
             }
         } else {
           currentRenderRequests[SuperIconUiType.CONSENT_TOGGLE]?.contentJob =
@@ -393,6 +462,29 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
             }
         }
       }
+
+      // Configure accessibility so the root layout announces itself as a Switch and
+      // reports the checked state of the hidden MaterialSwitch to TalkBack.
+      ViewCompat.setAccessibilityDelegate(
+        view,
+        object : AccessibilityDelegateCompat() {
+          override fun onInitializeAccessibilityNodeInfo(
+            host: View,
+            info: AccessibilityNodeInfoCompat,
+          ) {
+            super.onInitializeAccessibilityNodeInfo(host, info)
+            info.className = Switch::class.java.name
+            info.isCheckable = true
+            info.checked =
+              if (switchView.isChecked) {
+                AccessibilityNodeInfoCompat.CHECKED_STATE_TRUE
+              } else {
+                AccessibilityNodeInfoCompat.CHECKED_STATE_FALSE
+              }
+          }
+        },
+      )
+
       return view
     }
 
@@ -402,7 +494,7 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
       callback: ISuperIconRenderCallback,
       totalDisplayCount: Int,
       icon: Icon?,
-    ): View {
+    ): Pair<View, View.OnAttachStateChangeListener> {
       val consentView =
         LayoutInflater.from(renderContext).inflate(R.layout.super_icon_consent_dialog, null, false)
 
@@ -417,8 +509,10 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
         }
       }
 
+      // Tracks whether the user actively clicked the Yes or No buttons.
+      // This allows us to distinguish between explicit button presses and implicit dismissals
+      // (e.g., tapping outside the dialog) when the view is eventually detached.
       var userMadeExplicitChoice = false
-
       fun executeConsentAction(
         remoteErrorMsg: String,
         genericErrorMsg: String,
@@ -448,7 +542,7 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
           ) {
             consentManager.recordConsentState(ConsentState.GRANTED)
             callback.onConsentMetricsLogged(ConsentEventConstants.GRANTED, totalDisplayCount)
-            callback.onConsentGranted(awaitCallback(context))
+            callback.onConsentGranted(callbackHelper.awaitCallback(context, backgroundScope))
           }
       }
       val denyAction = View.OnClickListener {
@@ -466,13 +560,29 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
       consentView.findViewById<View>(R.id.btn_yes).setOnClickListener(grantAction)
       consentView.findViewById<View>(R.id.btn_no).setOnClickListener(denyAction)
 
-      consentView.addOnAttachStateChangeListener(
+      val attachListener =
         object : View.OnAttachStateChangeListener {
+          private var focusJob: Job? = null
+
           override fun onViewAttachedToWindow(v: View) {
-            // No action needed on attach
+            val titleView = v.findViewById<TextView>(R.id.super_icon_consent_title)
+            // TalkBack struggles to establish initial focus and linear swiping over the
+            // SurfaceControlViewHost process boundary without an explicit "kick".
+            focusJob = mainScope.launch {
+              @SuppressWarnings("AndroidLint") // Required for TalkBack in SurfaceControlViewHost
+              titleView?.performAccessibilityAction(
+                android.view.accessibility.AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS,
+                null,
+              )
+            }
           }
 
           override fun onViewDetachedFromWindow(v: View) {
+            focusJob?.cancel()
+            focusJob = null
+            // If the view is detached because Gboard is requesting the surface package (which
+            // requires recreating the host to bridge Accessibility tokens), Gboard will temporarily
+            // remove the listener to avoid triggering this block.
             if (!userMadeExplicitChoice) {
               currentRenderRequests[SuperIconUiType.CONSENT_DIALOG]?.contentJob =
                 executeConsentAction(
@@ -488,9 +598,9 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
             }
           }
         }
-      )
+      consentView.addOnAttachStateChangeListener(attachListener)
 
-      return consentView
+      return Pair(consentView, attachListener)
     }
 
     @SuppressLint("InflateParams")
@@ -498,51 +608,70 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
       val chipLayoutId =
         when (params.renderOptions.uiType) {
           SuperIconUiType.SPELL_CHECKER_CHIP -> R.layout.spell_checker_chip
+          SuperIconUiType.SUPER_ICON_IN_PANEL -> R.layout.super_icon_chip_in_panel
           else -> R.layout.super_icon_chip
         }
-      val view = LayoutInflater.from(renderContext).inflate(chipLayoutId, null)
-      view.contentDescription = params.renderOptions.contentDescription
+      val view =
+        LayoutInflater.from(renderContext).inflate(chipLayoutId, null).apply {
+          params.renderOptions.accessibilityPaneTitle?.let {
+            // Set accessibility pane title so the accessibility service announces the correct
+            // window title when focused.
+            ViewCompat.setAccessibilityPaneTitle(this, it)
+          }
+          contentDescription = params.renderOptions.contentDescription
+          ViewCompat.setAccessibilityDelegate(
+            this,
+            object : AccessibilityDelegateCompat() {
+              override fun onInitializeAccessibilityNodeInfo(
+                view: View,
+                info: AccessibilityNodeInfoCompat,
+              ) {
+                super.onInitializeAccessibilityNodeInfo(view, info)
+                info.roleDescription = params.renderOptions.roleDescription ?: "Button"
+                // Sets the class name to behave like the standard control for accessibility
+                // services
+                // (like Switch Access) that rely on the class name to identify the control type.
+                info.className = Button::class.java.name
+              }
+            },
+          )
+        }
       logger
         .atFine()
         .log("uiType: %s renderOptions: %s", params.renderOptions.uiType, params.renderOptions)
 
-      if (
-        params.renderOptions.uiType == SuperIconUiType.SPELL_CHECKER_CHIP &&
-          !params.renderOptions.label.isNullOrEmpty()
-      ) {
-        val textView = view.findViewById<TextView>(R.id.text)
-        textView.text = params.renderOptions.label
-        if (params.renderOptions.labelColor != RenderOptions.DEFAULT_LABEL_COLOR) {
-          textView.setTextColor(params.renderOptions.labelColor)
+      with(params.renderOptions) {
+        if (
+          (uiType == SuperIconUiType.SPELL_CHECKER_CHIP ||
+            uiType == SuperIconUiType.SUPER_ICON_IN_PANEL) && !label.isNullOrEmpty()
+        ) {
+          view.findViewById<TextView>(R.id.text).apply {
+            text = label
+            if (labelColor != RenderOptions.DEFAULT_LABEL_COLOR && labelColor != 0) {
+              setTextColor(labelColor)
+            }
+            if (
+              params.renderOptions.uiType == SuperIconUiType.SUPER_ICON_IN_PANEL && !isUnderTest
+            ) {
+              // Makes the TextView selected to make the marquee to start scrolling.
+              isSelected = true
+              // Sets the TextView IMPORTANT_FOR_ACCESSIBILITY_NO to avoid it's focused by
+              // accessibility service.
+              importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            }
+            fontFamily
+              ?.takeIf { it != RenderOptions.DEFAULT_FONT_FAMILY }
+              ?.let { typeface = Typeface.create(it, Typeface.NORMAL) }
+            if (textSizeInPixels > 0) {
+              setTextSize(TypedValue.COMPLEX_UNIT_PX, textSizeInPixels)
+            }
+            textScaleX = this@with.textScaleX
+          }
         }
-        val fontFamily = params.renderOptions.fontFamily ?: RenderOptions.DEFAULT_FONT_FAMILY
-        if (fontFamily != RenderOptions.DEFAULT_FONT_FAMILY) {
-          textView.typeface = Typeface.create(fontFamily, Typeface.NORMAL)
-        }
-        if (params.renderOptions.textSizeInPixels > 0) {
-          textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, params.renderOptions.textSizeInPixels)
-        }
-        textView.textScaleX = params.renderOptions.textScaleX
       }
-      // --- Set the Drawable on the Chip ---
-      val imageView: ImageView = view.findViewById(R.id.icon)
-      loadDrawableFromIcon(params.renderOptions.icon, renderContext = renderContext) { drawable ->
-        if (drawable != null) {
-          // Apply the bypass force dark theme
-          val immuneDrawable = createForceDarkImmuneDrawable(drawable)
-          imageView.setImageDrawable(immuneDrawable)
-        } else {
-          imageView.setImageDrawable(null)
-        }
 
-        imageView.scaleX = params.renderOptions.iconScaleX
-        imageView.scaleY = params.renderOptions.iconScaleY
-      }
-      imageView.layoutParams =
-        imageView.layoutParams.apply {
-          width = params.renderOptions.iconWidth
-          height = params.renderOptions.iconHeight
-        }
+      // --- Set the Drawable on the Chip ---
+      setChipIcon(view, renderContext, params.renderOptions)
 
       loadDrawableFromIcon(params.renderOptions.background, renderContext = renderContext) {
         background ->
@@ -550,7 +679,7 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
       }
 
       view.setOnClickListener {
-        currentRenderRequests[SuperIconUiType.SUPER_ICON]?.contentJob =
+        currentRenderRequests[params.renderOptions.uiType]?.contentJob =
           backgroundScope.safeLaunch(
             errorLogMessage = "Failed executing click action",
             onError = { e ->
@@ -563,9 +692,9 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
             val currentState = consentManager.consentStateFlow.first()
             if (currentState == ConsentState.GRANTED) {
               logger.atFine().log("onClick with consent granted")
-              params.callback.onClick(awaitCallback(context))
+              params.callback.onClick(callbackHelper.awaitCallback(context, backgroundScope))
             } else {
-              if (awaitCallback(context).messages.isEmpty()) {
+              if (callbackHelper.awaitCallback(context, backgroundScope).messages.isEmpty()) {
                 logger.atFine().log("onClick with empty conversation data")
                 params.callback.onClick(ConversationData(emptyList(), packageName = ""))
               } else if (consentManager.shouldShowConsentForm()) {
@@ -580,13 +709,55 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
       return view
     }
 
+    private fun setChipIcon(view: View, renderContext: Context, renderOptions: RenderOptions) {
+      val imageView: ImageView = view.findViewById(R.id.icon) ?: return
+      loadDrawableFromIcon(renderOptions.icon, renderContext = renderContext) { drawable ->
+        if (drawable != null) {
+          // Apply the bypass force dark theme
+          val immuneDrawable = createForceDarkImmuneDrawable(drawable)
+          imageView.setImageDrawable(immuneDrawable)
+        } else {
+          imageView.setImageDrawable(null)
+        }
+
+        imageView.scaleX = renderOptions.iconScaleX
+        imageView.scaleY = renderOptions.iconScaleY
+      }
+      imageView.layoutParams =
+        imageView.layoutParams.apply {
+          width = renderOptions.iconWidth
+          height = renderOptions.iconHeight
+        }
+
+      if (renderOptions.subIcon != null) {
+        val subImageView: ImageView = view.findViewById(R.id.expand_icon) ?: return
+        loadDrawableFromIcon(renderOptions.subIcon, renderContext = renderContext) { drawable ->
+          if (drawable != null) {
+            // Apply the bypass force dark theme
+            val immuneDrawable = createForceDarkImmuneDrawable(drawable)
+            subImageView.setImageDrawable(immuneDrawable)
+          } else {
+            subImageView.setImageDrawable(null)
+          }
+
+          subImageView.scaleX = renderOptions.subIconScaleX
+          subImageView.scaleY = renderOptions.subIconScaleY
+        }
+        subImageView.layoutParams =
+          subImageView.layoutParams.apply {
+            width = renderOptions.subIconWidth
+            height = renderOptions.subIconHeight
+          }
+      }
+    }
+
     private suspend fun showConsentForm(renderContext: Context, params: Params, display: Display) {
       withContext(mainDispatcher) {
         consentManager.recordConsentFormShown()
         val totalDisplayCount = consentManager.getConsentFormShownTimes()
         currentRenderRequests[SuperIconUiType.CONSENT_DIALOG] =
           RenderRequestParams(params, null, null)
-        val consentView =
+        val (consentView, attachListener) =
           createConsentView(
             renderContext,
             params.callback,
@@ -617,6 +788,7 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
           params.renderOptions.windowToken,
           SuperIconUiType.CONSENT_DIALOG,
           params.callback,
+          attachListener,
         )
       }
     }
@@ -631,10 +803,12 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
       windowToken: IBinder?,
       @SuperIconUiType uiType: Int,
       callback: ISuperIconRenderCallback,
+      attachListener: View.OnAttachStateChangeListener? = null,
     ) {
       logger.atFine().log("windowToken: %s", windowToken)
       val host = createSurfaceControlViewHost(display, windowToken, hostInputToken)
-      val superIconUi = SuperIconUi(host, params, view, measuredSize, renderContext, display)
+      val superIconUi =
+        SuperIconUi(host, params, view, measuredSize, renderContext, display, attachListener)
       var success = false
       try {
         (view.parent as? ViewGroup)?.removeView(view)
@@ -662,13 +836,16 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
             }
           }
         }
-        if (uiType == SuperIconUiType.SUPER_ICON) {
+        if (uiType == SuperIconUiType.CONSENT_DIALOG) {
+          // Only store CONSENT_DIALOG in consentDialogUi to avoid it being evicted by the LRU
+          // cache, as it is a critical modal UI. Other UIs go to activeSuperIconUis cache.
+          this@SuperIconRenderServiceBinderStub.consentDialogUi?.releaseOnEviction()
+          this@SuperIconRenderServiceBinderStub.consentDialogUi = superIconUi
+        } else {
           this@SuperIconRenderServiceBinderStub.activeSuperIconUis.put(superIconUi, true)
           logger
             .atFine()
             .log("add activeSuperIconUis.count: %s %s", activeSuperIconUis.size(), superIconUi)
-        } else {
-          this@SuperIconRenderServiceBinderStub.consentDialogUi = superIconUi
         }
         // We post the callback invocation to the end of the main thread handler queue, to
         // make sure the callback happens after the views are drawn. This is needed because
@@ -686,7 +863,7 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
         success = true
       } finally {
         if (!success) {
-          superIconUi.releaseSurfaceContentViewHost(uiType = uiType)
+          superIconUi.releaseSurfaceControlViewHost(uiType = uiType)
           logger
             .atFine()
             .log("released host due to cancellation or failure: %s %s", host, superIconUi)
@@ -729,7 +906,7 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
       override fun releaseSurfaceControlViewHost(uiType: Int) {
         val superIconUi = weakRef.get()
         logger.atFine().log("releaseSurfaceControlViewHost, superIconUi: %s", superIconUi)
-        superIconUi?.releaseSurfaceContentViewHost(uiType)
+        superIconUi?.releaseSurfaceControlViewHost(uiType)
       }
     }
 
@@ -740,17 +917,20 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
       val measuredSize: Size,
       val renderContext: Context,
       val display: Display,
+      val attachListener: View.OnAttachStateChangeListener? = null,
     ) {
-      fun releaseSurfaceContentViewHost(uiType: Int) {
+      fun releaseSurfaceControlViewHost(uiType: Int) {
         mainScope.launch {
           releaseResourcesInternal()
-          if (uiType == SuperIconUiType.SUPER_ICON) {
+          if (uiType == SuperIconUiType.CONSENT_DIALOG) {
+            if (this@SuperIconRenderServiceBinderStub.consentDialogUi === this@SuperIconUi) {
+              this@SuperIconRenderServiceBinderStub.consentDialogUi = null
+            }
+          } else {
             activeSuperIconUis.remove(this@SuperIconUi)
             logger
               .atFine()
               .log("remove activeSuperIconUis.count: %s %s", activeSuperIconUis.size(), this)
-          } else {
-            this@SuperIconRenderServiceBinderStub.consentDialogUi = null
           }
         }
       }
@@ -767,27 +947,68 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
 
       fun getSurfacePackage(surfacePackageResultCallback: ISuperIconSurfacePackageResultCallback) {
         mainScope.launch {
-          releaseResourcesInternal()
-          // Recreate the SurfaceControlViewHost using the window token if available.
-          // This is crucial for Accessibility (e.g. TalkBack) to bridge the focus
-          // between the client process (Gboard) and the host process (Pcs).
-          val host =
-            createSurfaceControlViewHost(
-              display,
-              params.renderOptions.windowToken,
-              params.hostInputToken,
-            )
-          (view.parent as? ViewGroup)?.removeView(view)
-          val viewToSet = FrameLayout(renderContext)
-          viewToSet.addView(view)
-          host.setView(viewToSet, measuredSize.width, measuredSize.height)
-          val surfacePackage = host.surfacePackage ?: return@launch
-          viewHost = host
+          logger.atFine().log("recreate surfaceControlViewHost")
+          try {
+            if (attachListener != null) {
+              view.removeOnAttachStateChangeListener(attachListener)
+            }
+            releaseResourcesInternal()
+            // The previous SurfaceControlViewHost's root view (the old FrameLayout) was destroyed
+            // during release(). We must remove our inner `view` from it to avoid an
+            // IllegalStateException ("The specified child already has a parent") and wrap it
+            // in a fresh FrameLayout for the new host.
+            (view.parent as? ViewGroup)?.removeView(view)
+            val viewToSet = FrameLayout(renderContext)
+            viewToSet.addView(view)
+            if (attachListener != null) {
+              // Safe to re-attach the listener now that the recreation detachments are done.
+              view.addOnAttachStateChangeListener(attachListener)
+            }
+            // Recreate the SurfaceControlViewHost using the window token if available.
+            // This is crucial for Accessibility (e.g. TalkBack) to bridge the focus
+            // between the client process (Gboard) and the host process (Pcs).
+            val host =
+              createSurfaceControlViewHost(
+                display,
+                params.renderOptions.windowToken,
+                params.hostInputToken,
+              )
+            host.setView(viewToSet, measuredSize.width, measuredSize.height)
+            val surfacePackage = host.surfacePackage
+            if (surfacePackage == null) {
+              logger.atSevere().log("Failed to get surface package during recreation (null)")
+              handleRecreationFailure()
+              return@launch
+            }
+            viewHost = host
+            backgroundScope.launch {
+              try {
+                surfacePackageResultCallback.onResult(surfacePackage)
+              } catch (e: RemoteException) {
+                logger.atSevere().withCause(e).log("RemoteException calling onSurfacePackage")
+              }
+            }
+          } catch (e: Exception) {
+            logger.atSevere().withCause(e).log("Failed to recreate surface package")
+            handleRecreationFailure()
+          }
+        }
+      }
+
+      private fun handleRecreationFailure() {
+        if (params.renderOptions.uiType == SuperIconUiType.CONSENT_DIALOG) {
           backgroundScope.launch {
             try {
-              surfacePackageResultCallback.onResult(surfacePackage)
+              // If we fail to recreate the surface package, the consent dialog cannot be
+              // rendered on Gboard's side. Since the user cannot grant consent, we must
+              // implicitly deny it so that Gboard can dismiss its popup container and
+              // reset its UI state instead of hanging indefinitely.
+              params.callback.onConsentDenied()
             } catch (e: RemoteException) {
-              logger.atSevere().withCause(e).log("RemoteException calling onSurfacePackage")
+              logger
+                .atSevere()
+                .withCause(e)
+                .log("Failed to report consent denied after recreation failure")
             }
           }
         }
@@ -800,35 +1021,6 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
         request.contentJob?.cancel()
       }
     }
-
-    suspend fun awaitCallback(context: Context): ConversationData =
-      withTimeoutOrNull(CALLBACK_TIMEOUT_MS) {
-        suspendCancellableCoroutine { continuation ->
-          var localConnection: AutoCloseable? = null
-          val callback =
-            object : IConversationContentCallback.Stub() {
-              override fun onResponse(conversationData: ConversationData) {
-                logger.atInfo().log("IConversationContentCallback.onResponse")
-                localConnection?.close()
-                continuation.resume(conversationData)
-              }
-
-              override fun onError(@SuperIconErrorCodes errorCode: Int, errorMessage: String) {
-                logger
-                  .atSevere()
-                  .log("IConversationContentCallback.onError %d %s", errorCode, errorMessage)
-                localConnection?.close()
-                continuation.resume(ConversationData(listOf(), packageName = ""))
-              }
-            }
-          localConnection = connectionFactory.create(context, backgroundScope, callback)
-          continuation.invokeOnCancellation { localConnection.close() }
-        }
-      }
-        ?: run {
-          logger.atSevere().log("Callback timed out after %d ms", CALLBACK_TIMEOUT_MS)
-          ConversationData(listOf(), packageName = "")
-        }
 
     private fun CoroutineScope.safeLaunch(
       errorLogMessage: String = "Unhandled exception",
@@ -874,7 +1066,11 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
       ) {
         return false
       }
-      if (renderOptions.uiType == SuperIconUiType.SUPER_ICON) {
+      if (
+        renderOptions.uiType == SuperIconUiType.SUPER_ICON ||
+          renderOptions.uiType == SuperIconUiType.SPELL_CHECKER_CHIP ||
+          renderOptions.uiType == SuperIconUiType.SUPER_ICON_IN_PANEL
+      ) {
         return renderOptions.icon != null &&
           renderOptions.background != null &&
           !(renderOptions.iconWidth <= 0 || renderOptions.iconHeight <= 0)
@@ -891,10 +1087,19 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
 
   private companion object {
     val logger: AndroidFluentLogger = AndroidFluentLogger.create("PcsSuperIcon")
+    val isUnderTest: Boolean by lazy {
+      try {
+        Class.forName("androidx.test.platform.app.InstrumentationRegistry")
+        true
+      } catch (e: ClassNotFoundException) {
+        false
+      }
+    }
     const val INVALID_PARAMETER_ERROR_MESSAGE: String = "invalid parameter"
 
     const val MAXIMUM_ACTIVE_UI_COUNT = 10
-    const val CALLBACK_TIMEOUT_MS = 1000L
+    const val DEFAULT_TYPEFACE_WEIGHT = 500
+    const val DEFAULT_LETTER_SPACING = 0.0f
 
     fun loadDrawableFromIcon(
       icon: Icon?,

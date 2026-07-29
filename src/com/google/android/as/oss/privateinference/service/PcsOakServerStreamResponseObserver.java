@@ -18,7 +18,6 @@ package com.google.android.as.oss.privateinference.service;
 
 import androidx.annotation.NonNull;
 import com.google.android.as.oss.logging.PcsStatsEnums.CountMetricId;
-import com.google.android.as.oss.logging.PcsStatsEnums.ValueMetricId;
 import com.google.android.as.oss.privateinference.library.BaseOakServerStreamResponseObserver;
 import com.google.android.as.oss.privateinference.library.oakutil.AttestationVerificationException;
 import com.google.android.as.oss.privateinference.logging.PcsStatsLogger;
@@ -46,7 +45,6 @@ public final class PcsOakServerStreamResponseObserver extends BaseOakServerStrea
   private final PrivateInferenceNetworkUsageLogHelper networkUsageLogHelper;
   private final PcsStatsLogger pcsStatsLogger;
 
-  private final long inferenceStartMillis;
   private final Timers.Timer inferenceSessionTimer;
   private final AtomicLong totalRequestSize;
   private final AtomicLong totalResponseSize;
@@ -60,7 +58,6 @@ public final class PcsOakServerStreamResponseObserver extends BaseOakServerStrea
       StreamObserver<PrivateInferenceSessionResponse> clientSessionResponseObserver,
       PrivateInferenceNetworkUsageLogHelper networkUsageLogHelper,
       PcsStatsLogger pcsStatsLogger,
-      long inferenceStartMillis,
       Timers.Timer inferenceSessionTimer,
       AtomicLong totalRequestSize,
       AtomicLong totalResponseSize,
@@ -71,7 +68,6 @@ public final class PcsOakServerStreamResponseObserver extends BaseOakServerStrea
     super(clientSessionResponseObserver, directOakClientRequestObserver);
     this.networkUsageLogHelper = networkUsageLogHelper;
     this.pcsStatsLogger = pcsStatsLogger;
-    this.inferenceStartMillis = inferenceStartMillis;
     this.inferenceSessionTimer = inferenceSessionTimer;
     this.totalRequestSize = totalRequestSize;
     this.totalResponseSize = totalResponseSize;
@@ -92,18 +88,15 @@ public final class PcsOakServerStreamResponseObserver extends BaseOakServerStrea
     super.onNext(oakResponse);
     logger.atInfo().log(
         "[startInferenceSession] Received response from server with size: %d.", oakResponse.size());
+    logInferenceEvent(loggingMetricIdProvider.getInferenceSuccessCountMetricId(featureName.get()));
   }
 
   @Override
   public void onError(Throwable t) {
     inferenceSessionTimer.stop();
-    long latencyMs = System.currentTimeMillis() - inferenceStartMillis;
     logger.atWarning().log(
         "[startInferenceSession] onError[%s] from server for feature: %s.",
         t.getMessage(), featureName.get().name());
-    logInferenceLatency(
-        loggingMetricIdProvider.getInferenceFailureLatencyValueMetricId(featureName.get()),
-        latencyMs);
     networkUsageLogHelper.logPrivateInferenceRequest(
         featureName.get().name(),
         callingPackageName,
@@ -120,16 +113,12 @@ public final class PcsOakServerStreamResponseObserver extends BaseOakServerStrea
     logger.atInfo().log(
         "[startInferenceSession] onCompleted from server for feature: %s.",
         featureName.get().name());
-    logInferenceLatency(
-        loggingMetricIdProvider.getInferenceSuccessLatencyValueMetricId(featureName.get()),
-        System.currentTimeMillis() - inferenceStartMillis);
     networkUsageLogHelper.logPrivateInferenceRequest(
         featureName.get().name(),
         callingPackageName,
         /* isSuccess= */ true,
         totalRequestSize.get(),
         totalResponseSize.get());
-    logInferenceEvent(loggingMetricIdProvider.getInferenceSuccessCountMetricId(featureName.get()));
     inferenceSessionTimer.stop();
     super.onCompleted();
   }
@@ -152,9 +141,5 @@ public final class PcsOakServerStreamResponseObserver extends BaseOakServerStrea
     }
 
     pcsStatsLogger.logEventCount(countMetricId);
-  }
-
-  private void logInferenceLatency(ValueMetricId valueMetricId, long latencyMs) {
-    pcsStatsLogger.logEventLatency(valueMetricId, latencyMs);
   }
 }

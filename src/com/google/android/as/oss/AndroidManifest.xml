@@ -50,6 +50,12 @@
   <!-- Required to write to system settings -->
   <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
 
+  <!-- Required to launch the onboarding and settings activities in the Relationships app. -->
+  <uses-permission
+      android:name="com.google.android.apps.pixel.relationships.permission.LAUNCH_ONBOARDING"/>
+  <uses-permission
+      android:name="com.google.android.apps.pixel.relationships.permission.LAUNCH_SETTINGS"/>
+
   <!-- App-declared Allow Associations -->
   <allow-component-access>
     <package android:name="com.android.providers.settings" />

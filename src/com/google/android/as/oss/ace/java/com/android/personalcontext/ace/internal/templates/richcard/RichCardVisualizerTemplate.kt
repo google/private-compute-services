@@ -18,24 +18,18 @@
 
 package com.android.personalcontext.ace.internal.templates.richcard
 
-import android.service.personalcontext.PersonalContextManager
 import android.service.personalcontext.insight.DisplayInsight
 import android.service.personalcontext.insight.InsightCollection
 import android.service.personalcontext.insight.interaction.InsightEvent
 import android.util.Log
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,13 +41,10 @@ import com.android.personalcontext.ace.client.prototype.richcard.RichCardHint
 import com.android.personalcontext.ace.client.prototype.richcard.RichCardLiveDataHint
 import com.android.personalcontext.ace.common.wrappers.IPublishedContextInsight
 import com.android.personalcontext.ace.internal.findprototypehint.FindPrototypeHint.findPrototypeHint
-import com.android.personalcontext.ace.internal.templates.richcard.common.GoogleSans
-import com.android.personalcontext.ace.internal.templates.richcard.common.withDefaultFontFamily
+import com.android.personalcontext.ace.internal.templates.richcard.common.RichCardTheme
+import com.android.personalcontext.ace.internal.templates.richcard.common.rememberInsightEventReporter
 import com.android.personalcontext.ace.internal.templates.richcard.decoder.CardDecoderManager
 import com.android.personalcontext.ace.internal.templates.richcard.renderer.CardRendererManager
-import com.android.personalcontext.ace.visualizer.templates.LocalInsightEventReporter
-import com.android.personalcontext.ace.visualizer.templates.LocalPublishedContextInsight
-import com.android.personalcontext.ace.visualizer.templates.LocalRenderToken
 import com.android.personalcontext.ace.visualizer.templates.VisualizerTemplate
 import javax.inject.Inject
 
@@ -112,25 +103,12 @@ internal constructor(
     cardUiDatas: List<CardUiData<DeprecatedUiCardContext>>,
     cardInsight: CardInsight,
   ) {
-    val context = LocalContext.current
-    val publishedInsight = LocalPublishedContextInsight.current
-    val insightEventReporter = LocalInsightEventReporter.current
-    val renderToken = LocalRenderToken.current
-    val personalContextManager = remember {
-      context.getSystemService(PersonalContextManager::class.java)
-    }
+    val reportEvent = rememberInsightEventReporter()
 
     DisposableEffect(Unit) {
       onDispose {
         Log.d(TAG, "Card disposed, reporting EVENT_USER_DISMISS")
-        with(insightEventReporter) {
-          personalContextManager?.reportChildInsightEvent(
-            publishedInsight,
-            cardInsight.toContextInsight(),
-            InsightEvent.EVENT_USER_DISMISS,
-            renderToken,
-          )
-        }
+        reportEvent(cardInsight.toContextInsight(), InsightEvent.EVENT_USER_DISMISS)
       }
     }
 
@@ -160,19 +138,4 @@ internal constructor(
   companion object {
     const val TAG = "RichCardVisualizerTemplate"
   }
-}
-
-/** The theme for RichCard template. */
-@Composable
-private fun RichCardTheme(content: @Composable () -> Unit) {
-  val context = LocalContext.current
-  val colorScheme =
-    if (isSystemInDarkTheme()) {
-      dynamicDarkColorScheme(context)
-    } else {
-      dynamicLightColorScheme(context)
-    }
-
-  val cardTypography = MaterialTheme.typography.withDefaultFontFamily(GoogleSans)
-  MaterialTheme(colorScheme = colorScheme, typography = cardTypography, content = content)
 }

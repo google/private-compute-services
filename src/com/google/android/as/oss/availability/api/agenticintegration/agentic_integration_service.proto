@@ -19,7 +19,6 @@ package com.google.gemini.integration.proto;
 import "google/protobuf/duration.proto";
 import "logs/proto/logs_annotations/logs_annotations.proto";
 
-
 option java_outer_classname = "AgenticIntegrationServiceOuterClass";
 option (logs_proto.file_not_used_for_logging_except_enums) = true;
 option java_package = "com.google.android.as.oss.availability.api.agenticintegration";

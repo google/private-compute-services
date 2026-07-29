@@ -24,17 +24,22 @@ import com.android.personalcontext.ace.client.prototype.weather.WeatherHint
 import com.android.personalcontext.ace.client.prototype.weather.WeatherHint.SuggestionType
 import com.android.personalcontext.ace.client.prototype.weather.WeatherInsight
 import com.android.personalcontext.ace.client.prototype.weather.WeatherInsight.ChipContent
+import com.android.personalcontext.ace.visualizer.compat.ThemeCompat
 
 /** A semantic data structure for the Weather CUJs. */
 data class WeatherTemplateData(
   val suggestionType: SuggestionType,
   val chipContents: List<ChipContent>,
+  val shouldShowBrandedIcon: Boolean,
 ) {
 
   companion object {
 
     /** Convert from hints and insights into [WeatherTemplateData]. */
-    fun ContextInsight.toWeatherTemplateData(hint: WeatherHint): WeatherTemplateData {
+    fun ContextInsight.toWeatherTemplateData(
+      hint: WeatherHint,
+      themeCompat: ThemeCompat,
+    ): WeatherTemplateData {
       val insight =
         findWeatherInsight()
           ?: error("Expected a top-level WeatherInsight, actual: ${this.javaClass.simpleName}")
@@ -42,6 +47,7 @@ data class WeatherTemplateData(
       return WeatherTemplateData(
         suggestionType = hint.suggestionType,
         chipContents = insight.chipContents,
+        shouldShowBrandedIcon = with(themeCompat) { shouldShowBrandedIcon() },
       )
     }
 

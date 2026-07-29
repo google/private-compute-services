@@ -17,6 +17,7 @@ load("//third_party/protobuf/bazel:cc_proto_library.bzl", "cc_proto_library")
 load("//third_party/protobuf/bazel:java_lite_proto_library.bzl", "java_lite_proto_library")
 load("//third_party/protobuf/bazel:java_proto_library.bzl", "java_proto_library")
 load("//third_party/protobuf/bazel:proto_library.bzl", "proto_library")
+load("//third_party/protobuf/build_defs:kt_jvm_proto_library.bzl", "kt_jvm_proto_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -36,6 +37,11 @@ cc_proto_library(
 
 java_proto_library(
     name = "public_keys_java_proto",
+    deps = [":public_keys_proto"],
+)
+
+kt_jvm_proto_library(
+    name = "public_keys_kt_jvm_proto",
     deps = [":public_keys_proto"],
 )
 
@@ -68,6 +74,14 @@ filegroup(
     ],
 )
 
+filegroup(
+    name = "public_keys_labs_certs",
+    srcs = ["res/raw/public_keys_labs_certs.pem"],
+    visibility = [
+        "//visibility:public",
+    ],
+)
+
 android_library(
     name = "private_inference_service_stub_factory",
     srcs = ["PrivateInferenceServiceStubFactory.kt"],
@@ -94,6 +108,11 @@ android_library(
 )
 
 android_library(
+    name = "client_metadata_flag",
+    srcs = ["ClientMetadataFlag.kt"],
+)
+
+android_library(
     name = "private_inference_oak_async_client",
     srcs = [
         "AndroidKeystoreAttestationGenerator.kt",
@@ -105,6 +124,7 @@ android_library(
     manifest = "//src/com/google/android/as/oss/privateinference/library/oakutil:AndroidManifest.xml",
     resource_files = glob(["res/**"]),
     deps = [
+        ":client_metadata_flag",
         ":device_attestation_flag",
         ":private_inference_client_timer_names",
         ":private_inference_service_stub_factory",
@@ -114,6 +134,7 @@ android_library(
         "//src/com/google/android/as/oss/common/time",
         "//src/com/google/android/as/oss/logging:enums_java_proto_lite",
         "//src/com/google/android/as/oss/privateinference/api:anonymous_token_request_kt_proto_lite",
+        "//src/com/google/android/as/oss/privateinference/api:client_metadata_kt_proto_lite",
         "//src/com/google/android/as/oss/privateinference/api:device_attestation_request_kt_proto_lite",
         "//src/com/google/android/as/oss/privateinference/api:private_aratea_service_java_lite_grpc",
         "//src/com/google/android/as/oss/privateinference/api:private_aratea_service_kt_proto_lite",

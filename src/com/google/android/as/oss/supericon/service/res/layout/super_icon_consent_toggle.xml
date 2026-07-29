@@ -16,14 +16,53 @@
 -->
 
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/consent_toggle_root"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp">
+    android:minHeight="52dp"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingHorizontal="12dp"
+    android:focusable="true"
+    android:clickable="true"
+    android:background="?attr/selectableItemBackground"
+    android:accessibilityPaneTitle="@string/super_icon_consent_toggle_window_title">
 
-  <Switch
-      android:id="@+id/consent_toggle_switch"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content" />
+    <ImageView
+        android:id="@+id/consent_toggle_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="12dp"
+        android:layout_gravity="center_vertical"
+        android:visibility="gone"
+        android:tint="?attr/colorOnSurface"
+        android:contentDescription="@null"
+        android:importantForAccessibility="no" />
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/consent_toggle_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginEnd="12dp"
+        android:textColor="?attr/colorOnSurface"
+        android:textAppearance="?attr/textAppearanceLabelLarge"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:visibility="gone" />
+
+    <com.google.android.material.materialswitch.MaterialSwitch
+        android:id="@+id/consent_toggle_switch"
+        app:thumbIcon="@drawable/super_icon_consent_thumb_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:minWidth="60dp"
+        android:minHeight="48dp"
+        android:clickable="false"
+        android:focusable="false"
+        android:importantForAccessibility="no" />
+
+</LinearLayout>

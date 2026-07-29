@@ -16,6 +16,7 @@
 
 package com.google.android.as.oss.supericon.aidl;
 
+import android.graphics.Bitmap;
 import com.google.android.as.oss.supericon.aidl.ConversationData;
 import com.google.android.as.oss.supericon.utils.SuperIconErrorCodes;
 
@@ -34,4 +35,11 @@ interface IConversationContentCallback {
    * Called when an error occurs while fetching conversation content.
    */
   void onError(@SuperIconErrorCodes int errorCode, String errorMessage) = 1;
-};
+
+  /**
+   * Called when the screenshot is available.
+   *
+   * @param screenshot The screenshot bitmap.
+   */
+  void onScreenshotResponse(in Bitmap screenshot) = 2;
+}

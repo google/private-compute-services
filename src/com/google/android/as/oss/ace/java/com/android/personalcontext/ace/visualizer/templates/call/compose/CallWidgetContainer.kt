@@ -23,8 +23,10 @@ import android.graphics.drawable.Icon
 import android.service.personalcontext.PersonalContextManager
 import android.service.personalcontext.insight.interaction.InsightEvent
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -34,10 +36,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -52,6 +54,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.Dp
@@ -61,7 +64,6 @@ import com.android.personalcontext.ace.visualizer.templates.LocalInsightEventRep
 import com.android.personalcontext.ace.visualizer.templates.LocalInsightSurfaceClientInfo
 import com.android.personalcontext.ace.visualizer.templates.LocalPublishedContextInsight
 import com.android.personalcontext.ace.visualizer.templates.LocalRenderToken
-import com.android.personalcontext.ace.visualizer.templates.call.LocalCallWidgetBackgrounds
 import com.android.personalcontext.ace.visualizer.templates.call.compose.CallWidgetConstants.DEFAULT_MAX_GENERAL_CARDS_TO_DISPLAY
 import com.android.personalcontext.ace.visualizer.templates.call.data.CallVisualizerDetailedCard
 import com.android.personalcontext.ace.visualizer.templates.call.data.CallVisualizerWidget
@@ -72,10 +74,13 @@ import com.android.personalcontext.ace.visualizer.templates.utils.asTintableIcon
 
 private const val TAG = "CallWidgetContainer"
 
+@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+const val CALL_WIDGET_CONTAINER_TEST_TAG = "call_widget_container"
+
 /** The container for the Magic Cue Call widget. */
 @SuppressLint("FlaggedApi", "NewApi")
 @Composable
-fun CallWidgetContainer(widget: CallVisualizerWidget) {
+internal fun CallWidgetContainer(widget: CallVisualizerWidget) {
   val info = LocalInsightSurfaceClientInfo.current
   var isDisplayingMoreResults by remember { mutableStateOf(widget.ctaDisplayMoreResults == null) }
 
@@ -92,6 +97,7 @@ fun CallWidgetContainer(widget: CallVisualizerWidget) {
     state = lazyListState,
     modifier =
       Modifier.fillMaxWidth()
+        .testTag(CALL_WIDGET_CONTAINER_TEST_TAG)
         .thenIfNotNull(widgetBackground.takeIf { it != Color.Unspecified }) {
           Modifier.background(it)
         }
@@ -128,6 +134,7 @@ fun CallWidgetContainer(widget: CallVisualizerWidget) {
     CallGeneralCardsContainer(
       cards = generalCards,
       numGeneralCardsPerSource = numGeneralCardsPerSource,
+      isLoneGeneralCard = detailedCards.isEmpty() && generalCards.size == 1,
     )
 
     if (widget.ctaDisplayMoreResults != null && !isDisplayingMoreResults) {
@@ -180,7 +187,7 @@ private fun WidgetShowAllResultsButton(
 
   LaunchedEffect(Unit) { reportEvent(InsightEvent.EVENT_SHOW) }
 
-  Button(
+  OutlinedButton(
     modifier =
       Modifier.fillMaxWidth().thenIfNotNull(ctaDisplayMoreResults.contentDescription) {
         Modifier.clearAndSetSemantics { contentDescription = it }
@@ -190,10 +197,11 @@ private fun WidgetShowAllResultsButton(
       reportEvent(InsightEvent.EVENT_USER_TAP)
       onClick()
     },
+    border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline),
     colors =
-      ButtonDefaults.buttonColors(
-        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+      ButtonDefaults.outlinedButtonColors(
+        containerColor = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.primary,
       ),
     contentPadding = PaddingValues(vertical = 10.dp),
   ) {

@@ -220,6 +220,11 @@ abstract class NetworkUsageLogContentModule {
                 .featureNameId(R.string.feature_name_gpps)
                 .descriptionId(R.string.description_bt_log_root_signature)
                 .build(),
+            gppsHttpEntryBuilder
+                .connectionKeyStringId(R.string.url_regex_gpps_mdd_edgedl)
+                .featureNameId(R.string.feature_name_gpps)
+                .descriptionId(R.string.description_gpps_mdd)
+                .build(),
             asiFcEntryBuilder
                 .connectionKeyString(FeatureName.SUSPICIOUS_MESSAGE_ALERT.name())
                 .featureNameId(R.string.feature_name_suspicious_message_alert)
@@ -355,6 +360,15 @@ abstract class NetworkUsageLogContentModule {
                 .packageName(AICORE_PACKAGE_NAME)
                 .connectionKeyString(
                     PcsPrivateInferenceFeatureName.FEATURE_NAME_GBOARD_CONVERSATIONAL_WRITING_TOOLS
+                        .name())
+                .featureNameId(R.string.feature_name_gboard_conversational_writing_tools)
+                .descriptionId(R.string.description_pi_gboard_conversational_writing_tools)
+                .build(),
+            piEntryBuilder
+                .packageName(AICORE_PACKAGE_NAME)
+                .connectionKeyString(
+                    PcsPrivateInferenceFeatureName
+                        .FEATURE_NAME_GBOARD_CONVERSATIONAL_WRITING_TOOLS_V2
                         .name())
                 .featureNameId(R.string.feature_name_gboard_conversational_writing_tools)
                 .descriptionId(R.string.description_pi_gboard_conversational_writing_tools)

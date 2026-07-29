@@ -16,6 +16,7 @@ load("@bazel_rules_android//android:rules.bzl", "android_library")
 
 package(
     default_visibility = [
+        "//java/com/google/android/testing/personalcontext:__subpackages__",
         "//third_party/java/android_app/personalcontext:external",
     ],
 )

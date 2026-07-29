@@ -37,9 +37,11 @@ class GridCardUiDataDecoder @Inject constructor() : CardUiDataDecoder<GridCardUi
 
   override fun ContextInsight.toCardContext(): GridCardUiData {
     val cardInsight = this.toPrototypeInsight<CardInsight>() ?: error("Expected CardInsight")
+    val action = cardInsight.getCardContextAction()
 
     val titleInsight = cardInsight.title as? DisplayInsight
     val mainTitle = titleInsight?.details?.title?.toString()
+    val mainTitleContentDescription = titleInsight?.details?.contentDescription?.toString()
     val mainSubtitle = titleInsight?.details?.subtitle?.toString()
     val statusDisplayInsight = cardInsight.actions as? DisplayInsight
     val gridInsight = cardInsight.body.toPrototypeInsight<InsightGrid>()
@@ -68,11 +70,16 @@ class GridCardUiDataDecoder @Inject constructor() : CardUiDataDecoder<GridCardUi
 
     val titleData =
       if (mainTitle != null || mainSubtitle != null || accessoryData != null) {
-        TitleData(mainTitle = mainTitle, mainSubtitle = mainSubtitle, accessory = accessoryData)
+        TitleData(
+          mainTitle = mainTitle,
+          mainTitleContentDescription = mainTitleContentDescription,
+          mainSubtitle = mainSubtitle,
+          accessory = accessoryData,
+        )
       } else {
         null
       }
 
-    return GridCardUiData(title = titleData, gridItems = gridItems)
+    return GridCardUiData(title = titleData, gridItems = gridItems, action = action)
   }
 }

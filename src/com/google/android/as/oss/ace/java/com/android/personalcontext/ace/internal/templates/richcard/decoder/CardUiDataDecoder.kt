@@ -29,6 +29,7 @@ import com.android.personalcontext.ace.client.prototype.serversideclose.ServerSi
 import com.android.personalcontext.ace.common.DisplayableInsight
 import com.android.personalcontext.ace.common.asDisplayableInsight
 import com.android.personalcontext.ace.internal.templates.richcard.Attribution
+import com.android.personalcontext.ace.internal.templates.richcard.CardContextAction
 import com.android.personalcontext.ace.internal.templates.richcard.CardTitle
 import com.android.personalcontext.ace.internal.templates.richcard.CardUiData
 import com.android.personalcontext.ace.internal.templates.richcard.DeprecatedUiCardContext
@@ -56,6 +57,7 @@ abstract class CardUiDataDecoder<T : DeprecatedUiCardContext> {
     val cardTitle = getCardTitle(titleDisplayableInsight)
     val icon = getCardIcon(titleDisplayableInsight)
     val cardContext = body.toCardContext()
+    val cardContextAction = getCardContextAction()
     val actions = (actions as? InsightCollection)?.toCardActions()
 
     return CardUiData(
@@ -66,6 +68,7 @@ abstract class CardUiDataDecoder<T : DeprecatedUiCardContext> {
       dismissInsight = dismissInsight,
       attribution = attribution,
       cardContext = cardContext,
+      cardContextAction = cardContextAction,
       actions = actions,
     )
   }
@@ -109,7 +112,8 @@ abstract class CardUiDataDecoder<T : DeprecatedUiCardContext> {
 
   /** Extracts the card action details. */
   private fun CardInsight.getCardActionDetails(titleInsight: DisplayableInsight?) =
-    (titleInsight?.originalInsight as? ActionableInsight)?.actionDetails
+    (container as? ActionableInsight)?.actionDetails
+      ?: (titleInsight?.originalInsight as? ActionableInsight)?.actionDetails
 
   /** Extracts the dismiss insight. */
   private fun CardInsight.getDismissInsight(): ServerSideCloseInsight? {
@@ -148,6 +152,14 @@ abstract class CardUiDataDecoder<T : DeprecatedUiCardContext> {
   /** Extracts the card icon. */
   private fun CardInsight.getCardIcon(titleInsight: DisplayableInsight?): Icon? =
     container?.asDisplayableInsight()?.displayDetails?.icon ?: titleInsight?.displayDetails?.icon
+
+  /** Extracts the card context action. */
+  protected fun CardInsight.getCardContextAction(): CardContextAction? =
+    (container as? ActionableInsight)?.let { actionableInsight ->
+      actionableInsight.actionDetails.remoteAction?.let { remoteAction ->
+        CardContextAction(insight = actionableInsight, remoteAction = remoteAction)
+      }
+    }
 
   /**
    * Converts a [ContextInsight] to a [DeprecatedUiCardContext].

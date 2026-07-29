@@ -47,6 +47,7 @@ pcs_dev_and_mpm(
         "//src/com/google/android/as/oss/conversationid",
         "//src/com/google/android/as/oss/dataattribution:prod_modules",  # buildcleaner: keep
         "//src/com/google/android/as/oss/delegatedui:prod_modules",  # buildcleaner: keep
+        "//src/com/google/android/as/oss/featurelauncher:prod_modules",  # buildcleaner: keep
         "//src/com/google/android/as/oss/features/optin:prod_modules",  # buildcleaner: keep
         "//src/com/google/android/as/oss/feedback:prod_modules",  # buildcleaner: keep
         "//src/com/google/android/as/oss/feedback/gateway/service",  # buildcleaner: keep

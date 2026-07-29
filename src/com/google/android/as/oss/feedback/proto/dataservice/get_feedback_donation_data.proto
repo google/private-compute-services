@@ -17,6 +17,7 @@ edition = "2024";
 package com.google.android.as.oss.feedback.api.dataservice;
 
 import "src/com/google/android/as/oss/feedback/proto/feedback_tag_data.proto";
+import "src/com/google/android/as/oss/feedback/proto/gateway/blueflax.proto";
 import "src/com/google/android/as/oss/feedback/proto/gateway/pixel_apex_api.proto";
 import "src/com/google/android/as/oss/feedback/proto/gateway/quartz_log.proto";
 import "src/com/google/android/as/oss/feedback/proto/gateway/spoon.proto";
@@ -55,6 +56,9 @@ message GetFeedbackDonationDataResponse {
 
   // The optional field that represents the cuj of Quartz.
   feedback.api.gateway.QuartzCUJ quartz_cuj = 7;
+
+  // The optional field that represents the cuj of Blueflax.
+  feedback.api.gateway.BlueflaxCUJ blueflax_cuj = 9;
 
   // DEPRECATED: This field is no longer supported.
   repeated string ground_truth_options = 8 [deprecated = true];

@@ -38,14 +38,22 @@ import com.android.personalcontext.ace.internal.templates.richcard.CardUiData
 import com.android.personalcontext.ace.internal.templates.richcard.common.CardAppContextBlock
 import com.android.personalcontext.ace.internal.templates.richcard.common.CardTemplateLayout
 import com.android.personalcontext.ace.internal.templates.richcard.renderer.CardRenderer
+import com.android.personalcontext.ace.visualizer.compat.EnergyEffectsAnimationCompat
 import javax.inject.Inject
 
 /** [CardRenderer] for Calendar cards. */
-class CalendarCardRenderer @Inject internal constructor() :
+class CalendarCardRenderer
+@Inject
+internal constructor(private val energyEffectsAnimationCompat: EnergyEffectsAnimationCompat) :
   CardRenderer<DeprecatedUiCalendarCardContext> {
+
   @Composable
   override fun Render(cardUiData: CardUiData<DeprecatedUiCalendarCardContext>, modifier: Modifier) {
-    CardTemplateLayout(cardUiData = cardUiData, modifier = modifier) {
+    CardTemplateLayout(
+      cardUiData = cardUiData,
+      energyEffectsAnimationCompat = energyEffectsAnimationCompat,
+      modifier = modifier,
+    ) {
       val attribution = cardUiData.attribution
       val cardContext = cardUiData.cardContext
 

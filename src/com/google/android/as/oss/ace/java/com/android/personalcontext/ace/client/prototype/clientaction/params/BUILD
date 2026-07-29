@@ -38,6 +38,7 @@ android_library(
     ],
     deps = [
         ":params",
+        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/clientaction/params/blueflax",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/clientaction/params/fullscreenrequest",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/clientaction/params/hidekeyboard",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/clientaction/params/sharelivelocation",

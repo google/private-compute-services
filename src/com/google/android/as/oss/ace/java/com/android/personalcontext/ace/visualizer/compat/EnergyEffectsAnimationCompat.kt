@@ -46,7 +46,7 @@ interface EnergyEffectsAnimationCompat {
    */
   @Composable
   fun Modifier.applyEnergyEffectsAnimation(geminiAnimationSpec: GeminiAnimationSpec): Modifier =
-    applyEnergyEffectsAnimation(geminiAnimationSpec, fallback = { this })
+    applyEnergyEffectsAnimation(geminiAnimationSpec = geminiAnimationSpec, fallback = { this })
 
   /**
    * Returns a themed [Drawable] that applies the effects animation and starts the animation

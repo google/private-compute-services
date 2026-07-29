@@ -154,6 +154,7 @@ android_library(
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer/compat:theme_compat",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer/templates",
         "//third_party/java/androidx/compose/animation/animation_core",
+        "//third_party/java/androidx/compose/foundation",
         "//third_party/java/androidx/compose/material3",
         "//third_party/java/androidx/compose/runtime",
         "//third_party/java/androidx/compose/ui",

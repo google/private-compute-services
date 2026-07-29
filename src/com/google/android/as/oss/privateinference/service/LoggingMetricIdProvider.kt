@@ -17,7 +17,6 @@
 package com.google.android.`as`.oss.privateinference.service
 
 import com.google.android.`as`.oss.logging.PcsStatsEnums.CountMetricId
-import com.google.android.`as`.oss.logging.PcsStatsEnums.ValueMetricId
 import com.google.android.`as`.oss.privateinference.service.api.proto.PcsPrivateInferenceFeatureName
 import io.grpc.Status.Code
 import javax.inject.Inject
@@ -35,14 +34,10 @@ constructor(
   private val featureNameToFailureCountMetricIdMap:
     @JvmSuppressWildcards
     Map<PcsPrivateInferenceFeatureName, CountMetricId>,
-  @FeatureNameToSuccessLatencyValueMetricIdMap
-  private val featureNameToSuccessLatencyValueMetricIdMap:
+  @FeatureNameToCountMetricIdMap
+  private val featureNameToCountMetricIdMap:
     @JvmSuppressWildcards
-    Map<PcsPrivateInferenceFeatureName, ValueMetricId>,
-  @FeatureNameToFailureLatencyValueMetricIdMap
-  private val featureNameToFailureLatencyValueMetricIdMap:
-    @JvmSuppressWildcards
-    Map<PcsPrivateInferenceFeatureName, ValueMetricId>,
+    Map<PcsPrivateInferenceFeatureName, CountMetricId>,
 ) {
   fun getInferenceSuccessCountMetricId(featureName: PcsPrivateInferenceFeatureName): CountMetricId =
     featureNameToSuccessCountMetricIdMap.getOrDefault(
@@ -62,20 +57,10 @@ constructor(
       CountMetricId.PCS_PI_ERROR_UNSPECIFIED,
     )
 
-  fun getInferenceSuccessLatencyValueMetricId(
-    featureName: PcsPrivateInferenceFeatureName
-  ): ValueMetricId =
-    featureNameToSuccessLatencyValueMetricIdMap.getOrDefault(
+  fun getInferenceCountMetricId(featureName: PcsPrivateInferenceFeatureName): CountMetricId =
+    featureNameToCountMetricIdMap.getOrDefault(
       featureName,
-      ValueMetricId.PCS_PI_REQUEST_LATENCY_MS,
-    )
-
-  fun getInferenceFailureLatencyValueMetricId(
-    featureName: PcsPrivateInferenceFeatureName
-  ): ValueMetricId =
-    featureNameToFailureLatencyValueMetricIdMap.getOrDefault(
-      featureName,
-      ValueMetricId.PCS_PI_REQUEST_FAILURE_LATENCY_MS,
+      CountMetricId.PCS_PI_UNKNOWN_FEATURE_COUNT,
     )
 
   private companion object {

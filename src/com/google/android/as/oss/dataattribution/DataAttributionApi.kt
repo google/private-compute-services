@@ -59,7 +59,7 @@ object DataAttributionApi {
     attributionDialogData: AttributionDialogData,
     attributionChipData: AttributionChipData?,
     sourceDeepLinks: Array<PendingIntent?>?,
-    settingsIntent: PendingIntent? = null,
+    settingsIntent: PendingIntent?,
   ): Intent {
     require(
       sourceDeepLinks == null || sourceDeepLinks.size == attributionDialogData.attributionsCount

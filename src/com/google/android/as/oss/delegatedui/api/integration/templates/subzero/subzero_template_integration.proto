@@ -18,7 +18,6 @@ package com.google.android.as.oss.delegatedui.api.integration.templates.subzero;
 
 import "src/com/google/android/as/oss/delegatedui/api/integration/templates/ui_id_token.proto";
 
-
 option java_outer_classname = "SubzeroTemplateIntegration";
 option java_package = "com.google.android.as.oss.delegatedui.api.integration.templates.subzero";
 
@@ -50,28 +49,21 @@ message Reminder {
 
   string summary = 10;
 
-  repeated ActionData action_data = 11
-     ;
+  repeated ActionData action_data = 11;
 }
 
 message FunnelStats {
-  repeated Candidate retrieved_candidates = 1
-     ;
+  repeated Candidate retrieved_candidates = 1;
 
-  repeated Candidate future_candidates = 2
-     ;
+  repeated Candidate future_candidates = 2;
 
-  repeated Candidate quality_candidates = 3
-     ;
+  repeated Candidate quality_candidates = 3;
 
-  repeated Candidate deduped_candidates = 4
-     ;
+  repeated Candidate deduped_candidates = 4;
 
-  repeated Candidate ranked_candidiates = 5
-     ;
+  repeated Candidate ranked_candidiates = 5;
 
-  repeated Candidate generated_candidates = 6
-     ;
+  repeated Candidate generated_candidates = 6;
 }
 
 message Candidate {

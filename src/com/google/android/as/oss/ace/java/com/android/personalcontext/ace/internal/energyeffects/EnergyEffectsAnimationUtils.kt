@@ -21,7 +21,9 @@ package com.android.personalcontext.ace.internal.energyeffects
 import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +35,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import com.google.android.libraries.material.compose.effect.ExperimentalMaterial3EffectApi
+import com.google.android.libraries.material.compose.energy.getEnergyColors
 import com.google.android.libraries.material.gm3.color.tokens.R
 import com.google.android.shaderlib.energyeffects.BorderLightConfig
 import com.google.android.shaderlib.energyeffects.DotsConfig
@@ -41,6 +45,8 @@ import com.google.android.shaderlib.energyeffects.EnergyShaderConfig
 import com.google.android.shaderlib.energyeffects.LayoutConfig
 import com.google.android.shaderlib.energyeffects.animation.KeyframeSequence
 import com.google.android.shaderlib.energyeffects.animation.buildTransitions
+import com.google.android.shaderlib.energyeffects.builder.CardAnimationDirection
+import com.google.android.shaderlib.energyeffects.builder.DefaultCardConfig
 import com.google.android.shaderlib.energyeffects.builder.DefaultChipConfig
 import com.google.android.shaderlib.energyeffects.builder.copy
 import com.google.android.shaderlib.energyeffects.colors.EnergyColors
@@ -49,14 +55,18 @@ import com.google.android.shaderlib.energyeffects.shader.ShaderUniforms
 import com.google.android.shaderlib.energyeffects.utils.CornerRadii
 import com.google.android.shaderlib.energyeffects.utils.Margins
 import com.google.android.shaderlib.energyeffects.view.EnergyShaderDrawable
+import com.google.ux.material.libmonet.energy.EnergyColors as MonetEnergyColors
+import com.google.ux.material.libmonet.energy.EnergyColors.BaseColorRole
 
 /** Helper utilities for rendering and controlling the energy shader effects animations. */
 object EnergyEffectsAnimationUtils {
+  private const val DEFAULT_CARD_CORNER_RADIUS_DP = 20f
 
   /**
    * Applies the energy effects animation to the composable [Modifier].
    *
    * @param geminiAnimationSpec The specific spec of the animation to render.
+   * @param timeSupplierMs A provider for system time, useful to freeze animations in tests.
    */
   @Composable
   fun Modifier.applyEnergyEffectsAnimation(geminiAnimationSpec: GeminiAnimationSpec): Modifier {
@@ -72,7 +82,59 @@ object EnergyEffectsAnimationUtils {
         }
       },
       mainExecutor = ContextCompat.getMainExecutor(LocalContext.current),
+      timeSupplierMs = geminiAnimationSpec.timeSupplierMs,
+      timeOffsetMs = geminiAnimationSpec.timeOffsetMs,
     )
+  }
+
+  /**
+   * Creates a themed [GeminiAnimationSpec] for sage cards.
+   *
+   * @param colorScheme The active [ColorScheme].
+   * @param backgroundColor The base background color for the sage card layout.
+   */
+  @Composable
+  fun createSageCardSpec(
+    colorScheme: ColorScheme,
+    backgroundColor: Color,
+    timeSupplierMs: () -> Long = { System.currentTimeMillis() },
+    timeOffsetMs: Long? = null,
+  ): GeminiAnimationSpec {
+    return remember(colorScheme, backgroundColor, timeSupplierMs, timeOffsetMs) {
+      val baseColor = backgroundColor.toArgb()
+      val primaryColor = colorScheme.primary.toArgb()
+      val secondaryColor = colorScheme.secondary.toArgb()
+      val tertiaryColor = colorScheme.tertiary.toArgb()
+      val surfaceColor = colorScheme.surface.toArgb()
+
+      val colors =
+        MonetEnergyColors.withAccents(
+          baseColor,
+          primaryColor,
+          secondaryColor,
+          tertiaryColor,
+          surfaceColor,
+          false,
+          BaseColorRole.SURFACE,
+        )
+
+      val energyColors =
+        intArrayOf(colors.getOrElse(0) { baseColor }, colors.getOrElse(1) { baseColor })
+
+      val cardConfig =
+        DefaultCardConfig(
+          surfaceColor = baseColor,
+          energyColors = energyColors,
+          animationDirection = CardAnimationDirection.SLIDE_UP,
+        )
+
+      GeminiAnimationSpec(
+        config = cardConfig.initialConfig(),
+        stateMap = cardConfig.createEffectsBuilder().buildKeyframeSequences(),
+        timeSupplierMs = timeSupplierMs,
+        timeOffsetMs = timeOffsetMs,
+      )
+    }
   }
 
   /**
@@ -125,41 +187,170 @@ object EnergyEffectsAnimationUtils {
   data class GeminiAnimationSpec(
     val config: EnergyShaderConfig,
     val stateMap: Map<EffectState, KeyframeSequence>,
+    val timeSupplierMs: () -> Long = { System.currentTimeMillis() },
+    val timeOffsetMs: Long? = null,
   )
 
+  /**
+   * Creates a themed [GeminiAnimationSpec] for chips.
+   *
+   * @param cornerRadius The corner radius of the chip boundary. If null, the default pill shape
+   *   corner radii is inherited.
+   * @param density The screen density.
+   * @param colorScheme The active [ColorScheme].
+   * @param context The [Context] to resolve system theme colors.
+   */
   @Composable
   fun createChipSpec(
-    cornerRadius: CornerRadius,
+    cornerRadius: CornerRadius?,
     density: Float,
     colorScheme: ColorScheme,
     context: Context,
+    strokeColor: Color,
+    backgroundColor: Color,
   ): GeminiAnimationSpec {
-    return remember(cornerRadius, density, colorScheme, context) {
-      val resId = R.color.gm3_sys_color_dynamic_light_primary
+    val isDark = isSystemInDarkTheme()
+    return remember(
+      cornerRadius,
+      density,
+      colorScheme,
+      context,
+      strokeColor,
+      backgroundColor,
+      isDark,
+    ) {
+      val resId =
+        if (isDark) {
+          R.color.gm3_sys_color_dynamic_dark_surface_container
+        } else {
+          R.color.gm3_sys_color_dynamic_light_surface_container
+        }
       val colors = EnergyColors.from(resId, context)
 
       val energyColor1 = colors[0] // middle
       val energyColor2 = colors[1] // end
+      val cornerRadii = cornerRadius?.let { CornerRadii(it.x / density) }
       val chipConfig =
         MessageInlineChipConfig(
-          surfaceColor = colorScheme.surface.toArgb(),
+          surfaceColor = colorScheme.surfaceContainer.toArgb(),
           energyColors = intArrayOf(energyColor1, energyColor2),
-          cornerRadii = CornerRadii(cornerRadius.x / density),
+          cornerRadii = cornerRadii,
+          strokeColor = strokeColor.toArgb(),
+          backgroundColor = backgroundColor.toArgb(),
+          surfaceColorCrystallized = colorScheme.surface.toArgb(),
         )
       val builder = chipConfig.createEffectsBuilder(null)
       GeminiAnimationSpec(chipConfig.chipEntryConfig(), builder.buildKeyframeSequences())
     }
   }
 
+  /**
+   * Creates a themed [GeminiAnimationSpec] for cards derived from a base color.
+   *
+   * @param baseColor The base color from which the energy colors are derived.
+   * @param colorScheme The active [ColorScheme]. Defaults to [MaterialTheme.colorScheme].
+   * @param cornerRadiusDp The corner radius of the card boundary in DP.
+   * @param cardPaddingDp The card padding in DP.
+   * @param spreadDp The spread of the card boundary in DP. Default is 20 DP.
+   */
+  @OptIn(ExperimentalMaterial3EffectApi::class)
   @Composable
   fun createCardSpec(
-    cornerRadius: CornerRadius,
+    baseColor: Color,
+    colorScheme: ColorScheme = MaterialTheme.colorScheme,
+    cornerRadiusDp: Int,
+    cardPaddingDp: Int,
+    spreadDp: Int = 20,
+  ): GeminiAnimationSpec {
+    val energyColors = deriveEnergyColors(baseColor, colorScheme)
+    val glowColorMidArgb = energyColors[0].toArgb()
+    val glowColorEndArgb = energyColors[1].toArgb()
+    val cardConfig =
+      object :
+        DefaultCardConfig(
+          surfaceColor = Color.Transparent.toArgb(),
+          energyColors = intArrayOf(glowColorMidArgb, glowColorEndArgb),
+        ) {
+        override fun cardBaseConfig(): EnergyShaderConfig {
+          return super.cardBaseConfig().copy {
+            layout = layout.copy {
+              cornerRadii = CornerRadii(cornerRadiusDp.toFloat())
+              spread = spreadDp.toFloat()
+              margins = Margins(cardPaddingDp.toFloat())
+            }
+            panel =
+              this.getOrCreatePanel().copy {
+                color = Color.Transparent.toArgb()
+                alpha = 0f
+              }
+          }
+        }
+      }
+    val builder = cardConfig.createEffectsBuilder(null)
+    return GeminiAnimationSpec(cardConfig.cardEntryConfig(), builder.buildKeyframeSequences())
+  }
+
+  /**
+   * Creates a themed [GeminiAnimationSpec] for cards with a single glow color. Will be removed
+   * after all usages are migrated to the baseColor version.
+   *
+   * @param glowColor The color of the glow effect.
+   * @param cornerRadiusDp The corner radius of the card boundary in DP.
+   * @param cardPaddingDp The card padding in DP.
+   * @param spreadDp The spread of the card boundary in DP. Default is 20 DP.
+   */
+  @Deprecated("Use the baseColor version instead.")
+  fun createCardSpecLegacy(
+    glowColor: Color,
+    cornerRadiusDp: Int,
+    cardPaddingDp: Int,
+    spreadDp: Int = 20,
+  ): GeminiAnimationSpec {
+    val glowColorArgb = glowColor.toArgb()
+    val cardConfig =
+      object :
+        DefaultCardConfig(
+          surfaceColor = Color.Transparent.toArgb(),
+          energyColors = intArrayOf(glowColorArgb, glowColorArgb),
+        ) {
+        override fun cardBaseConfig(): EnergyShaderConfig {
+          return super.cardBaseConfig().copy {
+            layout = layout.copy {
+              cornerRadii = CornerRadii(cornerRadiusDp.toFloat())
+              spread = spreadDp.toFloat()
+              margins = Margins(cardPaddingDp.toFloat())
+            }
+            panel =
+              this.getOrCreatePanel().copy {
+                color = Color.Transparent.toArgb()
+                alpha = 0f
+              }
+          }
+        }
+      }
+    val builder = cardConfig.createEffectsBuilder(null)
+    return GeminiAnimationSpec(cardConfig.cardEntryConfig(), builder.buildKeyframeSequences())
+  }
+
+  /**
+   * Creates a themed [GeminiAnimationSpec] for cards.
+   *
+   * @param cornerRadius The corner radius of the card boundary. If null, the default configuration
+   *   value (20dp) is inherited.
+   * @param density The screen density.
+   * @param glowColor The color of the glow effect.
+   */
+  @Deprecated("Use createCardSpec instead.")
+  @Composable
+  fun createCardSpecLegacy(
+    cornerRadius: CornerRadius?,
     density: Float,
     glowColor: Color,
   ): GeminiAnimationSpec {
     return remember(cornerRadius, density, glowColor) {
       val glowColorArgb = glowColor.toArgb()
-      createCardAnimationSpec(cornerRadius.x, glowColorArgb)
+      val cornerRadiusDp = cornerRadius?.x ?: DEFAULT_CARD_CORNER_RADIUS_DP
+      createCardAnimationSpec(cornerRadiusDp, glowColorArgb)
     }
   }
 
@@ -234,20 +425,69 @@ object EnergyEffectsAnimationUtils {
 
     return GeminiAnimationSpec(config, stateMap)
   }
+
+  /**
+   * Derives energy colors from a base color, remembering the result across recompositions.
+   *
+   * @param baseColor The base color from which the energy colors are derived.
+   * @param colorScheme The active [ColorScheme].
+   * @return An array of derived energy colors.
+   */
+  @OptIn(ExperimentalMaterial3EffectApi::class)
+  @Composable
+  fun deriveEnergyColors(baseColor: Color, colorScheme: ColorScheme): Array<Color> {
+    return remember(
+      baseColor,
+      colorScheme.primary,
+      colorScheme.secondary,
+      colorScheme.tertiary,
+      colorScheme.surface,
+    ) {
+      getEnergyColors(baseColor, colorScheme)
+    }
+  }
 }
 
 class MessageInlineChipConfig(
   surfaceColor: Int? = null,
   energyColors: IntArray? = null,
   private val cornerRadii: CornerRadii? = null,
-) : DefaultChipConfig(surfaceColor, energyColors) {
+  private val strokeColor: Int? = null,
+  private val backgroundColor: Int? = null,
+  surfaceColorCrystallized: Int? = null,
+) :
+  DefaultChipConfig(
+    surfaceColor = surfaceColor,
+    energyColors = energyColors,
+    surfaceColorCrystallized = surfaceColorCrystallized,
+  ) {
   override fun chipBaseConfig(): EnergyShaderConfig {
     return super.chipBaseConfig().copy {
       cornerRadii?.let {
         layout = layout.copy {
           cornerRadii = it
+          spread = 4f
           margins = Margins(0f)
         }
+      }
+    }
+  }
+
+  override fun chipCrystallizedConfig(): EnergyShaderConfig {
+    return super.chipCrystallizedConfig().copy {
+      backgroundColor?.let { bgColor ->
+        panel =
+          getOrCreatePanel().copy {
+            color = bgColor
+            alpha = 1f
+          }
+      }
+      strokeColor?.let { sColor ->
+        borderLight =
+          getOrCreateBorderLight().copy {
+            color = sColor
+            alpha = 1f
+          }
       }
     }
   }

@@ -19,6 +19,7 @@
 package com.android.personalcontext.ace.visualizer.templates.call.compose
 
 import android.annotation.SuppressLint
+import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -42,18 +43,21 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.android.personalcontext.ace.visualizer.templates.LocalInsightSurfaceClientInfo
-import com.android.personalcontext.ace.visualizer.templates.call.LocalCallWidgetBackgrounds
 import com.android.personalcontext.ace.visualizer.templates.call.data.CallVisualizerWidget
 import kotlin.collections.sumOf
 
 private const val TAG = "FullScreenCallWidget"
 
+@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+const val FULL_SCREEN_CALL_WIDGET_TEST_TAG = "full_screen_call_widget"
+
 /** The container for the Magic Cue Call widget. */
 @SuppressLint("FlaggedApi", "NewApi")
 @Composable
-fun FullScreenCallWidget(widget: CallVisualizerWidget) {
+internal fun FullScreenCallWidget(widget: CallVisualizerWidget) {
   val info = LocalInsightSurfaceClientInfo.current
   var isDisplayingMoreResults by remember { mutableStateOf(widget.ctaDisplayMoreResults == null) }
 
@@ -66,7 +70,8 @@ fun FullScreenCallWidget(widget: CallVisualizerWidget) {
   LazyColumn(
     state = lazyListState,
     modifier =
-      Modifier.thenIfNotNull(widgetBackground.takeIf { it != Color.Unspecified }) {
+      Modifier.testTag(FULL_SCREEN_CALL_WIDGET_TEST_TAG)
+        .thenIfNotNull(widgetBackground.takeIf { it != Color.Unspecified }) {
           Modifier.background(it)
         }
         .scrollbar(
@@ -95,6 +100,7 @@ fun FullScreenCallWidget(widget: CallVisualizerWidget) {
     CallGeneralCardsContainer(
       cards = generalCards,
       numGeneralCardsPerSource = Int.MAX_VALUE,
+      isLoneGeneralCard = detailedCards.isEmpty() && generalCards.size == 1,
       useCardContainer = true,
       horizontalPadding = 16.dp,
     )
@@ -103,6 +109,7 @@ fun FullScreenCallWidget(widget: CallVisualizerWidget) {
       item {
         Spacer(modifier = Modifier.height(8.dp))
         AiDisclaimer(aiDisclaimer)
+        Spacer(modifier = Modifier.height(24.dp))
       }
     }
   }

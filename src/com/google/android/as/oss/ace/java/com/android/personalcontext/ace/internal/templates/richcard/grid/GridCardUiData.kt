@@ -17,18 +17,23 @@
 package com.android.personalcontext.ace.internal.templates.richcard.grid
 
 import com.android.personalcontext.ace.common.InsightGridItem.Span
+import com.android.personalcontext.ace.internal.templates.richcard.CardContextAction
 import com.android.personalcontext.ace.internal.templates.richcard.CardType
 import com.android.personalcontext.ace.internal.templates.richcard.DeprecatedUiCardContext
 
 /** Represents the non-semantic UI data for a grid card. */
-data class GridCardUiData(val title: TitleData? = null, val gridItems: List<GridCardItem>? = null) :
-  DeprecatedUiCardContext {
+data class GridCardUiData(
+  val title: TitleData? = null,
+  val gridItems: List<GridCardItem>? = null,
+  val action: CardContextAction? = null,
+) : DeprecatedUiCardContext {
   override val cardType: CardType = CardType.RICH_CARD_GRID
 }
 
 /** Title data for the grid card. At least one field must be non-null for it to show. */
 data class TitleData(
   val mainTitle: String? = null,
+  val mainTitleContentDescription: String? = null,
   val mainSubtitle: String? = null,
   val accessory: AccessoryData? = null,
 ) {

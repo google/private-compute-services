@@ -16,6 +16,7 @@
 
 package com.google.android.`as`.oss.privateinference.library.oakutil
 
+import android.os.Build
 import com.google.android.`as`.oss.common.ExecutorAnnotations.PiExecutorQualifier
 import com.google.android.`as`.oss.logging.PcsStatsEnums.CountMetricId
 import com.google.android.`as`.oss.logging.PcsStatsEnums.ValueMetricId
@@ -36,8 +37,10 @@ import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.oak.client.grpc.StreamObserverSessionClient
 import com.google.privacy.ppn.proto.PrivacyPassTokenData
 import com.google.protobuf.ByteString
+import com.google.search.mdi.privatearatea.proto.androidDeviceMetadata
 import com.google.search.mdi.privatearatea.proto.androidKeyStoreAttestationEvidence
 import com.google.search.mdi.privatearatea.proto.anonymousTokenRequest
+import com.google.search.mdi.privatearatea.proto.clientMetadata
 import com.google.search.mdi.privatearatea.proto.deviceAttestationRequest
 import com.google.search.mdi.privatearatea.proto.pcsPrivateArateaRequest
 import io.grpc.Status
@@ -63,6 +66,7 @@ internal constructor(
   private val stubFactory: PrivateInferenceServiceStubFactory,
   private val deviceAttestationGenerator: DeviceAttestationGenerator,
   private val deviceAttestationFlag: DeviceAttestationFlag,
+  private val clientMetadataFlag: ClientMetadataFlag,
   private val arateaAuthFlag: ArateaAuthFlag,
   private val bsaArateaTokenProvider: BsaTokenProvider<@JvmSuppressWildcards ArateaToken>,
   private val bsaCacheableArateaTokenProvider:
@@ -128,6 +132,7 @@ internal constructor(
                 wrapped = sessionStreamObserver,
                 deviceAttestationGenerator = deviceAttestationGenerator,
                 deviceAttestationFlag = deviceAttestationFlag,
+                clientMetadataFlag = clientMetadataFlag,
                 arateaAuthFlag = arateaAuthFlag,
                 timers = timers,
                 backgroundExecutor = backgroundExecutor,
@@ -156,6 +161,7 @@ internal constructor(
     private val wrapped: StreamObserverSessionClient.OakSessionStreamObserver,
     private val deviceAttestationGenerator: DeviceAttestationGenerator,
     private val deviceAttestationFlag: DeviceAttestationFlag,
+    private val clientMetadataFlag: ClientMetadataFlag,
     private val arateaAuthFlag: ArateaAuthFlag,
     private val timers: Timers,
     private val backgroundExecutor: ListeningExecutorService,
@@ -245,6 +251,13 @@ internal constructor(
                   anonymousTokenRequest = anonymousTokenRequest {
                     anonymousToken = ByteString.copyFrom(token.toByteArray())
                     encodedExtensions = ByteString.copyFromUtf8(token.encodedExtensions)
+                    if (clientMetadataFlag.enabled()) {
+                      clientMetadata = clientMetadata {
+                        androidDeviceMetadata = androidDeviceMetadata {
+                          manufacturer = Build.MANUFACTURER
+                        }
+                      }
+                    }
                   }
                 }
                 .toByteString()

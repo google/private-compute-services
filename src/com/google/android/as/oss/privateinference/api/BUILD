@@ -24,16 +24,46 @@ package(default_visibility = [
 ])
 
 proto_library(
+    name = "client_metadata_proto",
+    srcs = ["client_metadata.proto"],
+    deps = [
+        "//third_party/protobuf:cpp_features_proto",
+    ],
+)
+
+cc_proto_library(
+    name = "client_metadata_cc_proto",
+    deps = [":client_metadata_proto"],
+)
+
+java_proto_library(
+    name = "client_metadata_java_proto",
+    deps = [":client_metadata_proto"],
+)
+
+java_lite_proto_library(
+    name = "client_metadata_java_proto_lite",
+    deps = [":client_metadata_proto"],
+)
+
+kt_jvm_lite_proto_library(
+    name = "client_metadata_kt_proto_lite",
+    deps = [":client_metadata_proto"],
+)
+
+proto_library(
     name = "anonymous_token_request_proto",
     srcs = ["anonymous_token_request.proto"],
     deps = [
         "",
+        ":client_metadata_proto",
         "//third_party/protobuf:cpp_features_proto",
     ],
 )
 
 cc_proto_library(
     name = "anonymous_token_request_cc_proto",
+    visibility = ["//visibility:public"],
     deps = [":anonymous_token_request_proto"],
 )
 

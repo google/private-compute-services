@@ -397,7 +397,7 @@ private fun TemplateRendererScope.MergedChipsRow(
   chipBackgroundColor: Color,
 ) {
   Row(
-    modifier = modifier.wrapContentWidth().heightIn(48.dp).padding(vertical = 4.dp),
+    modifier = modifier.wrapContentWidth().padding(4.dp),
     horizontalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.End),
     verticalAlignment = Alignment.Bottom,
   ) {
@@ -595,7 +595,7 @@ private fun BugleOutlinedButton(
       modifier
         .clip(shape)
         .widthIn(min = 30.dp, max = 320.dp)
-        .heightIn(min = 40.dp)
+        .heightIn(min = Constants.MinHeight)
         .background(color = chipBackgroundColor)
         .combinedClickable(
           onClick = chipOnClick,

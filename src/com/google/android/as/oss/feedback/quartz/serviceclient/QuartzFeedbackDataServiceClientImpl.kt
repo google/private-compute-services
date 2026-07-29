@@ -269,6 +269,34 @@ internal constructor(
             isSuppressDuplicate =
               donationData.quartzDataDonationV2.quartzModelData.isSuppressDuplicate,
           )
+        } else if (
+          donationData.hasQuartzDataDonationV2() &&
+            donationData.quartzDataDonationV2.hasQuartzModelData() &&
+            quartzCuj == QuartzCUJ.QUARTZ_CUJ_ADVANCED_ORGANIZER
+        ) {
+          QuartzModelData(
+            modelInfo = donationData.quartzDataDonationV2.quartzModelData.modelInfo,
+            classificationMethod =
+              donationData.quartzDataDonationV2.quartzModelData.classificationMethod,
+            classificationBertCategoryResult =
+              donationData.quartzDataDonationV2.quartzModelData.classificationBertCategoryResult,
+            classificationBertCategoryScore =
+              donationData.quartzDataDonationV2.quartzModelData.classificationBertCategoryScore,
+            classificationCategory =
+              donationData.quartzDataDonationV2.quartzModelData.classificationCategory,
+            classificationDefaultCategoryResult =
+              donationData.quartzDataDonationV2.quartzModelData.classificationDefaultCategoryResult,
+            defaultCategoryCorrectionThreshold =
+              donationData.quartzDataDonationV2.quartzModelData.defaultCategoryCorrectionThreshold,
+            isSuppressDuplicate =
+              donationData.quartzDataDonationV2.quartzModelData.isSuppressDuplicate,
+            finalDecisionClassifierType =
+              donationData.quartzDataDonationV2.quartzModelData.finalDecisionClassifierType,
+            naihResult = donationData.quartzDataDonationV2.quartzModelData.naihResult,
+            naihCategory = donationData.quartzDataDonationV2.quartzModelData.naihCategory,
+            extraIdentifiedResults =
+              donationData.quartzDataDonationV2.quartzModelData.extraIdentifiedResultsList,
+          )
         } else {
           null
         },

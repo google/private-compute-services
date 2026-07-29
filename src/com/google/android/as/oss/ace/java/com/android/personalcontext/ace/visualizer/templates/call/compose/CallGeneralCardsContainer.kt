@@ -76,7 +76,6 @@ import com.android.personalcontext.ace.visualizer.R
 import com.android.personalcontext.ace.visualizer.templates.LocalInsightEventReporter
 import com.android.personalcontext.ace.visualizer.templates.LocalPublishedContextInsight
 import com.android.personalcontext.ace.visualizer.templates.LocalRenderToken
-import com.android.personalcontext.ace.visualizer.templates.call.LocalCallWidgetBackgrounds
 import com.android.personalcontext.ace.visualizer.templates.call.data.CallVisualizerGeneralCard
 import com.android.personalcontext.ace.visualizer.templates.utils.IconOrImage
 import com.android.personalcontext.ace.visualizer.templates.utils.TintableIcon
@@ -92,6 +91,7 @@ private val EXPAND_ICON_SIZE = EXPAND_ICON_CONTENT_SIZE + (EXPAND_ICON_PADDING *
 fun LazyListScope.CallGeneralCardsContainer(
   cards: List<List<CallVisualizerGeneralCard>>,
   numGeneralCardsPerSource: Int,
+  isLoneGeneralCard: Boolean = false,
   useCardContainer: Boolean = false,
   horizontalPadding: Dp = 0.dp,
 ) {
@@ -106,10 +106,19 @@ fun LazyListScope.CallGeneralCardsContainer(
     val isLastCard = i == generalCardsFlattened.size - 1
 
     if (!isFirstCard) {
-      HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
+      val cardBackground = LocalCallWidgetBackgrounds.current.cardBackground
+      val containerColor =
+        if (cardBackground != Color.Unspecified) cardBackground else Color.Transparent
+
+      HorizontalDivider(
+        modifier = Modifier.background(containerColor).padding(horizontal = horizontalPadding),
+        color = MaterialTheme.colorScheme.outlineVariant,
+        thickness = 1.dp,
+      )
     }
     CallGeneralCardContainer(
       card = generalCard,
+      isLoneGeneralCard = isLoneGeneralCard,
       isFirstCard = isFirstCard,
       isLastCard = isLastCard,
       useCardContainer = useCardContainer,
@@ -121,6 +130,7 @@ fun LazyListScope.CallGeneralCardsContainer(
 @Composable
 private fun CallGeneralCardContainer(
   card: CallVisualizerGeneralCard,
+  isLoneGeneralCard: Boolean,
   isFirstCard: Boolean,
   isLastCard: Boolean,
   useCardContainer: Boolean,
@@ -141,16 +151,28 @@ private fun CallGeneralCardContainer(
           bottomEnd = if (isLastCard) 24.dp else 0.dp,
         ),
     ) {
-      CallGeneralCardContent(card = card, horizontalPadding = horizontalPadding)
+      CallGeneralCardContent(
+        card = card,
+        isLoneGeneralCard = isLoneGeneralCard,
+        horizontalPadding = horizontalPadding,
+      )
     }
   } else {
-    CallGeneralCardContent(card = card, horizontalPadding = horizontalPadding)
+    CallGeneralCardContent(
+      card = card,
+      isLoneGeneralCard = isLoneGeneralCard,
+      horizontalPadding = horizontalPadding,
+    )
   }
 }
 
 /** Layout for a single general card. */
 @Composable
-private fun CallGeneralCardContent(card: CallVisualizerGeneralCard, horizontalPadding: Dp) {
+private fun CallGeneralCardContent(
+  card: CallVisualizerGeneralCard,
+  isLoneGeneralCard: Boolean,
+  horizontalPadding: Dp,
+) {
   // Metrics logging START
   val context = LocalContext.current
   val insightEventReporter = LocalInsightEventReporter.current
@@ -182,7 +204,7 @@ private fun CallGeneralCardContent(card: CallVisualizerGeneralCard, horizontalPa
 
   // Metrics logging END
 
-  var isExpanded by rememberSaveable { mutableStateOf(false) }
+  var isExpanded by rememberSaveable { mutableStateOf(isLoneGeneralCard) }
 
   Column(
     modifier =
@@ -281,7 +303,7 @@ private fun CallGeneralCardContent(card: CallVisualizerGeneralCard, horizontalPa
           )
         }
         AnimatedVisibility(visible = isExpanded) {
-          Spacer(modifier = Modifier.height(4.dp))
+          Spacer(modifier = Modifier.height(16.dp))
 
           Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             card.originalDataSource?.let { dataSource ->
@@ -331,7 +353,7 @@ private fun ExpandIcon(isExpanded: Boolean) {
 
   Box(
     modifier =
-      Modifier.background(color = MaterialTheme.colorScheme.outlineVariant, shape = CircleShape)
+      Modifier.background(color = MaterialTheme.colorScheme.secondaryContainer, shape = CircleShape)
         .padding(EXPAND_ICON_PADDING),
     contentAlignment = Alignment.Center,
   ) {
@@ -339,7 +361,7 @@ private fun ExpandIcon(isExpanded: Boolean) {
       modifier = Modifier.size(EXPAND_ICON_CONTENT_SIZE).rotate(rotationAngle),
       painter = painterResource(R.drawable.gs_keyboard_arrow_down_vd_theme_24),
       contentDescription = null,
-      tint = MaterialTheme.colorScheme.onSurfaceVariant,
+      tint = MaterialTheme.colorScheme.onSecondaryContainer,
     )
   }
 }

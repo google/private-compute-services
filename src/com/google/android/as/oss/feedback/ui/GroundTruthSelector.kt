@@ -47,6 +47,7 @@ fun GroundTruthSelector(
   title: String,
   options: List<GroundTruthData>,
   selectedOptions: Set<GroundTruthData>,
+  singleSelection: Boolean = false,
   onOptionToggled: (GroundTruthData) -> Unit,
   onDismissRequest: () -> Unit,
 ) {
@@ -79,7 +80,12 @@ fun GroundTruthSelector(
               Text(text = option.sourceApp)
             }
           },
-          leadingIcon = { Checkbox(checked = isSelected, onCheckedChange = null) },
+          leadingIcon =
+            if (singleSelection) {
+              null
+            } else {
+              { Checkbox(checked = isSelected, onCheckedChange = null) }
+            },
         )
       }
     }

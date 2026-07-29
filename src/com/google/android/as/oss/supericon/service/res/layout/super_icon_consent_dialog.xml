@@ -40,9 +40,13 @@
             app:tint="?attr/colorSecondary" />
 
         <TextView
+            android:id="@+id/super_icon_consent_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/super_icon_consent_title"
+            android:text="@string/super_icon_consent_with_p13n_title"
+            android:importantForAccessibility="yes"
+            android:focusable="true"
+            android:screenReaderFocusable="true"
             android:gravity="center"
             android:textAppearance="?attr/textAppearanceHeadlineSmall"
             android:textColor="?attr/colorOnSurface"
@@ -51,7 +55,10 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/super_icon_consent_body_1"
+            android:text="@string/super_icon_consent_with_p13n_body_1"
+            android:importantForAccessibility="yes"
+            android:focusable="true"
+            android:screenReaderFocusable="true"
             android:textAppearance="?attr/textAppearanceBodyMedium"
             android:textColor="?attr/colorOnSurfaceVariant"
             android:layout_marginBottom="12dp" />
@@ -59,7 +66,32 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/super_icon_consent_body_2"
+            android:text="@string/super_icon_consent_with_p13n_body_2"
+            android:importantForAccessibility="yes"
+            android:focusable="true"
+            android:screenReaderFocusable="true"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/super_icon_consent_with_p13n_body_3"
+            android:importantForAccessibility="yes"
+            android:focusable="true"
+            android:screenReaderFocusable="true"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/super_icon_consent_with_p13n_body_4"
+            android:importantForAccessibility="yes"
+            android:focusable="true"
+            android:screenReaderFocusable="true"
             android:textAppearance="?attr/textAppearanceBodyMedium"
             android:textColor="?attr/colorOnSurfaceVariant"
             android:layout_marginBottom="20dp" />

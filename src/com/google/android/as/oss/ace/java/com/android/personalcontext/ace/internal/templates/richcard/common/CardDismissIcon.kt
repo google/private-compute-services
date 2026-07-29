@@ -16,7 +16,6 @@
 
 package com.android.personalcontext.ace.internal.templates.richcard.common
 
-import android.service.personalcontext.PersonalContextManager
 import android.service.personalcontext.insight.interaction.InsightEvent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
@@ -34,10 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsight
 import com.android.personalcontext.ace.client.prototype.serversideclose.ServerSideCloseInsight
-import com.android.personalcontext.ace.visualizer.templates.LocalInsightEventReporter
 import com.android.personalcontext.ace.visualizer.templates.LocalInsightSurfaceClientInfo
-import com.android.personalcontext.ace.visualizer.templates.LocalPublishedContextInsight
-import com.android.personalcontext.ace.visualizer.templates.LocalRenderToken
 
 /** A composable that renders the dismiss button icon when [dismissInsight] is present. */
 @Suppress("NewApi", "FlaggedApi")
@@ -46,12 +42,7 @@ fun CardDismissIcon(dismissInsight: ServerSideCloseInsight?, modifier: Modifier 
   val serverSideCloseInsight = dismissInsight ?: return
   val context = LocalContext.current
   val info = LocalInsightSurfaceClientInfo.current
-  val publishedInsight = LocalPublishedContextInsight.current
-  val insightEventReporter = LocalInsightEventReporter.current
-  val renderToken = LocalRenderToken.current
-  val personalContextManager = remember {
-    context.getSystemService(PersonalContextManager::class.java)
-  }
+  val reportEvent = rememberInsightEventReporter()
   val dismissIcon = serverSideCloseInsight.insightDisplayDetails?.icon
   val dismissIconBitmap =
     remember(dismissIcon) { dismissIcon?.loadDrawable(context)?.toBitmap()?.asImageBitmap() }
@@ -68,14 +59,10 @@ fun CardDismissIcon(dismissInsight: ServerSideCloseInsight?, modifier: Modifier 
           .clickable(
             onClick = {
               info.onReceiveInsight(serverSideCloseInsight.toContextInsight())
-              with(insightEventReporter) {
-                personalContextManager?.reportChildInsightEvent(
-                  publishedInsight,
-                  serverSideCloseInsight.toContextInsight(),
-                  InsightEvent.EVENT_USER_DISMISS,
-                  renderToken,
-                )
-              }
+              reportEvent(
+                serverSideCloseInsight.toContextInsight(),
+                InsightEvent.EVENT_USER_DISMISS,
+              )
             },
             role = Role.Button,
           ),

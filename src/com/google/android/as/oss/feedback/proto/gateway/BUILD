@@ -19,6 +19,22 @@ load("//third_party/protobuf/build_defs:kt_jvm_proto_library.bzl", "kt_jvm_lite_
 package(default_visibility = ["//visibility:public"])
 
 proto_library(
+    name = "blueflax_proto",
+    srcs = ["blueflax.proto"],
+    deps = [""],
+)
+
+java_lite_proto_library(
+    name = "blueflax_java_proto_lite",
+    deps = [":blueflax_proto"],
+)
+
+kt_jvm_lite_proto_library(
+    name = "blueflax_kt_proto_lite",
+    deps = [":blueflax_proto"],
+)
+
+proto_library(
     name = "spoon_proto",
     srcs = ["spoon.proto"],
     deps = [""],
@@ -74,6 +90,7 @@ proto_library(
     srcs = ["pixel_apex_api.proto"],
     deps = [
         "",
+        ":blueflax_proto",
         ":message_armour_proto",
         ":quartz_log_proto",
         ":spoon_proto",

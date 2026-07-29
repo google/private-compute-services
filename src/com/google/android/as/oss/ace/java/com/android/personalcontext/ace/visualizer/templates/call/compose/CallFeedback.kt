@@ -88,11 +88,13 @@ internal fun FeedbackButtons(feedbackInsight: ContextInsight, shouldReportEvent:
     FeedbackButton(
       modifier = Modifier.testTag("thumbs_up"),
       icon = Icons.Outlined.ThumbUp,
+      contentDescription = "Helpful",
       onClick = { reportEvent(InsightEvent.EVENT_USER_FEEDBACK_POSITIVE) },
     )
     FeedbackButton(
       modifier = Modifier.testTag("thumbs_down"),
       icon = Icons.Outlined.ThumbDown,
+      contentDescription = "Not Helpful",
       onClick = { reportEvent(InsightEvent.EVENT_USER_FEEDBACK_NEGATIVE) },
     )
   }
@@ -100,11 +102,16 @@ internal fun FeedbackButtons(feedbackInsight: ContextInsight, shouldReportEvent:
 
 /** A single feedback button (ie. thumbs up or thumbs down). */
 @Composable
-private fun FeedbackButton(modifier: Modifier = Modifier, icon: ImageVector, onClick: () -> Unit) {
+private fun FeedbackButton(
+  modifier: Modifier = Modifier,
+  icon: ImageVector,
+  contentDescription: String,
+  onClick: () -> Unit,
+) {
   IconButton(modifier = modifier, onClick = onClick) {
     Icon(
       imageVector = icon,
-      contentDescription = null,
+      contentDescription = contentDescription,
       modifier = Modifier.size(24.dp),
       tint = MaterialTheme.colorScheme.onSurfaceVariant,
     )

@@ -20,6 +20,7 @@ package com.android.personalcontext.ace.client.prototype
 
 import android.service.personalcontext.hint.BundleHint
 import android.service.personalcontext.hint.ContextHint
+import com.android.personalcontext.ace.client.prototype.PrototypeHintId.BlueflaxMetadataHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.ClientSignalHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.ContactHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.CrossDeviceIntentHintId
@@ -35,6 +36,7 @@ import com.android.personalcontext.ace.client.prototype.PrototypeHintId.RenderTo
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.ThemeHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.VisualMetadataHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.WeatherHintId
+import com.android.personalcontext.ace.client.prototype.blueflax.BlueflaxMetadataHint
 import com.android.personalcontext.ace.client.prototype.clientsignal.ClientSignalHint
 import com.android.personalcontext.ace.client.prototype.contact.ContactHint
 import com.android.personalcontext.ace.client.prototype.crossdevice.CrossDeviceIntentHint
@@ -90,6 +92,7 @@ object PrototypeHintUtils {
         ThemeHintId -> ThemeHint
         DialerMetadataHintId -> DialerMetadataHint
         MessageMetadataHintId -> MessageMetadataHint
+        BlueflaxMetadataHintId -> BlueflaxMetadataHint
         GboardHintId -> GboardHint
 
         else -> null

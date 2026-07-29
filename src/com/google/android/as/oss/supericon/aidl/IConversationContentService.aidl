@@ -28,4 +28,14 @@ interface IConversationContentService {
    * @param conversationContentCallback The callback to receive the conversation content.
    */
   void requestConversationContent(in IConversationContentCallback conversationContentCallback) = 0;
+
+  /**
+   * Requests the conversation content (V2, asynchronous screenshot capture flow).
+   *
+   * @param conversationContentCallback The callback to receive the conversation content and asynchronous screenshot.
+   * @param packageName The package name of the app that has the conversation content.
+   * @param requestScreenshot True to trigger asynchronous screenshot capture alongside conversation messages.
+   * @return True if requestConversationContentV2 is supported by the server, False otherwise (allowing synchronous fallback).
+   */
+  boolean requestConversationContentV2(in IConversationContentCallback conversationContentCallback, in String packageName, boolean requestScreenshot) = 1;
 };

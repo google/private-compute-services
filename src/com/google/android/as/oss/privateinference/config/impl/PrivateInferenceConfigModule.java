@@ -23,14 +23,15 @@ import com.google.android.as.oss.common.config.FlagNamespace;
 import com.google.android.as.oss.privateinference.Annotations.PiServerChannelIdleTimeoutMinutes;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceAttachCertificateHeader;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceEnableArateaTokenCache;
-import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceEnableAsyncTokenCacheRefill;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceEndpointUrl;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceForceIpTunnelCreationForEverySession;
+import com.google.android.as.oss.privateinference.Annotations.PrivateInferencePassForceEzUsageHeader;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceUseEndpointSpecificVerificationKeys;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceWaitForGrpcChannelReady;
 import com.google.android.as.oss.privateinference.Annotations.TokenIssuanceEndpointUrl;
 import com.google.android.as.oss.privateinference.config.PrivateInferenceConfig;
 import com.google.android.as.oss.privateinference.library.oakutil.AttestationPublisherFlag;
+import com.google.android.as.oss.privateinference.library.oakutil.ClientMetadataFlag;
 import com.google.android.as.oss.privateinference.library.oakutil.DeviceAttestationFlag;
 import com.google.android.as.oss.privateinference.transport.IpRelayFallbackFlag;
 import com.google.android.as.oss.privateinference.transport.TransportFlag;
@@ -74,6 +75,10 @@ interface PrivateInferenceConfigModule {
   @Singleton
   abstract IpRelayFallbackFlag bindsIpRelayFallbackFlag(PcsConfigIpRelayFallbackFlag flag);
 
+  @Binds
+  @Singleton
+  abstract ClientMetadataFlag bindsClientMetadataFlag(PcsConfigClientMetadataFlag flag);
+
   @Provides
   @Singleton
   static PrivateInferenceConfigReader provideConfigReader(
@@ -114,16 +119,8 @@ interface PrivateInferenceConfigModule {
   }
 
   @Provides
-  @PrivateInferenceEnableAsyncTokenCacheRefill
-  static boolean providesEnableAsyncTokenCacheRefill(
-      ConfigReader<PrivateInferenceConfig> configReader) {
-    return configReader.getConfig().enableAsyncTokenCacheRefill();
-  }
-
-  @Provides
   @PrivateInferenceForceIpTunnelCreationForEverySession
-  static boolean providesForceIpTunnelCreationForEverySession(
-      ConfigReader<PrivateInferenceConfig> configReader) {
+  static boolean providesForceIpTunnelCreationForEverySession() {
     return false;
   }
 
@@ -139,5 +136,11 @@ interface PrivateInferenceConfigModule {
   static boolean providesUseEndpointSpecificVerificationKeys(
       ConfigReader<PrivateInferenceConfig> configReader) {
     return configReader.getConfig().useEndpointSpecificVerificationKeys();
+  }
+
+  @Provides
+  @PrivateInferencePassForceEzUsageHeader
+  static boolean providePassForceEzUsageHeader(ConfigReader<PrivateInferenceConfig> configReader) {
+    return configReader.getConfig().passForceEzUsageHeader();
   }
 }

@@ -23,5 +23,6 @@ android_library(
     ),
     deps = [
         "//third_party/java/auto:auto_value",
+        "@maven//:javax_inject_javax_inject",
     ],
 )

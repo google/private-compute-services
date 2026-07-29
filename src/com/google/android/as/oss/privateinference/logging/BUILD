@@ -17,7 +17,9 @@ load("@bazel_rules_android//android:rules.bzl", "android_library")
 package(default_visibility = [
     "//java/com/google/android/apps/internal/mdi/privatearatea:__pkg__",
     "//java/com/google/android/libraries/mdi/privatearatea:__pkg__",
+    "//java/com/google/android/libraries/mdi/sealedmemory:__subpackages__",
     "//javatests/com/google/android/libraries/mdi/privatearatea:__pkg__",
+    "//javatests/com/google/android/libraries/mdi/sealedmemory:__subpackages__",
     "//visibility:public",
 ])
 

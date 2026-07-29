@@ -146,8 +146,24 @@ public class PccSecurityConfigReader extends AbstractConfigReader<PccSecurityCon
           FLAG_PREFIX + "blueflax_package_security_info",
           PackageSecurityInfo.newBuilder()
               .setPackageName("com.google.android.apps.pixel.blueflax")
+              .addAllowedReleaseKeys(
+                  "2815dfa37aedbba232e7113bbfa0b8168d7b71401074378535da4a6fbca15520")
               .addAllowedTestKeys(
                   "103938ee4537e59e8ee792f654504fb8346fc6b346d0bbc4415fc339fcfc8ec1")
+              .addAllowedTestKeys(
+                  "b4443a5892c6cb3febd3fb3cfdef015e5b1722dd62f85b424a0dbc8950722afc")
+              .build(),
+          /* merge= */ false);
+
+  public static final ProtoFlag<PackageSecurityInfo> GLASSES_CORE_PACKAGE_SECURITY_INFO =
+      ProtoFlag.create(
+          FLAG_PREFIX + "glasses_core_package_security_info",
+          PackageSecurityInfo.newBuilder()
+              .setPackageName("com.google.android.glasses.core")
+              .addAllowedReleaseKeys(
+                  "3257d599a49d2c961a471ca9843f59d341a405884583fc087df4237b733bbd6d")
+              .addAllowedTestKeys(
+                  "ae95c5718b550cad726dc268702df2bacbc2aa292924782b4384e2b990022825")
               .build(),
           /* merge= */ false);
 
@@ -181,6 +197,7 @@ public class PccSecurityConfigReader extends AbstractConfigReader<PccSecurityCon
         .setGboardPackageSecurityInfo(flagManager.get(GBOARD_PACKAGE_SECURITY_INFO))
         .setAgsaPackageSecurityInfo(flagManager.get(AGSA_PACKAGE_SECURITY_INFO))
         .setBlueflaxPackageSecurityInfo(flagManager.get(BLUEFLAX_PACKAGE_SECURITY_INFO))
+        .setGlassesCorePackageSecurityInfo(flagManager.get(GLASSES_CORE_PACKAGE_SECURITY_INFO))
         .setEnableAllowlistedOnly(flagManager.get(ENABLE_SECURITY_CHECK))
         .setSecurityInfoList(
             PackageSecurityInfoList.newBuilder()
@@ -195,7 +212,8 @@ public class PccSecurityConfigReader extends AbstractConfigReader<PccSecurityCon
                             flagManager.get(NEXUS_LAUNCHER_PACKAGE_SECURITY_INFO),
                             flagManager.get(PLAYPROTECT_PACKAGE_SECURITY_INFO),
                             flagManager.get(SAFETYCORE_PACKAGE_SECURITY_INFO),
-                            flagManager.get(BLUEFLAX_PACKAGE_SECURITY_INFO))
+                            flagManager.get(BLUEFLAX_PACKAGE_SECURITY_INFO),
+                            flagManager.get(GLASSES_CORE_PACKAGE_SECURITY_INFO))
                         .collect(toImmutableList()))
                 .build())
         .build();

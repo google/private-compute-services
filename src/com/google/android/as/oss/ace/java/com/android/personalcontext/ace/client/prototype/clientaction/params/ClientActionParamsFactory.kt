@@ -17,6 +17,7 @@
 package com.android.personalcontext.ace.client.prototype.clientaction.params
 
 import android.os.Bundle
+import com.android.personalcontext.ace.client.prototype.clientaction.params.blueflax.BlueflaxParams
 import com.android.personalcontext.ace.client.prototype.clientaction.params.fullscreenrequest.FullScreenRequestParams
 import com.android.personalcontext.ace.client.prototype.clientaction.params.hidekeyboard.HideKeyboardParams
 import com.android.personalcontext.ace.client.prototype.clientaction.params.sharelivelocation.ShareLiveLocationParams
@@ -39,6 +40,7 @@ object ClientActionParamsFactory {
         ClientActionParamId.TEXT_PASTE -> TextPasteParams
         ClientActionParamId.SHARE_LIVE_LOCATION -> ShareLiveLocationParams
         ClientActionParamId.HIDE_KEYBOARD -> HideKeyboardParams
+        ClientActionParamId.BLUEFLAX -> BlueflaxParams
         ClientActionParamId.UNKNOWN -> UnknownParams
       }
 

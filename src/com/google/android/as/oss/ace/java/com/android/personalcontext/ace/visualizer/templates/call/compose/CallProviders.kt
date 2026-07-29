@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.personalcontext.ace.visualizer.templates.call
+package com.android.personalcontext.ace.visualizer.templates.call.compose
 
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color

@@ -78,24 +78,27 @@ import com.android.personalcontext.ace.client.prototype.serversideclose.ServerSi
 import com.android.personalcontext.ace.client.prototype.weather.WeatherHint
 import com.android.personalcontext.ace.client.prototype.weather.WeatherHint.SuggestionType
 import com.android.personalcontext.ace.client.prototype.weather.WeatherInsight.ChipContent
+import com.android.personalcontext.ace.common.gradientTint
 import com.android.personalcontext.ace.common.wrappers.IPublishedContextInsight
 import com.android.personalcontext.ace.internal.R
 import com.android.personalcontext.ace.internal.findprototypehint.FindPrototypeHint.findPrototypeHint
 import com.android.personalcontext.ace.internal.templates.weather.WeatherTemplateData.Companion.toWeatherTemplateData
+import com.android.personalcontext.ace.visualizer.compat.ThemeCompat
 import com.android.personalcontext.ace.visualizer.templates.LocalInsightSurfaceClientInfo
 import com.android.personalcontext.ace.visualizer.templates.LocalRenderToken
 import com.android.personalcontext.ace.visualizer.templates.VisualizerTemplate
 import javax.inject.Inject
 
 /** A [VisualizerTemplate] that renders a weather template UI. */
-class WeatherVisualizerTemplate @Inject internal constructor() : VisualizerTemplate {
+class WeatherVisualizerTemplate @Inject internal constructor(private val themeCompat: ThemeCompat) :
+  VisualizerTemplate {
 
   override fun handleInsight(
     publishedInsight: IPublishedContextInsight
   ): (@Composable () -> Unit)? {
     val insight = publishedInsight.insight
     val hint = insight.findPrototypeHint<WeatherHint>() ?: return null
-    val weatherTemplateData = insight.toWeatherTemplateData(hint)
+    val weatherTemplateData = insight.toWeatherTemplateData(hint, themeCompat)
 
     return { WeatherTemplate(weatherTemplateData, publishedInsight) }
   }
@@ -138,13 +141,17 @@ private fun EventTemplate(data: WeatherTemplateData, reportEvent: (Int) -> Unit)
     horizontalAlignment = Alignment.CenterHorizontally,
   ) {
     for (chip in data.chipContents) {
-      EventCard(chip = chip, reportEvent = reportEvent)
+      EventCard(
+        chip = chip,
+        reportEvent = reportEvent,
+        showBrandedIcon = data.shouldShowBrandedIcon,
+      )
     }
   }
 }
 
 @Composable
-private fun EventCard(chip: ChipContent, reportEvent: (Int) -> Unit) {
+private fun EventCard(chip: ChipContent, reportEvent: (Int) -> Unit, showBrandedIcon: Boolean) {
   val info = LocalInsightSurfaceClientInfo.current
   LaunchedEffect(Unit) { reportEvent(InsightEvent.EVENT_SHOW) }
   Card(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max).clip(CARD_SHAPE)) {
@@ -165,12 +172,16 @@ private fun EventCard(chip: ChipContent, reportEvent: (Int) -> Unit) {
       verticalAlignment = Alignment.CenterVertically,
     ) {
       val painter = chip.image?.let { BitmapPainter(it.asImageBitmap()) }
+      val iconBackgroundColor =
+        if (showBrandedIcon) MaterialTheme.colorScheme.surfaceBright
+        else MaterialTheme.colorScheme.secondary
       PrimaryRoundedIcon(
         iconBackgroundWidth = 40.dp,
         iconWidth = 20.dp,
         iconColor = MaterialTheme.colorScheme.onSecondary,
-        iconBackgroundColor = MaterialTheme.colorScheme.secondary,
+        iconBackgroundColor = iconBackgroundColor,
         painter = painter,
+        isIconGradient = showBrandedIcon,
       )
       Spacer(modifier = Modifier.width(12.dp))
       Column(verticalArrangement = Arrangement.SpaceAround) {
@@ -203,13 +214,17 @@ private fun LocationTemplate(data: WeatherTemplateData, reportEvent: (Int) -> Un
     horizontalAlignment = Alignment.CenterHorizontally,
   ) {
     for (chip in data.chipContents) {
-      LocationCard(chip = chip, reportEvent = reportEvent)
+      LocationCard(
+        chip = chip,
+        reportEvent = reportEvent,
+        showBrandedIcon = data.shouldShowBrandedIcon,
+      )
     }
   }
 }
 
 @Composable
-private fun LocationCard(chip: ChipContent, reportEvent: (Int) -> Unit) {
+private fun LocationCard(chip: ChipContent, reportEvent: (Int) -> Unit, showBrandedIcon: Boolean) {
   val info = LocalInsightSurfaceClientInfo.current
   val dismissState = rememberSwipeToDismissBoxState()
 
@@ -243,11 +258,16 @@ private fun LocationCard(chip: ChipContent, reportEvent: (Int) -> Unit) {
       verticalAlignment = Alignment.CenterVertically,
     ) {
       val painter = chip.image?.let { BitmapPainter(it.asImageBitmap()) }
+      val iconBackgroundColor =
+        if (showBrandedIcon) MaterialTheme.colorScheme.surfaceBright
+        else MaterialTheme.colorScheme.secondary
       PrimaryRoundedIcon(
         iconBackgroundWidth = 59.dp,
+        iconWidth = 32.dp,
         iconColor = MaterialTheme.colorScheme.onSecondary,
-        iconBackgroundColor = MaterialTheme.colorScheme.secondary,
+        iconBackgroundColor = iconBackgroundColor,
         painter = painter,
+        isIconGradient = showBrandedIcon,
       )
       Spacer(modifier = Modifier.width(16.dp))
       Column(verticalArrangement = Arrangement.SpaceAround) {
@@ -290,6 +310,7 @@ private fun PrimaryRoundedIcon(
   iconColor: Color,
   iconBackgroundColor: Color,
   painter: Painter?,
+  isIconGradient: Boolean = false,
 ) {
   if (painter == null) return
   Box(
@@ -300,7 +321,20 @@ private fun PrimaryRoundedIcon(
       modifier = Modifier.size(iconBackgroundWidth),
       onDraw = { drawCircle(color = iconBackgroundColor) },
     )
-    Icon(painter, contentDescription = null, modifier = Modifier.size(iconWidth), tint = iconColor)
+    val iconModifier =
+      if (isIconGradient) {
+        val primaryFixedDimColor = MaterialTheme.colorScheme.primaryFixedDim
+        val primaryColor = MaterialTheme.colorScheme.primary
+        Modifier.gradientTint(listOf(primaryFixedDimColor, primaryColor))
+      } else {
+        Modifier
+      }
+    Icon(
+      painter,
+      contentDescription = null,
+      modifier = Modifier.size(iconWidth).then(iconModifier),
+      tint = iconColor,
+    )
   }
 }
 

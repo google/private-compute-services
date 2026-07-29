@@ -33,26 +33,39 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.personalcontext.ace.internal.templates.richcard.CardUiData
 import com.android.personalcontext.ace.internal.templates.richcard.common.CardTemplateLayout
+import com.android.personalcontext.ace.internal.templates.richcard.common.cardContextActionClickable
 import com.android.personalcontext.ace.internal.templates.richcard.renderer.CardRenderer
+import com.android.personalcontext.ace.visualizer.compat.EnergyEffectsAnimationCompat
 import javax.inject.Inject
 
-class StackCardRenderer @Inject internal constructor() : CardRenderer<StackCardUiData> {
+class StackCardRenderer
+@Inject
+internal constructor(private val energyEffectsAnimationCompat: EnergyEffectsAnimationCompat) :
+  CardRenderer<StackCardUiData> {
 
   @Composable
   override fun Render(cardUiData: CardUiData<StackCardUiData>, modifier: Modifier) {
     val uiContext = cardUiData.cardContext ?: return
 
-    CardTemplateLayout(cardUiData = cardUiData, modifier = modifier) {
+    CardTemplateLayout(
+      cardUiData = cardUiData,
+      energyEffectsAnimationCompat = energyEffectsAnimationCompat,
+      modifier = modifier,
+    ) {
       Row(
         modifier =
           Modifier.fillMaxWidth()
             .clip(RoundedCornerShape(32.dp))
             .background(MaterialTheme.colorScheme.surfaceContainer)
+            .cardContextActionClickable(uiContext.action)
             .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
@@ -67,20 +80,35 @@ class StackCardRenderer @Inject internal constructor() : CardRenderer<StackCardU
 
   @Composable
   private fun LeadingColumn(headerData: HeaderData, modifier: Modifier = Modifier) {
-    Column(modifier = modifier.width(64.dp), verticalArrangement = Arrangement.Top) {
+    var columnModifier = modifier.width(64.dp)
+    if (headerData.contentDescription != null) {
+      columnModifier = columnModifier.clearAndSetSemantics {
+        contentDescription = headerData.contentDescription
+      }
+    }
+    Column(modifier = columnModifier, verticalArrangement = Arrangement.Top) {
       if (headerData.subtitle != null) {
         Text(
           text = headerData.subtitle,
-          fontSize = 12.sp,
-          lineHeight = 16.sp,
-          fontWeight = FontWeight.W500,
-          color = MaterialTheme.colorScheme.outline,
+          style =
+            MaterialTheme.typography.labelMedium.copy(
+              fontSize = 12.sp,
+              lineHeight = 16.sp,
+              fontWeight = FontWeight.W500,
+              letterSpacing = 0.sp,
+            ),
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
       }
       Text(
         text = headerData.title,
-        style = MaterialTheme.typography.titleSmall,
-        lineHeight = 20.sp,
+        style =
+          MaterialTheme.typography.titleSmall.copy(
+            fontWeight = FontWeight.Medium,
+            fontSize = 14.sp,
+            lineHeight = 20.sp,
+            letterSpacing = 0.1.sp,
+          ),
         color = MaterialTheme.colorScheme.onSurface,
       )
     }
@@ -109,18 +137,30 @@ class StackCardRenderer @Inject internal constructor() : CardRenderer<StackCardU
     ) {
       Text(
         text = item.title,
-        fontSize = 12.sp,
-        lineHeight = 16.sp,
-        fontWeight = FontWeight.W500,
+        style =
+          MaterialTheme.typography.labelMedium.copy(
+            fontSize = 12.sp,
+            lineHeight = 16.sp,
+            fontWeight = FontWeight.W500,
+            letterSpacing = 0.sp,
+          ),
         color = MaterialTheme.colorScheme.onSurface,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
       )
       if (item.subtitle != null) {
         Text(
           text = item.subtitle,
-          fontSize = 12.sp,
-          lineHeight = 16.sp,
-          fontWeight = FontWeight.W400,
+          style =
+            MaterialTheme.typography.bodySmall.copy(
+              fontSize = 12.sp,
+              lineHeight = 16.sp,
+              fontWeight = FontWeight.W400,
+              letterSpacing = 0.sp,
+            ),
           color = MaterialTheme.colorScheme.onSurfaceVariant,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
         )
       }
     }
@@ -137,18 +177,30 @@ class StackCardRenderer @Inject internal constructor() : CardRenderer<StackCardU
     ) {
       Text(
         text = item.title,
-        fontSize = 12.sp,
-        lineHeight = 16.sp,
-        fontWeight = FontWeight.W500,
+        style =
+          MaterialTheme.typography.labelMedium.copy(
+            fontSize = 12.sp,
+            lineHeight = 16.sp,
+            fontWeight = FontWeight.W500,
+            letterSpacing = 0.sp,
+          ),
         color = MaterialTheme.colorScheme.onSurface,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
       )
       if (item.subtitle != null) {
         Text(
           text = item.subtitle,
-          fontSize = 12.sp,
-          lineHeight = 16.sp,
-          fontWeight = FontWeight.W400,
+          style =
+            MaterialTheme.typography.bodySmall.copy(
+              fontSize = 12.sp,
+              lineHeight = 16.sp,
+              fontWeight = FontWeight.W400,
+              letterSpacing = 0.sp,
+            ),
           color = MaterialTheme.colorScheme.onSurfaceVariant,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
         )
       }
     }

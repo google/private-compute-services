@@ -21,4 +21,7 @@ import android.service.personalcontext.insight.ContextInsight
 interface ThemeCompat {
   /** Whether this [ContextInsight] should show the animation v2. */
   fun ContextInsight.shouldShowAnimationV2(): Boolean = false
+
+  /** Whether this [ContextInsight] should show the branded icon. */
+  fun ContextInsight.shouldShowBrandedIcon(): Boolean = false
 }

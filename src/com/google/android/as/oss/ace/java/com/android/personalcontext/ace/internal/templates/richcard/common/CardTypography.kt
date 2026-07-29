@@ -23,7 +23,8 @@ import androidx.compose.ui.text.font.DeviceFontFamilyName
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 
-val GoogleSans = FontFamily(Font(DeviceFontFamilyName("google-sans-flex")))
+val GoogleSansFlex = FontFamily(Font(DeviceFontFamilyName("google-sans-flex")))
+val GoogleSansText = FontFamily(Font(DeviceFontFamilyName("google-sans-text")))
 
 fun Typography.withDefaultFontFamily(fontFamily: FontFamily): Typography {
   return this.copy(

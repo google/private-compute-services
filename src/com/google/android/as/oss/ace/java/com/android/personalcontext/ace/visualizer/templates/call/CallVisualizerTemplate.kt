@@ -20,25 +20,14 @@ package com.android.personalcontext.ace.visualizer.templates.call
 
 import android.service.personalcontext.hint.CallHint
 import android.util.Log
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Typography
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import com.android.personalcontext.ace.common.FindHintUtils.findContextHint
 import com.android.personalcontext.ace.common.wrappers.IPublishedContextInsight
 import com.android.personalcontext.ace.visualizer.compat.FlexFontCompat
 import com.android.personalcontext.ace.visualizer.compat.InsightGridCompat
 import com.android.personalcontext.ace.visualizer.compat.VisualMetadataCompat
 import com.android.personalcontext.ace.visualizer.templates.VisualizerTemplate
-import com.android.personalcontext.ace.visualizer.templates.call.compose.CallWidgetContainer
-import com.android.personalcontext.ace.visualizer.templates.call.compose.FullScreenCallWidget
+import com.android.personalcontext.ace.visualizer.templates.call.compose.CallTemplate
 import com.android.personalcontext.ace.visualizer.templates.call.data.CallInsightConverter
 import com.android.personalcontext.ace.visualizer.templates.call.data.CallVisualizerWidget
 import javax.inject.Inject
@@ -81,60 +70,4 @@ internal constructor(
   companion object {
     private const val TAG = "CallVisualizerTemplate"
   }
-}
-
-@Composable
-private fun CallTemplate(
-  widget: CallVisualizerWidget,
-  insightGridCompat: InsightGridCompat,
-  isFullScreen: Boolean,
-  flexFontCompat: FlexFontCompat,
-) {
-  CompositionLocalProvider(LocalInsightGridCompat provides insightGridCompat) {
-    CallTheme(flexFontCompat = flexFontCompat) {
-      val backgrounds =
-        if (isFullScreen) {
-          CallWidgetBackgrounds(
-            widgetBackground = MaterialTheme.colorScheme.surfaceContainer,
-            cardBackground = MaterialTheme.colorScheme.surfaceContainerHighest,
-          )
-        } else {
-          CallWidgetBackgrounds(
-            widgetBackground = MaterialTheme.colorScheme.surfaceContainerHighest,
-            cardBackground = Color.Unspecified,
-          )
-        }
-
-      CompositionLocalProvider(LocalCallWidgetBackgrounds provides backgrounds) {
-        if (isFullScreen) {
-          FullScreenCallWidget(widget)
-        } else {
-          CallWidgetContainer(widget)
-        }
-      }
-    }
-  }
-}
-
-@Composable
-private fun CallTheme(
-  flexFontCompat: FlexFontCompat,
-  darkTheme: Boolean = isSystemInDarkTheme(),
-  dynamicColor: Boolean = true,
-  content: @Composable () -> Unit,
-) {
-  val colorScheme =
-    when {
-      dynamicColor -> {
-        val context = LocalContext.current
-        if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-      }
-
-      darkTheme -> darkColorScheme()
-      else -> lightColorScheme()
-    }
-
-  val dynamicTypography = flexFontCompat.flexFont(typography = Typography(), round = 0f)
-
-  MaterialTheme(colorScheme = colorScheme, typography = dynamicTypography) { content() }
 }

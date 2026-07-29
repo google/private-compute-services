@@ -153,7 +153,7 @@ constructor(
     Log.i(TAG, "Visualizer: Received ($hintTypes) -> ($insightTypes) [$ACE_EMBEDDED_TAG]")
 
     if (emptyRenderCompat.isEmpty(insight)) {
-      Log.w(TAG, "Visualizer: Received empty insight, returning null view [$ACE_EMBEDDED_TAG]")
+      Log.w(TAG, "Visualizer: Empty insight, returning null view [$ACE_EMBEDDED_TAG]")
       return VisualizerResult.NoView
     }
 
@@ -214,10 +214,12 @@ constructor(
           val currentInfo by clientInfoState
 
           val saveableStateRegistry =
-            SaveableStateRegistry(
-              restoredValues = savedComposeStates[currentInfo.id],
-              canBeSaved = { true },
-            )
+            remember(id) {
+              SaveableStateRegistry(
+                restoredValues = savedComposeStates[currentInfo.id],
+                canBeSaved = { true },
+              )
+            }
 
           val blurRadius by
             animateDpAsState(

@@ -18,9 +18,11 @@ package com.google.android.`as`.oss.supericon.aidl
 
 import android.graphics.Color.BLACK
 import android.graphics.drawable.Icon
+import android.os.Bundle
 import android.os.IBinder
 import android.os.Parcel
 import android.os.Parcelable
+import android.text.TextUtils
 import com.google.android.`as`.oss.supericon.utils.SuperIconUiType
 import com.google.fcp.client.common.internal.safeparcel.AbstractSafeParcelable
 import com.google.fcp.client.common.internal.safeparcel.SafeParcelable
@@ -49,77 +51,126 @@ import java.util.Objects
  * @property textSizeInPixels The text size in pixels of the label text.
  * @property textScaleX The horizontal scale factor for the label text.
  * @property windowToken The window token.
+ * @property accessibilityPaneTitle The accessibility pane title.
  */
 @SafeParcelable.Class(creator = "RenderOptionsCreator")
 class RenderOptions
-@SafeParcelable.Constructor
 constructor(
-  @field:SafeParcelable.Field(id = 1, getter = "getWidth")
-  @param:SafeParcelable.Param(id = 1)
-  val width: Int,
-  @field:SafeParcelable.Field(id = 2, getter = "getHeight")
-  @param:SafeParcelable.Param(id = 2)
-  val height: Int,
-  @field:SafeParcelable.Field(id = 3, getter = "getMinWidth")
-  @param:SafeParcelable.Param(id = 3)
-  val minWidth: Int,
-  @field:SafeParcelable.Field(id = 4, getter = "getMinHeight")
-  @param:SafeParcelable.Param(id = 4)
-  val minHeight: Int,
-  @field:SafeParcelable.Field(id = 5, getter = "getMaxWidth")
-  @param:SafeParcelable.Param(id = 5)
-  val maxWidth: Int,
-  @field:SafeParcelable.Field(id = 6, getter = "getMaxHeight")
-  @param:SafeParcelable.Param(id = 6)
-  val maxHeight: Int,
+  @field:SafeParcelable.Field(id = 1, getter = "getWidth") val width: Int,
+  @field:SafeParcelable.Field(id = 2, getter = "getHeight") val height: Int,
+  @field:SafeParcelable.Field(id = 3, getter = "getMinWidth") val minWidth: Int,
+  @field:SafeParcelable.Field(id = 4, getter = "getMinHeight") val minHeight: Int,
+  @field:SafeParcelable.Field(id = 5, getter = "getMaxWidth") val maxWidth: Int,
+  @field:SafeParcelable.Field(id = 6, getter = "getMaxHeight") val maxHeight: Int,
   @field:SafeParcelable.Field(id = 7, getter = "getUiType")
-  @param:SafeParcelable.Param(id = 7)
   @field:SuperIconUiType
-  @param:SuperIconUiType
   val uiType: Int = SuperIconUiType.SUPER_ICON,
-  @field:SafeParcelable.Field(id = 8, getter = "getIcon")
-  @param:SafeParcelable.Param(id = 8)
-  val icon: Icon? = null,
-  @field:SafeParcelable.Field(id = 9, getter = "getIconWidth")
-  @param:SafeParcelable.Param(id = 9)
-  val iconWidth: Int = 0,
-  @field:SafeParcelable.Field(id = 10, getter = "getIconHeight")
-  @param:SafeParcelable.Param(id = 10)
-  val iconHeight: Int = 0,
-  @field:SafeParcelable.Field(id = 11, getter = "getIconScaleX")
-  @param:SafeParcelable.Param(id = 11)
-  val iconScaleX: Float = 1.0f,
-  @field:SafeParcelable.Field(id = 12, getter = "getIconScaleY")
-  @param:SafeParcelable.Param(id = 12)
-  val iconScaleY: Float = 1.0f,
-  @field:SafeParcelable.Field(id = 13, getter = "getBackground")
-  @param:SafeParcelable.Param(id = 13)
-  val background: Icon? = null,
-  @field:SafeParcelable.Field(id = 14, getter = "getLabel")
-  @param:SafeParcelable.Param(id = 14)
-  val label: String? = null,
+  @field:SafeParcelable.Field(id = 8, getter = "getIcon") val icon: Icon? = null,
+  @field:SafeParcelable.Field(id = 9, getter = "getIconWidth") val iconWidth: Int = 0,
+  @field:SafeParcelable.Field(id = 10, getter = "getIconHeight") val iconHeight: Int = 0,
+  @field:SafeParcelable.Field(id = 11, getter = "getIconScaleX") val iconScaleX: Float = 1.0f,
+  @field:SafeParcelable.Field(id = 12, getter = "getIconScaleY") val iconScaleY: Float = 1.0f,
+  @field:SafeParcelable.Field(id = 13, getter = "getBackground") val background: Icon? = null,
+  @field:SafeParcelable.Field(id = 14, getter = "getLabel") val label: String? = null,
   @field:SafeParcelable.Field(id = 15, getter = "getLabelColor")
-  @param:SafeParcelable.Param(id = 15)
   val labelColor: Int = DEFAULT_LABEL_COLOR,
   @field:SafeParcelable.Field(id = 16, getter = "getFontFamily")
-  @param:SafeParcelable.Param(id = 16)
   val fontFamily: String? = DEFAULT_FONT_FAMILY,
   @field:SafeParcelable.Field(id = 17, getter = "getTextSizeInPixels")
-  @param:SafeParcelable.Param(id = 17)
   val textSizeInPixels: Float = 0.0f, // Default to 0.0f
-  @field:SafeParcelable.Field(id = 18, getter = "getTextScaleX")
-  @param:SafeParcelable.Param(id = 18)
-  val textScaleX: Float = 1.0f,
-  @field:SafeParcelable.Field(id = 19, getter = "getWindowToken")
-  @param:SafeParcelable.Param(id = 19)
-  val windowToken: IBinder? = null,
+  @field:SafeParcelable.Field(id = 18, getter = "getTextScaleX") val textScaleX: Float = 1.0f,
+  @field:SafeParcelable.Field(id = 19, getter = "getWindowToken") val windowToken: IBinder? = null,
   @field:SafeParcelable.Field(id = 20, getter = "getContentDescription")
-  @param:SafeParcelable.Param(id = 20)
   val contentDescription: String? = null,
+  @field:SafeParcelable.Field(id = 21, getter = "getRoleDescription")
+  val roleDescription: String? = null,
+  @field:SafeParcelable.Field(
+    id = 22,
+    getter = "getAccessibilityPaneTitleBundle",
+    type = "android.os.Bundle",
+  )
+  val accessibilityPaneTitle: CharSequence? = null,
+  @field:SafeParcelable.Field(id = 23, getter = "getSubIcon") val subIcon: Icon? = null,
+  @field:SafeParcelable.Field(id = 24, getter = "getSubIconWidth") val subIconWidth: Int = 0,
+  @field:SafeParcelable.Field(id = 25, getter = "getSubIconHeight") val subIconHeight: Int = 0,
+  @field:SafeParcelable.Field(id = 26, getter = "getSubIconScaleX", defaultValue = "1.0f")
+  val subIconScaleX: Float = 1.0f,
+  @field:SafeParcelable.Field(id = 27, getter = "getSubIconScaleY", defaultValue = "1.0f")
+  val subIconScaleY: Float = 1.0f,
 ) : AbstractSafeParcelable() {
+
+  @SafeParcelable.Constructor
+  constructor(
+    @SafeParcelable.Param(id = 1) width: Int,
+    @SafeParcelable.Param(id = 2) height: Int,
+    @SafeParcelable.Param(id = 3) minWidth: Int,
+    @SafeParcelable.Param(id = 4) minHeight: Int,
+    @SafeParcelable.Param(id = 5) maxWidth: Int,
+    @SafeParcelable.Param(id = 6) maxHeight: Int,
+    @SafeParcelable.Param(id = 7) @SuperIconUiType uiType: Int,
+    @SafeParcelable.Param(id = 8) icon: Icon?,
+    @SafeParcelable.Param(id = 9) iconWidth: Int,
+    @SafeParcelable.Param(id = 10) iconHeight: Int,
+    @SafeParcelable.Param(id = 11) iconScaleX: Float,
+    @SafeParcelable.Param(id = 12) iconScaleY: Float,
+    @SafeParcelable.Param(id = 13) background: Icon?,
+    @SafeParcelable.Param(id = 14) label: String?,
+    @SafeParcelable.Param(id = 15) labelColor: Int,
+    @SafeParcelable.Param(id = 16) fontFamily: String?,
+    @SafeParcelable.Param(id = 17) textSizeInPixels: Float,
+    @SafeParcelable.Param(id = 18) textScaleX: Float,
+    @SafeParcelable.Param(id = 19) windowToken: IBinder?,
+    @SafeParcelable.Param(id = 20) contentDescription: String?,
+    @SafeParcelable.Param(id = 21) roleDescription: String?,
+    @SafeParcelable.Param(id = 22) accessibilityPaneTitleBundle: Bundle?,
+    @SafeParcelable.Param(id = 23) subIcon: Icon?,
+    @SafeParcelable.Param(id = 24) subIconWidth: Int,
+    @SafeParcelable.Param(id = 25) subIconHeight: Int,
+    @SafeParcelable.Param(id = 26) subIconScaleX: Float,
+    @SafeParcelable.Param(id = 27) subIconScaleY: Float,
+  ) : this(
+    width = width,
+    height = height,
+    minWidth = minWidth,
+    minHeight = minHeight,
+    maxWidth = maxWidth,
+    maxHeight = maxHeight,
+    uiType = uiType,
+    icon = icon,
+    iconWidth = iconWidth,
+    iconHeight = iconHeight,
+    iconScaleX = iconScaleX,
+    iconScaleY = iconScaleY,
+    background = background,
+    label = label,
+    labelColor = labelColor,
+    fontFamily = fontFamily,
+    textSizeInPixels = textSizeInPixels,
+    textScaleX = textScaleX,
+    windowToken = windowToken,
+    contentDescription = contentDescription,
+    roleDescription = roleDescription,
+    accessibilityPaneTitle =
+      accessibilityPaneTitleBundle?.getCharSequence(KEY_ACCESSIBILITY_PANE_TITLE),
+    subIcon = subIcon,
+    subIconWidth = subIconWidth,
+    subIconHeight = subIconHeight,
+    subIconScaleX = subIconScaleX,
+    subIconScaleY = subIconScaleY,
+  )
+
   // SafeParcelable requires a Creator and specific writing logic
   override fun writeToParcel(dest: Parcel, flags: Int) {
     RenderOptionsCreator.writeToParcel(this, dest, flags)
+  }
+
+  /** Returns [accessibilityPaneTitle] as a String. */
+  fun getAccessibilityPaneTitleString(): String? = accessibilityPaneTitle?.toString()
+
+  /** Returns [accessibilityPaneTitle] wrapped in a [Bundle] for safe parceling across processes. */
+  fun getAccessibilityPaneTitleBundle(): Bundle? {
+    val title = accessibilityPaneTitle ?: return null
+    return Bundle().apply { putCharSequence(KEY_ACCESSIBILITY_PANE_TITLE, title) }
   }
 
   override fun equals(other: Any?): Boolean {
@@ -145,7 +196,14 @@ constructor(
       textSizeInPixels == otherOptions.textSizeInPixels &&
       textScaleX == otherOptions.textScaleX &&
       windowToken == otherOptions.windowToken &&
-      contentDescription == otherOptions.contentDescription
+      contentDescription == otherOptions.contentDescription &&
+      roleDescription == otherOptions.roleDescription &&
+      TextUtils.equals(accessibilityPaneTitle, otherOptions.accessibilityPaneTitle) &&
+      (subIcon?.equals(otherOptions.subIcon) ?: (otherOptions.subIcon == null)) &&
+      subIconWidth == otherOptions.subIconWidth &&
+      subIconHeight == otherOptions.subIconHeight &&
+      subIconScaleX == otherOptions.subIconScaleX &&
+      subIconScaleY == otherOptions.subIconScaleY
   }
 
   override fun hashCode(): Int {
@@ -170,16 +228,24 @@ constructor(
       textScaleX,
       windowToken,
       contentDescription,
+      roleDescription,
+      accessibilityPaneTitle?.toString(),
+      subIcon,
+      subIconWidth,
+      subIconHeight,
+      subIconScaleX,
+      subIconScaleY,
     )
   }
 
   override fun toString(): String {
-    return "RenderOptions(width=$width, height=$height, minWidth=$minWidth, minHeight=$minHeight, maxWidth=$maxWidth, maxHeight=$maxHeight, uiType=$uiType, icon=$icon, iconWidth=$iconWidth, iconHeight=$iconHeight, iconScaleX=$iconScaleX, iconScaleY=$iconScaleY, background=$background, label=$label, labelColor=$labelColor, fontFamily=$fontFamily, textSizeInPixels=$textSizeInPixels, textScaleX=$textScaleX, windowToken=$windowToken, contentDescription=$contentDescription)"
+    return "RenderOptions(width=$width, height=$height, minWidth=$minWidth, minHeight=$minHeight, maxWidth=$maxWidth, maxHeight=$maxHeight, uiType=$uiType, icon=$icon, iconWidth=$iconWidth, iconHeight=$iconHeight, iconScaleX=$iconScaleX, iconScaleY=$iconScaleY, background=$background, label=$label, labelColor=$labelColor, fontFamily=$fontFamily, textSizeInPixels=$textSizeInPixels, textScaleX=$textScaleX, windowToken=$windowToken, contentDescription=$contentDescription, roleDescription=$roleDescription, accessibilityPaneTitle=$accessibilityPaneTitle, subIcon=$subIcon, subIconWidth=$subIconWidth, subIconHeight=$subIconHeight, subIconScaleX=$subIconScaleX, subIconScaleY=$subIconScaleY)"
   }
 
   companion object {
     @JvmField val CREATOR: Parcelable.Creator<RenderOptions> = RenderOptionsCreator()
     const val DEFAULT_LABEL_COLOR = BLACK
     const val DEFAULT_FONT_FAMILY = "google-sans-text-medium"
+    const val KEY_ACCESSIBILITY_PANE_TITLE = "accessibility_pane_title"
   }
 }

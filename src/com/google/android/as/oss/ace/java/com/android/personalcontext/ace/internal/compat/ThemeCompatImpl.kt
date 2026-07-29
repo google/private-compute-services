@@ -36,4 +36,12 @@ class ThemeCompatImpl @Inject constructor() : ThemeCompat {
       themeHint.type == ThemeType.SHOW_ANIMATION_V2 && themeHint.data
     }
   }
+
+  override fun ContextInsight.shouldShowBrandedIcon(): Boolean {
+    return this.originHints.any {
+      val themeHint = it.contextHint.toPrototypeHint<ThemeHint>() ?: return@any false
+
+      themeHint.type == ThemeType.SHOW_BRANDED_ICON && themeHint.data
+    }
+  }
 }

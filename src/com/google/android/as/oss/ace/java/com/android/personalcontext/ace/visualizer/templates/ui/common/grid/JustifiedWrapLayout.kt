@@ -21,12 +21,26 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+
+/** The strategy to use for justifying the items in each row when remaining space exists. */
+enum class JustifyStrategy {
+  /** The last item in each row will expand to fill the remaining space. */
+  LAST_ITEM_ONLY,
+  /** All items in each row will expand proportionally to fill the remaining space. */
+  PROPORTIONAL,
+  /**
+   * Items will maintain their exact span width relative to total span capacity, leaving remaining
+   * space empty.
+   */
+  EXACT_SPAN,
+}
 
 /**
  * A layout that arranges [items] in rows, wrapping to a new line when the cumulative span of items
@@ -40,9 +54,7 @@ import androidx.compose.ui.unit.dp
  * @param totalSpanCapacity The maximum span capacity of each row.
  * @param spanSelector A lambda to extract the span value from [T]. This allows the caller to
  *   provide any object type for [items]
- * @param justifyLastItemOnly The strategy to use for justifying the items in each row. If true, the
- *   last item in each row will expand to fill the remaining space. If false, the items will expand
- *   proportionally to fill the remaining space.
+ * @param justifyStrategy The strategy to use for justifying the items in each row.
  * @param horizontalArrangement The horizontal arrangement of items in a row.
  * @param verticalArrangement The vertical arrangement of rows.
  * @param renderItem The Composable function to render each item.
@@ -52,7 +64,7 @@ fun <T> JustifiedWrapLayout(
   items: List<T>,
   totalSpanCapacity: Int,
   spanSelector: (T) -> Int,
-  justifyLastItemOnly: Boolean = true,
+  justifyStrategy: JustifyStrategy = JustifyStrategy.LAST_ITEM_ONLY,
   horizontalArrangement: Arrangement.Horizontal = Arrangement.spacedBy(4.dp),
   verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(4.dp),
   renderItem: @Composable (item: T) -> Unit,
@@ -65,7 +77,7 @@ fun <T> JustifiedWrapLayout(
         items = items,
         totalSpanCapacity = totalSpanCapacity,
         spanSelector = spanSelector,
-        justifyLastItemOnly = justifyLastItemOnly,
+        justifyStrategy = justifyStrategy,
         horizontalArrangement = horizontalArrangement,
         renderItem = renderItem,
       )
@@ -74,13 +86,12 @@ fun <T> JustifiedWrapLayout(
 }
 
 /**
- * A row of [items] that are justified either proportionally or with the last item only.
+ * A row of [items] that are justified according to [justifyStrategy].
  *
  * @param items The list of items to render.
  * @param totalSpanCapacity The maximum span capacity of each row.
  * @param spanSelector A lambda to extract the span value from [T].
- * @param justifyLastItemOnly If true, the last item in each row will expand to fill the remaining
- *   space. If false, the items will expand proportionally to fill the remaining space.
+ * @param justifyStrategy The strategy to use for justifying the items in the row.
  * @param horizontalArrangement The horizontal arrangement of items in the row.
  * @param renderItem The Composable function to render each item.
  */
@@ -89,7 +100,7 @@ private fun <T> LayoutRow(
   items: List<T>,
   totalSpanCapacity: Int,
   spanSelector: (T) -> Int,
-  justifyLastItemOnly: Boolean,
+  justifyStrategy: JustifyStrategy,
   horizontalArrangement: Arrangement.Horizontal,
   renderItem: @Composable (item: T) -> Unit,
 ) {
@@ -103,7 +114,7 @@ private fun <T> LayoutRow(
     items.forEachIndexed { index, item ->
       val itemSpan = spanSelector(item)
       val itemWeight =
-        if (justifyLastItemOnly && index == items.lastIndex) {
+        if (justifyStrategy == JustifyStrategy.LAST_ITEM_ONLY && index == items.lastIndex) {
           // Last item in the row expands to fill the remaining space
           itemSpan + remainingSpan.coerceAtLeast(0)
         } else {
@@ -111,6 +122,10 @@ private fun <T> LayoutRow(
         }
 
       Column(modifier = Modifier.weight(itemWeight.toFloat()).fillMaxHeight()) { renderItem(item) }
+    }
+
+    if (justifyStrategy == JustifyStrategy.EXACT_SPAN && remainingSpan > 0) {
+      Spacer(modifier = Modifier.weight(remainingSpan.toFloat()))
     }
   }
 }

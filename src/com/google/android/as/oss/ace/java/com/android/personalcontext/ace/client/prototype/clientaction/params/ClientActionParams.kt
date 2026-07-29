@@ -29,6 +29,7 @@ enum class ClientActionParamId(val uid: Int) {
   TEXT_PASTE(4),
   SHARE_LIVE_LOCATION(5),
   HIDE_KEYBOARD(6),
+  BLUEFLAX(7),
 }
 
 /** Base class for Bundle-backed ClientActionParams. */

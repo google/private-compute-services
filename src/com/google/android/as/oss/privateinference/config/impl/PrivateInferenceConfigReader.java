@@ -68,11 +68,6 @@ class PrivateInferenceConfigReader extends AbstractConfigReader<PrivateInference
           FLAG_PREFIX + "enable_aratea_token_cache",
           PrivateInferenceConfig.DEFAULT_ENABLE_ARATEA_TOKEN_CACHE);
 
-  static final BooleanFlag ENABLE_ASYNC_TOKEN_CACHE_REFILL =
-      BooleanFlag.create(
-          FLAG_PREFIX + "enable_async_token_cache_refill",
-          PrivateInferenceConfig.DEFAULT_ENABLE_ASYNC_TOKEN_CACHE_REFILL);
-
   static final IntegerFlag PROXY_TOKEN_BATCH_SIZE_FLAG =
       IntegerFlag.create(
           FLAG_PREFIX + "proxy_token_batch_size",
@@ -175,6 +170,11 @@ class PrivateInferenceConfigReader extends AbstractConfigReader<PrivateInference
           FLAG_PREFIX + "ip_relay_fallback_mode",
           PrivateInferenceConfig.DEFAULT_IP_RELAY_FALLBACK_MODE);
 
+  static final BooleanFlag SEND_CLIENT_METADATA_FLAG =
+      BooleanFlag.create(
+          FLAG_PREFIX + "send_client_metadata",
+          PrivateInferenceConfig.DEFAULT_SEND_CLIENT_METADATA);
+
   private final FlagManager flagManager;
 
   static PrivateInferenceConfigReader create(FlagManager flagManager) {
@@ -211,10 +211,10 @@ class PrivateInferenceConfigReader extends AbstractConfigReader<PrivateInference
             PrivateInferenceConfig.DEFAULT_FORCE_IP_TUNNEL_CREATION_FOR_EVERY_SESSION)
         .setUseEndpointSpecificVerificationKeys(
             PrivateInferenceConfig.DEFAULT_USE_ENDPOINT_SPECIFIC_VERIFICATION_KEYS)
+        .setPassForceEzUsageHeader(PrivateInferenceConfig.DEFAULT_PASS_FORCE_EZ_USAGE_HEADER)
         // Flags that can be overridden via Device Config flags.
         .setEnabled(flagManager.get(ENABLED_FLAG))
         .setEnableArateaTokenCache(flagManager.get(ENABLE_ARATEA_TOKEN_CACHE))
-        .setEnableAsyncTokenCacheRefill(flagManager.get(ENABLE_ASYNC_TOKEN_CACHE_REFILL))
         .setProxyConfigProviderType(flagManager.get(PROXY_CONFIG_PROVIDER_TYPE_FLAG))
         .setWaitForGrpcChannelReady(flagManager.get(ENABLE_WAIT_FOR_GRPC_CHANNEL_READY_FLAG))
         .setAttachCertificateHeader(flagManager.get(ATTACH_CERTIFICATE_HEADER_FLAG))
@@ -253,6 +253,7 @@ class PrivateInferenceConfigReader extends AbstractConfigReader<PrivateInference
         .setPiServerChannelIdleTimeoutMinutes(
             flagManager.get(PI_SERVER_CHANNEL_IDLE_TIMEOUT_MINUTES_FLAG))
         .setIpRelayFallbackMode(flagManager.get(IP_RELAY_FALLBACK_MODE_FLAG))
+        .setSendClientMetadata(flagManager.get(SEND_CLIENT_METADATA_FLAG))
         .build();
   }
 

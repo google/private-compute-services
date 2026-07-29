@@ -32,26 +32,40 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.personalcontext.ace.client.prototype.grid.InsightGrid
 import com.android.personalcontext.ace.internal.templates.richcard.CardUiData
 import com.android.personalcontext.ace.internal.templates.richcard.common.CardTemplateLayout
+import com.android.personalcontext.ace.internal.templates.richcard.common.GoogleSansText
 import com.android.personalcontext.ace.internal.templates.richcard.common.LoadingBox
+import com.android.personalcontext.ace.internal.templates.richcard.common.cardContextActionClickable
 import com.android.personalcontext.ace.internal.templates.richcard.renderer.CardRenderer
+import com.android.personalcontext.ace.visualizer.compat.EnergyEffectsAnimationCompat
 import com.android.personalcontext.ace.visualizer.templates.ui.common.grid.JustifiedWrapLayout
 import javax.inject.Inject
 
 /** Renderer for [GridCardUiData]. */
-class GridCardRenderer @Inject internal constructor() : CardRenderer<GridCardUiData> {
+class GridCardRenderer
+@Inject
+internal constructor(private val energyEffectsAnimationCompat: EnergyEffectsAnimationCompat) :
+  CardRenderer<GridCardUiData> {
 
   @Composable
   override fun Render(cardUiData: CardUiData<GridCardUiData>, modifier: Modifier) {
-    CardTemplateLayout(cardUiData = cardUiData, modifier = modifier) {
-      val uiData = cardUiData.cardContext
 
+    CardTemplateLayout(
+      cardUiData = cardUiData,
+      energyEffectsAnimationCompat = energyEffectsAnimationCompat,
+      modifier = modifier,
+    ) {
+      val uiData = cardUiData.cardContext
       if (uiData != null) {
         GridCard(modifier = Modifier.fillMaxWidth(), uiData = uiData)
       }
@@ -63,7 +77,9 @@ class GridCardRenderer @Inject internal constructor() : CardRenderer<GridCardUiD
     Column(
       modifier =
         modifier
-          .background(MaterialTheme.colorScheme.surfaceBright, RoundedCornerShape(16.dp))
+          .clip(RoundedCornerShape(16.dp))
+          .background(MaterialTheme.colorScheme.surfaceContainer)
+          .cardContextActionClickable(uiData.action)
           .padding(horizontal = 10.dp, vertical = 8.dp),
       verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -76,7 +92,16 @@ class GridCardRenderer @Inject internal constructor() : CardRenderer<GridCardUiD
                 text = it,
                 color = MaterialTheme.colorScheme.onSurface,
                 style =
-                  MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp, lineHeight = 26.sp),
+                  MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 20.sp,
+                    lineHeight = 26.sp,
+                    letterSpacing = 0.sp,
+                  ),
+                modifier =
+                  title.mainTitleContentDescription?.let { desc ->
+                    Modifier.clearAndSetSemantics { contentDescription = desc }
+                  } ?: Modifier,
               )
             }
             title.mainSubtitle?.let {
@@ -84,7 +109,13 @@ class GridCardRenderer @Inject internal constructor() : CardRenderer<GridCardUiD
                 text = it,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style =
-                  MaterialTheme.typography.bodySmall.copy(fontSize = 14.sp, lineHeight = 16.sp),
+                  MaterialTheme.typography.bodySmall.copy(
+                    fontFamily = GoogleSansText,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 14.sp,
+                    lineHeight = 16.sp,
+                    letterSpacing = 0.2.sp,
+                  ),
               )
             }
           }
@@ -107,7 +138,12 @@ class GridCardRenderer @Inject internal constructor() : CardRenderer<GridCardUiD
                 text = accessoryData.text,
                 color = foregroundColor,
                 style =
-                  TextStyle(fontWeight = FontWeight.W500, fontSize = 12.sp, lineHeight = 26.sp),
+                  MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.W500,
+                    fontSize = 12.sp,
+                    lineHeight = 26.sp,
+                    letterSpacing = 0.sp,
+                  ),
               )
             }
           }
@@ -138,15 +174,22 @@ class GridCardRenderer @Inject internal constructor() : CardRenderer<GridCardUiD
                       MaterialTheme.colorScheme.surfaceContainerHigh,
                       RoundedCornerShape(8.dp),
                     )
+                    .semantics(mergeDescendants = true) {}
                     .padding(vertical = 4.dp, horizontal = 8.dp)
               ) {
                 item.title?.let { titleText ->
                   Text(
                     text = titleText,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style =
-                      TextStyle(fontWeight = FontWeight.W500, fontSize = 12.sp, lineHeight = 26.sp),
+                      MaterialTheme.typography.labelMedium.copy(
+                        fontWeight = FontWeight.W500,
+                        fontSize = 12.sp,
+                        lineHeight = 26.sp,
+                        letterSpacing = 0.sp,
+                      ),
                     maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                   )
                 }
                 item.subtitle?.let { subtitleText ->
@@ -154,8 +197,14 @@ class GridCardRenderer @Inject internal constructor() : CardRenderer<GridCardUiD
                     text = subtitleText,
                     color = MaterialTheme.colorScheme.onSurface,
                     style =
-                      TextStyle(fontWeight = FontWeight.W500, fontSize = 20.sp, lineHeight = 26.sp),
+                      MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.W500,
+                        fontSize = 20.sp,
+                        lineHeight = 26.sp,
+                        letterSpacing = 0.sp,
+                      ),
                     maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                   )
                 }
               }

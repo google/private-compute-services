@@ -32,6 +32,7 @@ import java.time.LocalDate
  *   generated when a contact is created. For more details, see:
  *   [android.provider.ContactsContract.ContactsColumns.LOOKUP_KEY]
  * @property emails List of Contact's email addresses.
+ * @property addresses List of Contact's physical addresses.
  * @property birthday Contact's birthday, if any.
  */
 data class ContactHint(
@@ -39,6 +40,7 @@ data class ContactHint(
   val phoneNumbers: List<String>,
   val lookupKey: String,
   val emails: List<String> = emptyList(),
+  val addresses: List<String> = emptyList(),
   val birthday: LocalDate? = null,
   // ...Add other Contact information in the future
 ) : PrototypeHint(ContactHintId, this) {
@@ -54,8 +56,9 @@ data class ContactHint(
   companion object : Creator {
     private const val KEY_NAME = "name"
     private const val KEY_PHONE_NUMBERS = "phone_numbers"
-    private const val KEY_EMAILS = "emails"
     private const val KEY_LOOKUP_KEY = "lookup_key"
+    private const val KEY_EMAILS = "emails"
+    private const val KEY_ADDRESSES = "addresses"
     private const val KEY_BIRTHDAY = "birthday"
 
     override fun create(bundle: Bundle): PrototypeHint {
@@ -63,9 +66,10 @@ data class ContactHint(
       val phoneNumbers = bundle.getStringArrayList(KEY_PHONE_NUMBERS) ?: emptyList<String>()
       val lookupKey = bundle.getString(KEY_LOOKUP_KEY) ?: ""
       val emails = bundle.getStringArrayList(KEY_EMAILS) ?: emptyList<String>()
+      val addresses = bundle.getStringArrayList(KEY_ADDRESSES) ?: emptyList<String>()
       val birthdayString = bundle.getString(KEY_BIRTHDAY)
       val birthday = birthdayString?.let { LocalDate.parse(it) }
-      return ContactHint(name, phoneNumbers, lookupKey, emails, birthday)
+      return ContactHint(name, phoneNumbers, lookupKey, emails, addresses, birthday)
     }
   }
 }

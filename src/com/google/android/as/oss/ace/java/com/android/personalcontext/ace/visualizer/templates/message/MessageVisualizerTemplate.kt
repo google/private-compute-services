@@ -69,6 +69,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
+import com.android.personalcontext.ace.client.prototype.message.MessageMetadataHint
 import com.android.personalcontext.ace.common.FindHintUtils.findContextHint
 import com.android.personalcontext.ace.common.gradientTint
 import com.android.personalcontext.ace.common.wrappers.IPublishedContextInsight
@@ -76,16 +77,15 @@ import com.android.personalcontext.ace.internal.energyeffects.EnergyEffectsAnima
 import com.android.personalcontext.ace.visualizer.compat.ClientActionInsightCompat
 import com.android.personalcontext.ace.visualizer.compat.EnergyEffectsAnimationCompat
 import com.android.personalcontext.ace.visualizer.compat.FlexFontCompat
+import com.android.personalcontext.ace.visualizer.compat.ThemeCompat
 import com.android.personalcontext.ace.visualizer.templates.LocalInsightEventReporter
 import com.android.personalcontext.ace.visualizer.templates.LocalInsightSurfaceClientInfo
 import com.android.personalcontext.ace.visualizer.templates.LocalPublishedContextInsight
 import com.android.personalcontext.ace.visualizer.templates.LocalRenderToken
 import com.android.personalcontext.ace.visualizer.templates.VisualizerTemplate
 import com.android.personalcontext.ace.visualizer.templates.message.MessageTemplateData.Companion.toMessageTemplateData
-import com.android.personalcontext.ace.visualizer.templates.utils.EmbeddedTheme
 import com.android.personalcontext.ace.visualizer.templates.utils.IconOrImage
 import com.android.personalcontext.ace.visualizer.templates.utils.RemoteActionUtils.execute
-import com.android.personalcontext.ace.visualizer.templates.utils.TintableIcon
 import com.android.personalcontext.ace.visualizer.templates.utils.asTintableIcon
 import javax.inject.Inject
 
@@ -95,31 +95,32 @@ internal constructor(
   val flexFontCompat: FlexFontCompat,
   private val clientActionInsightCompat: ClientActionInsightCompat,
   private val energyEffectsAnimationCompat: EnergyEffectsAnimationCompat,
+  private val themeCompat: ThemeCompat,
 ) : VisualizerTemplate {
 
   override fun handleInsight(
     publishedInsight: IPublishedContextInsight
   ): (@Composable () -> Unit)? {
-    Log.d(TAG, "[MessagesEmbedded] handleInsight")
+    Log.i(TAG, "[MessagesEmbedded] handleInsight")
     val insight = publishedInsight.insight
     val unused = insight.findContextHint<MessagesHint>() ?: return null
-    val messageTemplateData = insight.toMessageTemplateData(clientActionInsightCompat)
+    val messageTemplateData = insight.toMessageTemplateData(clientActionInsightCompat, themeCompat)
     return { MessageTemplate(messageTemplateData) }
   }
 
   @Composable
   private fun MessageTemplate(messageTemplateData: MessageTemplateData) {
-    MainTheme() { MergedChipsRow(messageTemplateData) }
+    MainTheme(messageTemplateData.styleConfig) { MergedChipsRow(messageTemplateData) }
   }
 
   @Composable
   private fun MergedChipsRow(messageTemplateData: MessageTemplateData) {
-    Log.d(
+    Log.i(
       TAG,
       "[MessagesEmbedded] MergedChipsRow chip count: ${messageTemplateData.messageChipList.size}",
     )
     Row(
-      modifier = Modifier.wrapContentWidth().heightIn(48.dp).padding(vertical = 4.dp),
+      modifier = Modifier.wrapContentWidth().padding(4.dp),
       horizontalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.End),
       verticalAlignment = Alignment.Bottom,
     ) {
@@ -150,11 +151,11 @@ internal constructor(
 
   @Composable
   fun MessageRemoteActionChip(remoteActionChip: RemoteActionChip) {
-    Log.d(TAG, "[MessagesEmbedded] MessageRemoteActionChip: ${remoteActionChip.title}")
+    Log.i(TAG, "[MessagesEmbedded] MessageRemoteActionChip: ${remoteActionChip.title}")
     val context = LocalContext.current
     MessageOutlinedButton(
       chipOnClick = {
-        Log.d(TAG, "[MessagesEmbedded] remote action clicked")
+        Log.i(TAG, "[MessagesEmbedded] remote action clicked")
         remoteActionChip.remoteAction.execute(context)
       },
       insight = remoteActionChip.insight,
@@ -163,54 +164,44 @@ internal constructor(
         title = remoteActionChip.title,
         subtitle = remoteActionChip.subtitle,
         contentDescription = remoteActionChip.contentDescription,
-        icon = remoteActionChip.icon?.toBitmap(context)?.asTintableIcon(tintable = false),
+        icon = remoteActionChip.icon,
+        isIconTintable = false,
       )
     }
   }
 
   @Composable
   fun MessageClientActionChip(clientActionChip: ClientActionChip) {
-    Log.d(TAG, "[MessagesEmbedded] MessageClientActionChip: ${clientActionChip.title}")
+    Log.i(TAG, "[MessagesEmbedded] MessageClientActionChip: ${clientActionChip.title}")
     val context = LocalContext.current
     val info = LocalInsightSurfaceClientInfo.current
     MessageOutlinedButton(
       chipOnClick = {
-        Log.d(TAG, "[MessagesEmbedded] client action clicked")
+        Log.i(TAG, "[MessagesEmbedded] client action clicked")
         info.onReceiveInsight(clientActionChip.insight)
       },
       insight = clientActionChip.insight,
     ) {
-      val trailingIconBitmap = clientActionChip.trailingIcon?.toBitmap(context)
-      val gradientModifier =
-        if (trailingIconBitmap != null) {
-          val primaryFixedDimColor = MaterialTheme.colorScheme.primaryFixedDim
-          val primaryColor = MaterialTheme.colorScheme.primary
-          Modifier.gradientTint(listOf(primaryFixedDimColor, primaryColor))
-        } else {
-          Modifier
-        }
       MessageRowContent(
         title = clientActionChip.title,
         subtitle = clientActionChip.subtitle,
         contentDescription = clientActionChip.contentDescription,
-        icon =
-          clientActionChip.icon
-            ?.toBitmap(context)
-            ?.asTintableIcon(tintable = trailingIconBitmap != null),
-        trailingIcon = trailingIconBitmap?.asTintableIcon(tintable = true),
-        iconModifier = gradientModifier,
+        icon = clientActionChip.icon,
+        isIconTintable = clientActionChip.trailingIcon != null && !clientActionChip.isIconGradient,
+        isIconGradient = clientActionChip.isIconGradient,
+        trailingIcon = clientActionChip.trailingIcon,
       )
     }
   }
 
   @Composable
   internal fun MessageSuggestionChip(suggestionChip: SuggestionChip) {
-    Log.d(TAG, "[MessagesEmbedded] MessageSuggestionChip: ${suggestionChip.title}")
+    Log.i(TAG, "[MessagesEmbedded] MessageSuggestionChip: ${suggestionChip.title}")
     val context = LocalContext.current
     val info = LocalInsightSurfaceClientInfo.current
     MessageOutlinedButton(
       chipOnClick = {
-        Log.d(TAG, "[MessagesEmbedded] display insight clicked")
+        Log.i(TAG, "[MessagesEmbedded] display insight clicked")
         info.onReceiveInsight(suggestionChip.insight)
       },
       insight = suggestionChip.insight,
@@ -219,7 +210,9 @@ internal constructor(
         title = suggestionChip.title,
         subtitle = suggestionChip.subtitle,
         contentDescription = suggestionChip.contentDescription,
-        icon = suggestionChip.icon?.toBitmap(context)?.asTintableIcon(tintable = true),
+        icon = suggestionChip.icon,
+        isIconTintable = !suggestionChip.isIconGradient,
+        isIconGradient = suggestionChip.isIconGradient,
       )
     }
   }
@@ -230,9 +223,7 @@ internal constructor(
     insight: ContextInsight,
     chipContents: @Composable () -> Unit,
   ) {
-    val shape =
-      EmbeddedTheme.InlineSuggestion.shapes.suggestion
-        ?: RoundedCornerShape(MessageConstants.CornerRadius)
+    val shape = MaterialTheme.shapes.medium
     val interactionSource = remember { MutableInteractionSource() }
     val context = LocalContext.current
     val insightEventReporter = LocalInsightEventReporter.current
@@ -256,36 +247,23 @@ internal constructor(
     val density = LocalDensity.current
     val cornerRadius = remember(shape, density) { shape.toCornerRadius(density) }
     val colorScheme = MaterialTheme.colorScheme
+    val strokeColor = MaterialTheme.colorScheme.outlineVariant
+    val backgroundColor = MaterialTheme.colorScheme.surface
     val geminiAnimationSpec =
       EnergyEffectsAnimationUtils.createChipSpec(
         cornerRadius = cornerRadius,
         density = density.density,
         colorScheme = colorScheme,
         context = context,
+        strokeColor = strokeColor,
+        backgroundColor = backgroundColor,
       )
 
-    val strokeColor =
-      EmbeddedTheme.InlineSuggestion.colorScheme.stroke ?: MaterialTheme.colorScheme.outlineVariant
-    val backgroundColor =
-      EmbeddedTheme.InlineSuggestion.colorScheme.suggestionBackground ?: Color.Transparent
     with(energyEffectsAnimationCompat) {
       Box(
         modifier =
-          Modifier.clip(shape)
-            .widthIn(min = 30.dp, max = 264.dp)
-            .heightIn(min = 40.dp)
-            .combinedClickable(
-              onClick = {
-                chipOnClick()
-                reportEvent(InsightEvent.EVENT_USER_TAP)
-              },
-              onLongClick = {
-                Log.d(TAG, "[MessagesEmbedded] chip long clicked")
-                reportEvent(InsightEvent.EVENT_USER_LONG_PRESS)
-              },
-              interactionSource = interactionSource,
-              indication = ripple(color = MaterialTheme.colorScheme.onSurface),
-            )
+          Modifier.widthIn(min = 30.dp, max = 264.dp)
+            .heightIn(min = MessageConstants.MinHeight)
             .applyEnergyEffectsAnimation(
               geminiAnimationSpec = geminiAnimationSpec,
               fallback = {
@@ -295,6 +273,19 @@ internal constructor(
                   backgroundColor = backgroundColor,
                 )
               },
+            )
+            .clip(RoundedCornerShape(cornerRadius.x))
+            .combinedClickable(
+              onClick = {
+                chipOnClick()
+                reportEvent(InsightEvent.EVENT_USER_TAP)
+              },
+              onLongClick = {
+                Log.i(TAG, "[MessagesEmbedded] chip long clicked")
+                reportEvent(InsightEvent.EVENT_USER_LONG_PRESS)
+              },
+              interactionSource = interactionSource,
+              indication = ripple(color = MaterialTheme.colorScheme.onSurface),
             )
             .semantics { role = Role.Button },
         contentAlignment = Alignment.Center,
@@ -308,30 +299,49 @@ internal constructor(
   private fun MessageRowContent(
     title: String,
     contentDescription: String,
-    icon: TintableIcon?,
-    iconModifier: Modifier = Modifier,
+    icon: Icon?,
+    isIconTintable: Boolean = true,
+    isIconGradient: Boolean = false,
     subtitle: String? = null,
-    trailingIcon: TintableIcon? = null,
+    trailingIcon: Icon? = null,
   ) {
     Row(
       modifier =
         Modifier.clearAndSetSemantics(contentDescription)
           .padding(
-            horizontal = MessageConstants.ButtonHorizontalPadding,
-            vertical = MessageConstants.ButtonVerticalPadding,
+            start = MessageConstants.ButtonHorizontalPadding,
+            end =
+              if (trailingIcon != null) {
+                MessageConstants.ButtonHorizontalPadding
+              } else {
+                MessageConstants.ButtonEndPadding
+              },
+            top = MessageConstants.ButtonVerticalPadding,
+            bottom = MessageConstants.ButtonVerticalPadding,
           ),
       horizontalArrangement = Arrangement.spacedBy(8.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
+      val context = LocalContext.current
       // Icon
-      val tint =
-        EmbeddedTheme.InlineSuggestion.colorScheme.icon ?: MaterialTheme.colorScheme.primary
+      val tint = MaterialTheme.colorScheme.primary
       icon?.let {
-        IconOrImage(
-          icon = icon,
-          modifier = Modifier.size(18.dp).align(Alignment.CenterVertically).then(iconModifier),
-          tint = tint,
-        )
+        val iconModifier =
+          if (isIconGradient) {
+            val primaryFixedDimColor = MaterialTheme.colorScheme.primaryFixedDim
+            val primaryColor = MaterialTheme.colorScheme.primary
+            Modifier.gradientTint(listOf(primaryFixedDimColor, primaryColor))
+          } else {
+            Modifier
+          }
+        val mappedIcon = icon.toBitmap(context)?.asTintableIcon(tintable = isIconTintable)
+        mappedIcon?.let {
+          IconOrImage(
+            icon = mappedIcon,
+            modifier = Modifier.size(18.dp).align(Alignment.CenterVertically).then(iconModifier),
+            tint = tint,
+          )
+        }
       }
 
       // Text
@@ -352,21 +362,22 @@ internal constructor(
                 weight = 550,
                 round = 0f,
               ),
-            color =
-              EmbeddedTheme.InlineSuggestion.colorScheme.text
-                ?: MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
           )
         }
       }
 
-      if (trailingIcon != null) {
-        IconOrImage(
-          icon = trailingIcon,
-          modifier = Modifier.size(18.dp).align(Alignment.CenterVertically),
-          tint = tint,
-        )
+      trailingIcon?.let {
+        val mappedTrailingIcon = trailingIcon.toBitmap(context)?.asTintableIcon(tintable = true)
+        mappedTrailingIcon?.let {
+          IconOrImage(
+            icon = mappedTrailingIcon,
+            modifier = Modifier.size(18.dp).align(Alignment.CenterVertically),
+            tint = tint,
+          )
+        }
       }
     }
   }
@@ -382,8 +393,7 @@ internal constructor(
           weight = 500,
           round = 0f,
         ),
-      color =
-        EmbeddedTheme.InlineSuggestion.colorScheme.text ?: MaterialTheme.colorScheme.onSurface,
+      color = MaterialTheme.colorScheme.onSurface,
       overflow = TextOverflow.Ellipsis,
       maxLines = maxLines,
     )
@@ -420,13 +430,37 @@ internal constructor(
   )
 
   @Composable
-  private fun MainTheme(content: @Composable () -> Unit) {
+  private fun MainTheme(styleConfig: MessageMetadataHint?, content: @Composable () -> Unit) {
     val context = LocalContext.current
-    val colorScheme =
+    val baseColorScheme =
       if (isSystemInDarkTheme()) dynamicDarkColorScheme(context)
       else dynamicLightColorScheme(context)
 
-    MaterialTheme(colorScheme = colorScheme, typography = Typography(), content = content)
+    val colorScheme =
+      baseColorScheme.copy(
+        outlineVariant =
+          styleConfig?.strokeColor?.let { Color(it) } ?: baseColorScheme.outlineVariant,
+        onSurface = styleConfig?.textColor?.let { Color(it) } ?: baseColorScheme.onSurface,
+        onSurfaceVariant =
+          styleConfig?.textColor?.let { Color(it) } ?: baseColorScheme.onSurfaceVariant,
+        primary = styleConfig?.iconColor?.let { Color(it) } ?: baseColorScheme.primary,
+        surface =
+          styleConfig?.suggestionBackgroundColor?.let { Color(it) } ?: baseColorScheme.surface,
+      )
+
+    val shapes =
+      MaterialTheme.shapes.copy(
+        medium =
+          styleConfig?.suggestionCornerRadius?.let { RoundedCornerShape(it.toFloat()) }
+            ?: RoundedCornerShape(MessageConstants.CornerRadius)
+      )
+
+    MaterialTheme(
+      colorScheme = colorScheme,
+      shapes = shapes,
+      typography = Typography(),
+      content = content,
+    )
   }
 
   companion object {

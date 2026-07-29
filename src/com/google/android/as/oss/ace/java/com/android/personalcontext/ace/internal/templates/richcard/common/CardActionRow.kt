@@ -18,8 +18,6 @@
 
 package com.android.personalcontext.ace.internal.templates.richcard.common
 
-import android.service.personalcontext.PersonalContextManager
-import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.interaction.InsightEvent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -48,6 +46,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -58,10 +58,7 @@ import com.android.personalcontext.ace.client.prototype.serversideclose.ServerSi
 import com.android.personalcontext.ace.internal.templates.richcard.ActionableCardAction
 import com.android.personalcontext.ace.internal.templates.richcard.CardAction
 import com.android.personalcontext.ace.internal.templates.richcard.EgressableCardAction
-import com.android.personalcontext.ace.visualizer.templates.LocalInsightEventReporter
 import com.android.personalcontext.ace.visualizer.templates.LocalInsightSurfaceClientInfo
-import com.android.personalcontext.ace.visualizer.templates.LocalPublishedContextInsight
-import com.android.personalcontext.ace.visualizer.templates.LocalRenderToken
 import com.android.personalcontext.ace.visualizer.templates.utils.RemoteActionUtils.execute
 
 /** A composable that renders a row of action buttons for a visualizer card. */
@@ -83,19 +80,7 @@ fun CardActionRow(cardActions: List<CardAction>, modifier: Modifier = Modifier) 
 private fun CardActionButton(cardAction: CardAction) {
   val info = LocalInsightSurfaceClientInfo.current
   val context = LocalContext.current
-  val insightEventReporter = LocalInsightEventReporter.current
-  val publishedInsight = LocalPublishedContextInsight.current
-  val renderToken = LocalRenderToken.current
-
-  val personalContextManager = remember {
-    context.getSystemService(PersonalContextManager::class.java)
-  }
-
-  fun reportEvent(insight: ContextInsight, event: Int) {
-    with(insightEventReporter) {
-      personalContextManager?.reportChildInsightEvent(publishedInsight, insight, event, renderToken)
-    }
-  }
+  val reportEvent = rememberInsightEventReporter()
 
   var hasReportedImpression by rememberSaveable { mutableStateOf(false) }
   LaunchedEffect(Unit) {
@@ -112,14 +97,20 @@ private fun CardActionButton(cardAction: CardAction) {
     modifier =
       Modifier.clip(RoundedCornerShape(100.dp)).let { baseModifier ->
         when (cardAction) {
-          is ActionableCardAction ->
-            baseModifier.clickable {
-              cardAction.insight?.let { insight ->
-                reportEvent(insight, InsightEvent.EVENT_USER_TAP)
+          is ActionableCardAction -> {
+            val description = cardAction.remoteAction.contentDescription?.toString()
+            val title = cardAction.displayDetails.title?.toString()
+
+            baseModifier
+              .clearAndSetSemantics { contentDescription = description ?: title ?: "" }
+              .clickable {
+                cardAction.insight?.let { insight ->
+                  reportEvent(insight, InsightEvent.EVENT_USER_TAP)
+                }
+                cardAction.remoteAction.execute(context)
+                info.onReceiveInsight(ServerSideCloseInsight().toContextInsight())
               }
-              cardAction.remoteAction.execute(context)
-              info.onReceiveInsight(ServerSideCloseInsight().toContextInsight())
-            }
+          }
           is EgressableCardAction ->
             baseModifier.clickable {
               cardAction.insight?.let { insight ->

@@ -26,7 +26,8 @@ public abstract class PcsHttpConfig {
     return new AutoValue_PcsHttpConfig.Builder()
         .setOnReadyHandlerEnabled(true)
         .setIpcStreamingThrottleMs(4000)
-        .setWriteToPfd(false);
+        .setWriteToPfd(false)
+        .setEnableCronetMigration(false);
   }
 
   public abstract boolean onReadyHandlerEnabled();
@@ -35,7 +36,9 @@ public abstract class PcsHttpConfig {
 
   public abstract boolean writeToPfd();
 
-  /** Builder for {@link NetworkUsageLogConfig} */
+  public abstract boolean enableCronetMigration();
+
+  /** Builder for {@link PcsHttpConfig} */
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder setOnReadyHandlerEnabled(boolean value);
@@ -43,6 +46,8 @@ public abstract class PcsHttpConfig {
     public abstract Builder setIpcStreamingThrottleMs(int value);
 
     public abstract Builder setWriteToPfd(boolean value);
+
+    public abstract Builder setEnableCronetMigration(boolean value);
 
     public abstract PcsHttpConfig build();
   }

@@ -52,6 +52,7 @@ fun FeedbackTagChips(
   groundTruthTitle: String,
   tagsGroupTruthOptions: Map<FeedbackTagData, List<GroundTruthData>>,
   tagsGroundTruthSelection: Map<FeedbackTagData, Set<GroundTruthData>>,
+  singleSelection: Boolean = false,
   onTagsShown: (List<FeedbackTagData>) -> Unit,
   onTagSelectionChanged: (FeedbackTagData, Boolean) -> Unit,
   onTagGroundTruthToggled: (FeedbackTagData, GroundTruthData) -> Unit,
@@ -122,7 +123,13 @@ fun FeedbackTagChips(
             title = groundTruthTitle,
             options = groundTruthOptions,
             selectedOptions = currentGroundTruthSelection,
-            onOptionToggled = { groundTruthData -> onTagGroundTruthToggled(tag, groundTruthData) },
+            singleSelection = singleSelection,
+            onOptionToggled = { groundTruthData ->
+              onTagGroundTruthToggled(tag, groundTruthData)
+              if (singleSelection) {
+                expandedTag = null
+              }
+            },
             onDismissRequest = { expandedTag = null },
           )
         }

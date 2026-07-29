@@ -267,6 +267,7 @@ constructor(
     sentiment: FeedbackRatingSentiment,
     tag: FeedbackTagData,
     option: GroundTruthData,
+    singleSelection: Boolean = false,
   ) {
     _uiStateFlow.update { currentState ->
       val oldMap = currentState.tagsGroundTruthSelectionMap
@@ -277,11 +278,15 @@ constructor(
             val newSet =
               if (currentSet.contains(option)) {
                 currentSet - option
+              } else if (singleSelection) {
+                setOf(option)
               } else {
                 currentSet + option
               }
             if (newSet.isEmpty()) {
               oldOptionsSets - tag
+            } else if (singleSelection) {
+              mapOf(tag to newSet)
             } else {
               oldOptionsSets + (tag to newSet)
             }

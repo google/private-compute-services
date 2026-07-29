@@ -55,6 +55,7 @@ data class CardUiData<out C : DeprecatedUiCardContext>(
   val dismissInsight: ServerSideCloseInsight? = null,
   val attribution: Attribution? = null,
   val cardContext: C? = null,
+  val cardContextAction: CardContextAction? = null,
   val actions: List<CardAction>? = null,
 )
 
@@ -118,3 +119,11 @@ data class EgressableCardAction(
   override val displayDetails: InsightDisplayDetails,
   override val insight: ContextInsight?,
 ) : CardAction
+
+/**
+ * Action to be executed when the body of the card is tapped.
+ *
+ * @property insight The insight used to report the tap event.
+ * @property remoteAction The remote action to be executed.
+ */
+data class CardContextAction(val insight: ContextInsight, val remoteAction: RemoteAction)

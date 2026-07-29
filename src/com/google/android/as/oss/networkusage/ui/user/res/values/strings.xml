@@ -156,6 +156,9 @@
   <string name="feature_name_gpps">Google Play Protect Service</string>
   <!-- Description of the upload events of federated analytics results for Google Play Protect Service, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
   <string name="description_gpps_fa">Uploaded privacy-preserving analytics to improve Google Play Protect Service</string>
+  <!-- Description of downloads consisting of Google Play Protect Service models using MDD, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_gpps_mdd">Updated the on-device protections of Google Play Protect Service</string>
+  <string name="url_regex_gpps_mdd_edgedl" translatable="false">https://edgedl.me.gvt1.com/edgedl/mdi-serving/google-play-protect-service/.*</string>
 
   <!-- People and Conversations Service -->
   <!-- Name of the People and Conversations Service feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->

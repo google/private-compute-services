@@ -21,7 +21,6 @@ import android.os.ParcelFileDescriptor;
 import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.common.flavor.BuildFlavor;
 import com.google.android.as.oss.logging.PcsStatsEnums.CountMetricId;
-import com.google.android.as.oss.logging.PcsStatsEnums.ValueMetricId;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogUtils;
 import com.google.android.as.oss.privateinference.config.PrivateInferenceConfig;
 import com.google.android.as.oss.privateinference.library.PrivateInferenceRequestMetadata;
@@ -104,7 +103,6 @@ public final class PrivateInferenceGrpcBindableService
   @Override
   public StreamObserver<PrivateInferenceSessionRequest> startInferenceSession(
       StreamObserver<PrivateInferenceSessionResponse> sessionResponseObserver) {
-    long startTime = System.currentTimeMillis();
     InputStream parcelInputStream =
         new ParcelFileDescriptor.AutoCloseInputStream(
             MetadataParcelFileDescriptorKeys.FILE_DESCRIPTOR_CONTEXT_KEY.get());
@@ -126,7 +124,6 @@ public final class PrivateInferenceGrpcBindableService
             sessionResponseObserver,
             networkUsageLogHelper,
             pcsStatsLogger,
-            startTime,
             inferenceSessionTimer,
             totalRequestSize,
             totalResponseSize,
@@ -144,14 +141,15 @@ public final class PrivateInferenceGrpcBindableService
         buildFlavor,
         sessionResponseObserver,
         totalRequestSize,
-        featureName);
+        featureName,
+        pcsStatsLogger,
+        loggingMetricIdProvider);
   }
 
   @Override
   public void performInference(
       PcsPrivateInferenceRequest request,
       StreamObserver<PcsPrivateInferenceResponse> responseObserver) {
-    long startTime = System.currentTimeMillis();
     if (!configReader.getConfig().enabled() && !buildFlavor.isInternal()) {
       logger.atFine().log("Rejecting request since the feature is disabled");
       responseObserver.onError(
@@ -184,6 +182,7 @@ public final class PrivateInferenceGrpcBindableService
             logger.atInfo().log("[performInference] Oak Noise session is set up.");
             clientStreamObserver.onNext(request.getData());
             clientStreamObserver.onCompleted(); // Signal no more requests after this one.
+            logInferenceRequestEvent(request.getFeatureName());
             logger.atInfo().log(
                 "[performInference] Sent request to server with size: %d.", requestSize);
           }
@@ -201,7 +200,6 @@ public final class PrivateInferenceGrpcBindableService
           @Override
           public void onError(Throwable t) {
             inferenceTimer.stop();
-            long latencyMs = System.currentTimeMillis() - startTime;
             logger.atWarning().log(
                 "[performInference] onError[%s] from server for feature: %s.",
                 t.getMessage(), featureName);
@@ -211,7 +209,6 @@ public final class PrivateInferenceGrpcBindableService
                 /* isSuccess= */ false,
                 requestSize,
                 responseSize.get());
-            logInferenceFailureLatency(request.getFeatureName(), latencyMs);
             logInferenceFailureEvent(request.getFeatureName());
             logInferenceFailureErrorCode(t);
 
@@ -222,8 +219,6 @@ public final class PrivateInferenceGrpcBindableService
           public void onCompleted() {
             logger.atInfo().log(
                 "[performInference] onCompleted from server for feature: %s.", featureName);
-            logInferenceSuccessLatency(
-                request.getFeatureName(), System.currentTimeMillis() - startTime);
             networkUsageLogHelper.logPrivateInferenceRequest(
                 featureName,
                 callingPackageName,
@@ -285,6 +280,11 @@ public final class PrivateInferenceGrpcBindableService
     pcsStatsLogger.logEventCount(countMetricId);
   }
 
+  private void logInferenceRequestEvent(PcsPrivateInferenceFeatureName featureName) {
+    CountMetricId countMetricId = loggingMetricIdProvider.getInferenceCountMetricId(featureName);
+    pcsStatsLogger.logEventCount(countMetricId);
+  }
+
   private void logInferenceFailureErrorCode(Throwable t) {
     CountMetricId countMetricId = null;
     Status status = Status.fromThrowable(t);
@@ -299,19 +299,5 @@ public final class PrivateInferenceGrpcBindableService
     }
 
     pcsStatsLogger.logEventCount(countMetricId);
-  }
-
-  private void logInferenceSuccessLatency(
-      PcsPrivateInferenceFeatureName featureName, long latencyMs) {
-    ValueMetricId valueMetricId =
-        loggingMetricIdProvider.getInferenceSuccessLatencyValueMetricId(featureName);
-    pcsStatsLogger.logEventLatency(valueMetricId, latencyMs);
-  }
-
-  private void logInferenceFailureLatency(
-      PcsPrivateInferenceFeatureName featureName, long latencyMs) {
-    ValueMetricId valueMetricId =
-        loggingMetricIdProvider.getInferenceFailureLatencyValueMetricId(featureName);
-    pcsStatsLogger.logEventLatency(valueMetricId, latencyMs);
   }
 }

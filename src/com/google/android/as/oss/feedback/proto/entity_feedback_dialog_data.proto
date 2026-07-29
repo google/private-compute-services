@@ -24,7 +24,7 @@ option java_outer_classname = "EntityFeedbackDialogDataOuterClass";
 option java_package = "com.google.android.as.oss.feedback.api";
 
 // The data required to populate the feedback UI for a single entity.
-// Next ID: 5
+// Next ID: 7
 message EntityFeedbackDialogData {
   // The content of the entity, uniquely identifies this entity within the same
   // session.
@@ -39,4 +39,10 @@ message EntityFeedbackDialogData {
 
   // The common dialog data.
   FeedbackDialogCommonData dialog_common_data = 4;
+
+  // The app ID of the entity.
+  string app_id = 5;
+
+  // The CUJ of the entity.
+  int32 cuj = 6;
 }

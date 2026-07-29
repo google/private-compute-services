@@ -25,6 +25,8 @@ import android.service.personalcontext.insight.interaction.InsightEvent
 import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,6 +36,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
@@ -44,6 +47,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
 import com.android.personalcontext.ace.visualizer.templates.LocalInsightEventReporter
 import com.android.personalcontext.ace.visualizer.templates.LocalPublishedContextInsight
 import com.android.personalcontext.ace.visualizer.templates.LocalRenderToken
@@ -103,19 +107,24 @@ internal fun DeeplinkText(
 
   val annotatedString = getDeeplinkAnnotatedString(text = text, sourceName = sourceName)
 
-  Text(
-    text = annotatedString,
+  Box(
+    contentAlignment = Alignment.CenterStart,
     modifier =
-      Modifier.clickable(
+      Modifier.defaultMinSize(minHeight = 48.dp)
+        .clickable(
           interactionSource = remember { MutableInteractionSource() },
           indication = null,
           onClick = onClickLambda,
           role = Role.Button,
         )
         .semantics { contentDescription = text },
-    style = MaterialTheme.typography.labelMedium,
-    color = MaterialTheme.colorScheme.primary,
-  )
+  ) {
+    Text(
+      text = annotatedString,
+      style = MaterialTheme.typography.labelMedium,
+      color = MaterialTheme.colorScheme.primary,
+    )
+  }
 }
 
 /**

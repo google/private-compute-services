@@ -57,10 +57,13 @@ import com.android.personalcontext.ace.internal.templates.richcard.common.CardAp
 import com.android.personalcontext.ace.internal.templates.richcard.common.CardTemplateLayout
 import com.android.personalcontext.ace.internal.templates.richcard.common.LoadingBox
 import com.android.personalcontext.ace.internal.templates.richcard.renderer.CardRenderer
+import com.android.personalcontext.ace.visualizer.compat.EnergyEffectsAnimationCompat
 import javax.inject.Inject
 
 /** [CardRenderer] for Location Preview cards. */
-class LocationPreviewCardRenderer @Inject internal constructor() :
+class LocationPreviewCardRenderer
+@Inject
+internal constructor(private val energyEffectsAnimationCompat: EnergyEffectsAnimationCompat) :
   CardRenderer<DeprecatedUiLocationPreviewCardContext> {
 
   @Composable
@@ -68,7 +71,11 @@ class LocationPreviewCardRenderer @Inject internal constructor() :
     cardUiData: CardUiData<DeprecatedUiLocationPreviewCardContext>,
     modifier: Modifier,
   ) {
-    CardTemplateLayout(cardUiData = cardUiData, modifier = modifier) {
+    CardTemplateLayout(
+      cardUiData = cardUiData,
+      energyEffectsAnimationCompat = energyEffectsAnimationCompat,
+      modifier = modifier,
+    ) {
       val cardContext = cardUiData.cardContext
       val attribution = cardUiData.attribution
       if (attribution?.isValid == true && cardContext != null) {

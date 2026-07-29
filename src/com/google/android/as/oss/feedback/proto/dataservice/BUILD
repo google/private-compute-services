@@ -36,6 +36,7 @@ proto_library(
     deps = [
         "",
         "//src/com/google/android/as/oss/feedback/proto:feedback_tag_data_proto",
+        "//src/com/google/android/as/oss/feedback/proto/gateway:blueflax_proto",
         "//src/com/google/android/as/oss/feedback/proto/gateway:pixel_apex_api_proto",
         "//src/com/google/android/as/oss/feedback/proto/gateway:quartz_log_proto",
         "//src/com/google/android/as/oss/feedback/proto/gateway:spoon_proto",

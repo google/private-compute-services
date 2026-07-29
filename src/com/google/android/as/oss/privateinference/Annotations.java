@@ -33,6 +33,11 @@ public final class Annotations {
   @Retention(RetentionPolicy.RUNTIME)
   public @interface PrivateInferenceUseEndpointSpecificVerificationKeys {}
 
+  /** Annotation for whether to pass x-use-ez header. */
+  @Qualifier
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface PrivateInferencePassForceEzUsageHeader {}
+
   /** Annotation for whether to wait for the channel to be ready. */
   @Qualifier
   @Retention(RetentionPolicy.RUNTIME)
@@ -42,11 +47,6 @@ public final class Annotations {
   @Qualifier
   @Retention(RetentionPolicy.RUNTIME)
   public @interface PrivateInferenceEnableArateaTokenCache {}
-
-  /** Annotation for whether to enable async token cache refills. */
-  @Qualifier
-  @Retention(RetentionPolicy.RUNTIME)
-  public @interface PrivateInferenceEnableAsyncTokenCacheRefill {}
 
   /** Annotation for whether to create an IP tunnel for every session. */
   @Qualifier

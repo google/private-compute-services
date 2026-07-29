@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@rules_proto_grpc//java:defs.bzl", "java_grpc_library")
+load("//net/proto2/compiler/stubby/python:py_stubby_library.bzl", "py_stubby_library")
 load("//third_party/bazel_rules/rules_python/python:proto.bzl", "py_proto_library")
 load("//third_party/protobuf/bazel:java_lite_proto_library.bzl", "java_lite_proto_library")
 load("//third_party/protobuf/bazel:proto_library.bzl", "proto_library")
@@ -61,6 +62,12 @@ kt_jvm_proto_library(
 py_proto_library(
     name = "protected_download_py_pb2",
     deps = [":protected_download_proto"],
+)
+
+py_stubby_library(
+    name = "protected_download_py_stubby",
+    srcs = [":protected_download_proto"],
+    deps = [":protected_download_py_pb2"],
 )
 
 java_grpc_library(

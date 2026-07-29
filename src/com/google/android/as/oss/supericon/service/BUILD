@@ -37,6 +37,7 @@ kt_jvm_lite_proto_library(
 android_library(
     name = "conversation_content_connection",
     srcs = [
+        "ConversationContentCallbackHelper.kt",
         "ConversationContentConnection.kt",
         "ConversationContentConnectionFactory.kt",
     ],
@@ -45,6 +46,7 @@ android_library(
     deps = [
         "//java/com/google/common/time:time-android",
         "//src/com/google/android/as/oss/supericon/aidl:conversation_content_service_aidl",
+        "//src/com/google/android/as/oss/supericon/aidl:conversation_data",
         "//src/com/google/android/as/oss/supericon/utils",
         "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-jvm",
         "@maven//:androidx_annotation_annotation",
@@ -87,15 +89,18 @@ android_library(
     deps = [
         ":conversation_content_connection",
         ":super_icon_consent_manager",
+        "//googledata/icons/android/google_symbols/check:vd_theme_24",
+        "//googledata/icons/android/google_symbols/clear:vd_theme_24",
         "//src/com/google/android/as/oss/common",
         "//src/com/google/android/as/oss/common/config",
-        "//src/com/google/android/as/oss/supericon/aidl:conversation_content_service_aidl",
         "//src/com/google/android/as/oss/supericon/aidl:conversation_data",
         "//src/com/google/android/as/oss/supericon/aidl:render_options",
         "//src/com/google/android/as/oss/supericon/aidl:super_icon_render_service_aidl",
         "//src/com/google/android/as/oss/supericon/config",
         "//src/com/google/android/as/oss/supericon/utils",
         "//third_party/java/android_libs/material_components:chip",
+        "//third_party/java/android_libs/material_components:materialswitch",
+        "//third_party/java/androidx/constraintlayout",
         "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-jvm",
         "@maven//:com_google_android_material_material",
         "@maven//:com_google_dagger_dagger",

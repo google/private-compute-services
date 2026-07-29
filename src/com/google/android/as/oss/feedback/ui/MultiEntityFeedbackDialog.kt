@@ -172,7 +172,13 @@ fun MultiEntityFeedbackDialog(
         viewModel.updateTagSelection(entity, sentiment, tag, selected, singleSelection)
       },
       onTagGroundTruthToggled = { entity, sentiment, tag, option ->
-        viewModel.toggleTagGroundTruthSelection(entity, sentiment, tag, option)
+        viewModel.toggleTagGroundTruthSelection(
+          entity,
+          sentiment,
+          tag,
+          option,
+          singleSelection = true,
+        )
       },
       onFreeFormTextChanged = { entity, value -> viewModel.updateFreeFormText(entity, value) },
       onOptInCheckedChanged = { checked ->
@@ -404,10 +410,17 @@ private fun MultiEntityFeedbackEditingScreen(
               uiState.feedbackDonationData
                 ?.getOrNull()
                 ?.feedbackUiRenderingData
-                ?.feedbackDialogGroundTruthTitle ?: "",
+                ?.feedbackDialogGroundTruthTitle
+                ?: uiState.quartzFeedbackDonationData
+                  ?.getOrNull()
+                  ?.feedbackUiRenderingData
+                  ?.feedbackDialogGroundTruthTitle
+                ?: "",
             onSelectedSentimentChanged = { onEntitySentimentChanged(entity.entityContent, it) },
             onTagSelectionChanged = { entityContent, sentiment, tag, selected ->
-              val singleSelection = foundQuartzCuj == QuartzCUJ.QUARTZ_CUJ_KEY_TYPE
+              val singleSelection =
+                (foundQuartzCuj == QuartzCUJ.QUARTZ_CUJ_KEY_TYPE ||
+                  foundQuartzCuj == QuartzCUJ.QUARTZ_CUJ_ADVANCED_ORGANIZER)
               onTagSelectionChanged(entityContent, sentiment, tag, selected, singleSelection)
             },
             onTagGroundTruthToggled = onTagGroundTruthToggled,
@@ -636,6 +649,7 @@ private fun EntityBodyContent(
         groundTruthTitle = groundTruthTitle,
         tagsGroupTruthOptions = tagsGroundTruthOptions,
         tagsGroundTruthSelection = tagsGroundTruthSelection,
+        singleSelection = true,
         onTagsShown = onTagsShown,
         onTagSelectionChanged = onTagSelectionChanged,
         onTagGroundTruthToggled = onTagGroundTruthToggled,
@@ -682,21 +696,30 @@ private fun MultiEntityFeedbackViewFeedbackScreen(
   onDismissRequest: () -> Unit,
 ) {
   val donationData = uiState.feedbackDonationData
+  val quartzDonationData = uiState.quartzFeedbackDonationData
 
   val iconContentDescription =
     donationData
       ?.getOrNull()
       ?.feedbackUiRenderingData
       ?.feedbackDialogViewDataBackButtonContentDescription
+      ?: quartzDonationData
+        ?.getOrNull()
+        ?.feedbackUiRenderingData
+        ?.feedbackDialogViewDataBackButtonContentDescription
       ?: data.dialogCommonData.donationDataFailureBackButtonContentDescription
+
+  val headerTitle =
+    donationData?.getOrNull()?.feedbackUiRenderingData?.feedbackDialogViewDataTitle
+      ?: quartzDonationData?.getOrNull()?.feedbackUiRenderingData?.feedbackDialogViewDataTitle
+      ?: data.title
 
   FeedbackContentScaffold(
     modifier = modifier,
     headerIcon = Icons.AutoMirrored.Filled.ArrowBack,
     headerIconContentDescription = iconContentDescription,
     headerIconOnClick = onViewDataScreenBackPressed,
-    headerTitle =
-      donationData?.getOrNull()?.feedbackUiRenderingData?.feedbackDialogViewDataTitle ?: data.title,
+    headerTitle = headerTitle,
     primaryButtonLabel = data.buttonLabel,
     primaryButtonLoading = uiState.feedbackSubmitStatus == FeedbackSubmitState.SUBMIT_PENDING,
     primaryButtonOnClick = {

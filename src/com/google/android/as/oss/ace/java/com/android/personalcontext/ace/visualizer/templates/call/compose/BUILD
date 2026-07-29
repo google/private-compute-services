@@ -62,18 +62,22 @@ android_library(
     srcs = [
         "CallDetailedCardContainer.kt",
         "CallGeneralCardsContainer.kt",
+        "CallTemplate.kt",
         "CallWidgetContainer.kt",
         "FullScreenCallWidget.kt",
     ],
     visibility = [
+        "//javatests/com/google/android/apps/miphone/pcs/ace/java/com/android/personalcontext/ace/visualizer/templates/call:__subpackages__",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer/templates/call:__subpackages__",
     ],
     deps = [
+        ":call_providers",
         ":call_widget_constants",
         ":common",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer:resources",
+        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer/compat:flex_font_compat",
+        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer/compat:insight_grid_compat",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer/templates",
-        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer/templates/call:call_providers",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer/templates/call/data:call_template_data",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer/templates/ui/common/grid:justified_wrap_layout",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer/templates/utils:tintable_icon",
@@ -92,6 +96,23 @@ android_library(
         "//third_party/java/androidx/compose/ui/text",
         "//third_party/java/androidx/compose/ui/unit",
         "//third_party/java/androidx/core/ktx",
+        "@maven//:androidx_annotation_annotation",
         "@maven//:androidx_core_core",
+    ],
+)
+
+android_library(
+    name = "call_providers",
+    srcs = [
+        "CallProviders.kt",
+    ],
+    visibility = [
+        "//javatests/com/google/android/apps/miphone/pcs/ace/java/com/android/personalcontext/ace/visualizer/templates/call:__subpackages__",
+        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer/templates/call:__subpackages__",
+    ],
+    deps = [
+        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer/compat:insight_grid_compat",
+        "//third_party/java/androidx/compose/runtime",
+        "//third_party/java/androidx/compose/ui/graphics",
     ],
 )

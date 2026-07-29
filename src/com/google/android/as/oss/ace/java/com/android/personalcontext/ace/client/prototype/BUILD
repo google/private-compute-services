@@ -30,6 +30,7 @@ android_library(
         ":prototype_hint",
         ":prototype_insight",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/aacard",
+        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/blueflax:blueflax_metadata_hint",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/card",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/clientaction",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/clientsignal",

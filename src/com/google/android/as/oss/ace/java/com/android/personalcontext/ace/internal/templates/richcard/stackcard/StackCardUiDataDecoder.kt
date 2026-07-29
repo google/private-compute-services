@@ -42,7 +42,11 @@ class StackCardUiDataDecoder @Inject constructor() : CardUiDataDecoder<StackCard
       val headerInsight = headerInsights.firstOrNull()
       val headerData = headerInsight?.let {
         it.details.title?.toString()?.let { title ->
-          HeaderData(title = title, subtitle = it.details.subtitle?.toString())
+          HeaderData(
+            title = title,
+            subtitle = it.details.subtitle?.toString(),
+            contentDescription = it.details.contentDescription?.toString(),
+          )
         }
       }
 
@@ -64,7 +68,9 @@ class StackCardUiDataDecoder @Inject constructor() : CardUiDataDecoder<StackCard
         }
       }
 
-      return StackCardUiData(header = headerData, items = items)
+      val action = cardInsight.getCardContextAction()
+
+      StackCardUiData(header = headerData, items = items, action = action)
     } ?: throw IllegalArgumentException("Failed to convert ContextInsight to StackCardUiData")
   }
 

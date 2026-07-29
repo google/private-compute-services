@@ -16,6 +16,7 @@
 
 package com.google.android.as.oss.supericon.aidl;
 
+import android.graphics.Bitmap;
 import android.view.SurfaceControlViewHost;
 import com.google.android.as.oss.supericon.aidl.ConversationData;
 import com.google.android.as.oss.supericon.aidl.ISuperIconUi;
@@ -75,6 +76,13 @@ oneway interface ISuperIconRenderCallback {
 
   /**
    * Called to log the shown/granted/denied event of consent form
-    */
+   */
   void onConsentMetricsLogged(int eventType, int totalDisplayCount);
+
+  /**
+   * Called when the screenshot is received.
+   *
+   * @param screenshot the screenshot bitmap
+   */
+  void onScreenshotReceived(in Bitmap screenshot);
 };

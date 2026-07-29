@@ -26,7 +26,6 @@ android_library(
         "CallVisualizerTemplate.kt",
     ],
     deps = [
-        ":call_providers",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/common:find_hint",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/common/wrappers",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer/compat:flex_font_compat",
@@ -42,21 +41,5 @@ android_library(
         "//third_party/java/androidx/compose/ui/graphics",
         "//third_party/java/androidx/hilt/navigation_compose",
         "@maven//:javax_inject_javax_inject",
-    ],
-)
-
-android_library(
-    name = "call_providers",
-    srcs = [
-        "CallProviders.kt",
-    ],
-    visibility = [
-        "//javatests/com/google/android/apps/miphone/pcs/ace/java/com/android/personalcontext/ace/visualizer/templates/call:__subpackages__",
-        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer/templates/call:__subpackages__",
-    ],
-    deps = [
-        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer/compat:insight_grid_compat",
-        "//third_party/java/androidx/compose/runtime",
-        "//third_party/java/androidx/compose/ui/graphics",
     ],
 )

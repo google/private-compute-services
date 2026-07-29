@@ -53,11 +53,11 @@ constructor(
   val uiState = _uiState.asStateFlow()
 
   init {
-    viewModelScope.launch { resolveSettingsActivity() }
+    viewModelScope.launch { resolveLegacySettingsActivity() }
   }
 
-  private suspend fun resolveSettingsActivity() {
-    val intent = createUnresolvedSettingsIntent()
+  private suspend fun resolveLegacySettingsActivity() {
+    val intent = createUnresolvedLegacySettingsIntent()
     val resolved =
       withContext(ioCoroutineDispatcher) {
         intent.resolveActivityInfo(context.packageManager, 0) != null
@@ -65,7 +65,7 @@ constructor(
     _uiState.update { it.copy(settingsIntentLegacy = if (resolved) intent else null) }
   }
 
-  private fun createUnresolvedSettingsIntent(): Intent =
+  private fun createUnresolvedLegacySettingsIntent(): Intent =
     Intent().apply {
       setClassName(
         "com.google.android.apps.pixel.psi",

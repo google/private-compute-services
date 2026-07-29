@@ -18,6 +18,7 @@
 
 package com.android.personalcontext.ace.internal.templates.richcard.stackcard
 
+import com.android.personalcontext.ace.internal.templates.richcard.CardContextAction
 import com.android.personalcontext.ace.internal.templates.richcard.CardType
 import com.android.personalcontext.ace.internal.templates.richcard.DeprecatedUiCardContext
 
@@ -26,14 +27,22 @@ import com.android.personalcontext.ace.internal.templates.richcard.DeprecatedUiC
  *
  * @property header Optional structured header data for the leading column.
  * @property items The list of items to display in the main stack.
+ * @property action The action to trigger when the body is tapped.
  */
-data class StackCardUiData(val header: HeaderData?, val items: List<StackItem>) :
-  DeprecatedUiCardContext {
+data class StackCardUiData(
+  val header: HeaderData?,
+  val items: List<StackItem>,
+  val action: CardContextAction? = null,
+) : DeprecatedUiCardContext {
   override val cardType: CardType = CardType.RICH_CARD_STACK
 }
 
 /** Represents the header data in the leading column. */
-data class HeaderData(val title: String, val subtitle: String? = null)
+data class HeaderData(
+  val title: String,
+  val subtitle: String? = null,
+  val contentDescription: String? = null,
+)
 
 /** Represents an item in the stack. */
 data class StackItem(val title: String, val subtitle: String?, val style: Style = Style.STANDARD)

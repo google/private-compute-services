@@ -48,8 +48,11 @@ data class GboardHint(
   }
 
   enum class QueryCategory(val value: String) {
+    // Browsing history
     CHROME("CHROME"),
-    LOAM_FILE("LOAM_FILE");
+    LOAM_FILE("LOAM_FILE"),
+    // Sian local cache
+    NESTA("NESTA");
 
     companion object {
       fun fromValue(value: String?): QueryCategory? = entries.find { it.value == value }

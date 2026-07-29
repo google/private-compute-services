@@ -77,6 +77,7 @@ internal interface FeatureOptInServiceModule {
             pccSecurityConfigReader.config.psiPackageSecurityInfo(),
             pccSecurityConfigReader.config.asiPackageSecurityInfo(),
             pccSecurityConfigReader.config.blueflaxPackageSecurityInfo(),
+            pccSecurityConfigReader.config.agsaPackageSecurityInfo(),
           )
           .map {
             checkNotNull(

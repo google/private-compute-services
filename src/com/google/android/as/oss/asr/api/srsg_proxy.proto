@@ -44,10 +44,10 @@ message SrsgRequest {
   string session_id = 1;
 
   oneof payload {
-    InitialSrsgRequest initial_request = 2
-       ;
+    InitialSrsgRequest initial_request = 2;
 
-    EndOfData end_of_data = 3;  // Optional: To signal a clean shutdown request from client.
+    EndOfData end_of_data =
+        3;  // Optional: To signal a clean shutdown request from client.
   }
 }
 
@@ -59,18 +59,15 @@ message InitialSrsgRequest {
 
   int32 channel_count = 3;
 
-  int32 audio_format = 4
-     ;  // e.g., AudioFormat.ENCODING_PCM_16BIT
+  int32 audio_format = 4;  // e.g., AudioFormat.ENCODING_PCM_16BIT
 
   string application_id = 5;
 
   bool mask_offensive_words = 6;
 
-  LanguageDetectionConfig language_detection_config = 7
-     ;
+  LanguageDetectionConfig language_detection_config = 7;
 
-  AutoLanguageSwitchConfig auto_language_switch_config = 8
-     ;
+  AutoLanguageSwitchConfig auto_language_switch_config = 8;
 
   bool asr_enhancement_enabled = 9;
 
@@ -84,8 +81,7 @@ message SrsgResponse {
   string session_id = 1;
 
   oneof result {
-    SerializedProtoEvent proto_event = 2
-       ;
+    SerializedProtoEvent proto_event = 2;
 
     ErrorResponse error = 3;
 

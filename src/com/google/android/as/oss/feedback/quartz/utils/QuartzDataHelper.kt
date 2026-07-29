@@ -44,6 +44,7 @@ import com.google.android.`as`.oss.feedback.api.gateway.quartzKeySummarizationDa
 import com.google.android.`as`.oss.feedback.api.gateway.quartzKeyTypeData
 import com.google.android.`as`.oss.feedback.api.gateway.quartzModelData
 import com.google.android.`as`.oss.feedback.api.gateway.quartzNotificationData
+import com.google.android.`as`.oss.feedback.api.gateway.quartzUserInput
 import com.google.android.`as`.oss.feedback.api.gateway.runtimeConfig
 import com.google.android.`as`.oss.feedback.api.gateway.structuredUserInput
 import com.google.android.`as`.oss.feedback.api.gateway.userDonation
@@ -112,6 +113,28 @@ class QuartzDataHelper @Inject constructor() {
               KeyTypeOptionTag.KEY_TYPE_OPTION_UNSPECIFIED
             }
         }
+      } else if (feedbackCuj.quartzCuj == QuartzCUJ.QUARTZ_CUJ_ADVANCED_ORGANIZER) {
+        val feedbackTagSelection =
+          uiState.tagsSelectionMap[selectedEntityContent]
+            ?.values
+            ?.firstOrNull()
+            ?.keys
+            ?.firstOrNull()
+            ?.label ?: ""
+        val groundTruthSelection =
+          uiState.tagsGroundTruthSelectionMap[selectedEntityContent]
+            ?.values
+            ?.firstOrNull()
+            ?.values
+            ?.firstOrNull()
+            ?.firstOrNull()
+            ?.label ?: ""
+        structuredUserInput = structuredUserInput {
+          quartzUserInput = quartzUserInput {
+            classifierTypeOption = feedbackTagSelection
+            classifierSubtypeOption = groundTruthSelection
+          }
+        }
       }
 
       additionalComment = uiState.freeFormTextMap[selectedEntityContent] ?: ""
@@ -164,6 +187,10 @@ class QuartzDataHelper @Inject constructor() {
                         data.modelData!!.defaultCategoryCorrectionThreshold
                       isSuppressDuplicate = data.modelData!!.isSuppressDuplicate
                       summaryText = data.modelData!!.summaryText
+                      finalDecisionClassifierType = data.modelData!!.finalDecisionClassifierType
+                      naihResult = data.modelData!!.naihResult
+                      naihCategory = data.modelData!!.naihCategory
+                      extraIdentifiedResults += data.modelData!!.extraIdentifiedResults
                     }
                   } else {
                     quartzModelData {}
@@ -199,7 +226,9 @@ class QuartzDataHelper @Inject constructor() {
                       channelId = data.typeData.channelId
                       channelName = data.typeData.channelName
                       channelImportance =
-                        QuartzCommonData.ChannelImportance.valueOf(data.typeData.channelImportance)
+                        QuartzCommonData.ChannelImportance.values().firstOrNull {
+                          it.name == data.typeData.channelImportance
+                        } ?: QuartzCommonData.ChannelImportance.CHANNEL_IMPORTANCE_UNSPECIFIED
                       channelDescription = data.typeData.channelDescription
                       channelConversationId = data.typeData.channelConversationId
                       playStoreCategory = data.typeData.playStoreCategory
@@ -232,9 +261,9 @@ class QuartzDataHelper @Inject constructor() {
                     appCategory = data.typeData.appCategory
                     modelInfoList += data.typeData.modelInfoList
                     classificationMethod =
-                      QuartzKeyTypeData.ClassificationMethod.valueOf(
-                        data.typeData.classificationMethod
-                      )
+                      QuartzKeyTypeData.ClassificationMethod.values().firstOrNull {
+                        it.name == data.typeData.classificationMethod
+                      } ?: QuartzKeyTypeData.ClassificationMethod.CLASSIFICATION_METHOD_UNKNOWN
                     classificationBertCategoryResult =
                       data.typeData.classificationBertCategoryResult
                     classificationBertCategoryScore = data.typeData.classificationBertCategoryScore
@@ -310,6 +339,18 @@ class QuartzDataHelper @Inject constructor() {
           ", ${quote("structuredUserInput")}: {" +
             "${quote(PREFIX + "QuartzUserInput")}: {" +
             "${quote("key_type_option")}: ${quote(structuredUserInput.keyTypeOption.name)}" +
+            "}" +
+            "}"
+        )
+      // Add QUARTZ_CUJ_ADVANCED_ORGANIZER its own structured user input.
+    } else if (feedbackCuj.quartzCuj == QuartzCUJ.QUARTZ_CUJ_ADVANCED_ORGANIZER) {
+      finalString =
+        finalString.plus(
+          ", ${quote("structuredUserInput")}: {" +
+            "${quote(PREFIX + "QuartzUserInput")}: {" +
+            "${quote("key_type_option")}: ${quote(structuredUserInput.keyTypeOption.name)}, " +
+            "${quote("classifier_type_option")}: ${quote(structuredUserInput.quartzUserInput.classifierTypeOption)}, " +
+            "${quote("classifier_subtype_option")}: ${quote(structuredUserInput.quartzUserInput.classifierSubtypeOption)}" +
             "}" +
             "}"
         )
@@ -389,7 +430,6 @@ class QuartzDataHelper @Inject constructor() {
         donationString = donationString.plus("}")
         return donationString
       }
-
       QuartzCUJ.QUARTZ_CUJ_KEY_SUMMARIZATION -> {
         var donationString = ""
         donationString =
@@ -410,6 +450,33 @@ class QuartzDataHelper @Inject constructor() {
               } else {
                 "{${quote(PREFIX + "QuartzDonation")}: " +
                   getQuartzKeySummarizationDataString(summarizationData) +
+                  "}"
+              } +
+              "}"
+          )
+        donationString = donationString.plus("}")
+        return donationString
+      }
+      QuartzCUJ.QUARTZ_CUJ_ADVANCED_ORGANIZER -> {
+        var donationString = ""
+        donationString =
+          donationString.plus(
+            ", ${quote("userDonation")}: " +
+              "{${quote("structuredDataDonation")}: " +
+              if (userDonation.hasQuartzDataDonationV2()) {
+                val quartzDataDonationV2 = userDonation.quartzDataDonationV2
+                "{${quote(PREFIX + "QuartzDonationV2")}: {" +
+                  getQuartzNotificationDataString(quartzDataDonationV2.quartzNotificationData) +
+                  ", " +
+                  getQuartzModelDataStringForAdvancedOrganizer(
+                    quartzDataDonationV2.quartzModelData
+                  ) +
+                  ", " +
+                  getQuartzAppInfoDataString(quartzDataDonationV2.quartzAppInfoData) +
+                  "}"
+              } else {
+                "{${quote(PREFIX + "QuartzDonation")}: " +
+                  getQuartzKeyTypeDataString(quartzKeyTypeData) +
                   "}"
               } +
               "}"
@@ -455,6 +522,25 @@ class QuartzDataHelper @Inject constructor() {
       "${quote("modelInfo")}: ${quote(quartzModelData.modelInfo)}, " +
       "${quote("featureName")}: ${quote(quartzModelData.featureName)}, " +
       "${quote("summaryText")}: ${quote(quartzModelData.summaryText)}" +
+      "}"
+  }
+
+  private fun getQuartzModelDataStringForAdvancedOrganizer(
+    quartzModelData: QuartzModelData
+  ): String {
+    return "${quote(PREFIX + "QuartzModelData")}: {" +
+      "${quote("modelInfo")}: ${quote(quartzModelData.modelInfo)}, " +
+      "${quote("classificationMethod")}: ${quote(quartzModelData.classificationMethod)}, " +
+      "${quote("classificationBertCategoryResult")}: ${quote(quartzModelData.classificationBertCategoryResult)}, " +
+      "${quote("classificationBertCategoryScore")}: ${quote(quartzModelData.classificationBertCategoryScore)}, " +
+      "${quote("classificationCategory")}: ${quote(quartzModelData.classificationCategory)}, " +
+      "${quote("classificationDefaultCategoryResult")}: ${quote(quartzModelData.classificationDefaultCategoryResult)}, " +
+      "${quote("defaultCategoryCorrectionThreshold")}: ${quote(quartzModelData.defaultCategoryCorrectionThreshold)}, " +
+      "${quote("isSuppressDuplicate")}: ${quote(quartzModelData.isSuppressDuplicate)}, " +
+      "${quote("finalDecisionClassifierType")}: ${quote(quartzModelData.finalDecisionClassifierType)}, " +
+      "${quote("naihResult")}: ${quote(quartzModelData.naihResult)}, " +
+      "${quote("naihCategory")}: ${quote(quartzModelData.naihCategory)}, " +
+      "${quote("extraIdentifiedResults")}: ${buildRepeatedMessages(quartzModelData.extraIdentifiedResultsList)}" +
       "}"
   }
 

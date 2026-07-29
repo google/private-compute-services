@@ -88,6 +88,7 @@ message BlobConstraints {
     AI_CORE_IMAGE_INPUT = 9;
     AI_CORE_MESSAGES_TEXT = 10;
     AI_CORE_CHROME_SUMMARIZATION_OUTPUT = 11;
+    PLAY_PROTECT_SERVICE_PROTECTED_DOWNLOAD = 201;
 
     // AI_CORE clients reserved range from 12 to 100
     AI_CORE_CLIENT_12 = 12;
@@ -137,7 +138,7 @@ message BlobConstraints {
     PSI_TEXT_INPUT_REGEXT_ONLY_CLASSIFIER_CLIENT = 104;
     PSI_TEXT_OUTPUT_REGEX_ONLY_CLASSIFIER_CLIENT = 105;
 
-       reserved 10000 to 10004, 99997 to 99999;
+    reserved 10000 to 10004, 99997 to 99999;
   }
 
   Client client = 1002;

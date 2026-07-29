@@ -14,6 +14,7 @@
 
 load("@bazel_rules_android//android:rules.bzl", "android_library")
 load("@rules_proto_grpc//java:defs.bzl", "java_grpc_library")
+load("//net/proto2/compiler/stubby/python:py_stubby_library.bzl", "py_stubby_library")
 load("//third_party/bazel_rules/rules_python/python:proto.bzl", "py_proto_library")
 load("//third_party/protobuf/bazel:java_lite_proto_library.bzl", "java_lite_proto_library")
 load("//third_party/protobuf/bazel:proto_library.bzl", "proto_library")
@@ -72,6 +73,12 @@ kt_jvm_grpc_library(
 py_proto_library(
     name = "data_service_py_pb2",
     deps = [":data_service_proto"],
+)
+
+py_stubby_library(
+    name = "data_service_py_stubby",
+    srcs = [":data_service_proto"],
+    deps = [":data_service_py_pb2"],
 )
 
 android_library(
