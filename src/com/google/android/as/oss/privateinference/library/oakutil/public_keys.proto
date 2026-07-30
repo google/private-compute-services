@@ -17,6 +17,7 @@ edition = "2024";
 package com.google.android.as.oss.privateinference.library.oakutil;
 
 import "google/protobuf/timestamp.proto";
+import "third_party/oak/proto/attestation/reference_value.proto";
 
 option java_outer_classname = "PublicKeys";
 option java_package = "com.google.android.as.oss.privateinference.library.oakutil.proto";
@@ -25,6 +26,25 @@ message VerificationKeys {
   // Serialized com.google.crypto.tink.TinkProtoKeysetFormat keyset.
   bytes tink_serialized_public_keyset = 1;
 
-  // Time until keyset is guaranteed to be valid for verification.
+  // Time until this verification policy is guaranteed to be valid.
   google.protobuf.Timestamp valid_until = 2;
+
+  // Optional Oak reference values for verifying the peer workload identity.
+  //
+  // When set, the client verifies the server's Oak evidence and endorsements
+  // against these values before sending inference request bytes into the
+  // encrypted session.
+  oak.attestation.v1.ReferenceValues workload_reference_values = 3;
+
+  // Attestation ID that the peer must use for workload evidence.
+  //
+  // This must match the ID used by the server-side Oak attester, for example a
+  // Restricted Kernel or Oak Containers attestation ID.
+  string workload_attestation_id = 4;
+
+  // If true, fail closed when workload_reference_values is not present.
+  //
+  // This lets clients distinguish legacy keyset-only verification from a
+  // deployment that requires workload identity verification.
+  bool require_workload_reference_values = 5;
 }
