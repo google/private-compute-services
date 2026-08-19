@@ -16,7 +16,6 @@ syntax = "proto3";
 
 package com.google.android.as.oss.featurelauncher.api;
 
-
 option java_package = "com.google.android.as.oss.featurelauncher.api.proto";
 option java_multiple_files = true;
 
@@ -37,16 +36,14 @@ message ExecuteFeatureRequest {
 // Response message for executing feature requests.
 message ExecuteFeatureResponse {
   // The results of the feature operations.
-  repeated FeatureResult feature_result = 1
-     ;
+  repeated FeatureResult feature_result = 1;
 }
 
 message Feature {
   FeatureType feature_type = 1;
 
   oneof params {
-    RelationshipsParams relationships_params = 2
-       ;
+    RelationshipsParams relationships_params = 2;
   }
 }
 

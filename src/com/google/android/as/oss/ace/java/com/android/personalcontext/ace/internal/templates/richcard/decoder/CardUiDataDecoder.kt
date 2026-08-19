@@ -21,13 +21,17 @@ import android.service.personalcontext.insight.ActionableInsight
 import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.DisplayInsight
 import android.service.personalcontext.insight.InsightCollection
+import androidx.compose.foundation.layout.WindowInsets
 import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.isPrototypeInsight
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsight
 import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsight
 import com.android.personalcontext.ace.client.prototype.card.CardInsight
 import com.android.personalcontext.ace.client.prototype.loading.LoadingInsight
+import com.android.personalcontext.ace.client.prototype.richcard.RichCardHint
 import com.android.personalcontext.ace.client.prototype.serversideclose.ServerSideCloseInsight
 import com.android.personalcontext.ace.common.DisplayableInsight
 import com.android.personalcontext.ace.common.asDisplayableInsight
+import com.android.personalcontext.ace.internal.findprototypehint.FindPrototypeHint.findPrototypeHint
 import com.android.personalcontext.ace.internal.templates.richcard.Attribution
 import com.android.personalcontext.ace.internal.templates.richcard.CardContextAction
 import com.android.personalcontext.ace.internal.templates.richcard.CardTitle
@@ -59,6 +63,8 @@ abstract class CardUiDataDecoder<T : DeprecatedUiCardContext> {
     val cardContext = body.toCardContext()
     val cardContextAction = getCardContextAction()
     val actions = (actions as? InsightCollection)?.toCardActions()
+    val richCardHint = toContextInsight().findPrototypeHint<RichCardHint>()
+    val insets = richCardHint?.bottomInsetPx?.let { WindowInsets(bottom = it) } ?: WindowInsets()
 
     return CardUiData(
       cardActionDetails = cardActionDetails,
@@ -70,6 +76,7 @@ abstract class CardUiDataDecoder<T : DeprecatedUiCardContext> {
       cardContext = cardContext,
       cardContextAction = cardContextAction,
       actions = actions,
+      insets = insets,
     )
   }
 

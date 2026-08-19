@@ -21,9 +21,12 @@
     android:id="@+id/chip"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center"
-    android:background="#10454140">
-
+    android:layout_gravity="center">
+    <View
+        android:id="@+id/background"
+        android:layout_gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
     <ImageView
         android:id="@+id/icon"
         android:layout_width="24dp"

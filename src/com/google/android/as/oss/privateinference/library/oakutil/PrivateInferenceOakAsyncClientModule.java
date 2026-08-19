@@ -29,6 +29,9 @@ import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.oak.client.grpc.StreamObserverSessionClient;
 import com.google.oak.remote_attestation.AttestationVerificationClock;
 import com.google.oak.session.OakSessionConfigBuilder;
+import com.google.oak.session.tls.OakSessionClientTlsContext;
+import com.google.oak.session.tls.OakSessionTlsContext;
+import com.google.oak.session.tls.OakSessionTlsException;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
@@ -56,6 +59,25 @@ abstract class PrivateInferenceOakAsyncClientModule {
   static StreamObserverSessionClient provideStreamObserverSessionClient(
       Provider<OakSessionConfigBuilder> configProvider) {
     return new StreamObserverSessionClient(configProvider);
+  }
+
+  @Provides
+  @Singleton
+  static StreamObserverTlsSessionClient provideStreamObserverTlsSessionClient(
+      Provider<OakSessionTlsContext> tlsContextProvider) {
+    return new StreamObserverTlsSessionClient(tlsContextProvider);
+  }
+
+  @Provides
+  static OakSessionTlsContext provideOakSessionTlsContext() {
+    try {
+      return OakSessionTlsContext.create(
+          OakSessionClientTlsContext.Config.builder()
+              .customCertVerifier((certChain, standardResult) -> {})
+              .build());
+    } catch (OakSessionTlsException e) {
+      throw new IllegalStateException("Failed to create OakSessionTlsContext", e);
+    }
   }
 
   @Binds

@@ -26,7 +26,7 @@ option java_outer_classname = "MultiFeedbackDialogDataOuterClass";
 option java_package = "com.google.android.as.oss.feedback.api";
 
 // The data required to populate the feedback UI for multiple entities.
-// Next ID: 15
+// Next ID: 16
 message MultiFeedbackDialogData {
   // The client session ID of the entities.
   string client_session_id = 1;
@@ -78,6 +78,9 @@ message MultiFeedbackDialogData {
   // The description of the view data tile.
   string feedback_dialog_opt_in_v2_description = 14
      ;
+
+  // Whether to hide the opt-in checkbox / controls in the UI.
+  bool hide_opt_in_control = 15;
 }
 
 message FeedbackEntityCommonData {

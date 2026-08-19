@@ -16,8 +16,14 @@ load("@bazel_rules_android//android:rules.bzl", "android_library")
 
 package(
     default_visibility = [
+        "//java/com/google/android/testing/personalcontext:__subpackages__",
         "//third_party/java/android_app/personalcontext:external",
     ],
+)
+
+android_library(
+    name = "pixel_dialer_metadata_keys",
+    srcs = ["PixelDialerMetadataKeys.kt"],
 )
 
 android_library(
@@ -26,8 +32,8 @@ android_library(
         "DialerMetadataHint.kt",
     ],
     deps = [
-        "//java/com/google/android/libraries/pixel/psi/delegatedui/ace/hints/call:pixel_dialer_metadata_keys",
-        "//java/com/google/android/libraries/pixel/psi/delegatedui/ace/hints/call:pixel_dialer_metadata_kt_proto_lite",
+        ":pixel_dialer_metadata_keys",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype:prototype_hint",
+        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )

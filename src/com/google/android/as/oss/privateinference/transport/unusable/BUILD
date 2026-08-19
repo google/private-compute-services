@@ -28,6 +28,7 @@ android_library(
         "UnusableManagedChannelFactory.kt",
     ],
     deps = [
+        "//src/com/google/android/as/oss/privateinference/service/api:private_inference_kt_proto_lite",
         "//src/com/google/android/as/oss/privateinference/transport:managed_channel_factory",
         "@maven//:io_grpc_grpc_api",
         "@maven//:javax_inject_javax_inject",

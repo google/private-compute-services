@@ -133,6 +133,7 @@ internal constructor(
               lastUpdated = timeSource.now().toProtoTimestamp()
             }
           }
+          logger.atInfo().log("Updated proxy configs data store")
         }
       }
 
@@ -157,6 +158,7 @@ internal constructor(
     // DataStore caches the data in memory, so this could be fast if it's not the first read.
     val timestampedProxyConfigs = proxyConfigsDataStore.data.first()
     if (timestampedProxyConfigs == timestampedProxyConfigs {}) {
+      logger.atInfo().log("Proxy config is empty in data store, will fetch new configs from server")
       return null
     }
 

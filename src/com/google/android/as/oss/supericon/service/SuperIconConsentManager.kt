@@ -76,7 +76,7 @@ internal constructor(
       }
 
   /** Updates the consent state and records it in the history. */
-  suspend fun recordConsentState(value: ConsentState) {
+  suspend fun recordConsentState(value: ConsentState, version: Long = 0L) {
     val protoValue =
       when (value) {
         ConsentState.UNSET -> ConsentStateProto.CONSENT_STATE_UNSET
@@ -92,11 +92,60 @@ internal constructor(
           consentHistoryEntry {
             timestampMs = clock.instant().toEpochMilli()
             state = protoValue
-            version = CURRENT_CONSENT_VERSION
+            this.version = version
           }
         )
       }
     }
+  }
+
+  /** Returns true if the user has granted consent for the specified version (or newer). */
+  suspend fun hasGrantedConsent(consentVersion: Long): Boolean {
+    val data = dataStore.data.first()
+
+    if (data.historyList.isEmpty()) {
+      // Backwards compatibility: If the user granted consent on an older version of the app
+      // before the history log existed, the history will be empty. In this case, we deduce
+      // that they agreed to the original version (version 0).
+      return data.currentState == ConsentStateProto.CONSENT_STATE_GRANTED && consentVersion == 0L
+    }
+
+    // We consider an event relevant to the requested version if:
+    // 1. It explicitly targets this version.
+    // 2. It is a grant of a newer version (implicitly granting older versions).
+    // 3. It is a global revocation (invalidating all grants).
+    // This prevents rollback regressions if a user denies a newer version.
+    val mostRecentRelevantEvent =
+      data.historyList
+        .filter {
+          it.version == consentVersion ||
+            (it.version > consentVersion && it.state == ConsentStateProto.CONSENT_STATE_GRANTED) ||
+            it.state == ConsentStateProto.CONSENT_STATE_REVOKED
+        }
+        .maxByOrNull { it.timestampMs }
+
+    return mostRecentRelevantEvent?.state == ConsentStateProto.CONSENT_STATE_GRANTED
+  }
+
+  /** Returns true if the current consent state is UNSET. */
+  suspend fun isConsentUnset(consentVersion: Long = 0L): Boolean {
+    val data = dataStore.data.first()
+
+    if (data.historyList.isEmpty()) {
+      // Backwards compatibility: If history is empty but currentState is set,
+      // it applies ONLY to version 0.
+      if (data.currentState != ConsentStateProto.CONSENT_STATE_UNSET) {
+        return consentVersion != 0L
+      }
+      return true
+    }
+    // Consent is considered "answered" if there is any history event
+    // for this version, a newer version, or a global REVOKED state.
+    val hasAnswered =
+      data.historyList.any {
+        it.version >= consentVersion || it.state == ConsentStateProto.CONSENT_STATE_REVOKED
+      }
+    return !hasAnswered
   }
 
   suspend fun recordConsentFormShown() {
@@ -111,24 +160,37 @@ internal constructor(
   /**
    * Evaluates if the consent form should be shown based on rate-limiting logic:
    * - Immediately returns false if the user explicitly opted out via the Gboard UI toggle (REVOKED)
-   * - Max n times shown overall
-   * - x days minimum interval after a denial/dismissal
+   * - Max n times shown overall per version
+   * - x days minimum interval after a denial/dismissal per version
    */
-  suspend fun shouldShowConsentForm(): Boolean {
+  suspend fun shouldShowConsentForm(consentVersion: Long = 0L): Boolean {
     val data = dataStore.data.first()
     val config = configReader.config
 
-    if (
-      data.currentState == ConsentStateProto.CONSENT_STATE_GRANTED ||
-        data.currentState == ConsentStateProto.CONSENT_STATE_REVOKED
-    ) {
+    if (data.currentState == ConsentStateProto.CONSENT_STATE_REVOKED) {
+      // The user explicitly revoked the feature. However, if they revoked an older version,
+      // we still want to give them a "fresh start" and show the form for the new version.
+      if (data.historyList.isEmpty()) {
+        if (0L >= consentVersion) return false
+      } else {
+        val mostRecentEvent = data.historyList.maxByOrNull { it.timestampMs }
+        if (mostRecentEvent != null && mostRecentEvent.version >= consentVersion) {
+          return false
+        }
+      }
+    }
+
+    if (hasGrantedConsent(consentVersion)) {
       return false
     }
 
-    // Filter history specifically for DENIED entries.
+    // Filter history specifically for DENIED entries for the requested version.
     // Note: The UI layer explicitly records dismissals (tapping outside) as DENIED,
     // so this single check covers both explicit denials and dismissals without counting UNSET.
-    val denials = data.historyList.filter { it.state == ConsentStateProto.CONSENT_STATE_DENIED }
+    val denials =
+      data.historyList.filter {
+        it.state == ConsentStateProto.CONSENT_STATE_DENIED && it.version == consentVersion
+      }
 
     // Max of n times
     if (denials.size >= config.maxConsentPrompts) {

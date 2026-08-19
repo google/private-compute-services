@@ -17,6 +17,7 @@
 package com.google.android.`as`.oss.delegatedui.config
 
 import com.google.android.`as`.oss.common.config.FlagManager.BooleanFlag
+import com.google.android.`as`.oss.common.config.FlagManager.LongFlag
 import com.google.android.`as`.oss.common.config.FlagManager.ProtoFlag
 import com.google.android.`as`.oss.delegatedui.api.config.DelegatedUiDataServiceConfigList
 
@@ -40,4 +41,6 @@ object DelegatedUiFlags {
     BooleanFlag.create("${PREFIX}bypass_all_security_policies", false)
   val ENABLE_BUGLE_OUTLINE_ANIMATION_V2 =
     BooleanFlag.create("${PREFIX}enable_bugle_outline_animation_v2", false)
+  val BUGLE_MAGIC_CARD_CHIP_TIMEOUT_MS =
+    LongFlag.create("${PREFIX}bugle_magic_card_chip_timeout_ms", 290000L)
 }

@@ -16,7 +16,6 @@ edition = "2024";
 
 package com.google.android.as.oss.delegatedui.api.integration.templates.example;
 
-
 option java_outer_classname = "ExampleTemplateIntegration";
 option java_package = "com.google.android.as.oss.delegatedui.api.integration.templates.example";
 

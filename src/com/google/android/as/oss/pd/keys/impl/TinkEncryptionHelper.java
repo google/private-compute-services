@@ -20,6 +20,7 @@ import com.google.android.as.oss.pd.keys.EncryptionHelper;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.RegistryConfiguration;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.hybrid.HybridConfigurationV0;
 import java.io.IOException;
@@ -63,13 +64,17 @@ class TinkEncryptionHelper implements EncryptionHelper {
 
   @Override
   public byte[] publicKey() throws GeneralSecurityException, IOException {
-    return TinkProtoKeysetFormat.serializeKeysetWithoutSecret(getPublicKeysetHandle());
+    return TinkProtoKeysetFormat.serializeKeysetWithoutSecret(
+        getPublicKeysetHandle(), RegistryConfiguration.get());
   }
 
   @Override
   public byte[] toEncryptedKeySet() throws GeneralSecurityException, IOException {
     return TinkProtoKeysetFormat.serializeEncryptedKeyset(
-        handle, masterKeyProvider.readOrGenerateMasterKey(), new byte[] {});
+        handle,
+        masterKeyProvider.readOrGenerateMasterKey(),
+        new byte[] {},
+        RegistryConfiguration.get());
   }
 
   @Override

@@ -16,7 +16,6 @@ edition = "2024";
 
 package com.google.android.as.oss.delegatedui.api.integration.egress.airflow;
 
-
 option java_outer_classname = "AirflowEgressIntegration";
 option java_package = "com.google.android.as.oss.delegatedui.api.integration.egress.airflow";
 

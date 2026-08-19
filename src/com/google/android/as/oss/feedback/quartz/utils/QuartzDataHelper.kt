@@ -191,6 +191,7 @@ class QuartzDataHelper @Inject constructor() {
                       naihResult = data.modelData!!.naihResult
                       naihCategory = data.modelData!!.naihCategory
                       extraIdentifiedResults += data.modelData!!.extraIdentifiedResults
+                      isNaihExpired = data.modelData!!.isNaihExpired
                     }
                   } else {
                     quartzModelData {}
@@ -540,7 +541,8 @@ class QuartzDataHelper @Inject constructor() {
       "${quote("finalDecisionClassifierType")}: ${quote(quartzModelData.finalDecisionClassifierType)}, " +
       "${quote("naihResult")}: ${quote(quartzModelData.naihResult)}, " +
       "${quote("naihCategory")}: ${quote(quartzModelData.naihCategory)}, " +
-      "${quote("extraIdentifiedResults")}: ${buildRepeatedMessages(quartzModelData.extraIdentifiedResultsList)}" +
+      "${quote("extraIdentifiedResults")}: ${buildRepeatedMessages(quartzModelData.extraIdentifiedResultsList)}, " +
+      "${quote("isNaihExpired")}: ${quote(quartzModelData.isNaihExpired)}" +
       "}"
   }
 

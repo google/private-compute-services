@@ -37,4 +37,6 @@ data class FeedbackConfig(
   val enableDefaultDonationOptInL1: Boolean,
   // Whether to enable default opt in for Memory L0 data.
   val enableDefaultDonationOptInL0: Boolean,
+  // Whether to enable Blueflax feedback.
+  val enableBlueflaxFeedback: Boolean = false,
 )

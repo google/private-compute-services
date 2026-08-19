@@ -24,8 +24,10 @@ android_library(
     name = "gboard",
     srcs = [
         "GboardHint.kt",
+        "KeyEventHint.kt",
     ],
     deps = [
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype:prototype_hint",
+        "@maven//:androidx_core_core",
     ],
 )

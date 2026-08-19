@@ -19,6 +19,8 @@ package com.google.android.as.oss.privateinference.library;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.android.as.oss.privateinference.library.oakutil.PrivateInferenceOakAsyncClient;
+import com.google.android.as.oss.privateinference.service.api.proto.IpBlindingMode;
+import com.google.android.as.oss.privateinference.service.api.proto.PcsPrivateInferenceFeatureName;
 import com.google.android.as.oss.privateinference.service.api.proto.PrivateInferenceRequest;
 import com.google.android.as.oss.privateinference.service.api.proto.PrivateInferenceSessionRequest;
 import com.google.android.as.oss.privateinference.service.api.proto.SessionInitializationRequest;
@@ -62,6 +64,7 @@ public class BaseOakServerStreamRequestReader
       oakServerStreamResponseObserver;
 
   private final AtomicReference<StreamObserver<ByteString>> directOakClientRequestObserver;
+  private final boolean enableTlsBasedSession;
 
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
 
@@ -70,10 +73,25 @@ public class BaseOakServerStreamRequestReader
       StreamObserverSessionClient.OakSessionStreamObserver oakServerStreamResponseObserver,
       AtomicReference<StreamObserver<ByteString>> directOakClientRequestObserver,
       @Nullable InputStream parcelInputStream) {
+    this(
+        oakAsyncClient,
+        oakServerStreamResponseObserver,
+        directOakClientRequestObserver,
+        parcelInputStream,
+        /* enableTlsBasedSession= */ false);
+  }
+
+  public BaseOakServerStreamRequestReader(
+      PrivateInferenceOakAsyncClient oakAsyncClient,
+      StreamObserverSessionClient.OakSessionStreamObserver oakServerStreamResponseObserver,
+      AtomicReference<StreamObserver<ByteString>> directOakClientRequestObserver,
+      @Nullable InputStream parcelInputStream,
+      boolean enableTlsBasedSession) {
     this.parcelInputStream = parcelInputStream;
     this.oakAsyncClient = oakAsyncClient;
     this.oakServerStreamResponseObserver = oakServerStreamResponseObserver;
     this.directOakClientRequestObserver = directOakClientRequestObserver;
+    this.enableTlsBasedSession = enableTlsBasedSession;
   }
 
   @Override
@@ -81,9 +99,15 @@ public class BaseOakServerStreamRequestReader
     if (privateInferenceSessionRequest.hasSessionInitializationRequest()) {
       SessionInitializationRequest initializationRequest =
           privateInferenceSessionRequest.getSessionInitializationRequest();
-      oakAsyncClient.startNoiseSession(
-          buildPrivateInferenceRequestMetadata(initializationRequest),
-          oakServerStreamResponseObserver);
+      if (enableTlsBasedSession) {
+        oakAsyncClient.startTlsSession(
+            buildPrivateInferenceRequestMetadata(initializationRequest),
+            oakServerStreamResponseObserver);
+      } else {
+        oakAsyncClient.startNoiseSession(
+            buildPrivateInferenceRequestMetadata(initializationRequest),
+            oakServerStreamResponseObserver);
+      }
     } else if (privateInferenceSessionRequest.hasInferenceRequest()) {
       // oakClientStreamObserver should have been created in during the handshake.
       if (directOakClientRequestObserver.get() == null) {
@@ -161,6 +185,20 @@ public class BaseOakServerStreamRequestReader
           authInfo.spatulaHeader = Optional.of(request.getSpatulaHeader());
         }
         return authInfo;
+      }
+
+      @Override
+      public PcsPrivateInferenceFeatureName getFeatureName() {
+        return request.getFeatureName();
+      }
+
+      @Override
+      public IpBlindingMode getIpBlindingMode() {
+        IpBlindingMode ipBlindingMode = request.getSessionConfiguration().getIpBlindingMode();
+        if (ipBlindingMode == IpBlindingMode.IP_BLINDING_MODE_UNSPECIFIED) {
+          return IpBlindingMode.IP_BLINDING_MODE_ENABLED;
+        }
+        return ipBlindingMode;
       }
     };
   }

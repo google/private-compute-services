@@ -16,12 +16,11 @@ edition = "2024";
 
 package com.google.android.as.oss.dataattribution.proto;
 
-
 option java_outer_classname = "AttributionChipHeader";
 option java_package = "com.google.android.as.oss.dataattribution.proto";
 
 // The data required to populate [AttributionChipData].
-// Next ID: 4
+// Next ID: 5
 message AttributionChipData {
   // A bitmap that should match the icon/image the user sees on the long-pressed
   // entity.
@@ -36,4 +35,8 @@ message AttributionChipData {
   // the label that should match the full egress data if the user clicks on the
   // long-pressed entity.
   string chip_label = 2;
+
+  // Whether the chip_bitmap is a branded icon, which should apply gradient
+  // tinting when displayed.
+  bool is_branded_icon = 4;
 }

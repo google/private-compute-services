@@ -16,7 +16,6 @@ edition = "2024";
 
 package com.google.android.as.oss.feedback.api.gateway;
 
-
 option java_outer_classname = "MessageArmour";
 option java_package = "com.google.android.as.oss.feedback.api.gateway";
 
@@ -44,8 +43,7 @@ message MessageArmourDataDonation {
 
     // User survey free form text response for Message Armour feature.
     MessageArmourUserSurveyTextResponse
-        message_armour_user_survey_text_response = 2
-       ;
+        message_armour_user_survey_text_response = 2;
   }
 }
 
@@ -59,8 +57,7 @@ message MessageArmourUserInput {
   oneof cuj_specific_user_input {
     // User survey selection response for Message Armour feature.
     MessageArmourUserSurveySelectionResponse
-        message_armour_user_survey_selection_response = 1
-       ;
+        message_armour_user_survey_selection_response = 1;
   }
 }
 

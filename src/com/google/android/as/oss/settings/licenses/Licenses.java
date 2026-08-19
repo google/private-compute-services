@@ -55,7 +55,7 @@ public final class Licenses {
    */
   public static ArrayList<License> getLicenseListFromMetadata(String metadata, String filePath) {
     String[] entries = metadata.split("\n");
-    ArrayList<License> licenses = new ArrayList<License>(entries.length);
+    ArrayList<License> licenses = new ArrayList<>(entries.length);
     for (String entry : entries) {
       int delimiter = entry.indexOf(' ');
       String[] licenseLocation = entry.substring(0, delimiter).split(":");

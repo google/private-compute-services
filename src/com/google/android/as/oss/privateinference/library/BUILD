@@ -23,6 +23,9 @@ android_library(
     srcs = [
         "PrivateInferenceRequestMetadata.java",
     ],
+    deps = [
+        "//src/com/google/android/as/oss/privateinference/service/api:private_inference_java_proto_lite",
+    ],
 )
 
 android_library(

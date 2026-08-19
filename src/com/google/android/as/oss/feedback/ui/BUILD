@@ -17,6 +17,27 @@ load("@bazel_rules_android//android:rules.bzl", "android_library")
 package(default_visibility = ["//visibility:public"])
 
 android_library(
+    name = "betterbug_attachment_screen",
+    srcs = ["BetterBugAttachmentScreen.kt"],
+    deps = [
+        "//java/com/google/android/libraries/material/compose:button",
+        "//java/com/google/android/libraries/material/compose:checkbox",
+        "//java/com/google/android/libraries/material/compose:progress_indicator",
+        "//java/com/google/android/libraries/material/compose:scaffold",
+        "//java/com/google/android/libraries/material/compose:text",
+        "//src/com/google/android/as/oss/feedback/domain:betterbug_attachment_view_model",
+        "//third_party/java/androidx/activity/compose",
+        "//third_party/java/androidx/compose/foundation",
+        "//third_party/java/androidx/compose/foundation/layout",
+        "//third_party/java/androidx/compose/material3",
+        "//third_party/java/androidx/compose/runtime",
+        "//third_party/java/androidx/compose/runtime/saveable",
+        "//third_party/java/androidx/compose/ui",
+        "//third_party/java/androidx/compose/ui/unit",
+    ],
+)
+
+android_library(
     name = "single_entity_feedback_dialog",
     srcs = [
         "SingleEntityFeedbackDialog.kt",
@@ -33,6 +54,7 @@ android_library(
         ":view_feedback_data_dialog",
         "//src/com/google/android/as/oss/delegatedui/service/templates/fonts:flex_fonts",
         "//src/com/google/android/as/oss/delegatedui/service/templates/motion:expressive_motion",
+        "//src/com/google/android/as/oss/feedback/blueflax/utils:blueflax_data_helper",
         "//src/com/google/android/as/oss/feedback/domain:feedback_submission_data",
         "//src/com/google/android/as/oss/feedback/domain:feedback_ui_consts",
         "//src/com/google/android/as/oss/feedback/domain:feedback_ui_state",
@@ -81,6 +103,7 @@ android_library(
         ":view_feedback_data_dialog",
         "//src/com/google/android/as/oss/delegatedui/service/templates/fonts:flex_fonts",
         "//src/com/google/android/as/oss/delegatedui/service/templates/motion:expressive_motion",
+        "//src/com/google/android/as/oss/feedback/blueflax/utils:blueflax_data_helper",
         "//src/com/google/android/as/oss/feedback/domain:feedback_submission_data",
         "//src/com/google/android/as/oss/feedback/domain:feedback_ui_consts",
         "//src/com/google/android/as/oss/feedback/domain:feedback_ui_state",

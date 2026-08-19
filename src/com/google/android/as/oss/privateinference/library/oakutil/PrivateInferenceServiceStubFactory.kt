@@ -25,9 +25,12 @@ import com.google.android.`as`.oss.privateinference.Annotations.PrivateInference
 import com.google.android.`as`.oss.privateinference.Annotations.PrivateInferenceWaitForGrpcChannelReady
 import com.google.android.`as`.oss.privateinference.config.impl.DeviceInfo
 import com.google.android.`as`.oss.privateinference.library.PrivateInferenceRequestMetadata
+import com.google.android.`as`.oss.privateinference.service.api.proto.IpBlindingMode
+import com.google.android.`as`.oss.privateinference.service.api.proto.sessionConfiguration
 import com.google.android.`as`.oss.privateinference.transport.ManagedChannelFactory
 import com.google.common.flogger.GoogleLogger
 import com.google.search.mdi.privatearatea.proto.PrivateArateaServiceGrpc
+import com.google.search.mdi.privatearatea.proto.PrivateTlsServiceGrpc
 import dagger.Lazy
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.grpc.Metadata
@@ -57,15 +60,75 @@ internal constructor(
    * interceptor to the stub if required.
    */
   open suspend fun createStub(
-    authInfo: PrivateInferenceRequestMetadata.AuthInfo
+    authInfo: PrivateInferenceRequestMetadata.AuthInfo,
+    ipBlindingMode: IpBlindingMode,
   ): PrivateArateaServiceGrpc.PrivateArateaServiceStub {
+    val sessionConfiguration = sessionConfiguration { this.ipBlindingMode = ipBlindingMode }
     var stub =
       if (waitForGrpcChannelToBeReady) {
         logger.atInfo().log("Waiting for gRPC channel to be ready.")
-        PrivateArateaServiceGrpc.newStub(managedChannelFactory.get().getInstance())
+        PrivateArateaServiceGrpc.newStub(
+            managedChannelFactory.get().getInstance(sessionConfiguration)
+          )
           .withWaitForReady()
       } else {
-        PrivateArateaServiceGrpc.newStub(managedChannelFactory.get().getInstance())
+        PrivateArateaServiceGrpc.newStub(
+          managedChannelFactory.get().getInstance(sessionConfiguration)
+        )
+      }
+    if (attachCertificateHeader) {
+      logger.atInfo().log("Attaching certificate header to the request.")
+      stub =
+        stub.withInterceptors(
+          AndroidPackageAndCertificateInterceptor(
+            context.packageName,
+            getCertFingerprint(context) ?: "",
+          )
+        )
+    }
+
+    deviceInfo.getOrNull()?.let {
+      logger.atFine().log("Attaching device info to the request.")
+      stub =
+        stub.withInterceptors(
+          DeviceInfo.PcsVersionInterceptor(deviceInfo.getOrNull()),
+          DeviceInfo.HardwareRevisionInterceptor(deviceInfo.getOrNull()),
+        )
+    }
+
+    if (useEndpointSpecificVerificationKeys) {
+      logger.atInfo().log("Attaching client verification key variant header to the request.")
+      stub = stub.withInterceptors(ClientVerificationKeyVariantInterceptor("nonprod"))
+    }
+
+    if (passForceEzUsageHeader) {
+      logger.atInfo().log("Attaching x-use-ez header to the request.")
+      stub = stub.withInterceptors(UseEzInterceptor())
+    }
+
+    return when {
+      authInfo.spatulaHeader.isPresent ->
+        stub.withInterceptors(SpatulaInterceptor(authInfo.spatulaHeader.get()))
+      authInfo.apiKey.isPresent -> stub.withInterceptors(ApiKeyInterceptor(authInfo.apiKey.get()))
+      else -> stub
+    }
+  }
+
+  /**
+   * Creates a stub for PrivateTlsServiceGrpc.PrivateTlsServiceStub
+   *
+   * The given API key or Spatula header in the [authInfo] is used to add the appropriate
+   * interceptor to the stub if required.
+   */
+  open suspend fun createPrivateTlsServiceStub(
+    authInfo: PrivateInferenceRequestMetadata.AuthInfo
+  ): PrivateTlsServiceGrpc.PrivateTlsServiceStub {
+    var stub =
+      if (waitForGrpcChannelToBeReady) {
+        logger.atInfo().log("Waiting for gRPC channel to be ready.")
+        PrivateTlsServiceGrpc.newStub(managedChannelFactory.get().getInstance()).withWaitForReady()
+      } else {
+        PrivateTlsServiceGrpc.newStub(managedChannelFactory.get().getInstance())
       }
     if (attachCertificateHeader) {
       logger.atInfo().log("Attaching certificate header to the request.")

@@ -24,6 +24,7 @@ import android.service.personalcontext.insight.ActionableInsight
 import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.InsightActionDetails
 import android.service.personalcontext.insight.InsightDisplayDetails
+import androidx.compose.foundation.layout.WindowInsets
 import com.android.personalcontext.ace.client.prototype.serversideclose.ServerSideCloseInsight
 import com.android.personalcontext.ace.common.DisplayableInsight
 import java.util.UUID
@@ -45,6 +46,7 @@ import java.util.UUID
  * @property attribution Source information for the data.
  * @property cardContext Card content info in grid. If null, omit the context section.
  * @property actions Optional list of actions the user can take.
+ * @property insets Optional insets to apply to the card contents from the edges of the card.
  */
 data class CardUiData<out C : DeprecatedUiCardContext>(
   val id: String = UUID.randomUUID().toString(),
@@ -57,6 +59,7 @@ data class CardUiData<out C : DeprecatedUiCardContext>(
   val cardContext: C? = null,
   val cardContextAction: CardContextAction? = null,
   val actions: List<CardAction>? = null,
+  val insets: WindowInsets = WindowInsets(),
 )
 
 /** Represents the state of the card title/insight. */

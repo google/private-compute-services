@@ -17,6 +17,7 @@
 package com.google.android.`as`.oss.feedback.gateway
 
 import android.content.Context
+import com.google.android.`as`.oss.feedback.api.gateway.BlueflaxCUJ
 import com.google.android.`as`.oss.feedback.api.gateway.FeedbackCUJ
 import com.google.android.`as`.oss.feedback.api.gateway.LogFeedbackV2Request
 import com.google.android.`as`.oss.feedback.api.gateway.MemoryEntity
@@ -26,6 +27,7 @@ import com.google.android.`as`.oss.feedback.api.gateway.Rating
 import com.google.android.`as`.oss.feedback.api.gateway.RuntimeConfig
 import com.google.android.`as`.oss.feedback.api.gateway.SpoonFeedbackDataDonation
 import com.google.android.`as`.oss.feedback.api.gateway.UserDataDonationOption
+import com.google.android.`as`.oss.feedback.blueflax.utils.BlueflaxDataHelper
 import com.google.android.`as`.oss.feedback.messagearmour.utils.MessageArmourDataHelper
 import com.google.android.`as`.oss.feedback.quartz.utils.QuartzDataHelper
 import com.google.android.`as`.oss.networkusage.db.ConnectionDetails.ConnectionType
@@ -48,6 +50,7 @@ class FeedbackHttpClientImpl
 internal constructor(
   private val quartzDataHelper: QuartzDataHelper,
   private val messageArmourDataHelper: MessageArmourDataHelper,
+  private val blueflaxDataHelper: BlueflaxDataHelper,
   private val networkUsageLogRepository: NetworkUsageLogRepository,
   @ApplicationContext private val context: Context,
 ) : FeedbackHttpClient {
@@ -64,6 +67,9 @@ internal constructor(
       ) {
         usageLogFeatureName = FEATURE_NAME_FEEDBACK_ASI
         with(messageArmourDataHelper) { request.convertToMessageArmourRequestString() }
+      } else if (request.feedbackCuj.blueflaxCuj != BlueflaxCUJ.BLUEFLAX_CUJ_UNSPECIFIED) {
+        usageLogFeatureName = FEATURE_NAME_FEEDBACK_BLUEFLAX
+        with(blueflaxDataHelper) { request.convertToBlueflaxRequestString() }
       } else {
         usageLogFeatureName = FEATURE_NAME_FEEDBACK_PSI
         request.convertToRequestString()
@@ -72,12 +78,8 @@ internal constructor(
     if (
       !networkUsageLogRepository.isKnownConnection(
         ConnectionType.FEEDBACK_REQUEST,
-        FEATURE_NAME_FEEDBACK_PSI,
-      ) &&
-        !networkUsageLogRepository.isKnownConnection(
-          ConnectionType.FEEDBACK_REQUEST,
-          FEATURE_NAME_FEEDBACK_ASI,
-        )
+        usageLogFeatureName,
+      )
     ) {
       logger.atInfo().log("Feedback upload request rejected as connection is not known")
       return false
@@ -154,6 +156,7 @@ internal constructor(
     const val APEX_SERVICE_URL = ""
     const val FEATURE_NAME_FEEDBACK_PSI = "feedback_apex_psi"
     const val FEATURE_NAME_FEEDBACK_ASI = "feedback_apex_asi"
+    const val FEATURE_NAME_FEEDBACK_BLUEFLAX = "feedback_apex_blueflax"
     val JSON_MEDIA_TYPE = "$JSON_CONTENT_TYPE; charset=utf-8".toMediaType()
   }
 }

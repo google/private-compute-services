@@ -22,7 +22,9 @@ import kotlin.annotation.Retention
 
 @Qualifier @Retention(RUNTIME) annotation class FeatureNameToSuccessCountMetricIdMap
 
-@Qualifier @Retention(RUNTIME) annotation class FeatureNameToFailureCountMetricIdMap
+@Qualifier @Retention(RUNTIME) annotation class FeatureNameToSessionErrorCountMetricIdMap
+
+@Qualifier @Retention(RUNTIME) annotation class FeatureNameToSessionCountMetricIdMap
 
 @Qualifier @Retention(RUNTIME) annotation class FeatureNameToCountMetricIdMap
 

@@ -26,4 +26,6 @@ object Constants {
   const val SHOULD_AUTO_SUBMIT_KEY = "SHOULD_AUTO_SUBMIT"
   const val TOAST_MESSAGE_ON_FAILURE_KEY = "TOAST_MESSAGE_ON_FAILURE"
   const val SHOULD_AUTOMATE_KEY = "SHOULD_AUTOMATE"
+  const val ACTION_SHARE_CONVERSATION =
+    "com.google.android.apps.pixel.blueflax.action.SHARE_CONVERSATION"
 }

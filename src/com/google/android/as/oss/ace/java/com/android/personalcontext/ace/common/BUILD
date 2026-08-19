@@ -55,6 +55,10 @@ android_library(
 android_library(
     name = "modifier_utils",
     srcs = ["ModifierUtils.kt"],
+    visibility = [
+        "//javatests/com/google/android/apps/miphone/pcs:__subpackages__",
+        "//src/com/google/android/as/oss:__subpackages__",
+    ],
     deps = [
         "//third_party/java/androidx/compose/ui",
         "//third_party/java/androidx/compose/ui/geometry",
@@ -69,6 +73,22 @@ android_library(
     ],
     deps = [
         "@maven//:androidx_core_core",
+    ],
+)
+
+android_library(
+    name = "energy_color_utils",
+    srcs = ["EnergyColorUtils.kt"],
+    visibility = [
+        "//src/com/google/android/as/oss:__subpackages__",
+    ],
+    deps = [
+        "//java/com/google/android/systemui/graphics/shaderlib/ane/colors",
+        "//third_party/java/androidx/compose/foundation",
+        "//third_party/java/androidx/compose/runtime",
+        "//third_party/java/androidx/compose/ui",
+        "//third_party/java/androidx/compose/ui/graphics",
+        "@maven//:androidx_annotation_annotation",
     ],
 )
 

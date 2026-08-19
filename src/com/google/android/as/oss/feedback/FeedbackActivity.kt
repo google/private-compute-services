@@ -61,6 +61,18 @@ class FeedbackActivity : Hilt_FeedbackActivity() {
         return
       }
 
+      // TODO: Clean up this defensive check once enableBlueflaxFeedback is enabled by
+      // default.
+      if (
+        !configReader.config.enableBlueflaxFeedback &&
+          entityFeedbackDialogData?.feedbackClient ==
+            EntityFeedbackDialogData.FeedbackClient.FEEDBACK_CLIENT_BLUEFLAX
+      ) {
+        logger.atSevere().log("Blueflax feedback is disabled by config. Finishing activity.")
+        finish()
+        return
+      }
+
       logger
         .atInfo()
         .log(

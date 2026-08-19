@@ -83,6 +83,8 @@ android_library(
     resource_files = glob(["res/**"]),
     deps = [
         ":data_attribution_view_model",
+        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/common:energy_color_utils",
+        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/common:modifier_utils",
         "//src/com/google/android/as/oss/dataattribution/proto:attribution_chip_header_kt_proto_lite",
         "//src/com/google/android/as/oss/dataattribution/proto:attribution_dialog_kt_proto_lite",
         "//src/com/google/android/as/oss/delegatedui/service/templates/fonts:flex_fonts",

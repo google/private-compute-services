@@ -20,6 +20,7 @@ import com.google.android.as.oss.attestation.AttestationMeasurementRequest;
 import com.google.android.as.oss.attestation.PccAttestationMeasurementClient;
 import com.google.android.as.oss.pd.attestation.AttestationClient;
 import com.google.android.as.oss.pd.attestation.AttestationResponse;
+import com.google.common.flogger.GoogleLogger;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.concurrent.Executor;
@@ -29,6 +30,8 @@ import java.util.concurrent.Executor;
  * measurement for protected downloads.
  */
 public class AttestationClientImpl implements AttestationClient {
+  private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
+
   private final PccAttestationMeasurementClient attestationMeasurementClient;
   private final Executor executor;
 
@@ -47,6 +50,19 @@ public class AttestationClientImpl implements AttestationClient {
             .build();
 
     return FluentFuture.from(attestationMeasurementClient.requestAttestationMeasurement(request))
+        .catchingAsync(
+            Exception.class,
+            e -> {
+              logger.atWarning().withCause(e).log(
+                  "Failed to generate key with ID attestation, retrying without it.");
+              AttestationMeasurementRequest retryRequest =
+                  AttestationMeasurementRequest.builder()
+                      .setContentBinding(contentBinding)
+                      .setIncludeIdAttestation(false)
+                      .build();
+              return attestationMeasurementClient.requestAttestationMeasurement(retryRequest);
+            },
+            executor)
         .transform(response -> AttestationResponse.create(response.toByteString()), executor);
   }
 

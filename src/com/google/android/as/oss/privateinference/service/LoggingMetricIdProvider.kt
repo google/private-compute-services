@@ -30,8 +30,12 @@ constructor(
   private val featureNameToSuccessCountMetricIdMap:
     @JvmSuppressWildcards
     Map<PcsPrivateInferenceFeatureName, CountMetricId>,
-  @FeatureNameToFailureCountMetricIdMap
-  private val featureNameToFailureCountMetricIdMap:
+  @FeatureNameToSessionErrorCountMetricIdMap
+  private val featureNameToSessionErrorCountMetricIdMap:
+    @JvmSuppressWildcards
+    Map<PcsPrivateInferenceFeatureName, CountMetricId>,
+  @FeatureNameToSessionCountMetricIdMap
+  private val featureNameToSessionCountMetricIdMap:
     @JvmSuppressWildcards
     Map<PcsPrivateInferenceFeatureName, CountMetricId>,
   @FeatureNameToCountMetricIdMap
@@ -45,10 +49,18 @@ constructor(
       CountMetricId.PCS_PI_UNKNOWN_FEATURE_SUCCESS,
     )
 
-  fun getInferenceFailureCountMetricId(featureName: PcsPrivateInferenceFeatureName): CountMetricId =
-    featureNameToFailureCountMetricIdMap.getOrDefault(
+  fun getInferenceSessionCountMetricId(featureName: PcsPrivateInferenceFeatureName): CountMetricId =
+    featureNameToSessionCountMetricIdMap.getOrDefault(
       featureName,
-      CountMetricId.PCS_PI_UNKNOWN_FEATURE_FAILURE,
+      CountMetricId.PCS_PI_UNKNOWN_FEATURE_SESSION_COUNT,
+    )
+
+  fun getInferenceSessionErrorCountMetricId(
+    featureName: PcsPrivateInferenceFeatureName
+  ): CountMetricId =
+    featureNameToSessionErrorCountMetricIdMap.getOrDefault(
+      featureName,
+      CountMetricId.PCS_PI_UNKNOWN_FEATURE_SESSION_ERROR,
     )
 
   fun getInferenceFailureErrorCodeCountMetricId(errorCode: Code): CountMetricId =
@@ -57,7 +69,7 @@ constructor(
       CountMetricId.PCS_PI_ERROR_UNSPECIFIED,
     )
 
-  fun getInferenceCountMetricId(featureName: PcsPrivateInferenceFeatureName): CountMetricId =
+  fun getRequestCountMetricId(featureName: PcsPrivateInferenceFeatureName): CountMetricId =
     featureNameToCountMetricIdMap.getOrDefault(
       featureName,
       CountMetricId.PCS_PI_UNKNOWN_FEATURE_COUNT,

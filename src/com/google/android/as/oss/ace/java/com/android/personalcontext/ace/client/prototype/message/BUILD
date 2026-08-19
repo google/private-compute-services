@@ -25,7 +25,5 @@ android_library(
     srcs = [
         "MessageMetadataHint.kt",
     ],
-    deps = [
-        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype:prototype_hint",
-    ],
+    deps = ["//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype:prototype_hint"],
 )

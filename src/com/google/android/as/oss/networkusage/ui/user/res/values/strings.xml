@@ -346,6 +346,7 @@
   <!-- Url pattern for feedback request and response[CHAR LIMIT=NONE] -->
   <string name="feature_name_feedback_apex_psi" translatable="false">feedback_apex_psi</string>
   <string name="feature_name_feedback_apex_asi" translatable="false">feedback_apex_asi</string>
+  <string name="feature_name_feedback_apex_blueflax" translatable="false">feedback_apex_blueflax</string>
 
   <!-- Device Intelligence -->
   <!-- Name of the Device Intelligence feature which is part of Private Compute Core, displayed in the network usage log. [CHAR_LIMIT=NONE] -->

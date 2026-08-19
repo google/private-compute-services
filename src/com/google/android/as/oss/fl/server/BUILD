@@ -43,6 +43,7 @@ android_library(
         "//src/com/google/android/as/oss/grpc:annotations",
         "//src/com/google/android/as/oss/networkusage/db",
         "//src/com/google/android/as/oss/networkusage/db:repository",
+        "//src/com/google/android/as/oss/protos:pcs_feature_enum_java_proto_lite",
         "//third_party/fcp/java_src/main/java/com/google/fcp/client/privatelogger",
         "//third_party/fcp/java_src/main/java/com/google/fcp/client/privatelogger/impl",
         "@federated_compute//fcp/client:fl_runner",

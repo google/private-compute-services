@@ -23,6 +23,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -46,8 +47,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -65,16 +68,29 @@ import com.android.personalcontext.ace.visualizer.templates.utils.RemoteActionUt
 @Composable
 @Suppress("NewApi")
 fun CardActionRow(cardActions: List<CardAction>, modifier: Modifier = Modifier) {
-  Row(
-    modifier = modifier.fillMaxWidth(),
-    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
-  ) {
-    for (cardAction in cardActions) {
-      CardActionButton(cardAction = cardAction)
+  if (LocalDensity.current.fontScale > 1.0f) {
+    FlowRow(
+      modifier = modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+      verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      for (cardAction in cardActions) {
+        CardActionButton(cardAction = cardAction)
+      }
+    }
+  } else {
+    Row(
+      modifier = modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+    ) {
+      for (cardAction in cardActions) {
+        CardActionButton(cardAction = cardAction)
+      }
     }
   }
 }
 
+// Renders an individual action button within the card action row.
 @Composable
 @Suppress("NewApi")
 private fun CardActionButton(cardAction: CardAction) {
@@ -102,7 +118,9 @@ private fun CardActionButton(cardAction: CardAction) {
             val title = cardAction.displayDetails.title?.toString()
 
             baseModifier
-              .clearAndSetSemantics { contentDescription = description ?: title ?: "" }
+              .semantics(mergeDescendants = true) {
+                contentDescription = description ?: title ?: ""
+              }
               .clickable {
                 cardAction.insight?.let { insight ->
                   reportEvent(insight, InsightEvent.EVENT_USER_TAP)
@@ -111,14 +129,19 @@ private fun CardActionButton(cardAction: CardAction) {
                 info.onReceiveInsight(ServerSideCloseInsight().toContextInsight())
               }
           }
-          is EgressableCardAction ->
-            baseModifier.clickable {
-              cardAction.insight?.let { insight ->
-                reportEvent(insight, InsightEvent.EVENT_USER_TAP)
-                info.onReceiveInsight(insight)
-                info.onReceiveInsight(ServerSideCloseInsight().toContextInsight())
+          is EgressableCardAction -> {
+            val title = cardAction.displayDetails.title?.toString()
+
+            baseModifier
+              .semantics(mergeDescendants = true) { contentDescription = title ?: "" }
+              .clickable {
+                cardAction.insight?.let { insight ->
+                  reportEvent(insight, InsightEvent.EVENT_USER_TAP)
+                  info.onReceiveInsight(insight)
+                  info.onReceiveInsight(ServerSideCloseInsight().toContextInsight())
+                }
               }
-            }
+          }
         }
       },
   ) {
@@ -131,7 +154,9 @@ private fun CardActionButton(cardAction: CardAction) {
     val startPadding = if (hasIcon) 12.dp else 16.dp
 
     Row(
-      modifier = Modifier.padding(start = startPadding, end = 16.dp, top = 10.dp, bottom = 10.dp),
+      modifier =
+        Modifier.clearAndSetSemantics {}
+          .padding(start = startPadding, end = 16.dp, top = 10.dp, bottom = 10.dp),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.Center,
     ) {
@@ -146,6 +171,7 @@ private fun CardActionButton(cardAction: CardAction) {
         fontWeight = FontWeight.Medium,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.weight(1f, fill = false),
       )
     }
   }

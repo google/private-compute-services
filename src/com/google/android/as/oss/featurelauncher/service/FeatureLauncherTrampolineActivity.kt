@@ -51,7 +51,17 @@ class FeatureLauncherTrampolineActivity : ComponentActivity() {
 
     val targetIntent = getTargetIntent()
     if (targetIntent != null) {
-      launcher.launch(targetIntent)
+      try {
+        launcher.launch(targetIntent)
+      } catch (e: SecurityException) {
+        logger.atSevere().withCause(e).log("SecurityException launching target intent")
+        val requestId = intent.getStringExtra(EXTRA_REQUEST_ID)
+        if (requestId != null) {
+          val deferred = FeatureLauncherServiceImpl.pendingRequests.remove(requestId)
+          deferred?.completeExceptionally(e)
+        }
+        finish()
+      }
     } else {
       logger.atSevere().log("Missing target intent in TrampolineActivity")
       finish()

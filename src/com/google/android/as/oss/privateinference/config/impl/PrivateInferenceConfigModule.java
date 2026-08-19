@@ -23,6 +23,8 @@ import com.google.android.as.oss.common.config.FlagNamespace;
 import com.google.android.as.oss.privateinference.Annotations.PiServerChannelIdleTimeoutMinutes;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceAttachCertificateHeader;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceEnableArateaTokenCache;
+import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceEnableConfigurableIpBlindingMode;
+import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceEnableTlsBasedSession;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceEndpointUrl;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceForceIpTunnelCreationForEverySession;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferencePassForceEzUsageHeader;
@@ -119,6 +121,12 @@ interface PrivateInferenceConfigModule {
   }
 
   @Provides
+  @PrivateInferenceEnableTlsBasedSession
+  static boolean providesEnableTlsBasedSession(ConfigReader<PrivateInferenceConfig> configReader) {
+    return configReader.getConfig().enableTlsBasedSession();
+  }
+
+  @Provides
   @PrivateInferenceForceIpTunnelCreationForEverySession
   static boolean providesForceIpTunnelCreationForEverySession() {
     return false;
@@ -142,5 +150,12 @@ interface PrivateInferenceConfigModule {
   @PrivateInferencePassForceEzUsageHeader
   static boolean providePassForceEzUsageHeader(ConfigReader<PrivateInferenceConfig> configReader) {
     return configReader.getConfig().passForceEzUsageHeader();
+  }
+
+  @Provides
+  @PrivateInferenceEnableConfigurableIpBlindingMode
+  static boolean provideEnableConfigurableIpBlindingMode(
+      ConfigReader<PrivateInferenceConfig> configReader) {
+    return configReader.getConfig().enableConfigurableIpBlindingMode();
   }
 }

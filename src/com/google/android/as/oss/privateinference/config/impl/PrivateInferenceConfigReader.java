@@ -68,6 +68,11 @@ class PrivateInferenceConfigReader extends AbstractConfigReader<PrivateInference
           FLAG_PREFIX + "enable_aratea_token_cache",
           PrivateInferenceConfig.DEFAULT_ENABLE_ARATEA_TOKEN_CACHE);
 
+  static final BooleanFlag ENABLE_TLS_BASED_SESSION =
+      BooleanFlag.create(
+          FLAG_PREFIX + "enable_tls_based_session",
+          PrivateInferenceConfig.DEFAULT_ENABLE_TLS_BASED_SESSION);
+
   static final IntegerFlag PROXY_TOKEN_BATCH_SIZE_FLAG =
       IntegerFlag.create(
           FLAG_PREFIX + "proxy_token_batch_size",
@@ -175,6 +180,11 @@ class PrivateInferenceConfigReader extends AbstractConfigReader<PrivateInference
           FLAG_PREFIX + "send_client_metadata",
           PrivateInferenceConfig.DEFAULT_SEND_CLIENT_METADATA);
 
+  static final BooleanFlag ENABLE_CONFIGURABLE_IP_BLINDING_MODE_FLAG =
+      BooleanFlag.create(
+          FLAG_PREFIX + "enable_configurable_ip_blinding_mode",
+          PrivateInferenceConfig.DEFAULT_ENABLE_CONFIGURABLE_IP_BLINDING_MODE);
+
   private final FlagManager flagManager;
 
   static PrivateInferenceConfigReader create(FlagManager flagManager) {
@@ -215,6 +225,7 @@ class PrivateInferenceConfigReader extends AbstractConfigReader<PrivateInference
         // Flags that can be overridden via Device Config flags.
         .setEnabled(flagManager.get(ENABLED_FLAG))
         .setEnableArateaTokenCache(flagManager.get(ENABLE_ARATEA_TOKEN_CACHE))
+        .setEnableTlsBasedSession(flagManager.get(ENABLE_TLS_BASED_SESSION))
         .setProxyConfigProviderType(flagManager.get(PROXY_CONFIG_PROVIDER_TYPE_FLAG))
         .setWaitForGrpcChannelReady(flagManager.get(ENABLE_WAIT_FOR_GRPC_CHANNEL_READY_FLAG))
         .setAttachCertificateHeader(flagManager.get(ATTACH_CERTIFICATE_HEADER_FLAG))
@@ -254,6 +265,8 @@ class PrivateInferenceConfigReader extends AbstractConfigReader<PrivateInference
             flagManager.get(PI_SERVER_CHANNEL_IDLE_TIMEOUT_MINUTES_FLAG))
         .setIpRelayFallbackMode(flagManager.get(IP_RELAY_FALLBACK_MODE_FLAG))
         .setSendClientMetadata(flagManager.get(SEND_CLIENT_METADATA_FLAG))
+        .setEnableConfigurableIpBlindingMode(
+            flagManager.get(ENABLE_CONFIGURABLE_IP_BLINDING_MODE_FLAG))
         .build();
   }
 

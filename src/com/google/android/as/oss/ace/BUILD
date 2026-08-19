@@ -41,3 +41,14 @@ bzl_library(
         "//visibility:public",
     ],
 )
+
+genquery(
+    name = "all_ace_libs_query",
+    expression = "visible(//javatests/com/google/android/apps/miphone/pcs/ace/java/com/android/personalcontext/ace:PcsAceCoverageSentryDeps, filter('^//src/com/google/android/as/oss/ace', kind(android_library, deps(//src/com/google/android/as/oss/ace:common_modules) + deps(//src/com/google/android/as/oss/ace:internal_only_modules))))",
+    scope = [
+        "//src/com/google/android/as/oss/ace:common_modules",
+        "//src/com/google/android/as/oss/ace:internal_only_modules",
+        "//javatests/com/google/android/apps/miphone/pcs/ace/java/com/android/personalcontext/ace:PcsAceCoverageSentryDeps",
+    ],
+    visibility = ["//javatests/com/google/android/apps/miphone/pcs/ace:__subpackages__"],
+)

@@ -20,12 +20,16 @@ import com.google.android.`as`.oss.privateinference.util.timers.Timers
 import com.google.oak.session.v1.SessionRequest
 import com.google.oak.session.v1.SessionResponse
 import com.google.search.mdi.privatearatea.proto.PrivateArateaServiceGrpc
+import com.google.search.mdi.privatearatea.proto.PrivateTlsServiceGrpc
+import com.google.search.mdi.privatearatea.proto.TlsSessionRequest
+import com.google.search.mdi.privatearatea.proto.TlsSessionResponse
 import io.grpc.stub.StreamObserver
 import java.util.function.Consumer
 
 class RequestLoggingHelpers(private val timers: Timers) {
   private var handshakeTimer: Timers.Timer? = null
   private var attestTimer: Timers.Timer? = null
+  private var tlsHandshakeComplete = false
 
   fun startSessionWithHandshakeLogging(
     asyncStub: PrivateArateaServiceGrpc.PrivateArateaServiceStub,
@@ -34,6 +38,17 @@ class RequestLoggingHelpers(private val timers: Timers) {
     return StreamObserverHook(
       asyncStub.startNoiseSession(StreamObserverHook(responseObserver, this::logHandshakeResponse)),
       this::logHandshakeRequest,
+    )
+  }
+
+  fun startTlsSessionWithHandshakeLogging(
+    tlsStub: PrivateTlsServiceGrpc.PrivateTlsServiceStub,
+    responseObserver: StreamObserver<TlsSessionResponse>,
+  ): StreamObserver<TlsSessionRequest> {
+    return TlsStreamObserverHook(
+      tlsStub.tlsSession(StreamObserverHook(responseObserver, this::logTlsHandshakeResponse)),
+      this::logTlsHandshakeRequest,
+      this::onTlsHandshakeComplete,
     )
   }
 
@@ -63,6 +78,26 @@ class RequestLoggingHelpers(private val timers: Timers) {
     }
   }
 
+  private fun logTlsHandshakeRequest(request: TlsSessionRequest) {
+    // if (!tlsHandshakeComplete) {
+    //   handshakeTimer =
+    //     timers.start(<TLS_HANDSHAKE_TIMER_NAME>)
+    // }
+  }
+
+  private fun logTlsHandshakeResponse(response: TlsSessionResponse) {
+    if (!tlsHandshakeComplete) {
+      handshakeTimer?.stop()
+      handshakeTimer = null
+    }
+  }
+
+  private fun onTlsHandshakeComplete() {
+    tlsHandshakeComplete = true
+    handshakeTimer?.stop()
+    handshakeTimer = null
+  }
+
   /** A small utility to allow us to inspect requests and responses for logging. */
   private class StreamObserverHook<T>(val delegate: StreamObserver<T>, val hook: Consumer<T>) :
     StreamObserver<T> {
@@ -77,6 +112,29 @@ class RequestLoggingHelpers(private val timers: Timers) {
 
     override fun onCompleted() {
       delegate.onCompleted()
+    }
+  }
+
+  private class TlsStreamObserverHook(
+    val delegate: StreamObserver<TlsSessionRequest>,
+    val hook: Consumer<TlsSessionRequest>,
+    val onCompleteHook: Runnable,
+  ) : StreamObserver<TlsSessionRequest>, StreamObserverTlsSessionClient.HandshakeListener {
+    override fun onNext(value: TlsSessionRequest) {
+      hook.accept(value)
+      delegate.onNext(value)
+    }
+
+    override fun onError(t: Throwable) {
+      delegate.onError(t)
+    }
+
+    override fun onCompleted() {
+      delegate.onCompleted()
+    }
+
+    override fun onHandshakeComplete() {
+      onCompleteHook.run()
     }
   }
 }

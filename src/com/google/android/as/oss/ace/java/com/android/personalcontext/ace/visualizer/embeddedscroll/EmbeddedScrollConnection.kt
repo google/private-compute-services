@@ -16,6 +16,7 @@
 
 package com.android.personalcontext.ace.visualizer.embeddedscroll
 
+import android.util.Log
 import android.view.View
 import androidx.compose.foundation.gestures.draggable2D
 import androidx.compose.foundation.gestures.rememberDraggable2DState
@@ -52,8 +53,7 @@ import kotlin.math.abs
  *
  * @param availableAxes Bitmask of axes to detect (e.g., SCROLL_AXIS_HORIZONTAL |
  *   SCROLL_AXIS_VERTICAL). Defaults to allowing both.
- * @param onScrollEvent Callback invoked with
- *   [com.android.personalcontext.ace.common.EmbeddedScrollEvent] events (START, DELTA, STOP).
+ * @param onScrollEvent Callback invoked with [EmbeddedScrollEvent] events (START, DELTA, STOP).
  */
 @Composable
 fun Modifier.embeddedScroll(
@@ -78,12 +78,20 @@ private fun rememberEmbeddedScrollConnection(
 
       private var lockedAxis = Undecided
       private var reportedAxis: LockedAxis? = null
+      private var reportedStop = false
+
+      override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+        Log.v(TAG, "onPreScroll(available = $available)")
+        return super.onPreScroll(available, source)
+      }
 
       override fun onPostScroll(
         consumed: Offset,
         available: Offset,
         source: NestedScrollSource,
       ): Offset {
+        Log.v(TAG, "onPostScroll(consumed = $consumed, available = $available)")
+
         if (lockedAxis == Undecided) {
           lockedAxis = available.getPrimaryAxis(availableAxes)
 
@@ -91,6 +99,10 @@ private fun rememberEmbeddedScrollConnection(
             onScrollEvent(EmbeddedScrollEvent(type = SCROLL_START, axes = lockedAxis.axis))
             reportedAxis = lockedAxis
           }
+        }
+
+        if (source != NestedScrollSource.UserInput) {
+          return Offset.Zero
         }
 
         val delta = available.clampToAxis(lockedAxis)
@@ -101,12 +113,35 @@ private fun rememberEmbeddedScrollConnection(
         return delta
       }
 
+      override suspend fun onPreFling(available: Velocity): Velocity {
+        Log.v(TAG, "onPreFling(available = $available)")
+
+        val velocity = available.clampToAxis(lockedAxis)
+        if (!velocity.isEmpty()) {
+          onScrollEvent(EmbeddedScrollEvent(type = SCROLL_STOP, x = velocity.x, y = velocity.y))
+
+          lockedAxis = Undecided
+          reportedAxis = null
+          reportedStop = true
+        }
+        return velocity
+      }
+
       override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+        Log.v(TAG, "onPostFling(consumed = $consumed, available = $available)")
+
+        if (reportedStop) {
+          reportedStop = false
+          return Velocity.Zero
+        }
+
         val velocity = available.clampToAxis(lockedAxis)
         onScrollEvent(EmbeddedScrollEvent(type = SCROLL_STOP, x = velocity.x, y = velocity.y))
 
         lockedAxis = Undecided
         reportedAxis = null
+        reportedStop = false
+
         return velocity
       }
     }
@@ -125,6 +160,8 @@ private fun Modifier.draggableScroll(
   return draggable2D(
     state =
       rememberDraggable2DState { delta ->
+        Log.v(TAG, "onDelta(delta = $delta)")
+
         if (lockedAxis == Undecided) {
           lockedAxis = delta.getPrimaryAxis(availableAxes)
 
@@ -140,6 +177,7 @@ private fun Modifier.draggableScroll(
         }
       },
     onDragStopped = { velocity ->
+      Log.v(TAG, "onDragStopped(velocity = $velocity)")
       val velocity = velocity.clampToAxis(lockedAxis)
       onScrollEvent(EmbeddedScrollEvent(type = SCROLL_STOP, x = velocity.x, y = velocity.y))
 
@@ -185,3 +223,7 @@ private fun Velocity.clampToAxis(lockState: LockedAxis): Velocity =
   }
 
 private fun Offset.isEmpty(): Boolean = x == 0f && y == 0f
+
+private fun Velocity.isEmpty(): Boolean = x == 0f && y == 0f
+
+private const val TAG = "EmbeddedScrollConnection"

@@ -182,7 +182,7 @@ public final class PrivateInferenceGrpcBindableService
             logger.atInfo().log("[performInference] Oak Noise session is set up.");
             clientStreamObserver.onNext(request.getData());
             clientStreamObserver.onCompleted(); // Signal no more requests after this one.
-            logInferenceRequestEvent(request.getFeatureName());
+            logRequestCountEvent(request.getFeatureName());
             logger.atInfo().log(
                 "[performInference] Sent request to server with size: %d.", requestSize);
           }
@@ -209,7 +209,7 @@ public final class PrivateInferenceGrpcBindableService
                 /* isSuccess= */ false,
                 requestSize,
                 responseSize.get());
-            logInferenceFailureEvent(request.getFeatureName());
+            logInferenceSessionErrorEvent(request.getFeatureName());
             logInferenceFailureErrorCode(t);
 
             responseObserver.onError(wrapIfAttestationFailure(t));
@@ -230,7 +230,7 @@ public final class PrivateInferenceGrpcBindableService
             responseObserver.onCompleted();
           }
         };
-
+    logInferenceSessionCountEvent(request.getFeatureName());
     oakAsyncClient.startNoiseSession(
         buildPrivateInferenceRequestMetadata(request), privateInferenceResponseObserver);
   }
@@ -274,14 +274,20 @@ public final class PrivateInferenceGrpcBindableService
     pcsStatsLogger.logEventCount(countMetricId);
   }
 
-  private void logInferenceFailureEvent(PcsPrivateInferenceFeatureName featureName) {
+  private void logInferenceSessionErrorEvent(PcsPrivateInferenceFeatureName featureName) {
     CountMetricId countMetricId =
-        loggingMetricIdProvider.getInferenceFailureCountMetricId(featureName);
+        loggingMetricIdProvider.getInferenceSessionErrorCountMetricId(featureName);
     pcsStatsLogger.logEventCount(countMetricId);
   }
 
-  private void logInferenceRequestEvent(PcsPrivateInferenceFeatureName featureName) {
-    CountMetricId countMetricId = loggingMetricIdProvider.getInferenceCountMetricId(featureName);
+  private void logInferenceSessionCountEvent(PcsPrivateInferenceFeatureName featureName) {
+    CountMetricId countMetricId =
+        loggingMetricIdProvider.getInferenceSessionCountMetricId(featureName);
+    pcsStatsLogger.logEventCount(countMetricId);
+  }
+
+  private void logRequestCountEvent(PcsPrivateInferenceFeatureName featureName) {
+    CountMetricId countMetricId = loggingMetricIdProvider.getRequestCountMetricId(featureName);
     pcsStatsLogger.logEventCount(countMetricId);
   }
 

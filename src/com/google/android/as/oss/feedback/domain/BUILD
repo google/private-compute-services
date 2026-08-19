@@ -17,6 +17,23 @@ load("@bazel_rules_android//android:rules.bzl", "android_library")
 package(default_visibility = ["//visibility:public"])
 
 android_library(
+    name = "betterbug_attachment_view_model",
+    srcs = ["BetterBugAttachmentViewModel.kt"],
+    deps = [
+        "//src/com/google/android/as/oss/common",
+        "//src/com/google/android/as/oss/feedback/proto/dataservice:internal_feedback_data_kt_proto_lite",
+        "//src/com/google/android/as/oss/feedback/serviceclient:internal_service_client",
+        "//third_party/java/androidx/lifecycle/viewmodel",
+        "//third_party/java/dagger/hilt:view_model",
+        "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-jvm",
+        "@maven//:androidx_core_core",
+        "@maven//:com_google_dagger_hilt-android",
+        "@maven//:com_google_flogger_google_extensions",
+        "@maven//:javax_inject_javax_inject",
+    ],
+)
+
+android_library(
     name = "feedback_ui_consts",
     srcs = ["FeedbackUiElementType.kt"],
     deps = [],
@@ -33,10 +50,14 @@ android_library(
         "//src/com/google/android/as/oss/common",
         "//src/com/google/android/as/oss/common/config",
         "//src/com/google/android/as/oss/delegatedui/api/integration/templates:ui_id_token_kt_proto_lite",
+        "//src/com/google/android/as/oss/feedback",
+        "//src/com/google/android/as/oss/feedback/blueflax/utils:blueflax_data_helper",
         "//src/com/google/android/as/oss/feedback/config",
         "//src/com/google/android/as/oss/feedback/gateway:feedback_http_client",
         "//src/com/google/android/as/oss/feedback/gateway:feedback_http_client_module",  # buildcleaner: keep for Feedback Http Client Module
         "//src/com/google/android/as/oss/feedback/proto:feedback_tag_data_kt_proto_lite",
+        "//src/com/google/android/as/oss/feedback/proto/dataservice:data_service_kt_proto_lite",
+        "//src/com/google/android/as/oss/feedback/proto/gateway:blueflax_kt_proto_lite",
         "//src/com/google/android/as/oss/feedback/proto/gateway:pixel_apex_api_kt_proto_lite",
         "//src/com/google/android/as/oss/feedback/proto/gateway:quartz_log_kt_proto_lite",
         "//src/com/google/android/as/oss/feedback/proto/gateway:spoon_kt_proto_lite",
@@ -56,6 +77,8 @@ android_library(
         "//third_party/java/androidx/compose/ui/text",
         "//third_party/java/androidx/compose/ui/unit",
         "//third_party/java/androidx/hilt/navigation_compose",
+        "//third_party/java/androidx/lifecycle/viewmodel",
+        "//third_party/java/androidx/lifecycle/viewmodel_savedstate",
         "//third_party/java/dagger/hilt:view_model",
         "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-jvm",
         "@maven//:com_google_dagger_hilt-android",
@@ -81,6 +104,7 @@ android_library(
     srcs = ["FeedbackSubmissionData.kt"],
     deps = [
         "//src/com/google/android/as/oss/feedback/proto:feedback_tag_data_kt_proto_lite",
+        "//src/com/google/android/as/oss/feedback/proto/gateway:blueflax_kt_proto_lite",
         "//src/com/google/android/as/oss/feedback/proto/gateway:quartz_log_kt_proto_lite",
         "//src/com/google/android/as/oss/feedback/proto/gateway:spoon_kt_proto_lite",
     ],

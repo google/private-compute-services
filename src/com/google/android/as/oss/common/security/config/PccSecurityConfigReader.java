@@ -38,6 +38,8 @@ public class PccSecurityConfigReader extends AbstractConfigReader<PccSecurityCon
               .setPackageName("com.google.android.as")
               .addAllowedReleaseKeys(
                   "3af39ab967aaa5d279e49b5f769cb66e40799838bc8799343ee57ae435d2455b")
+              .addAllowedTestKeys(
+                  "8a99842f792551717d3a19e155a6d6a6e375bd1e19fbceff438e20d2f78d8dbe")
               .build(),
           /* merge= */ false);
 

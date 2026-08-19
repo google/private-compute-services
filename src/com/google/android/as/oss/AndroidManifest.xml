@@ -78,6 +78,7 @@
     </package>
 
     <!-- System & Settings Intelligence -->
+    <package android:name="com.android.settings.intelligence" />
     <package android:name="com.google.android.settings.intelligence"
         android:certDigest="d9882b784173aa98c32ad7848ff38bf16bddc61c636883f940d85e2f059aa249"> <!-- Prod -->
       <additional-certificate android:certDigest="d4418fa2261c104e8cce39b0acbb02d69102227b5624f77602c2b112269fcc30" /> <!-- Test -->

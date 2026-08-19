@@ -89,6 +89,8 @@ cc_library(
         ":jni_helpers",
         ":jni_logging",
         ":jni_message_interface_wrapper",
+        "//google/protobuf:any_cc_proto",
+        "//privacy/net/attestation/proto:attestation_cc_proto",
         "//third_party/absl/functional:any_invocable",
         "//third_party/absl/status",
         "//third_party/absl/status:statusor",
@@ -152,6 +154,7 @@ cc_library(
         "//third_party/absl/strings",
         "//third_party/java/jdk:jni",
     ],
+    alwayslink = 1,
 )
 
 android_jni_library(

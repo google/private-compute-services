@@ -16,7 +16,6 @@ edition = "2024";
 
 package com.google.android.as.oss.feedback.api.gateway;
 
-
 option java_outer_classname = "Blueflax";
 option java_package = "com.google.android.as.oss.feedback.api.gateway";
 
@@ -28,18 +27,14 @@ enum BlueflaxCUJ {
 }
 
 message BlueflaxFeedbackDataDonation {
-  repeated string triggering_messages = 1
-     ;
+  repeated string triggering_messages = 1;
 
   repeated string model_outputs = 2;
 
-  string selected_entity_content = 3
-     ;
+  string selected_entity_content = 3;
 }
 
 message BlueflaxUserInput {
-  string optional_blueflax_comment = 1
-     ;
-  repeated string ground_truth_list = 2
-     ;
+  string optional_blueflax_comment = 1;
+  repeated string ground_truth_list = 2;
 }

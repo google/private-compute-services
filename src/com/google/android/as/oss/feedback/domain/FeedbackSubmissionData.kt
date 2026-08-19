@@ -17,12 +17,14 @@
 package com.google.android.`as`.oss.feedback.domain
 
 import com.google.android.`as`.oss.feedback.api.FeedbackRatingSentiment
+import com.google.android.`as`.oss.feedback.api.gateway.BlueflaxCUJ
 import com.google.android.`as`.oss.feedback.api.gateway.QuartzCUJ
 import com.google.android.`as`.oss.feedback.api.gateway.SpoonCUJ
 
 data class FeedbackSubmissionData(
   val cuj: SpoonCUJ? = null,
   val quartzCuj: QuartzCUJ? = null,
+  val blueflaxCuj: BlueflaxCUJ? = null,
   val selectedEntityContent: String,
   val ratingSentiment: FeedbackRatingSentiment,
 )

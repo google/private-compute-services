@@ -69,12 +69,14 @@ android_library(
         "MessageVisualizerTemplate.kt",
     ],
     deps = [
-        ":message_animated_list_item_visibility",
         ":message_chip_animation",
         ":message_constants",
         ":message_template_data",
         "//googledata/icons/android/google_symbols/star:vd_theme_24",
+        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype:prototype_utils",
+        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/clientaction/params/showcards",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/message:message_metadata_hint",
+        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/serversideclose",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/common:find_hint",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/common:modifier_utils",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/common/wrappers",
@@ -86,6 +88,9 @@ android_library(
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer/templates",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer/templates/utils:remote_action_utils",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer/templates/utils:tintable_icon",
+        "//src/com/google/android/as/oss/common/config",
+        "//src/com/google/android/as/oss/delegatedui/config",
+        "//src/com/google/android/as/oss/delegatedui/service/templates/motion:expressive_motion",
         "//third_party/java/androidx/compose/animation",
         "//third_party/java/androidx/compose/animation/animation_core",
         "//third_party/java/androidx/compose/foundation",
@@ -100,20 +105,8 @@ android_library(
         "//third_party/java/androidx/compose/ui/text",
         "//third_party/java/androidx/compose/ui/unit",
         "//third_party/java/androidx/core/ktx",
+        "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-jvm",
         "@maven//:androidx_core_core",
         "@maven//:javax_inject_javax_inject",
-    ],
-)
-
-android_library(
-    name = "message_animated_list_item_visibility",
-    srcs = [
-        "MessageAnimatedListItemVisibility.kt",
-    ],
-    deps = [
-        "//third_party/java/androidx/compose/animation",
-        "//third_party/java/androidx/compose/animation/animation_core",
-        "//third_party/java/androidx/compose/runtime",
-        "//third_party/java/androidx/compose/ui",
     ],
 )

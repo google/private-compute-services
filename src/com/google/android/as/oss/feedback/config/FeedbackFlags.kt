@@ -38,4 +38,5 @@ object FeedbackFlags {
     BooleanFlag.create("${PREFIX}enable_default_donation_opt_in_l1", false)
   val ENABLE_DEFAULT_DONATION_OPT_IN_L0 =
     BooleanFlag.create("${PREFIX}enable_default_donation_opt_in_l0", false)
+  val ENABLE_BLUEFLAX_FEEDBACK = BooleanFlag.create("${PREFIX}enable_blueflax_feedback", false)
 }

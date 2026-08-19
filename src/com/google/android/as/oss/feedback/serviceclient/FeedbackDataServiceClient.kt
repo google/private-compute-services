@@ -18,6 +18,7 @@ package com.google.android.`as`.oss.feedback.serviceclient
 
 import com.google.android.`as`.oss.feedback.api.dataservice.FeedbackUiRenderingData
 import com.google.android.`as`.oss.feedback.api.dataservice.feedbackUiRenderingData
+import com.google.android.`as`.oss.feedback.api.gateway.BlueflaxCUJ
 import com.google.android.`as`.oss.feedback.api.gateway.QuartzCUJ
 import com.google.android.`as`.oss.feedback.api.gateway.SpoonCUJ
 import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory
@@ -49,6 +50,7 @@ data class FeedbackDonationData(
   val runtimeConfig: RuntimeConfig = RuntimeConfig(),
   val feedbackUiRenderingData: FeedbackUiRenderingData = feedbackUiRenderingData {},
   val cuj: SpoonCUJ = SpoonCUJ.SPOON_CUJ_UNKNOWN,
+  val blueflaxCuj: BlueflaxCUJ? = null,
   val defaultDonationOptInL1Enabled: Boolean = false,
   val defaultDonationOptInL0Enabled: Boolean = false,
 ) : ViewFeedbackData {
@@ -281,7 +283,12 @@ data class FeedbackDonationData(
       appendLine("  modelMetadata: ${runtimeConfig.modelMetadata}")
       appendLine("  modelId: ${runtimeConfig.modelId}")
       appendLine("}")
-      if (cuj != SpoonCUJ.SPOON_CUJ_OVERALL_FEEDBACK) appendLine("cuj: $cuj")
+      if (cuj != SpoonCUJ.SPOON_CUJ_OVERALL_FEEDBACK && cuj != SpoonCUJ.SPOON_CUJ_UNKNOWN) {
+        appendLine("cuj: $cuj")
+      }
+      if (blueflaxCuj != null && blueflaxCuj != BlueflaxCUJ.BLUEFLAX_CUJ_UNSPECIFIED) {
+        appendLine("blueflaxCuj: $blueflaxCuj")
+      }
     }
   }
 

@@ -296,6 +296,7 @@ internal constructor(
             naihCategory = donationData.quartzDataDonationV2.quartzModelData.naihCategory,
             extraIdentifiedResults =
               donationData.quartzDataDonationV2.quartzModelData.extraIdentifiedResultsList,
+            isNaihExpired = donationData.quartzDataDonationV2.quartzModelData.isNaihExpired,
           )
         } else {
           null

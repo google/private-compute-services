@@ -24,4 +24,10 @@ data class SuperIconConfig(
   val maxConsentPrompts: Int,
   /** The duration to wait before reprompting the user for consent after a denial. */
   val repromptDuration: kotlin.time.Duration,
+  /** True if screenshot capture is enabled. */
+  val enableScreenshot: Boolean,
+  /** The timeout for asynchronous screenshot capture in milliseconds. */
+  val screenshotTimeoutMs: Long = 3000L,
+  /** The URL to open when the "Learn more" link is clicked. */
+  val learnMoreUrl: String = "",
 )

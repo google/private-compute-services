@@ -16,6 +16,7 @@
 
 package com.google.android.`as`.oss.privateinference.transport.unusable
 
+import com.google.android.`as`.oss.privateinference.service.api.proto.SessionConfiguration
 import com.google.android.`as`.oss.privateinference.transport.ManagedChannelFactory
 import io.grpc.ManagedChannel
 import javax.inject.Inject
@@ -28,5 +29,6 @@ class UnusableManagedChannelFactory @Inject constructor() : ManagedChannelFactor
   private val channel =
     UnusableManagedChannel("Transport is unusable (explicitly configured for failure).")
 
-  override suspend fun getInstance(): ManagedChannel = channel
+  override suspend fun getInstance(sessionConfiguration: SessionConfiguration): ManagedChannel =
+    channel
 }

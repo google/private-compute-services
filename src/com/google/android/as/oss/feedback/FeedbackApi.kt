@@ -24,6 +24,7 @@ import android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import com.google.android.`as`.oss.feedback.api.EntityFeedbackDialogData
 import com.google.android.`as`.oss.feedback.api.MultiFeedbackDialogData
+import com.google.android.`as`.oss.feedback.api.dataservice.GetFeedbackDonationDataResponse
 
 /** The public API for showing the FeedbackActivity. */
 object FeedbackApi {
@@ -34,6 +35,9 @@ object FeedbackApi {
   /** Key for the [MultiFeedbackDialogData] proto extra in the Intent bundle. */
   internal const val EXTRA_MULTI_FEEDBACK_DIALOG_DATA_PROTO: String =
     "multi_feedback_dialog_data_proto"
+  /** Key for the [GetFeedbackDonationDataResponse] proto extra in the Intent bundle. */
+  const val EXTRA_FEEDBACK_DONATION_DATA_RESPONSE_PROTO: String =
+    "feedback_donation_data_response_proto"
 
   private const val PCS_PKG_NAME: String = "com.google.android.as.oss"
   private const val FEEDBACK_ACTIVITY_NAME: String =
@@ -41,9 +45,14 @@ object FeedbackApi {
 
   /**
    * Creates an [Intent] that starts [FeedbackActivity] to allow the user to give feedback on a
-   * single entity.
+   * single entity, optionally including feedback donation data.
    */
-  fun createEntityFeedbackIntent(context: Context, data: EntityFeedbackDialogData): Intent {
+  @JvmOverloads
+  fun createEntityFeedbackIntent(
+    context: Context,
+    data: EntityFeedbackDialogData,
+    donationDataResponse: GetFeedbackDonationDataResponse? = null,
+  ): Intent {
     val intent =
       Intent(Intent.ACTION_MAIN).apply {
         setComponent(ComponentName(PCS_PKG_NAME, FEEDBACK_ACTIVITY_NAME))
@@ -54,6 +63,9 @@ object FeedbackApi {
           FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_CLEAR_TASK or FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
         )
         putExtra(EXTRA_ENTITY_FEEDBACK_DIALOG_DATA_PROTO, data.toByteArray())
+        donationDataResponse?.let {
+          putExtra(EXTRA_FEEDBACK_DONATION_DATA_RESPONSE_PROTO, it.toByteArray())
+        }
       }
 
     return intent

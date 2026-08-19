@@ -38,6 +38,7 @@ android_library(
     name = "managed_channel_factory",
     srcs = ["ManagedChannelFactory.kt"],
     deps = [
+        "//src/com/google/android/as/oss/privateinference/service/api:private_inference_kt_proto_lite",
         "@maven//:io_grpc_grpc_api",
     ],
 )
@@ -46,6 +47,7 @@ kt_jvm_library_with_nullness_check(
     name = "managed_channel_factory_jvm",
     srcs = ["ManagedChannelFactory.kt"],
     deps = [
+        "//src/com/google/android/as/oss/privateinference/service/api:private_inference_java_proto_lite",
         "@maven//:io_grpc_grpc_api",
     ],
 )

@@ -26,4 +26,5 @@ data class DelegatedUiConfig(
   // Only used for testing.
   val bypassAllSecurityPolicies: Boolean,
   val enableBugleOutlineAnimationV2: Boolean,
+  val bugleMagicCardChipTimeoutMs: Long,
 )

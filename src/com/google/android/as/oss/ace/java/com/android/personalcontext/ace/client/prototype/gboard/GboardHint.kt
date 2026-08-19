@@ -26,24 +26,32 @@ data class GboardHint(
   val userInput: String? = null,
   val userQuery: String? = null,
   val queryCategory: QueryCategory? = null,
+  val inputFieldMetadata: Bundle? = null,
+  val extraInfo: Bundle? = null,
 ) : PrototypeHint(GboardHintId, this) {
 
   override fun exportDataToBundle(bundle: Bundle) {
     bundle.putString(KEY_USER_INPUT, userInput)
     bundle.putString(KEY_USER_QUERY, userQuery)
     bundle.putString(KEY_QUERY_CATEGORY, queryCategory?.value)
+    bundle.putBundle(KEY_INPUT_FIELD_METADATA, inputFieldMetadata)
+    bundle.putBundle(KEY_EXTRA_INFO, extraInfo)
   }
 
   companion object : Creator {
     private const val KEY_USER_INPUT = "user_input"
     private const val KEY_USER_QUERY = "user_query"
     private const val KEY_QUERY_CATEGORY = "query_category"
+    private const val KEY_INPUT_FIELD_METADATA = "input_field_metadata"
+    private const val KEY_EXTRA_INFO = "extra_info"
 
     override fun create(bundle: Bundle): PrototypeHint =
       GboardHint(
         userInput = bundle.getString(KEY_USER_INPUT),
         userQuery = bundle.getString(KEY_USER_QUERY),
         queryCategory = QueryCategory.fromValue(bundle.getString(KEY_QUERY_CATEGORY)),
+        inputFieldMetadata = bundle.getBundle(KEY_INPUT_FIELD_METADATA),
+        extraInfo = bundle.getBundle(KEY_EXTRA_INFO),
       )
   }
 

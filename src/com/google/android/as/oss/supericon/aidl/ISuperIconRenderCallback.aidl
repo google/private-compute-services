@@ -80,6 +80,13 @@ oneway interface ISuperIconRenderCallback {
   void onConsentMetricsLogged(int eventType, int totalDisplayCount);
 
   /**
+   * Called when a link is clicked in the UI.
+   *
+   * @param url the url to open in a separate, non-background process through IPC.
+   */
+  void onLinkClicked(in String url);
+
+  /**
    * Called when the screenshot is received.
    *
    * @param screenshot the screenshot bitmap

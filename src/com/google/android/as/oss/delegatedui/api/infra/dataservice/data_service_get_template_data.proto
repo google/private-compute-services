@@ -53,7 +53,8 @@ message DelegatedUiGetTemplateDataResponse {
   integration.templates.DelegatedUiTemplateType template_type = 1;
 
   // The data to use to populate the template.
-  integration.templates.DelegatedUiTemplateData template_data = 2;
+  integration.templates.DelegatedUiTemplateData template_data = 2
+     ;
 
   // Whether there is additional data available for a follow-up
   // GetDelegatedUiAdditionalData call.

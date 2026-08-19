@@ -25,6 +25,7 @@ import com.android.personalcontext.ace.client.prototype.PrototypeHintId.MessageM
  * styling. Colors are represented as Int (ARGB format).
  *
  * @property suggestionLimit The maximum number of suggestions to display.
+ * @property lastAuthorPhoneNumber The phone number of the last message's author.
  * @property strokeColor The color of the stroke around the suggestion.
  * @property textColor The color of the suggestion text.
  * @property iconColor The color of any icons in the suggestion.
@@ -33,32 +34,43 @@ import com.android.personalcontext.ace.client.prototype.PrototypeHintId.MessageM
  */
 data class MessageMetadataHint(
   val suggestionLimit: Int = 0,
+  val lastAuthorPhoneNumber: String? = null,
   val strokeColor: Int? = null,
   val textColor: Int? = null,
   val iconColor: Int? = null,
   val suggestionBackgroundColor: Int? = null,
   val suggestionCornerRadius: Int? = null,
+  val disabledActions: List<DisabledAction> = emptyList(),
 ) : PrototypeHint(MessageMetadataHintId, this) {
 
   override fun exportDataToBundle(bundle: Bundle) {
     bundle.putInt(KEY_SUGGESTION_LIMIT, suggestionLimit)
+    lastAuthorPhoneNumber?.let { bundle.putString(KEY_LAST_AUTHOR_PHONE_NUMBER, it) }
     strokeColor?.let { bundle.putInt(KEY_STROKE_COLOR, it) }
     textColor?.let { bundle.putInt(KEY_TEXT_COLOR, it) }
     iconColor?.let { bundle.putInt(KEY_ICON_COLOR, it) }
     suggestionBackgroundColor?.let { bundle.putInt(KEY_SUGGESTION_BACKGROUND_COLOR, it) }
     suggestionCornerRadius?.let { bundle.putInt(KEY_SUGGESTION_CORNER_RADIUS, it) }
+    bundle.putIntegerArrayList(KEY_DISABLED_ACTIONS, ArrayList(disabledActions.map { it.ordinal }))
   }
 
   companion object : Creator {
     private const val KEY_SUGGESTION_LIMIT = "suggestion_limit"
+    private const val KEY_LAST_AUTHOR_PHONE_NUMBER = "last_author_phone_number"
     private const val KEY_STROKE_COLOR = "stroke_color"
     private const val KEY_TEXT_COLOR = "text_color"
     private const val KEY_ICON_COLOR = "icon_color"
     private const val KEY_SUGGESTION_BACKGROUND_COLOR = "suggestion_background_color"
     private const val KEY_SUGGESTION_CORNER_RADIUS = "suggestion_corner_radius"
+    private const val KEY_DISABLED_ACTIONS = "disabled_actions"
 
     override fun create(bundle: Bundle): PrototypeHint {
       val suggestionLimit = bundle.getInt(KEY_SUGGESTION_LIMIT)
+      val lastAuthorPhoneNumber =
+        bundle
+          .takeIf { it.containsKey(KEY_LAST_AUTHOR_PHONE_NUMBER) }
+          ?.getString(KEY_LAST_AUTHOR_PHONE_NUMBER)
+          ?.ifBlank { null }
       val strokeColor =
         if (bundle.containsKey(KEY_STROKE_COLOR)) bundle.getInt(KEY_STROKE_COLOR) else null
       val textColor =
@@ -77,15 +89,27 @@ data class MessageMetadataHint(
         } else {
           null
         }
+      val disabledActionsOrdinals = bundle.getIntegerArrayList(KEY_DISABLED_ACTIONS)
+      val disabledActions =
+        disabledActionsOrdinals?.mapNotNull { ordinal -> DisabledAction.entries.getOrNull(ordinal) }
+          ?: emptyList()
 
       return MessageMetadataHint(
         suggestionLimit = suggestionLimit,
+        lastAuthorPhoneNumber = lastAuthorPhoneNumber,
         strokeColor = strokeColor,
         textColor = textColor,
         iconColor = iconColor,
         suggestionBackgroundColor = suggestionBackgroundColor,
         suggestionCornerRadius = suggestionCornerRadius,
+        disabledActions = disabledActions,
       )
     }
   }
+}
+
+/** Actions that should be disabled in Messages. */
+enum class DisabledAction {
+  SAVE_SENDER_TO_CONTACT,
+  SAVE_THIRD_PARTY_TO_CONTACT,
 }

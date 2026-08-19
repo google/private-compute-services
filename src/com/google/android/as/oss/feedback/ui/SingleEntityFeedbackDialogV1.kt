@@ -16,7 +16,6 @@
 
 package com.google.android.`as`.oss.feedback.ui
 
-import android.R
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.widget.Toast
@@ -71,10 +70,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.`as`.oss.delegatedui.service.templates.fonts.FlexFontUtils.withFlexFont
 import com.google.android.`as`.oss.delegatedui.service.templates.motion.ExpressiveMotionUtils
 import com.google.android.`as`.oss.feedback.api.EntityFeedbackDialogData
+import com.google.android.`as`.oss.feedback.api.EntityFeedbackDialogData.FeedbackClient.FEEDBACK_CLIENT_SPOON
+import com.google.android.`as`.oss.feedback.api.EntityFeedbackDialogData.FeedbackClient.FEEDBACK_CLIENT_UNSPECIFIED
 import com.google.android.`as`.oss.feedback.api.FeedbackRatingSentiment
 import com.google.android.`as`.oss.feedback.api.FeedbackRatingTagSource
 import com.google.android.`as`.oss.feedback.api.FeedbackTagData
 import com.google.android.`as`.oss.feedback.api.gateway.SpoonCUJ
+import com.google.android.`as`.oss.feedback.blueflax.utils.validBlueflaxCuj
 import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.LegacyV1
 import com.google.android.`as`.oss.feedback.domain.FeedbackDialogMode.EDITING_FEEDBACK
 import com.google.android.`as`.oss.feedback.domain.FeedbackDialogMode.VIEWING_FEEDBACK_DONATION_DATA
@@ -108,7 +110,16 @@ fun SingleEntityFeedbackDialogV1(
       clientSessionId = data.clientSessionId,
       interactionType = InteractionType.INTERACTION_TYPE_VIEW,
     )
-    viewModel.loadDonationData(clientSessionId = data.clientSessionId, loadSpoonData = true)
+    if (viewModel.hasDonationDataExtra) {
+      viewModel.loadDonationDataFromExtra(blueflaxCuj = data.validBlueflaxCuj)
+    } else {
+      viewModel.loadDonationData(
+        clientSessionId = data.clientSessionId,
+        loadSpoonData =
+          data.feedbackClient == FEEDBACK_CLIENT_SPOON ||
+            data.feedbackClient == FEEDBACK_CLIENT_UNSPECIFIED,
+      )
+    }
     launch {
       viewModel.events.collect { event: FeedbackSubmissionEvent ->
         onFeedbackEvent(event)
@@ -138,6 +149,7 @@ fun SingleEntityFeedbackDialogV1(
                 } else {
                   null
                 },
+              blueflaxCuj = data.validBlueflaxCuj,
               selectedEntityContent = data.entityContent,
               ratingSentiment = data.ratingSentiment,
             )
@@ -159,7 +171,7 @@ private fun EntityFeedbackBottomSheet(
   val scrimColor = remember { Animatable(Color.Transparent) }
 
   val targetColor = BottomSheetDefaults.ScrimColor
-  val transitionDuration = integerResource(R.integer.config_shortAnimTime)
+  val transitionDuration = integerResource(android.R.integer.config_shortAnimTime)
   LaunchedEffect(Unit) {
     delay(transitionDuration.milliseconds * 1.5)
     scrimColor.animateTo(targetColor)
@@ -475,24 +487,26 @@ private fun EntityFeedbackEditingContent(
     Spacer(modifier = Modifier.height(12.dp))
 
     // Opt-in checkbox and label
-    FeedbackOptInContentV1(
-      modifier = Modifier.fillMaxWidth(),
-      optInLabel =
-        if (data.ratingSentiment == FeedbackRatingSentiment.RATING_SENTIMENT_UNDEFINED) {
-          donationData.feedbackUiRenderingData.feedbackDialogOptInLabelGenericInfoLabel
-        } else {
-          donationData.feedbackUiRenderingData.feedbackDialogOptInLabel
-        },
-      optInLabelLinkPrivacyPolicy =
-        donationData.feedbackUiRenderingData.feedbackDialogOptInLabelLinkPrivacyPolicy,
-      optInLabelLinkViewData =
-        donationData.feedbackUiRenderingData.feedbackDialogOptInLabelLinkViewData,
-      optInCheckboxContentDescription =
-        donationData.feedbackUiRenderingData.feedbackDialogOptInCheckboxContentDescription,
-      optInChecked = optInChecked,
-      onOptInCheckedChanged = onOptInCheckedChanged,
-      onViewDataClicked = onViewDataClicked,
-    )
+    if (!donationData.feedbackUiRenderingData.hideOptInControl) {
+      FeedbackOptInContentV1(
+        modifier = Modifier.fillMaxWidth(),
+        optInLabel =
+          if (data.ratingSentiment == FeedbackRatingSentiment.RATING_SENTIMENT_UNDEFINED) {
+            donationData.feedbackUiRenderingData.feedbackDialogOptInLabelGenericInfoLabel
+          } else {
+            donationData.feedbackUiRenderingData.feedbackDialogOptInLabel
+          },
+        optInLabelLinkPrivacyPolicy =
+          donationData.feedbackUiRenderingData.feedbackDialogOptInLabelLinkPrivacyPolicy,
+        optInLabelLinkViewData =
+          donationData.feedbackUiRenderingData.feedbackDialogOptInLabelLinkViewData,
+        optInCheckboxContentDescription =
+          donationData.feedbackUiRenderingData.feedbackDialogOptInCheckboxContentDescription,
+        optInChecked = optInChecked,
+        onOptInCheckedChanged = onOptInCheckedChanged,
+        onViewDataClicked = onViewDataClicked,
+      )
+    }
 
     Spacer(modifier = Modifier.height(24.dp))
   }

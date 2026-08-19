@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -81,7 +82,8 @@ fun CardTemplateLayout(
               Modifier.applyEnergyEffectsAnimation(geminiAnimationSpec = spec, fallback = { this })
             }
           )
-          .padding(horizontal = 12.dp, vertical = 16.dp),
+          .padding(horizontal = 12.dp, vertical = 16.dp)
+          .padding(cardUiData.insets.asPaddingValues()),
       verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
       Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

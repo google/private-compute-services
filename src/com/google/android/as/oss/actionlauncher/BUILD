@@ -34,6 +34,8 @@ android_library(
         "//src/com/google/android/as/oss/availability/service/impl:agentic_integration_service_grpc_client_module",
         "//src/com/google/android/as/oss/common",
         "//src/com/google/android/as/oss/common/config",
+        "//src/com/google/android/as/oss/common/security:security_policy_utils",
+        "//src/com/google/android/as/oss/common/security/config",
         "//src/com/google/android/as/oss/common/time",
         "//third_party/java/androidx/appcompat",
         "//third_party/java/protobuf/util:time_lite",

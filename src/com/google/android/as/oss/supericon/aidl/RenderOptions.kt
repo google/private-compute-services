@@ -17,6 +17,7 @@
 package com.google.android.`as`.oss.supericon.aidl
 
 import android.graphics.Color.BLACK
+import android.graphics.Color.TRANSPARENT
 import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.os.IBinder
@@ -52,6 +53,12 @@ import java.util.Objects
  * @property textScaleX The horizontal scale factor for the label text.
  * @property windowToken The window token.
  * @property accessibilityPaneTitle The accessibility pane title.
+ * @property lineSpacingExtra Extra spacing between lines of text, in pixels.
+ * @property lineSpacingMultiplier Multiplier for line height.
+ * @property textWeight Custom font weight.
+ * @property consentVersion The version of the consent.
+ * @property backgroundWidth The custom width of the background.
+ * @property backgroundHeight The custom height of the background.
  */
 @SafeParcelable.Class(creator = "RenderOptionsCreator")
 class RenderOptions
@@ -97,6 +104,19 @@ constructor(
   val subIconScaleX: Float = 1.0f,
   @field:SafeParcelable.Field(id = 27, getter = "getSubIconScaleY", defaultValue = "1.0f")
   val subIconScaleY: Float = 1.0f,
+  @field:SafeParcelable.Field(id = 28, getter = "getBackgroundRippleColor", defaultValue = "0")
+  val backgroundRippleColor: Int = DEFAULT_BACKGROUND_RIPPLE_COLOR,
+  @field:SafeParcelable.Field(id = 29, getter = "getLineSpacingExtra", defaultValue = "0.0f")
+  val lineSpacingExtra: Float = 0.0f,
+  @field:SafeParcelable.Field(id = 30, getter = "getLineSpacingMultiplier", defaultValue = "1.0f")
+  val lineSpacingMultiplier: Float = 1.0f,
+  @field:SafeParcelable.Field(id = 31, getter = "getTextWeight", defaultValue = "-1")
+  val textWeight: Int = INVALID_TEXT_WEIGHT,
+  @field:SafeParcelable.Field(id = 32, getter = "getConsentVersion") val consentVersion: Int = 0,
+  @field:SafeParcelable.Field(id = 33, getter = "getBackgroundWidth", defaultValue = "-1")
+  val backgroundWidth: Int = DEFAULT_BACKGROUND_SIZE,
+  @field:SafeParcelable.Field(id = 34, getter = "getBackgroundHeight", defaultValue = "-1")
+  val backgroundHeight: Int = DEFAULT_BACKGROUND_SIZE,
 ) : AbstractSafeParcelable() {
 
   @SafeParcelable.Constructor
@@ -128,6 +148,13 @@ constructor(
     @SafeParcelable.Param(id = 25) subIconHeight: Int,
     @SafeParcelable.Param(id = 26) subIconScaleX: Float,
     @SafeParcelable.Param(id = 27) subIconScaleY: Float,
+    @SafeParcelable.Param(id = 28) backgroundRippleColor: Int,
+    @SafeParcelable.Param(id = 29) lineSpacingExtra: Float,
+    @SafeParcelable.Param(id = 30) lineSpacingMultiplier: Float,
+    @SafeParcelable.Param(id = 31) textWeight: Int,
+    @SafeParcelable.Param(id = 32) consentVersion: Int,
+    @SafeParcelable.Param(id = 33) backgroundWidth: Int,
+    @SafeParcelable.Param(id = 34) backgroundHeight: Int,
   ) : this(
     width = width,
     height = height,
@@ -157,6 +184,13 @@ constructor(
     subIconHeight = subIconHeight,
     subIconScaleX = subIconScaleX,
     subIconScaleY = subIconScaleY,
+    backgroundRippleColor = backgroundRippleColor,
+    lineSpacingExtra = lineSpacingExtra,
+    lineSpacingMultiplier = lineSpacingMultiplier,
+    textWeight = textWeight,
+    consentVersion = consentVersion,
+    backgroundWidth = backgroundWidth,
+    backgroundHeight = backgroundHeight,
   )
 
   // SafeParcelable requires a Creator and specific writing logic
@@ -203,7 +237,14 @@ constructor(
       subIconWidth == otherOptions.subIconWidth &&
       subIconHeight == otherOptions.subIconHeight &&
       subIconScaleX == otherOptions.subIconScaleX &&
-      subIconScaleY == otherOptions.subIconScaleY
+      subIconScaleY == otherOptions.subIconScaleY &&
+      backgroundRippleColor == otherOptions.backgroundRippleColor &&
+      lineSpacingExtra == otherOptions.lineSpacingExtra &&
+      lineSpacingMultiplier == otherOptions.lineSpacingMultiplier &&
+      textWeight == otherOptions.textWeight &&
+      consentVersion == otherOptions.consentVersion &&
+      backgroundWidth == otherOptions.backgroundWidth &&
+      backgroundHeight == otherOptions.backgroundHeight
   }
 
   override fun hashCode(): Int {
@@ -235,16 +276,26 @@ constructor(
       subIconHeight,
       subIconScaleX,
       subIconScaleY,
+      backgroundRippleColor,
+      lineSpacingExtra,
+      lineSpacingMultiplier,
+      textWeight,
+      consentVersion,
+      backgroundWidth,
+      backgroundHeight,
     )
   }
 
   override fun toString(): String {
-    return "RenderOptions(width=$width, height=$height, minWidth=$minWidth, minHeight=$minHeight, maxWidth=$maxWidth, maxHeight=$maxHeight, uiType=$uiType, icon=$icon, iconWidth=$iconWidth, iconHeight=$iconHeight, iconScaleX=$iconScaleX, iconScaleY=$iconScaleY, background=$background, label=$label, labelColor=$labelColor, fontFamily=$fontFamily, textSizeInPixels=$textSizeInPixels, textScaleX=$textScaleX, windowToken=$windowToken, contentDescription=$contentDescription, roleDescription=$roleDescription, accessibilityPaneTitle=$accessibilityPaneTitle, subIcon=$subIcon, subIconWidth=$subIconWidth, subIconHeight=$subIconHeight, subIconScaleX=$subIconScaleX, subIconScaleY=$subIconScaleY)"
+    return "RenderOptions(width=$width, height=$height, minWidth=$minWidth, minHeight=$minHeight, maxWidth=$maxWidth, maxHeight=$maxHeight, uiType=$uiType, icon=$icon, iconWidth=$iconWidth, iconHeight=$iconHeight, iconScaleX=$iconScaleX, iconScaleY=$iconScaleY, background=$background, label=$label, labelColor=$labelColor, fontFamily=$fontFamily, textSizeInPixels=$textSizeInPixels, textScaleX=$textScaleX, windowToken=$windowToken, contentDescription=$contentDescription, roleDescription=$roleDescription, accessibilityPaneTitle=$accessibilityPaneTitle, subIcon=$subIcon, subIconWidth=$subIconWidth, subIconHeight=$subIconHeight, subIconScaleX=$subIconScaleX, subIconScaleY=$subIconScaleY, backgroundRippleColor=$backgroundRippleColor, lineSpacingExtra=$lineSpacingExtra, lineSpacingMultiplier=$lineSpacingMultiplier, textWeight=$textWeight, consentVersion=$consentVersion, backgroundWidth=$backgroundWidth, backgroundHeight=$backgroundHeight)"
   }
 
   companion object {
     @JvmField val CREATOR: Parcelable.Creator<RenderOptions> = RenderOptionsCreator()
     const val DEFAULT_LABEL_COLOR = BLACK
+    const val INVALID_TEXT_WEIGHT = -1
+    const val DEFAULT_BACKGROUND_RIPPLE_COLOR = TRANSPARENT
+    const val DEFAULT_BACKGROUND_SIZE = -1
     const val DEFAULT_FONT_FAMILY = "google-sans-text-medium"
     const val KEY_ACCESSIBILITY_PANE_TITLE = "accessibility_pane_title"
   }

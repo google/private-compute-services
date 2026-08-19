@@ -16,6 +16,9 @@
 
 package com.google.android.as.oss.fl.fc.service.scheduler.endorsementoptions;
 
+import static com.google.android.as.oss.fl.fc.service.scheduler.endorsementoptions.R.raw.pcs_release_endorsement_options;
+import static com.google.android.as.oss.fl.fcp.service.scheduler.endorsementoptions.cobalt.R.raw.cobalt_release_endorsement_options;
+
 import com.google.common.collect.ImmutableMap;
 import dagger.Module;
 import dagger.Provides;
@@ -29,7 +32,9 @@ class ReleaseModule {
   private static final ImmutableMap<EndorsementClientType, Integer> RESOURCE_ID_MAP =
       ImmutableMap.of(
           EndorsementClientType.PRIVATE_COMPUTE_SERVICES_DEFAULT_KEY,
-          R.raw.pcs_release_endorsement_options);
+          pcs_release_endorsement_options,
+          EndorsementClientType.COBALT_KEY,
+          cobalt_release_endorsement_options);
 
   @Provides
   static EndorsementOptionsProvider provideEndorsementOptionsProvider() {

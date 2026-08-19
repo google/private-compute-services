@@ -24,6 +24,7 @@ import com.google.android.`as`.oss.common.ExecutorAnnotations.PiExecutorQualifie
 import com.google.android.`as`.oss.logging.PcsStatsEnums.CountMetricId
 import com.google.android.`as`.oss.logging.PcsStatsEnums.ValueMetricId
 import com.google.android.`as`.oss.privateinference.Annotations.PiServerChannelIdleTimeoutMinutes
+import com.google.android.`as`.oss.privateinference.Annotations.PrivateInferenceEnableConfigurableIpBlindingMode
 import com.google.android.`as`.oss.privateinference.Annotations.PrivateInferenceEndpointUrl
 import com.google.android.`as`.oss.privateinference.Annotations.PrivateInferenceForceIpTunnelCreationForEverySession
 import com.google.android.`as`.oss.privateinference.Annotations.PrivateInferenceProxyConfiguration
@@ -34,6 +35,9 @@ import com.google.android.`as`.oss.privateinference.library.bsa.token.ProxyToken
 import com.google.android.`as`.oss.privateinference.library.oakutil.PrivateInferenceClientTimerNames
 import com.google.android.`as`.oss.privateinference.logging.MetricIdMap
 import com.google.android.`as`.oss.privateinference.logging.PcsStatsLogger
+import com.google.android.`as`.oss.privateinference.service.api.proto.IpBlindingMode
+import com.google.android.`as`.oss.privateinference.service.api.proto.SessionConfiguration
+import com.google.android.`as`.oss.privateinference.service.api.proto.sessionConfiguration
 import com.google.android.`as`.oss.privateinference.transport.IpRelayFallbackFlag
 import com.google.android.`as`.oss.privateinference.transport.ManagedChannelFactory
 import com.google.android.`as`.oss.privateinference.transport.ProxyConfigManager
@@ -85,25 +89,68 @@ constructor(
   @param:PrivateInferenceClientTimers private val timers: TimerSet,
   private val proxyAuthFlag: ProxyAuthFlag,
   private val pcsStatsLogger: PcsStatsLogger,
+  @PrivateInferenceEnableConfigurableIpBlindingMode
+  private val enableConfigurableIpBlindingMode: Boolean,
 ) : ManagedChannelFactory {
 
   private val mutex = Mutex()
-  private var managedChannelInstance: ManagedChannel? = null
-  private var currentCronetEngine: CronetEngine? = null
+  private val managedChannelInstances: MutableMap<IpBlindingMode, ManagedChannel> = mutableMapOf()
+  private var cronetEngineInstances: MutableMap<IpBlindingMode, CronetEngine> = mutableMapOf()
 
-  override suspend fun getInstance(): ManagedChannel {
-    return getManagedChannelInstance()
+  override suspend fun getInstance(sessionConfiguration: SessionConfiguration): ManagedChannel {
+    val config =
+      if (sessionConfiguration.ipBlindingMode == IpBlindingMode.IP_BLINDING_MODE_UNSPECIFIED) {
+        logger
+          .atInfo()
+          .log(
+            "IpBlindingMode in SessionInitializationRequest is unspecified, falling back to " +
+              "IP_BLINDING_MODE_ENABLED."
+          )
+        sessionConfiguration { ipBlindingMode = IpBlindingMode.IP_BLINDING_MODE_ENABLED }
+      } else {
+        sessionConfiguration
+      }
+    return getManagedChannelInstance(config)
   }
 
-  private suspend fun getManagedChannelInstance(): ManagedChannel = mutex.withLock {
-    if (forceIpTunnelCreationForEverySession) {
-      logger.atInfo().log("Shutting down any previous ManagedChannel or CronetEngine.")
-      managedChannelInstance?.shutdown()
-      currentCronetEngine?.shutdown()
-      create().also { managedChannelInstance = it }
-    } else {
-      managedChannelInstance ?: create().also { managedChannelInstance = it }
+  private suspend fun getManagedChannelInstance(
+    sessionConfiguration: SessionConfiguration
+  ): ManagedChannel = mutex.withLock {
+    val ipBlindingMode =
+      if (enableConfigurableIpBlindingMode) {
+        sessionConfiguration.ipBlindingMode
+      } else {
+        if (sessionConfiguration.ipBlindingMode == IpBlindingMode.IP_BLINDING_MODE_DISABLED) {
+          logger
+            .atInfo()
+            .log(
+              "IpBlindingMode in SessionInitializationRequest is ignored because " +
+                "EnableConfigurableIpBlindingMode flag is disabled."
+            )
+        }
+        IpBlindingMode.IP_BLINDING_MODE_ENABLED
+      }
+    // TODO: [forceIpTunnelCreationForEverySession] is a debug only flag to force IP
+    // blinding tunnel creation for every session. Refactor it to be generic to non-IP blinding
+    // tunnels too.
+    if (
+      forceIpTunnelCreationForEverySession &&
+        ipBlindingMode == IpBlindingMode.IP_BLINDING_MODE_ENABLED
+    ) {
+      logger.atInfo().log("Shutting down any previous IP relay ManagedChannel or CronetEngine.")
+      managedChannelInstances.get(ipBlindingMode)?.shutdown()
+      cronetEngineInstances.get(ipBlindingMode)?.shutdown()
+      managedChannelInstances.remove(ipBlindingMode)
+      cronetEngineInstances.remove(ipBlindingMode)
     }
+    managedChannelInstances.get(ipBlindingMode)
+      ?: create(sessionConfiguration).also {
+        if (it is UnusableManagedChannel) {
+          logger.atWarning().log("Created UnusableManagedChannel, will not cache it.")
+        } else {
+          managedChannelInstances.put(ipBlindingMode, it)
+        }
+      }
   }
 
   private fun proxyApisAvailable(): Boolean =
@@ -115,15 +162,21 @@ constructor(
       // http://[redacted]
       SdkExtensions.getExtensionVersion(Build.VERSION_CODES.S) >= 22
 
-  private suspend fun create(): ManagedChannel {
+  private suspend fun create(sessionConfiguration: SessionConfiguration): ManagedChannel {
     val mode = transportFlag.mode()
     logger
       .atInfo()
       .log(
-        "Creating gRPC channel for Private Inference server at %s with transport mode %s",
+        "Creating gRPC channel with IP blinding mode %s for Private Inference server at %s with " +
+          "transport mode %s",
+        sessionConfiguration.ipBlindingMode,
         endpointUrl,
         mode,
       )
+
+    if (sessionConfiguration.ipBlindingMode == IpBlindingMode.IP_BLINDING_MODE_DISABLED) {
+      return createCronetMainlineChannelBuilder().build()
+    }
 
     val isIpRelayMode =
       mode == TransportFlag.Mode.CRONET_MAINLINE_IP_RELAY ||
@@ -135,6 +188,11 @@ constructor(
 
     val proxyConfig =
       if (isIpRelayMode) {
+        if (!proxyConfigManager.isPresent) {
+          logger
+            .atWarning()
+            .log("ProxyConfigManager is not present in PrivateInferenceManagedChannelFactory.")
+        }
         val config = proxyConfigManager.orElse(null)?.getProxyConfig() ?: emptyList()
         if (config.isEmpty()) {
           logger
@@ -150,13 +208,7 @@ constructor(
     val managedChannelBuilder: ManagedChannelBuilder<*> =
       when (mode) {
         TransportFlag.Mode.OK_HTTP -> OkHttpChannelBuilder.forAddress(endpointUrl, HTTPS_PORT)
-        TransportFlag.Mode.CRONET_MAINLINE -> {
-          val engine =
-            HttpEngineNativeProvider(context).createBuilder().build().also {
-              currentCronetEngine = it
-            }
-          CronetChannelBuilder.forAddress(endpointUrl, HTTPS_PORT, engine)
-        }
+        TransportFlag.Mode.CRONET_MAINLINE -> createCronetMainlineChannelBuilder()
         TransportFlag.Mode.CRONET_MAINLINE_IP_RELAY ->
           when {
             ipRelayFallbackFlag.mode == IpRelayFallbackFlag.Mode.FORCE_STATIC -> {
@@ -183,8 +235,10 @@ constructor(
               )
           }
         TransportFlag.Mode.CRONET_STATIC -> {
-          val engine =
-            NativeCronetProvider(context).createBuilder().build().also { currentCronetEngine = it }
+          // TODO: This is a corner case expected to be unreachable. We no longer cache
+          // the CronetEngine instances. Will refactor the logic to separate CronetEngine and IP
+          // blinding mode.
+          val engine = NativeCronetProvider(context).createBuilder().build()
           CronetChannelBuilder.forAddress(endpointUrl, HTTPS_PORT, engine)
         }
         TransportFlag.Mode.CRONET_STATIC_IP_RELAY ->
@@ -195,6 +249,17 @@ constructor(
       .maxInboundMessageSize(MAX_INBOUND_MESSAGE_SIZE_BYTES)
       .idleTimeout(channelIdleTimeoutMinutes, TimeUnit.MINUTES)
       .build()
+  }
+
+  private fun createCronetMainlineChannelBuilder(): ManagedChannelBuilder<*> {
+    val engine =
+      cronetEngineInstances.get(IpBlindingMode.IP_BLINDING_MODE_DISABLED)
+        ?: HttpEngineNativeProvider(context).createBuilder().build().also {
+          cronetEngineInstances.put(IpBlindingMode.IP_BLINDING_MODE_DISABLED, it)
+        }
+    return CronetChannelBuilder.forAddress(endpointUrl, HTTPS_PORT, engine)
+      .maxInboundMessageSize(MAX_INBOUND_MESSAGE_SIZE_BYTES)
+      .idleTimeout(channelIdleTimeoutMinutes, TimeUnit.MINUTES)
   }
 
   private enum class CronetProviderType(
@@ -219,7 +284,10 @@ constructor(
     return try {
       val engineBuilder = providerType.builderFactory(context)
       engineBuilder.applyProxyConfig(proxyConfig)
-      val engine = engineBuilder.build().also { currentCronetEngine = it }
+      val engine =
+        engineBuilder.build().also {
+          cronetEngineInstances.put(IpBlindingMode.IP_BLINDING_MODE_ENABLED, it)
+        }
       pcsStatsLogger.logEventCount(providerType.metricId)
       CronetChannelBuilder.forAddress(endpointUrl, HTTPS_PORT, engine)
     } catch (e: UnsupportedOperationException) {

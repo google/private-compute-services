@@ -17,34 +17,33 @@
 
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Version 0 Consent Form Strings -->
     <!-- Title of the consent dialog explaining how Gboard uses screen context. [CHAR LIMIT=50] -->
     <string name="super_icon_consent_title">How Gboard uses screen context</string>
-
     <!-- First paragraph of the consent dialog body text. Explains data processing. [CHAR LIMIT=NONE] -->
     <string name="super_icon_consent_body_1">To provide more relevant writing suggestions, writing tools take a snapshot of your screen only at the time of use. This content, including any communications you view or receive, is processed in a secure, isolated environment on your device or in the cloud, where it\'s not shared with Google or any app.</string>
-
     <!-- Second paragraph of the consent dialog body text. Explains how to turn off the feature. [CHAR LIMIT=NONE] -->
     <string name="super_icon_consent_body_2">You can turn this feature off at any time.</string>
 
+    <!-- Version 1 Consent Form Strings -->
     <!-- Title of the consent dialog explaining how writing tools personalize suggestions. [CHAR LIMIT=100] -->
-    <string name="super_icon_consent_with_p13n_title">How writing tools personalize your suggestions</string>
+    <string name="super_icon_consent_title_v1">Improve writing suggestions with personal context</string>
     <!-- First paragraph of the consent dialog body text for P13N. Explains data usage. [CHAR LIMIT=NONE] -->
-    <string name="super_icon_consent_with_p13n_body_1">To provide more relevant writing suggestions, writing tools may use your typing history, as well as screen context obtained by taking a snapshot of your screen only at the time of use. </string>
+    <string name="super_icon_consent_body_1_v1">To provide more relevant writing suggestions, writing tools may use your typing history, as well as screen context obtained by taking a snapshot of your screen only at the time of use. </string>
     <!-- Second paragraph of the consent dialog body text for P13N. Explains Private AI Compute. [CHAR LIMIT=NONE] -->
-    <string name="super_icon_consent_with_p13n_body_2">With Google\'s Private AI Compute, your data is encrypted and processed in a private, dedicated space on your device and in the cloud. No one can see your data, not even Google.</string>
+    <string name="super_icon_consent_body_2_v1">With Google\'s Private AI Compute, your data is encrypted and processed in a private, dedicated space on your device and in the cloud. No one can see your data, not even Google.</string>
     <!-- Third paragraph of the consent dialog body text for P13N. Explains privacy. [CHAR LIMIT=NONE] -->
-    <string name="super_icon_consent_with_p13n_body_3">Unless you share with Google or other apps, your info stays private. It can\'t be traced back to you or accessed by anyone at Google.</string>
+    <string name="super_icon_consent_body_3_v1">Unless you share with Google or other apps, your info stays private. It can\'t be traced back to you or accessed by anyone at Google.</string>
     <!-- Fourth paragraph of the consent dialog body text for P13N. Explains setting change. [CHAR LIMIT=NONE] -->
-    <string name="super_icon_consent_with_p13n_body_4">You can change this setting anytime.</string>
-    <!-- Label for the button to decline consent. [CHAR LIMIT=20] -->
-    <string name="super_icon_consent_no_button">No, thanks</string>
+    <string name="super_icon_consent_body_4_v1">If you don\'t want to use personal context, writing tools will still use your input text via Google\'s Private AI Compute to provide writing suggestions. You can change your selection in Writing tools settings.</string>
+    <!-- Fifth paragraph of the consent dialog body text for P13N. Explains AI mistakes and links to learn more. [CHAR LIMIT=NONE] -->
+    <string name="super_icon_consent_body_5_v1">Writing tools use AI, so they may make mistakes. <annotation url="https://support.google.com/gboard?p=advanced-writing-tools">Learn more</annotation></string>
 
+    <!-- Shared Strings -->
+    <!-- Label for the button to decline consent. [CHAR LIMIT=20] -->
+    <string name="super_icon_consent_no_button">No thanks</string>
     <!-- Label for the button to accept consent. [CHAR LIMIT=20] -->
     <string name="super_icon_consent_yes_button">OK</string>
-
     <!-- Content description for the Writing Tools icon in the consent dialog. Spoken by screen readers. [CHAR LIMIT=30] -->
     <string name="super_icon_content_description">Writing tools</string>
-
-    <!-- Accessibility pane title for the consent toggle window. Spoken by screen readers when focusing the toggle. [CHAR LIMIT=30] -->
-    <string name="super_icon_consent_toggle_window_title">Use screen context</string>
 </resources>

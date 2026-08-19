@@ -126,7 +126,11 @@ message TextQuery {
 
   bool should_automate = 4;
 
-  reserved 3;
+  repeated File files = 3;
+
+  // If true, the full screen mode will be used. Otherwise, Floaty mode will be
+  // used.
+  bool should_use_full_screen_mode = 7;
 }
 
 message LaunchResponse {}

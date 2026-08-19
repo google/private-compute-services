@@ -16,8 +16,11 @@
 
 package com.google.android.`as`.oss.actionlauncher
 
+import android.app.ActivityOptions
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
 import com.google.android.`as`.oss.actionlauncher.config.ActionLauncherConfig
@@ -30,9 +33,12 @@ import com.google.android.`as`.oss.availability.api.agenticintegration.launchReq
 import com.google.android.`as`.oss.availability.api.agenticintegration.textQuery
 import com.google.android.`as`.oss.common.Executors.GENERAL_SINGLE_THREAD_EXECUTOR
 import com.google.android.`as`.oss.common.config.ConfigReader
+import com.google.android.`as`.oss.common.security.SecurityPolicyUtils
+import com.google.android.`as`.oss.common.security.config.PccSecurityConfig
 import com.google.android.`as`.oss.common.time.TimeSource
 import com.google.common.flogger.GoogleLogger
 import com.google.common.flogger.android.AndroidLogTag
+import com.google.fcp.client.common.GoogleSignatureVerifier
 import com.google.protobuf.util.Durations
 import dagger.hilt.android.AndroidEntryPoint
 import io.grpc.Metadata
@@ -51,11 +57,15 @@ class ActionLauncherActivity : Hilt_ActionLauncherActivity() {
   @Inject lateinit var configReader: ConfigReader<ActionLauncherConfig>
   @Inject lateinit var stub: AgenticIntegrationServiceGrpcKt.AgenticIntegrationServiceCoroutineStub
   @Inject lateinit var timeSource: TimeSource
+  @Inject lateinit var pccSecurityConfigReader: ConfigReader<PccSecurityConfig>
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     logger.atInfo().log("ActionLauncherActivity#onCreate")
-    if (!isSdkSupported() || !configReader.config.isActionLauncherEnabled) {
+    if (
+      Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM ||
+        !configReader.config.isActionLauncherEnabled
+    ) {
       logger.atInfo().log("ActionLauncherActivity is not supported or disabled. Finishing.")
       finish()
       return
@@ -63,8 +73,19 @@ class ActionLauncherActivity : Hilt_ActionLauncherActivity() {
     val geminiTextQuery = intent.getStringExtra(Constants.GEMINI_TEXT_QUERY_KEY)
     val shouldAutoSubmit = intent.getBooleanExtra(Constants.SHOULD_AUTO_SUBMIT_KEY, true)
     val shouldAutomate = intent.getBooleanExtra(Constants.SHOULD_AUTOMATE_KEY, false)
+    val binder = intent.extras?.getBinder("EXTRA_SHARED_MEMORY_BINDER")
+
     scope.launch {
-      if (geminiTextQuery != null) {
+      if (binder != null) {
+        val failureToastMessage = intent.getStringExtra(Constants.TOAST_MESSAGE_ON_FAILURE_KEY)
+        val success = forwardBinderToTarget(intent, binder)
+        logger.atInfo().log("ActionLauncherActivity#forwardBinderToTarget success: %s", success)
+        if (!success) {
+          if (!failureToastMessage.isNullOrEmpty()) {
+            showToast(failureToastMessage)
+          }
+        }
+      } else if (geminiTextQuery != null) {
         val toastMessageOnFailure = intent.getStringExtra(Constants.TOAST_MESSAGE_ON_FAILURE_KEY)
         val success =
           launchAgenticIntegrationServiceWithTextQuery(
@@ -149,6 +170,77 @@ class ActionLauncherActivity : Hilt_ActionLauncherActivity() {
     return null
   }
 
+  @Suppress("DEPRECATION")
+  private fun forwardBinderToTarget(incomingIntent: Intent, binder: IBinder): Boolean {
+    val targetPackage = incomingIntent.getStringExtra("EXTRA_SHARE_TARGET_PACKAGE")
+    val targetClass = incomingIntent.getStringExtra("EXTRA_SHARE_TARGET_CLASS")
+    if (targetPackage.isNullOrEmpty() || targetClass.isNullOrEmpty()) {
+      logger.atSevere().log("Target package or class is missing in incoming intent.")
+      return false
+    }
+    if (!isValidTarget(targetPackage)) {
+      logger.atSevere().log("Unauthorized target package: %s", targetPackage)
+      return false
+    }
+
+    logger
+      .atInfo()
+      .log("Forwarding shared memory binder to target: %s/%s", targetPackage, targetClass)
+    val bundle =
+      Bundle(incomingIntent.extras).apply { putBinder("EXTRA_SHARED_MEMORY_BINDER", binder) }
+    val intent =
+      Intent(Constants.ACTION_SHARE_CONVERSATION).apply {
+        setClassName(targetPackage, targetClass)
+        putExtras(bundle)
+      }
+    return try {
+      val options = ActivityOptions.makeBasic()
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+        options.setShareIdentityEnabled(true)
+      }
+      startActivityForResult(intent, REQUEST_CODE_FORWARD_TO_BLUEFLAX, options.toBundle())
+      true
+    } catch (e: Exception) {
+      logger
+        .atSevere()
+        .withCause(e)
+        .log("Failed to start target Activity %s/%s with binder", targetPackage, targetClass)
+      false
+    }
+  }
+
+  private fun isValidTarget(packageName: String): Boolean {
+    if (packageName == "com.google.android.apps.pixel.blueflax") {
+      val uid =
+        try {
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            packageManager.getPackageUid(packageName, 0)
+          } else {
+            @Suppress("DEPRECATION")
+            packageManager.getPackageInfo(packageName, 0).applicationInfo?.uid ?: return false
+          }
+        } catch (e: Exception) {
+          return false
+        }
+      return SecurityPolicyUtils.isCallerAuthorized(
+        pccSecurityConfigReader.config.securityInfoList(),
+        this,
+        uid,
+        /* allowTestKeys= */ !SecurityPolicyUtils.isUserBuild(),
+      )
+    }
+    if (
+      packageName == "com.google.android.googlequicksearchbox" ||
+        packageName == "com.google.android.apps.bard"
+    ) {
+      if (Build.TYPE == "user") {
+        return GoogleSignatureVerifier.getInstance(this).isPackageGoogleSigned(packageName)
+      }
+      return true
+    }
+    return false
+  }
+
   private fun showToast(message: String) {
     this@ActionLauncherActivity.runOnUiThread {
       Toast.makeText(this@ActionLauncherActivity, message, Toast.LENGTH_LONG).show()
@@ -156,6 +248,8 @@ class ActionLauncherActivity : Hilt_ActionLauncherActivity() {
   }
 
   companion object {
+    private const val REQUEST_CODE_FORWARD_TO_BLUEFLAX = 1001
+
     @AndroidLogTag("ActionLauncherActivity") private val logger = GoogleLogger.forEnclosingClass()
     private val AGENTIC_INTEGRATION_SERVICE_LAUNCH_ERROR_KEY: Metadata.Key<ErrorCode> =
       Metadata.Key.of(

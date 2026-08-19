@@ -92,6 +92,10 @@ abstract class NetworkUsageLogContentModule {
             .connectionType(ATTESTATION_REQUEST);
     ContentMapEntryBuilder psiHttpEntryBuilder =
         new ContentMapEntryBuilder(context).packageName(PSI_PACKAGE_NAME).connectionType(HTTP);
+    ContentMapEntryBuilder psiFaFlEntryBuilder =
+        new ContentMapEntryBuilder(context)
+            .packageName(PSI_PACKAGE_NAME)
+            .connectionType(FC_TRAINING_START_QUERY);
 
     ImmutableMap<ConnectionDetails, ConnectionResources> entries =
         ImmutableMap.ofEntries(
@@ -495,6 +499,12 @@ abstract class NetworkUsageLogContentModule {
             feedbackEntryBuilder
                 .packageName(ASI_PACKAGE_NAME)
                 .connectionKeyStringId(R.string.feature_name_feedback_apex_asi)
+                .featureNameId(R.string.feature_name_user_feedback)
+                .descriptionId(R.string.description_user_feedback)
+                .build(),
+            feedbackEntryBuilder
+                .packageName(ASI_PACKAGE_NAME)
+                .connectionKeyStringId(R.string.feature_name_feedback_apex_blueflax)
                 .featureNameId(R.string.feature_name_user_feedback)
                 .descriptionId(R.string.description_user_feedback)
                 .build(),

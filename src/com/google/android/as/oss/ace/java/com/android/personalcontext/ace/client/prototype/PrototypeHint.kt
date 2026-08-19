@@ -65,7 +65,7 @@ abstract class PrototypeHint(val id: PrototypeHintId, val creator: Creator) {
  * @property uid A unique positive value for each entry that should not change after creation.
  * @property typeName The class name of the prototype, may be used by OSI for comparison.
  */
-// Next ID: 21
+// Next ID: 22
 enum class PrototypeHintId(@field:IntRange(from = 1) val uid: Int, val typeName: String) {
   ExampleEmbeddedHintId(1, "ExampleEmbeddedHint"),
   WeatherHintId(2, "WeatherHint"),
@@ -88,4 +88,5 @@ enum class PrototypeHintId(@field:IntRange(from = 1) val uid: Int, val typeName:
   GboardHintId(18, "GboardHint"),
   RichCardErrorHintId(19, "RichCardErrorHint"),
   BlueflaxMetadataHintId(20, "BlueflaxMetadataHint"),
+  KeyEventHintId(21, "KeyEventHint"),
 }

@@ -430,24 +430,26 @@ private fun MultiEntityFeedbackEditingScreen(
         }
       }
 
-      FeedbackOptInControl(
-        modifier = Modifier.fillMaxWidth(),
-        optInCheckboxContentDescription = data.optInCheckboxContentDescription,
-        optInChecked = uiState.dataCollectionStates.values.any { it.isSelected() },
-        onOptInCheckedChanged = onOptInCheckedChanged,
-        viewDataTitle = data.feedbackDialogOptInV2Title,
-        viewDataDescription = data.feedbackDialogOptInV2Description,
-        onViewDataClicked = onViewDataClicked,
-      )
+      if (!data.hideOptInControl) {
+        FeedbackOptInControl(
+          modifier = Modifier.fillMaxWidth(),
+          optInCheckboxContentDescription = data.optInCheckboxContentDescription,
+          optInChecked = uiState.dataCollectionStates.values.any { it.isSelected() },
+          onOptInCheckedChanged = onOptInCheckedChanged,
+          viewDataTitle = data.feedbackDialogOptInV2Title,
+          viewDataDescription = data.feedbackDialogOptInV2Description,
+          onViewDataClicked = onViewDataClicked,
+        )
 
-      // Opt-in privacy statement
-      FeedbackOptInPrivacyStatement(
-        modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-        optInLabel = data.optInLabel,
-        optInLabelLinkPrivacyPolicy = data.optInLabelLinkPrivacyPolicy,
-        optInLabelLinkViewData = data.optInLabelLinkViewData,
-        onViewDataClicked = onViewDataClicked,
-      )
+        // Opt-in privacy statement
+        FeedbackOptInPrivacyStatement(
+          modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+          optInLabel = data.optInLabel,
+          optInLabelLinkPrivacyPolicy = data.optInLabelLinkPrivacyPolicy,
+          optInLabelLinkViewData = data.optInLabelLinkViewData,
+          onViewDataClicked = onViewDataClicked,
+        )
+      }
     }
   }
 }

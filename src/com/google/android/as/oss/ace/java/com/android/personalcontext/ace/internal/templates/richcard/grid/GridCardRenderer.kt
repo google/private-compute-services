@@ -39,11 +39,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.android.personalcontext.ace.client.prototype.grid.InsightGrid
 import com.android.personalcontext.ace.internal.templates.richcard.CardUiData
 import com.android.personalcontext.ace.internal.templates.richcard.common.CardTemplateLayout
-import com.android.personalcontext.ace.internal.templates.richcard.common.GoogleSansText
 import com.android.personalcontext.ace.internal.templates.richcard.common.LoadingBox
 import com.android.personalcontext.ace.internal.templates.richcard.common.cardContextActionClickable
 import com.android.personalcontext.ace.internal.templates.richcard.renderer.CardRenderer
@@ -72,6 +70,7 @@ internal constructor(private val energyEffectsAnimationCompat: EnergyEffectsAnim
     }
   }
 
+  /** Renders the grid card layout with title, accessory, and grid items. */
   @Composable
   private fun GridCard(modifier: Modifier, uiData: GridCardUiData) {
     Column(
@@ -86,18 +85,12 @@ internal constructor(private val energyEffectsAnimationCompat: EnergyEffectsAnim
       // Title section
       uiData.title?.let { title ->
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
-          Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+          Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             title.mainTitle?.let {
               Text(
                 text = it,
                 color = MaterialTheme.colorScheme.onSurface,
-                style =
-                  MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 20.sp,
-                    lineHeight = 26.sp,
-                    letterSpacing = 0.sp,
-                  ),
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Medium),
                 modifier =
                   title.mainTitleContentDescription?.let { desc ->
                     Modifier.clearAndSetSemantics { contentDescription = desc }
@@ -108,14 +101,7 @@ internal constructor(private val energyEffectsAnimationCompat: EnergyEffectsAnim
               Text(
                 text = it,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style =
-                  MaterialTheme.typography.bodySmall.copy(
-                    fontFamily = GoogleSansText,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 14.sp,
-                    lineHeight = 16.sp,
-                    letterSpacing = 0.2.sp,
-                  ),
+                style = MaterialTheme.typography.bodyMedium,
               )
             }
           }
@@ -137,13 +123,7 @@ internal constructor(private val energyEffectsAnimationCompat: EnergyEffectsAnim
               Text(
                 text = accessoryData.text,
                 color = foregroundColor,
-                style =
-                  MaterialTheme.typography.labelMedium.copy(
-                    fontWeight = FontWeight.W500,
-                    fontSize = 12.sp,
-                    lineHeight = 26.sp,
-                    letterSpacing = 0.sp,
-                  ),
+                style = MaterialTheme.typography.labelMedium,
               )
             }
           }
@@ -163,7 +143,7 @@ internal constructor(private val energyEffectsAnimationCompat: EnergyEffectsAnim
             is GridCardItem.Loading -> {
               LoadingBox(
                 modifier = Modifier.fillMaxWidth().height(60.dp),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(12.dp),
               )
             }
             is GridCardItem.Loaded -> {
@@ -172,22 +152,17 @@ internal constructor(private val energyEffectsAnimationCompat: EnergyEffectsAnim
                   Modifier.fillMaxWidth()
                     .background(
                       MaterialTheme.colorScheme.surfaceContainerHigh,
-                      RoundedCornerShape(8.dp),
+                      RoundedCornerShape(12.dp),
                     )
                     .semantics(mergeDescendants = true) {}
-                    .padding(vertical = 4.dp, horizontal = 8.dp)
+                    .padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
               ) {
                 item.title?.let { titleText ->
                   Text(
                     text = titleText,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style =
-                      MaterialTheme.typography.labelMedium.copy(
-                        fontWeight = FontWeight.W500,
-                        fontSize = 12.sp,
-                        lineHeight = 26.sp,
-                        letterSpacing = 0.sp,
-                      ),
+                    style = MaterialTheme.typography.labelSmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                   )
@@ -197,12 +172,7 @@ internal constructor(private val energyEffectsAnimationCompat: EnergyEffectsAnim
                     text = subtitleText,
                     color = MaterialTheme.colorScheme.onSurface,
                     style =
-                      MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.W500,
-                        fontSize = 20.sp,
-                        lineHeight = 26.sp,
-                        letterSpacing = 0.sp,
-                      ),
+                      MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Medium),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                   )

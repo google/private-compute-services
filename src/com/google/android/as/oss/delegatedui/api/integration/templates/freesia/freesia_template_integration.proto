@@ -16,7 +16,6 @@ edition = "2024";
 
 package com.google.android.as.oss.delegatedui.api.integration.templates.freesia;
 
-
 import option "third_party/protobuf/cpp_features.proto";
 
 option java_package = "com.google.android.as.oss.delegatedui.api.integration.templates.freesia";

@@ -17,12 +17,10 @@ edition = "2024";
 package com.google.android.as.oss.fl.api;
 
 import "src/com/google/android/as/oss/protos/pcs_feature-enum.proto";
-
 import "third_party/fcp/client/selector_context.proto";
 
 option java_package = "com.google.android.as.oss.fl.api.proto";
 option java_outer_classname = "PrivateLogging";
-
 
 // A service to enable PCC apps to pass data to PCS for upload via FCP's
 // PrivateLogger API. This service is used to implement a Private Logger that
@@ -101,8 +99,7 @@ message UploadRequest {
 // Response message sent from gRPC service containing overall upload result.
 message UploadFinishedResponse {
   // A list of outcomes for each task attempted during upload.
-  repeated UploadOutcome outcomes = 1
-     ;
+  repeated UploadOutcome outcomes = 1;
 }
 
 // Request message sent from PCS back to the PCC app to request data to be
@@ -126,8 +123,7 @@ message ClientStreamMessage {
   oneof message_type {
     // The initial request to start an upload. This must be the first message
     // sent by the client in the stream.
-    UploadRequest upload_request = 1
-       ;
+    UploadRequest upload_request = 1;
 
     // A response containing data requested by the service via GetDataRequest.
     // This is sent in response to a ServiceStreamMessage containing a

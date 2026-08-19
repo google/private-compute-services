@@ -16,6 +16,8 @@
 
 package com.google.android.as.oss.privateinference.library;
 
+import com.google.android.as.oss.privateinference.service.api.proto.IpBlindingMode;
+import com.google.android.as.oss.privateinference.service.api.proto.PcsPrivateInferenceFeatureName;
 import java.util.Optional;
 
 /**
@@ -36,6 +38,21 @@ public interface PrivateInferenceRequestMetadata {
     public Optional<String> spatulaHeader = Optional.empty();
   }
 
-  /** Returns the authentication info for the request. */
+  /** Returns the authentication info for the session. */
   public AuthInfo getAuthInfo();
+
+  /** Returns the feature name for the session. */
+  default PcsPrivateInferenceFeatureName getFeatureName() {
+    return PcsPrivateInferenceFeatureName.FEATURE_NAME_UNSPECIFIED;
+  }
+
+  /**
+   * Returns the IP binding mode for the session.
+   *
+   * <p>The default mode is IP_BLINDING_MODE_ENABLED to be consistent with the existing behavior of
+   * the PAC library w/o explicit configuration..
+   */
+  default IpBlindingMode getIpBlindingMode() {
+    return IpBlindingMode.IP_BLINDING_MODE_ENABLED;
+  }
 }

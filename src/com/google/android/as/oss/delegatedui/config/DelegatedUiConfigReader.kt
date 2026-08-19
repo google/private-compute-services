@@ -44,6 +44,8 @@ class DelegatedUiConfigReader(private val flagManager: FlagManager) :
       bypassAllSecurityPolicies = flagManager.get(DelegatedUiFlags.BYPASS_ALL_SECURITY_POLICIES),
       enableBugleOutlineAnimationV2 =
         flagManager.get(DelegatedUiFlags.ENABLE_BUGLE_OUTLINE_ANIMATION_V2),
+      bugleMagicCardChipTimeoutMs =
+        flagManager.get(DelegatedUiFlags.BUGLE_MAGIC_CARD_CHIP_TIMEOUT_MS),
     )
   }
 }

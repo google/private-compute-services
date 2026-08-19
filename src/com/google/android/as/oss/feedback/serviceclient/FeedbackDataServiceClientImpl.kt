@@ -25,6 +25,7 @@ import com.google.android.`as`.oss.feedback.config.FeedbackConfig
 import com.google.common.flogger.GoogleLogger
 import com.google.common.flogger.StackSize
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 
 class FeedbackDataServiceClientImpl
 @Inject
@@ -48,6 +49,7 @@ internal constructor(
         service.getFeedbackDonationData(request).toFeedbackDonationData()
       }
       .onFailure { e ->
+        if (e is CancellationException) throw e
         logger
           .atSevere()
           .withCause(e)
@@ -89,6 +91,7 @@ internal constructor(
         },
       feedbackUiRenderingData = feedbackUiRenderingData,
       cuj = cuj,
+      blueflaxCuj = blueflaxCuj,
       defaultDonationOptInL1Enabled = configReader.config.enableDefaultDonationOptInL1,
       defaultDonationOptInL0Enabled = configReader.config.enableDefaultDonationOptInL0,
     )

@@ -36,6 +36,7 @@ android_library(
         "//src/com/google/android/as/oss/privateinference/library/bsa/token:token_provider",
         "//src/com/google/android/as/oss/privateinference/library/oakutil:private_inference_client_timer_names",
         "//src/com/google/android/as/oss/privateinference/logging",
+        "//src/com/google/android/as/oss/privateinference/service/api:private_inference_kt_proto_lite",
         "//src/com/google/android/as/oss/privateinference/transport",
         "//src/com/google/android/as/oss/privateinference/transport:constants",
         "//src/com/google/android/as/oss/privateinference/transport:managed_channel_factory",

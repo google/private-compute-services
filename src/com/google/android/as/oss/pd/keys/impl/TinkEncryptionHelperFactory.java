@@ -20,6 +20,7 @@ import com.google.android.as.oss.pd.keys.EncryptionHelperFactory;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.RegistryConfiguration;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.hybrid.HybridConfig;
 import java.io.IOException;
@@ -59,7 +60,10 @@ final class TinkEncryptionHelperFactory implements EncryptionHelperFactory {
     return new TinkEncryptionHelper(
         masterKeyProvider,
         TinkProtoKeysetFormat.parseEncryptedKeyset(
-            encryptedKeyset, masterKeyProvider.readOrGenerateMasterKey(), new byte[] {}),
+            encryptedKeyset,
+            masterKeyProvider.readOrGenerateMasterKey(),
+            new byte[] {},
+            RegistryConfiguration.get()),
         /* hasPrivateKey= */ true);
   }
 
@@ -69,7 +73,7 @@ final class TinkEncryptionHelperFactory implements EncryptionHelperFactory {
     initializeIfNeeded();
     return new TinkEncryptionHelper(
         masterKeyProvider,
-        TinkProtoKeysetFormat.parseKeysetWithoutSecret(publicKey),
+        TinkProtoKeysetFormat.parseKeysetWithoutSecret(publicKey, RegistryConfiguration.get()),
         /* hasPrivateKey= */ false);
   }
 

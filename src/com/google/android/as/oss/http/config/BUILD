@@ -21,8 +21,5 @@ android_library(
     srcs = glob(
         ["*.java"],
     ),
-    deps = [
-        "//third_party/java/auto:auto_value",
-        "@maven//:javax_inject_javax_inject",
-    ],
+    deps = ["//third_party/java/auto:auto_value"],
 )

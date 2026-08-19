@@ -20,4 +20,5 @@ package com.google.android.as.oss.fl.fc.service.scheduler.endorsementoptions;
 public enum EndorsementClientType {
   // Default client type for PCS.
   PRIVATE_COMPUTE_SERVICES_DEFAULT_KEY,
+  COBALT_KEY,
 }

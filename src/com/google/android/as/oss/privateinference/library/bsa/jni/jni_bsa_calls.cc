@@ -23,10 +23,12 @@
 #include <utility>
 #include <vector>
 
+#include "google/protobuf/any.pb.h"
 #include "java/com/google/android/apps/miphone/pcs/privateinference/library/bsa/jni/jni_global_ref.h"
 #include "java/com/google/android/apps/miphone/pcs/privateinference/library/bsa/jni/jni_helpers.h"
 #include "java/com/google/android/apps/miphone/pcs/privateinference/library/bsa/jni/jni_logging.h"
 #include "java/com/google/android/apps/miphone/pcs/privateinference/library/bsa/jni/jni_message_interface_wrapper.h"
+#include "privacy/net/attestation/proto/attestation.pb.h"
 #include "third_party/absl/functional/any_invocable.h"
 #include "third_party/absl/status/status.h"
 #include "third_party/absl/status/statusor.h"
@@ -127,13 +129,16 @@ absl::StatusOr<quiche::ProxyLayer> GetQuicheProxyLayer(int proxy_layer) {
 void OnError(JNIEnv* env, const absl::Status& status, jobject callback) {
   absl::StatusOr<jobject> java_exception =
       helpers::CreateStatusException(env, status);
-  if (!java_exception.ok()) {
+  jobject exception_obj = nullptr;
+  if (java_exception.ok()) {
+    exception_obj = *java_exception;
+  } else {
     bsa_log_info("Failed to create Java Exception for error message: %s",
                  status.ToString().c_str());
     // We will still try to call the onError callback with null exception,
     // it will probably crash, but this is better than just hanging.
   }
-  env->CallVoidMethod(callback, kOnErrorMethodID, *java_exception);
+  env->CallVoidMethod(callback, kOnErrorMethodID, exception_obj);
 }
 
 void GetAttestationTokens(JNIEnv* env, jclass cls, jobject message_interface,
@@ -344,8 +349,13 @@ void OnAttestationData(JNIEnv* env, jclass cls, jlong contextPtr,
 
   jsize attestation_data_length = env->GetArrayLength(attestationData);
 
-  std::vector<std::string> attestation_data_strs;
-  attestation_data_strs.reserve(attestation_data_length);
+  if (attestation_data_length == 0) {
+    std::move(callback)(absl::InvalidArgumentError("Attestation data is empty"),
+                        std::nullopt);
+    return;
+  }
+
+  privacy::ppn::AndroidAttestationData android_attestation_data;
 
   for (jsize i = 0; i < attestation_data_length; ++i) {
     jbyteArray attestation_element =
@@ -363,11 +373,14 @@ void OnAttestationData(JNIEnv* env, jclass cls, jlong contextPtr,
       return;
     }
 
-    attestation_data_strs.push_back(*item_str);
+    android_attestation_data.add_hardware_backed_certs(*item_str);
   }
 
-  // When the new callback structure is ready, pass the vector to the callback.
-  std::move(callback)(attestation_data_strs, token_challenge);
+  google::protobuf::Any attestation_data_any;
+  attestation_data_any.PackFrom(android_attestation_data);
+
+  // Pass the Any container to the callback.
+  std::move(callback)(attestation_data_any, token_challenge);
 }
 
 void OnAttestationDataError(JNIEnv* env, jclass cls, jlong contextPtr,

@@ -16,7 +16,6 @@ edition = "2024";
 
 package com.google.android.as.oss.feedback.api.gateway;
 
-
 option java_outer_classname = "Spoon";
 option java_package = "com.google.android.as.oss.feedback.api.gateway";
 
@@ -41,24 +40,20 @@ enum SpoonCUJ {
 
 // Next ID: 8
 message SpoonFeedbackDataDonation {
-  repeated string triggering_messages = 1
-     ;
+  repeated string triggering_messages = 1;
 
-  repeated string intent_queries = 2
-     ;
+  repeated string intent_queries = 2;
 
   repeated string model_outputs = 3;
 
   repeated MemoryEntity memory_entities = 4;
 
-  string selected_entity_content = 5
-     ;
+  string selected_entity_content = 5;
 
   // The source documents that are used to generate the model outputs. The first
   // string represents the title/summary of the l0 entry, and the second string
   // represents the content of the l0 entry.
-  repeated SourceDocument source_documents = 6
-     ;
+  repeated SourceDocument source_documents = 6;
 
   // In the case of spoon failure, this field will be populated with the
   // failure reasons. Otherwise, this field will be an empty string.
@@ -67,8 +62,7 @@ message SpoonFeedbackDataDonation {
 
 message SpoonUserInput {
   string optional_spoon_comment = 1;
-  repeated string ground_truth_list = 6
-     ;
+  repeated string ground_truth_list = 6;
 }
 
 message SourceDocument {

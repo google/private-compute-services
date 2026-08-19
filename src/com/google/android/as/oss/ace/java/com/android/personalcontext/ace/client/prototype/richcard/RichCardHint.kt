@@ -36,18 +36,22 @@ import kotlinx.parcelize.Parcelize
  *   be rendered with the client session ID from the DAG chip session.
  * @property error An error representing unexpected errors in the client app that caused failure to
  *   render the card UI. If this is not null, the card UI will show an error state.
+ * @property bottomInsetPx The inset to apply to the card contents from the bottom of the card, in
+ *   pixels.
  */
 data class RichCardHint(
   val clientSessionId: String,
   val cardIds: List<String>,
   val cardClientSessionId: String? = null,
   val error: RichCardError? = null,
+  val bottomInsetPx: Int = 0,
 ) : PrototypeHint(RichCardHintId, this) {
   override fun exportDataToBundle(bundle: Bundle) {
     bundle.putString(CLIENT_SESSION_ID_KEY, clientSessionId)
     bundle.putStringArrayList(CARD_IDS_KEY, ArrayList(cardIds))
     bundle.putString(CARD_CLIENT_SESSION_ID_KEY, cardClientSessionId)
     bundle.putParcelable(ERROR_KEY, error)
+    bundle.putInt(BOTTOM_INSET_PX_KEY, bottomInsetPx)
   }
 
   companion object : Creator {
@@ -55,6 +59,7 @@ data class RichCardHint(
     private const val CARD_IDS_KEY = "cardIds"
     private const val CARD_CLIENT_SESSION_ID_KEY = "cardClientSessionId"
     private const val ERROR_KEY = "error"
+    private const val BOTTOM_INSET_PX_KEY = "bottomInsetPx"
 
     override fun create(bundle: Bundle): PrototypeHint {
       bundle.classLoader = RichCardError::class.java.classLoader
@@ -63,6 +68,7 @@ data class RichCardHint(
         bundle.getStringArrayList(CARD_IDS_KEY) ?: emptyList(),
         bundle.getString(CARD_CLIENT_SESSION_ID_KEY),
         BundleCompat.getParcelable(bundle, ERROR_KEY, RichCardError::class.java),
+        bundle.getInt(BOTTOM_INSET_PX_KEY, 0),
       )
     }
   }

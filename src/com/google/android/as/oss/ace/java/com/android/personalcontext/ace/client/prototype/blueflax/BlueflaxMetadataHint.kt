@@ -25,7 +25,7 @@ import com.android.personalcontext.ace.client.prototype.PrototypeHintId.Blueflax
  *
  * @property surface The surface type where the suggestion is shown.
  */
-data class BlueflaxMetadataHint(val surface: SurfaceType) :
+data class BlueflaxMetadataHint(val surface: SurfaceType, val limit: Int? = null) :
   PrototypeHint(BlueflaxMetadataHintId, this) {
 
   enum class SurfaceType(val value: String) {
@@ -42,14 +42,17 @@ data class BlueflaxMetadataHint(val surface: SurfaceType) :
 
   override fun exportDataToBundle(bundle: Bundle) {
     bundle.putString(KEY_SURFACE, surface.value)
+    limit?.let { bundle.putInt(KEY_LIMIT, it) }
   }
 
   companion object : Creator {
     private const val KEY_SURFACE = "surface"
+    private const val KEY_LIMIT = "limit"
 
     override fun create(bundle: Bundle): PrototypeHint {
       val surfaceStr = bundle.getString(KEY_SURFACE)
-      return BlueflaxMetadataHint(surface = SurfaceType.fromString(surfaceStr))
+      val limit = if (bundle.containsKey(KEY_LIMIT)) bundle.getInt(KEY_LIMIT) else null
+      return BlueflaxMetadataHint(surface = SurfaceType.fromString(surfaceStr), limit = limit)
     }
   }
 }

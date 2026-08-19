@@ -15,6 +15,7 @@
  */
 
 @file:Suppress("FlaggedApi", "NewApi")
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 
 package com.android.personalcontext.ace.visualizer.templates.message
 
@@ -26,9 +27,7 @@ import android.service.personalcontext.hint.MessagesHint
 import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.interaction.InsightEvent
 import android.util.Log
-import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.scaleIn
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -36,6 +35,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -69,7 +69,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsight
+import com.android.personalcontext.ace.client.prototype.clientaction.params.showcards.ShowCardsParams
 import com.android.personalcontext.ace.client.prototype.message.MessageMetadataHint
+import com.android.personalcontext.ace.client.prototype.serversideclose.ServerSideCloseInsight
 import com.android.personalcontext.ace.common.FindHintUtils.findContextHint
 import com.android.personalcontext.ace.common.gradientTint
 import com.android.personalcontext.ace.common.wrappers.IPublishedContextInsight
@@ -87,7 +90,11 @@ import com.android.personalcontext.ace.visualizer.templates.message.MessageTempl
 import com.android.personalcontext.ace.visualizer.templates.utils.IconOrImage
 import com.android.personalcontext.ace.visualizer.templates.utils.RemoteActionUtils.execute
 import com.android.personalcontext.ace.visualizer.templates.utils.asTintableIcon
+import com.google.android.`as`.oss.common.config.ConfigReader
+import com.google.android.`as`.oss.delegatedui.config.DelegatedUiConfig
+import com.google.android.`as`.oss.delegatedui.service.templates.motion.ExpressiveMotionUtils
 import javax.inject.Inject
+import kotlinx.coroutines.delay
 
 class MessageVisualizerTemplate
 @Inject
@@ -96,6 +103,7 @@ internal constructor(
   private val clientActionInsightCompat: ClientActionInsightCompat,
   private val energyEffectsAnimationCompat: EnergyEffectsAnimationCompat,
   private val themeCompat: ThemeCompat,
+  private val configReader: ConfigReader<DelegatedUiConfig>,
 ) : VisualizerTemplate {
 
   override fun handleInsight(
@@ -110,6 +118,22 @@ internal constructor(
 
   @Composable
   private fun MessageTemplate(messageTemplateData: MessageTemplateData) {
+    val info = LocalInsightSurfaceClientInfo.current
+    val timeoutMs = configReader.config.bugleMagicCardChipTimeoutMs
+    val hasShowCardsChip =
+      remember(messageTemplateData.messageChipList) {
+        messageTemplateData.messageChipList.any { it.isShowCardsChip() }
+      }
+    if (hasShowCardsChip && timeoutMs > 0) {
+      LaunchedEffect(messageTemplateData.messageChipList) {
+        delay(timeoutMs)
+        Log.i(
+          TAG,
+          "[MessagesEmbedded] Dismissing visualizer after ${timeoutMs}ms delay for show cards chip",
+        )
+        info.onReceiveInsight(ServerSideCloseInsight().toContextInsight())
+      }
+    }
     MainTheme(messageTemplateData.styleConfig) { MergedChipsRow(messageTemplateData) }
   }
 
@@ -124,26 +148,11 @@ internal constructor(
       horizontalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.End),
       verticalAlignment = Alignment.Bottom,
     ) {
-      val suggestionEnterEasing = CubicBezierEasing(0f, 0f, 0f, 1f)
-      if (messageTemplateData.messageChipList.isNotEmpty()) {
-        MessageAnimatedListItemVisibility(
-          values = messageTemplateData.messageChipList,
-          itemEnter = { _ ->
-            scaleIn(
-              animationSpec =
-                tween(
-                  durationMillis = MessageConstants.ANIMATION_REVEAL_DURATION_MILLIS,
-                  delayMillis = MessageConstants.ANIMATION_REVEAL_DELAY_MILLIS,
-                  easing = suggestionEnterEasing,
-                )
-            )
-          },
-        ) { messageChip ->
-          when (messageChip) {
-            is SuggestionChip -> MessageSuggestionChip(messageChip)
-            is RemoteActionChip -> MessageRemoteActionChip(messageChip)
-            is ClientActionChip -> MessageClientActionChip(messageChip)
-          }
+      for (messageChip in messageTemplateData.messageChipList) {
+        when (messageChip) {
+          is SuggestionChip -> MessageSuggestionChip(messageChip)
+          is RemoteActionChip -> MessageRemoteActionChip(messageChip)
+          is ClientActionChip -> MessageClientActionChip(messageChip)
         }
       }
     }
@@ -243,6 +252,19 @@ internal constructor(
         )
       }
     }
+    val showAnimationV2 = with(themeCompat) { publishedInsight.insight.shouldShowAnimationV2() }
+    val progress = remember { Animatable(0f) }
+    LaunchedEffect(showAnimationV2) {
+      if (showAnimationV2) {
+        delay(MessageConstants.ANIMATION_REVEAL_DELAY_MILLIS.toLong())
+        // Fast expansion using expressive default spatial spring
+        progress.animateTo(
+          targetValue = 1f,
+          animationSpec = ExpressiveMotionUtils.expressiveMotionScheme().defaultSpatialSpec(),
+        )
+      }
+    }
+
     LaunchedEffect(Unit) { reportEvent(InsightEvent.EVENT_SHOW) }
     val density = LocalDensity.current
     val cornerRadius = remember(shape, density) { shape.toCornerRadius(density) }
@@ -250,48 +272,54 @@ internal constructor(
     val strokeColor = MaterialTheme.colorScheme.outlineVariant
     val backgroundColor = MaterialTheme.colorScheme.surface
     val geminiAnimationSpec =
-      EnergyEffectsAnimationUtils.createChipSpec(
+      EnergyEffectsAnimationUtils.rememberChipSpec(
         cornerRadius = cornerRadius,
         density = density.density,
         colorScheme = colorScheme,
         context = context,
         strokeColor = strokeColor,
         backgroundColor = backgroundColor,
+        initialDelay = MessageConstants.ANIMATION_REVEAL_DELAY_MILLIS.toLong(),
       )
 
     with(energyEffectsAnimationCompat) {
-      Box(
+      AnimatedMessageChipLayout(
+        progress = { progress.value },
+        enabled = showAnimationV2,
         modifier =
-          Modifier.widthIn(min = 30.dp, max = 264.dp)
-            .heightIn(min = MessageConstants.MinHeight)
-            .applyEnergyEffectsAnimation(
-              geminiAnimationSpec = geminiAnimationSpec,
-              fallback = {
-                animatedActionBorder(
-                  cornerRadius = cornerRadius,
-                  strokeColor = strokeColor,
-                  backgroundColor = backgroundColor,
+          Modifier.widthIn(min = 30.dp, max = 264.dp).heightIn(min = MessageConstants.MinHeight),
+        background = {
+          Box(
+            modifier =
+              Modifier.fillMaxSize()
+                .applyEnergyEffectsAnimation(
+                  geminiAnimationSpec = geminiAnimationSpec,
+                  fallback = {
+                    animatedActionBorder(
+                      cornerRadius = cornerRadius,
+                      strokeColor = strokeColor,
+                      backgroundColor = backgroundColor,
+                    )
+                  },
                 )
-              },
-            )
-            .clip(RoundedCornerShape(cornerRadius.x))
-            .combinedClickable(
-              onClick = {
-                chipOnClick()
-                reportEvent(InsightEvent.EVENT_USER_TAP)
-              },
-              onLongClick = {
-                Log.i(TAG, "[MessagesEmbedded] chip long clicked")
-                reportEvent(InsightEvent.EVENT_USER_LONG_PRESS)
-              },
-              interactionSource = interactionSource,
-              indication = ripple(color = MaterialTheme.colorScheme.onSurface),
-            )
-            .semantics { role = Role.Button },
-        contentAlignment = Alignment.Center,
-      ) {
-        chipContents()
-      }
+                .clip(RoundedCornerShape(cornerRadius.x))
+                .combinedClickable(
+                  onClick = {
+                    chipOnClick()
+                    reportEvent(InsightEvent.EVENT_USER_TAP)
+                  },
+                  onLongClick = {
+                    Log.i(TAG, "[MessagesEmbedded] chip long clicked")
+                    reportEvent(InsightEvent.EVENT_USER_LONG_PRESS)
+                  },
+                  interactionSource = interactionSource,
+                  indication = ripple(color = MaterialTheme.colorScheme.onSurface),
+                )
+                .semantics { role = Role.Button }
+          )
+        },
+        content = { Box(contentAlignment = Alignment.Center) { chipContents() } },
+      )
     }
   }
 
@@ -461,6 +489,13 @@ internal constructor(
       typography = Typography(),
       content = content,
     )
+  }
+
+  private fun MessageChip.isShowCardsChip(): Boolean {
+    if (this !is ClientActionChip) return false
+    return clientActionInsightCompat.ifClientActionInsight(insight) {
+      it.clientActionParams is ShowCardsParams
+    } == true
   }
 
   companion object {

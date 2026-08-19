@@ -150,7 +150,7 @@ object PrototypeInsightUtils {
         LoadingInsightId -> LoadingInsight
       }
 
-    return creator.create(data.dataBundle, children, originHints)
+    return creator.create(data.dataBundle, children, originHints ?: emptySet())
   }
 
   /** Deserialize a [ContextInsight] back into a [PrototypeInsight] as [T], if possible. */

@@ -70,7 +70,8 @@ public class PcsOakServerStreamRequestReader extends BaseOakServerStreamRequestR
         oakAsyncClient,
         oakServerStreamResponseObserver,
         directOakClientRequestObserver,
-        parcelInputStream);
+        parcelInputStream,
+        configReader.getConfig().enableTlsBasedSession());
     this.configReader = configReader;
     this.buildFlavor = buildFlavor;
     this.clientSessionResponseObserver = clientSessionResponseObserver;
@@ -83,6 +84,11 @@ public class PcsOakServerStreamRequestReader extends BaseOakServerStreamRequestR
   @Override
   public void onNext(PrivateInferenceSessionRequest request) {
     if (request.hasSessionInitializationRequest()) {
+      if (featureName.get() == PcsPrivateInferenceFeatureName.FEATURE_NAME_UNSPECIFIED) {
+        featureName.set(request.getSessionInitializationRequest().getFeatureName());
+      }
+      logRequestCountEvent(featureName.get());
+      logInferenceSessionCountEvent(request.getSessionInitializationRequest().getFeatureName());
       if (!configReader.getConfig().enabled() && !buildFlavor.isInternal()) {
         logger.atWarning().log(
             "Rejecting the session initialization request since the feature is disabled");
@@ -96,6 +102,7 @@ public class PcsOakServerStreamRequestReader extends BaseOakServerStreamRequestR
       if (featureName.get() == PcsPrivateInferenceFeatureName.FEATURE_NAME_UNSPECIFIED) {
         featureName.set(request.getInferenceRequest().getFeatureName());
       }
+      logRequestCountEvent(featureName.get());
       long requestSize = 0;
       if (request.getInferenceRequest().hasData()) {
         requestSize = request.getInferenceRequest().getData().size();
@@ -104,7 +111,6 @@ public class PcsOakServerStreamRequestReader extends BaseOakServerStreamRequestR
       }
       totalRequestSize.getAndAdd(requestSize);
       super.onNext(request);
-      logInferenceRequestEvent(featureName.get());
       logger.atInfo().log(
           "[startInferenceSession] Sent request to server with size: %d.", requestSize);
     } else {
@@ -123,8 +129,14 @@ public class PcsOakServerStreamRequestReader extends BaseOakServerStreamRequestR
     super.onCompleted();
   }
 
-  private void logInferenceRequestEvent(PcsPrivateInferenceFeatureName featureName) {
-    CountMetricId countMetricId = loggingMetricIdProvider.getInferenceCountMetricId(featureName);
+  private void logRequestCountEvent(PcsPrivateInferenceFeatureName featureName) {
+    CountMetricId countMetricId = loggingMetricIdProvider.getRequestCountMetricId(featureName);
+    pcsStatsLogger.logEventCount(countMetricId);
+  }
+
+  private void logInferenceSessionCountEvent(PcsPrivateInferenceFeatureName featureName) {
+    CountMetricId countMetricId =
+        loggingMetricIdProvider.getInferenceSessionCountMetricId(featureName);
     pcsStatsLogger.logEventCount(countMetricId);
   }
 

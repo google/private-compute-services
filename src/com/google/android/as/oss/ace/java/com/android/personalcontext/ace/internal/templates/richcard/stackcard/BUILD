@@ -38,13 +38,11 @@ android_library(
     deps = [
         ":ui_data",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype:prototype_utils",
-        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/serversideclose",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard:card_ui_data",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/common",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/renderer",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer/compat:energy_effects_animation_compat",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer/templates",
-        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer/templates/utils:remote_action_utils",
         "//third_party/java/androidx/compose/foundation",
         "//third_party/java/androidx/compose/foundation/layout",
         "//third_party/java/androidx/compose/material3",

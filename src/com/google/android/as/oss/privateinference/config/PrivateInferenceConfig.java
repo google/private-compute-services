@@ -22,11 +22,13 @@ import com.google.android.as.oss.privateinference.library.bsa.token.cache.TokenC
 import com.google.android.as.oss.privateinference.library.bsa.token.cache.TokenCacheFlag.Mode;
 import com.google.android.as.oss.privateinference.library.oakutil.AttestationPublisherFlag;
 import com.google.android.as.oss.privateinference.library.oakutil.DeviceAttestationFlag;
+import com.google.android.as.oss.privateinference.service.api.proto.PcsPrivateInferenceFeatureName;
 import com.google.android.as.oss.privateinference.transport.IpRelayFallbackFlag;
 import com.google.android.as.oss.privateinference.transport.ProxyConfigProviderType;
 import com.google.android.as.oss.privateinference.transport.ProxyConfiguration;
 import com.google.android.as.oss.privateinference.transport.TransportFlag;
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableSet;
 
 /** Configuration for controlling the behavior of Private Inference. */
 @AutoValue
@@ -79,7 +81,9 @@ public abstract class PrivateInferenceConfig {
         .setUseEndpointSpecificVerificationKeys(DEFAULT_USE_ENDPOINT_SPECIFIC_VERIFICATION_KEYS)
         .setPassForceEzUsageHeader(DEFAULT_PASS_FORCE_EZ_USAGE_HEADER)
         .setIpRelayFallbackMode(DEFAULT_IP_RELAY_FALLBACK_MODE)
-        .setSendClientMetadata(DEFAULT_SEND_CLIENT_METADATA);
+        .setSendClientMetadata(DEFAULT_SEND_CLIENT_METADATA)
+        .setEnableTlsBasedSession(DEFAULT_ENABLE_TLS_BASED_SESSION)
+        .setEnableConfigurableIpBlindingMode(DEFAULT_ENABLE_CONFIGURABLE_IP_BLINDING_MODE);
   }
 
   /** Returns the current attestation publisher mode. */
@@ -115,6 +119,9 @@ public abstract class PrivateInferenceConfig {
 
   /** Returns true if an IP tunnel should be created for every session. */
   public abstract boolean forceIpTunnelCreationForEverySession();
+
+  /** Returns true if a TLS-based session should be enabled. */
+  public abstract boolean enableTlsBasedSession();
 
   /** Returns the current transport mode requests will use. */
   public abstract TransportFlag.Mode transportMode();
@@ -189,6 +196,9 @@ public abstract class PrivateInferenceConfig {
   /** Returns whether client metadata should be sent in the anonymous token request. */
   public abstract boolean sendClientMetadata();
 
+  /** Returns whether configurable IP blinding mode is enabled. */
+  public abstract boolean enableConfigurableIpBlindingMode();
+
   public static final String PRIVATE_INFERENCE_PROD_ENDPOINT_URL =
       "privatearatea.pa.googleapis.com";
   public static final String TOKEN_ISSUANCE_PROD_ENDPOINT_URL = "phosphor-pa.googleapis.com";
@@ -204,6 +214,7 @@ public abstract class PrivateInferenceConfig {
   public static final boolean DEFAULT_ENABLE_WAIT_FOR_GRPC_CHANNEL_READY = true;
   public static final boolean DEFAULT_ATTACH_CERTIFICATE_HEADER = false;
   public static final boolean DEFAULT_ENABLE_ARATEA_TOKEN_CACHE = true;
+  public static final boolean DEFAULT_ENABLE_TLS_BASED_SESSION = false;
   public static final boolean DEFAULT_FORCE_IP_TUNNEL_CREATION_FOR_EVERY_SESSION = false;
   public static final TransportFlag.Mode DEFAULT_TRANSPORT_MODE =
       TransportFlag.Mode.CRONET_MAINLINE_IP_RELAY;
@@ -211,6 +222,7 @@ public abstract class PrivateInferenceConfig {
   public static final String DEFAULT_PROXY_URL = "ToBeProvidedByFlags";
   public static final int DEFAULT_PROXY_PORT = 0;
   public static final String DEFAULT_PROXY_AUTH_HEADER = "ToBeProvidedByFlags";
+  public static final boolean DEFAULT_ENABLE_CONFIGURABLE_IP_BLINDING_MODE = false;
 
   /**
    * Possible value for {@link PrivateInferenceConfig#proxyTokenCacheRefreshIntervalMinutes()},
@@ -258,6 +270,12 @@ public abstract class PrivateInferenceConfig {
   public static final boolean DEFAULT_PASS_FORCE_EZ_USAGE_HEADER = false;
 
   public static final boolean DEFAULT_SEND_CLIENT_METADATA = false;
+
+  public static final ImmutableSet<PcsPrivateInferenceFeatureName>
+      FEATURE_ALLOWLIST_TO_DISABLE_IP_BLINDING =
+          ImmutableSet.of(
+              PcsPrivateInferenceFeatureName.FEATURE_NAME_BLUEFLAX_UNDERSTANDING,
+              PcsPrivateInferenceFeatureName.FEATURE_NAME_BLUEFLAX_QUERY);
 
   /** Builder for {@link PrivateInferenceConfig}. */
   @AutoValue.Builder
@@ -329,6 +347,10 @@ public abstract class PrivateInferenceConfig {
     public abstract Builder setPassForceEzUsageHeader(boolean value);
 
     public abstract Builder setSendClientMetadata(boolean value);
+
+    public abstract Builder setEnableTlsBasedSession(boolean value);
+
+    public abstract Builder setEnableConfigurableIpBlindingMode(boolean value);
 
     public abstract PrivateInferenceConfig build();
   }

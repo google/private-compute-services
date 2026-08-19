@@ -19,6 +19,7 @@
 package com.android.personalcontext.ace.client.prototype.clientaction.params.blueflax
 
 import android.app.RemoteAction
+import android.graphics.drawable.Icon
 import android.os.Bundle
 import com.android.personalcontext.ace.client.prototype.clientaction.params.ClientActionParamId
 import com.android.personalcontext.ace.client.prototype.clientaction.params.ClientActionParams
@@ -44,6 +45,7 @@ class BlueflaxParams(
   val overwriteSubtitle: String,
   val actionType: BlueflaxActionType,
   val closeContentDescription: String,
+  val overrideIcon: Icon? = null,
 ) : ClientActionParams() {
   override val id = ClientActionParamId.BLUEFLAX
 
@@ -53,6 +55,7 @@ class BlueflaxParams(
     bundle.putString(OVERWRITE_SUBTITLE_KEY, overwriteSubtitle)
     bundle.putString(ACTION_TYPE_KEY, actionType.value)
     bundle.putString(CLOSE_CONTENT_DESCRIPTION_KEY, closeContentDescription)
+    bundle.putParcelable(OVERRIDE_ICON_KEY, overrideIcon)
   }
 
   companion object : ClientActionParams.Creator {
@@ -61,6 +64,7 @@ class BlueflaxParams(
     private const val OVERWRITE_SUBTITLE_KEY = "overwrite_subtitle"
     private const val ACTION_TYPE_KEY = "action_type"
     private const val CLOSE_CONTENT_DESCRIPTION_KEY = "close_content_description"
+    private const val OVERRIDE_ICON_KEY = "override_icon"
 
     override fun create(bundle: Bundle): BlueflaxParams {
       return BlueflaxParams(
@@ -69,6 +73,7 @@ class BlueflaxParams(
         overwriteSubtitle = bundle.getString(OVERWRITE_SUBTITLE_KEY) ?: "",
         actionType = BlueflaxActionType.fromValue(bundle.getString(ACTION_TYPE_KEY)),
         closeContentDescription = bundle.getString(CLOSE_CONTENT_DESCRIPTION_KEY) ?: "Close",
+        overrideIcon = bundle.getParcelable(OVERRIDE_ICON_KEY, Icon::class.java),
       )
     }
   }

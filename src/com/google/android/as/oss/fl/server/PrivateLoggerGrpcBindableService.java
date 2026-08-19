@@ -40,6 +40,7 @@ import com.google.android.as.oss.fl.fc.service.scheduler.endorsementoptions.Endo
 import com.google.android.as.oss.fl.fc.service.scheduler.endorsementoptions.EndorsementOptionsProvider;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogUtils;
+import com.google.android.as.oss.proto.PcsFeatureEnum.FeatureName;
 import com.google.fcp.client.tasks.Task;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
@@ -347,9 +348,12 @@ public class PrivateLoggerGrpcBindableService
             return getDataFuture;
           };
 
+      EndorsementClientType clientType =
+          shouldUseCobaltEndorsementOptions(request.getFeatureName())
+              ? EndorsementClientType.COBALT_KEY
+              : EndorsementClientType.PRIVATE_COMPUTE_SERVICES_DEFAULT_KEY;
       byte[] endorsementOptions =
-          endorsementOptionsProvider.getEndorsementOptions(
-              context, EndorsementClientType.PRIVATE_COMPUTE_SERVICES_DEFAULT_KEY);
+          endorsementOptionsProvider.getEndorsementOptions(context, clientType);
 
       FcpInvocationOptions options =
           FcpInvocationOptions.builder()
@@ -452,6 +456,14 @@ public class PrivateLoggerGrpcBindableService
       // be ignored because the getDataFuture will already have been completed with that earlier
       // value and this .set() call would hence be a no-op.
       getDataFuture.set(entries);
+    }
+
+    private boolean shouldUseCobaltEndorsementOptions(FeatureName featureName) {
+      boolean cobaltEndorsementOptionsEnabled = false;
+      if (!cobaltEndorsementOptionsEnabled) {
+        return false;
+      }
+      return featureName.equals(FeatureName.GPPS_FEATURE_NAME);
     }
   }
 }

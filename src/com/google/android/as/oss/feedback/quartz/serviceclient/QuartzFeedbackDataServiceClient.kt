@@ -60,6 +60,7 @@ data class QuartzModelData(
   val naihResult: String = "",
   val naihCategory: String = "",
   val extraIdentifiedResults: List<String> = emptyList(),
+  val isNaihExpired: String = "",
 )
 
 data class QuartzAppInfoData(
@@ -324,6 +325,9 @@ data class QuartzFeedbackDonationData(
       }
       if (modelData.extraIdentifiedResults.isNotEmpty()) {
         appendLine(modelData.extraIdentifiedResults)
+      }
+      if (modelData.isNaihExpired.isNotEmpty()) {
+        appendLine(modelData.isNaihExpired)
       }
     }
   }

@@ -79,6 +79,7 @@ class FeedbackConfigReader(
         flagManager.get(FeedbackFlags.ENABLE_FINE_GRAINED_VIEW_DATA_DIALOG),
       enableDefaultDonationOptInL1 = defaultDonationOptInL1Enabled,
       enableDefaultDonationOptInL0 = defaultDonationOptInL0Enabled,
+      enableBlueflaxFeedback = flagManager.get(FeedbackFlags.ENABLE_BLUEFLAX_FEEDBACK),
     )
   }
 
@@ -94,6 +95,10 @@ class FeedbackConfigReader(
       )
       put(
         QuartzCUJ.QUARTZ_CUJ_KEY_SUMMARIZATION.name,
+        listOf(NotificationContent, QuartzModelOutputs, AppInfo),
+      )
+      put(
+        QuartzCUJ.QUARTZ_CUJ_ADVANCED_ORGANIZER.name,
         listOf(NotificationContent, QuartzModelOutputs, AppInfo),
       )
     }

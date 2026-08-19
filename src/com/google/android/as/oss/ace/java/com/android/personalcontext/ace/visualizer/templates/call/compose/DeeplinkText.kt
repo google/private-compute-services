@@ -68,7 +68,7 @@ internal fun DeeplinkText(
   text: String,
   sourceName: String,
   remoteAction: RemoteAction,
-  deeplinkInsight: ContextInsight,
+  deeplinkInsight: ContextInsight? = null,
 ) {
   val context = LocalContext.current
 
@@ -89,7 +89,8 @@ internal fun DeeplinkText(
 
   var hasReportedImpression by rememberSaveable { mutableStateOf(false) }
   LaunchedEffect(Unit) {
-    if (!hasReportedImpression) {
+    if (!hasReportedImpression && deeplinkInsight != null) {
+      Log.e(TAG, "[CallEmbedded] Logging DeeplinkText impression")
       reportEvent(deeplinkInsight, InsightEvent.EVENT_SHOW)
       hasReportedImpression = true
     }
@@ -100,7 +101,9 @@ internal fun DeeplinkText(
     remember(remoteAction, context, deeplinkInsight) {
       {
         Log.v(TAG, "[CallEmbedded] DeeplinkText onClick")
-        reportEvent(deeplinkInsight, InsightEvent.EVENT_USER_TAP)
+        if (deeplinkInsight != null) {
+          reportEvent(deeplinkInsight, InsightEvent.EVENT_USER_TAP)
+        }
         remoteAction.execute(context)
       }
     }

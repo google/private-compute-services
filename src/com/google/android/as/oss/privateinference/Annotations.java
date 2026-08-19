@@ -48,6 +48,11 @@ public final class Annotations {
   @Retention(RetentionPolicy.RUNTIME)
   public @interface PrivateInferenceEnableArateaTokenCache {}
 
+  /** Annotation for whether to enable TLS-based session. */
+  @Qualifier
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface PrivateInferenceEnableTlsBasedSession {}
+
   /** Annotation for whether to create an IP tunnel for every session. */
   @Qualifier
   @Retention(RetentionPolicy.RUNTIME)
@@ -87,6 +92,11 @@ public final class Annotations {
   @Qualifier
   @Retention(RetentionPolicy.RUNTIME)
   public @interface AttestationPublisherExecutor {}
+
+  /** Annotation for whether to enable configurable IP blinding mode. */
+  @Qualifier
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface PrivateInferenceEnableConfigurableIpBlindingMode {}
 
   private Annotations() {}
 }

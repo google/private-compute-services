@@ -49,12 +49,12 @@ import com.google.android.shaderlib.energyeffects.builder.CardAnimationDirection
 import com.google.android.shaderlib.energyeffects.builder.DefaultCardConfig
 import com.google.android.shaderlib.energyeffects.builder.DefaultChipConfig
 import com.google.android.shaderlib.energyeffects.builder.copy
-import com.google.android.shaderlib.energyeffects.colors.EnergyColors
 import com.google.android.shaderlib.energyeffects.compose.energyEffects
 import com.google.android.shaderlib.energyeffects.shader.ShaderUniforms
 import com.google.android.shaderlib.energyeffects.utils.CornerRadii
 import com.google.android.shaderlib.energyeffects.utils.Margins
 import com.google.android.shaderlib.energyeffects.view.EnergyShaderDrawable
+import com.google.android.systemui.graphics.energycolorslib.EnergyColors
 import com.google.ux.material.libmonet.energy.EnergyColors as MonetEnergyColors
 import com.google.ux.material.libmonet.energy.EnergyColors.BaseColorRole
 
@@ -192,22 +192,24 @@ object EnergyEffectsAnimationUtils {
   )
 
   /**
-   * Creates a themed [GeminiAnimationSpec] for chips.
+   * Remembers a themed [GeminiAnimationSpec] for chips.
    *
    * @param cornerRadius The corner radius of the chip boundary. If null, the default pill shape
    *   corner radii is inherited.
    * @param density The screen density.
    * @param colorScheme The active [ColorScheme].
    * @param context The [Context] to resolve system theme colors.
+   * @param initialDelay The initial delay in milliseconds before the animation starts.
    */
   @Composable
-  fun createChipSpec(
+  fun rememberChipSpec(
     cornerRadius: CornerRadius?,
     density: Float,
     colorScheme: ColorScheme,
     context: Context,
     strokeColor: Color,
     backgroundColor: Color,
+    initialDelay: Long = 0L,
   ): GeminiAnimationSpec {
     val isDark = isSystemInDarkTheme()
     return remember(
@@ -217,6 +219,7 @@ object EnergyEffectsAnimationUtils {
       context,
       strokeColor,
       backgroundColor,
+      initialDelay,
       isDark,
     ) {
       val resId =
@@ -240,6 +243,9 @@ object EnergyEffectsAnimationUtils {
           surfaceColorCrystallized = colorScheme.surface.toArgb(),
         )
       val builder = chipConfig.createEffectsBuilder(null)
+      if (initialDelay > 0L) {
+        builder.states[EffectState.ENTRY]?.transitions()?.firstOrNull()?.delay = initialDelay
+      }
       GeminiAnimationSpec(chipConfig.chipEntryConfig(), builder.buildKeyframeSequences())
     }
   }

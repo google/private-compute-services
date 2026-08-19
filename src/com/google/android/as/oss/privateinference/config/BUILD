@@ -24,7 +24,9 @@ android_library(
     srcs = glob(["*.java"]),
     deps = [
         "//src/com/google/android/as/oss/privateinference/library/oakutil:device_attestation_flag",
+        "//src/com/google/android/as/oss/privateinference/service/api:private_inference_java_proto_lite",
         "//src/com/google/android/as/oss/privateinference/transport",
         "//third_party/java/auto:auto_value",
+        "@maven//:com_google_guava_guava",
     ],
 )

@@ -92,6 +92,8 @@ internal constructor(
         }
       } catch (e: CancellationException) {
         throw e
+      } catch (e: SecurityException) {
+        throw e
       } catch (e: Exception) {
         this.status = FeatureResult.Status.FAILURE
       }
@@ -115,7 +117,11 @@ internal constructor(
       AndroidIntent(appContext, FeatureLauncherTrampolineActivity::class.java).apply {
         putExtra(FeatureLauncherTrampolineActivity.EXTRA_TARGET_INTENT, launchIntent)
         putExtra(FeatureLauncherTrampolineActivity.EXTRA_REQUEST_ID, requestId)
-        addFlags(AndroidIntent.FLAG_ACTIVITY_NEW_TASK or AndroidIntent.FLAG_ACTIVITY_NO_ANIMATION)
+        addFlags(
+          AndroidIntent.FLAG_ACTIVITY_NEW_TASK or
+            AndroidIntent.FLAG_ACTIVITY_MULTIPLE_TASK or
+            AndroidIntent.FLAG_ACTIVITY_NO_ANIMATION
+        )
       }
 
     try {

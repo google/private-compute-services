@@ -30,6 +30,7 @@ import com.android.personalcontext.ace.client.prototype.PrototypeHintId.DoNotRep
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.EntityTypeHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.ExampleEmbeddedHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.GboardHintId
+import com.android.personalcontext.ace.client.prototype.PrototypeHintId.KeyEventHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.LookupHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.MessageMetadataHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.RenderTokenHintId
@@ -44,6 +45,7 @@ import com.android.personalcontext.ace.client.prototype.dialer.DialerMetadataHin
 import com.android.personalcontext.ace.client.prototype.entitytype.EntityTypeHint
 import com.android.personalcontext.ace.client.prototype.example.ExampleEmbeddedHint
 import com.android.personalcontext.ace.client.prototype.gboard.GboardHint
+import com.android.personalcontext.ace.client.prototype.gboard.KeyEventHint
 import com.android.personalcontext.ace.client.prototype.lookup.LookupHint
 import com.android.personalcontext.ace.client.prototype.message.MessageMetadataHint
 import com.android.personalcontext.ace.client.prototype.metadata.VisualMetadataHint
@@ -94,6 +96,7 @@ object PrototypeHintUtils {
         MessageMetadataHintId -> MessageMetadataHint
         BlueflaxMetadataHintId -> BlueflaxMetadataHint
         GboardHintId -> GboardHint
+        KeyEventHintId -> KeyEventHint
 
         else -> null
       }

@@ -62,6 +62,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -72,6 +73,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.android.personalcontext.ace.common.EnergyColorUtils.getEnergyColors
+import com.android.personalcontext.ace.common.gradientTint
 import com.android.window.flags.ExportedFlags.balAdditionalStartModes
 import com.google.android.`as`.oss.dataattribution.proto.AttributionCardData
 import com.google.android.`as`.oss.dataattribution.proto.AttributionChipData
@@ -176,9 +179,9 @@ private fun DataAttributionScaffold(
             Spacer(Modifier.width(16.dp))
             Box(modifier = Modifier.padding(vertical = 5.dp), contentAlignment = Alignment.Center) {
               Icon(
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(24.dp).brandedIconGradientTint(data.isBrandedIcon),
                 bitmap = logoBitmap.asImageBitmap(),
-                tint = MaterialTheme.colorScheme.onSurface,
+                tint = getBrandedIconTint(data.isBrandedIcon),
                 contentDescription = null,
               )
             }
@@ -262,8 +265,10 @@ private fun AttributionChip(data: AttributionChipData) {
       ) {
         IconOrImage(
           icon = chipIcon,
-          modifier = Modifier.sizeIn(minWidth = 24.dp, minHeight = 24.dp),
-          tint = MaterialTheme.colorScheme.onSurface,
+          modifier =
+            Modifier.sizeIn(minWidth = 24.dp, minHeight = 24.dp)
+              .brandedIconGradientTint(data.isBrandedIcon),
+          tint = getBrandedIconTint(data.isBrandedIcon),
         )
       }
     }
@@ -536,6 +541,23 @@ private data class PendingIntentAction(val pendingIntent: PendingIntent) : Inten
       logger.atWarning().withCause(e).log("Tried executing a canceled PendingIntent.")
     }
   }
+}
+
+@Suppress("NewApi")
+@Composable
+private fun Modifier.brandedIconGradientTint(isBrandedIcon: Boolean): Modifier {
+  if (!isBrandedIcon) return this
+  val colorScheme = MaterialTheme.colorScheme
+  val energyColors = getEnergyColors()
+  return this.gradientTint(listOf(colorScheme.primary, energyColors[0], energyColors[1]))
+}
+
+@Composable
+private fun getBrandedIconTint(
+  isBrandedIcon: Boolean,
+  defaultTint: Color = MaterialTheme.colorScheme.onSurface,
+): Color {
+  return if (isBrandedIcon) Color.Unspecified else defaultTint
 }
 
 /**

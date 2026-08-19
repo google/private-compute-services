@@ -30,6 +30,7 @@ import com.google.protobuf.ByteString;
 import io.grpc.Status;
 import io.grpc.Status.Code;
 import io.grpc.stub.StreamObserver;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -49,6 +50,7 @@ public final class PcsOakServerStreamResponseObserver extends BaseOakServerStrea
   private final AtomicLong totalRequestSize;
   private final AtomicLong totalResponseSize;
   private final AtomicReference<PcsPrivateInferenceFeatureName> featureName;
+  private final AtomicBoolean hasLoggedSessionError = new AtomicBoolean(false);
 
   private final LoggingMetricIdProvider loggingMetricIdProvider;
 
@@ -103,7 +105,10 @@ public final class PcsOakServerStreamResponseObserver extends BaseOakServerStrea
         /* isSuccess= */ false,
         totalRequestSize.get(),
         totalResponseSize.get());
-    logInferenceEvent(loggingMetricIdProvider.getInferenceFailureCountMetricId(featureName.get()));
+    if (hasLoggedSessionError.compareAndSet(false, true)) {
+      logInferenceEvent(
+          loggingMetricIdProvider.getInferenceSessionErrorCountMetricId(featureName.get()));
+    }
     logInferenceFailureErrorCode(t);
     super.onError(t);
   }

@@ -23,6 +23,7 @@ android_library(
         "//visibility:public",
     ],
     deps = [
+        ":cobalt_internal_endorsement_options",
         ":endorsement_client_type",
         ":endorsementoptions",
         ":pcs_internal_endorsement_options",
@@ -36,6 +37,7 @@ android_library(
     name = "release",
     srcs = ["ReleaseModule.java"],
     deps = [
+        ":cobalt_release_endorsement_options",
         ":endorsement_client_type",
         ":endorsementoptions",
         ":pcs_release_endorsement_options",

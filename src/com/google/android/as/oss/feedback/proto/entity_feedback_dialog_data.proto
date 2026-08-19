@@ -19,13 +19,19 @@ package com.google.android.as.oss.feedback.api;
 import "src/com/google/android/as/oss/feedback/proto/feedback_dialog_common_data.proto";
 import "src/com/google/android/as/oss/feedback/proto/feedback_tag_data.proto";
 
-
 option java_outer_classname = "EntityFeedbackDialogDataOuterClass";
 option java_package = "com.google.android.as.oss.feedback.api";
 
 // The data required to populate the feedback UI for a single entity.
-// Next ID: 7
+// Next ID: 8
 message EntityFeedbackDialogData {
+  enum FeedbackClient {
+    FEEDBACK_CLIENT_UNSPECIFIED = 0;
+    FEEDBACK_CLIENT_SPOON = 1;
+    FEEDBACK_CLIENT_QUARTZ = 2;
+    FEEDBACK_CLIENT_BLUEFLAX = 3;
+  }
+
   // The content of the entity, uniquely identifies this entity within the same
   // session.
   string entity_content = 1;
@@ -34,8 +40,7 @@ message EntityFeedbackDialogData {
   string client_session_id = 2;
 
   // The rating sentiment of the feedback.
-  FeedbackRatingSentiment rating_sentiment = 3
-     ;
+  FeedbackRatingSentiment rating_sentiment = 3;
 
   // The common dialog data.
   FeedbackDialogCommonData dialog_common_data = 4;
@@ -45,4 +50,7 @@ message EntityFeedbackDialogData {
 
   // The CUJ of the entity.
   int32 cuj = 6;
+
+  // The feedback client of the entity.
+  FeedbackClient feedback_client = 7;
 }

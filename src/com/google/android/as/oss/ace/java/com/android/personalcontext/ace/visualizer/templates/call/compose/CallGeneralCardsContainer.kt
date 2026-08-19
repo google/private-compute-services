@@ -311,7 +311,7 @@ private fun CallGeneralCardContent(
                 text = dataSource.title,
                 sourceName = dataSource.appName,
                 remoteAction = dataSource.remoteAction,
-                deeplinkInsight = dataSource.originalInsight,
+                deeplinkInsight = null,
               )
             }
 

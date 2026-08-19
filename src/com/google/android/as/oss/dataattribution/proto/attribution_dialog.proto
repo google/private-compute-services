@@ -18,7 +18,6 @@ package com.google.android.as.oss.dataattribution.proto;
 
 import "src/com/google/android/as/oss/feedback/proto/feedback_dialog_common_data.proto";
 
-
 option java_outer_classname = "AttributionDialog";
 option java_package = "com.google.android.as.oss.dataattribution.proto";
 
@@ -41,8 +40,7 @@ message AttributionDialogData {
 
   // consists of the attribution data. This data is used for the row present
   // below the attributionHeader. Can be empty.
-  repeated AttributionCardData attributions = 5
-     ;
+  repeated AttributionCardData attributions = 5;
 
   // an identifier for the current suggestion session, used for logging or
   // feedback purposes.
@@ -62,6 +60,10 @@ message AttributionDialogData {
 
   // The common dialog data needed to show the Feedback dialog.
   feedback.api.FeedbackDialogCommonData feedback_dialog_common_data = 11;
+
+  // Whether the logo is a branded icon, which should apply gradient tinting
+  // when displayed.
+  bool is_branded_icon = 12;
 }
 
 // The attribution data used to populate [AttributionCard].

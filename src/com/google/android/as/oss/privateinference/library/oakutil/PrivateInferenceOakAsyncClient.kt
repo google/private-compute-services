@@ -29,12 +29,14 @@ import com.google.android.`as`.oss.privateinference.library.bsa.token.BsaTokenPr
 import com.google.android.`as`.oss.privateinference.library.bsa.token.CacheableArateaTokenParams
 import com.google.android.`as`.oss.privateinference.logging.MetricIdMap
 import com.google.android.`as`.oss.privateinference.logging.PcsStatsLogger
+import com.google.android.`as`.oss.privateinference.service.api.proto.PcsPrivateInferenceFeatureName
 import com.google.android.`as`.oss.privateinference.util.timers.Annotations.PrivateInferenceClientTimers
 import com.google.android.`as`.oss.privateinference.util.timers.TimerSet
 import com.google.android.`as`.oss.privateinference.util.timers.Timers
 import com.google.common.flogger.GoogleLogger
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.oak.client.grpc.StreamObserverSessionClient
+import com.google.oak.session.tls.OakSessionTlsContext
 import com.google.privacy.ppn.proto.PrivacyPassTokenData
 import com.google.protobuf.ByteString
 import com.google.search.mdi.privatearatea.proto.androidDeviceMetadata
@@ -49,6 +51,7 @@ import io.grpc.stub.StreamObserver
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -73,6 +76,8 @@ internal constructor(
     BsaTokenProvider<@JvmSuppressWildcards ArateaTokenWithoutChallenge>,
   @param:PrivateInferenceClientTimers private val timers: TimerSet,
   private val pcsStatsLogger: PcsStatsLogger,
+  private val oakSessionTlsContextProvider: Provider<@JvmSuppressWildcards OakSessionTlsContext>,
+  private val streamObserverTlsSessionClient: StreamObserverTlsSessionClient,
 ) : OakAsyncClient {
   private val dispatcher by lazy { backgroundExecutor.asCoroutineDispatcher() }
   private val nextSessionId = atomic(1)
@@ -123,7 +128,8 @@ internal constructor(
         context = dispatcher + CoroutineName("StartNoiseSession_${nextSessionId.getAndIncrement()}")
       )
       .launch {
-        val asyncStub = stubFactory.createStub(requestMetadata.authInfo)
+        val asyncStub =
+          stubFactory.createStub(requestMetadata.authInfo, requestMetadata.ipBlindingMode)
         try {
           streamObserverSessionClient.startSession(
             sessionStreamObserver =
@@ -139,6 +145,7 @@ internal constructor(
                 bsaArateaTokenProvider = bsaArateaTokenProvider,
                 bsaCacheableArateaTokenProvider = bsaCacheableArateaTokenProvider,
                 pcsStatsLogger = pcsStatsLogger,
+                featureName = requestMetadata.featureName,
               ),
             streamStarter = { observer ->
               RequestLoggingHelpers(timers)
@@ -151,6 +158,45 @@ internal constructor(
         } catch (e: Exception) {
           logger.atSevere().withCause(e).log("Failed to start noise session.")
           sessionStreamObserver.onError(e)
+        }
+      }
+  }
+
+  /**
+   * Opens a channel with the Private Aratea server and performs TLS handshake asynchronously using
+   * the Oak TLS library.
+   *
+   * Once the handshake is complete, the [StreamObserverSessionClient.OakSessionStreamObserver] will
+   * be notified with a [StreamObserver] that can be used to send requests over TLS.
+   */
+  // Open to allow mocking.
+  override fun startTlsSession(
+    requestMetadata: PrivateInferenceRequestMetadata,
+    sessionStreamObserver: StreamObserverSessionClient.OakSessionStreamObserver,
+  ) {
+    CoroutineScope(
+        context =
+          dispatcher + CoroutineName("StartPrivateSession_${nextSessionId.getAndIncrement()}")
+      )
+      .launch {
+        val observerWrapper =
+          PrivateInferenceTlsSessionStreamObserver(
+            scope = this@launch,
+            wrapped = sessionStreamObserver,
+            timers = timers,
+          )
+        try {
+          val tlsStub = stubFactory.createPrivateTlsServiceStub(requestMetadata.authInfo)
+          streamObserverTlsSessionClient.startSession(
+            sessionStreamObserver = observerWrapper,
+            streamStarter = { observer ->
+              RequestLoggingHelpers(timers)
+                .startTlsSessionWithHandshakeLogging(tlsStub = tlsStub, responseObserver = observer)
+            },
+          )
+        } catch (e: Exception) {
+          logger.atSevere().withCause(e).log("Failed to start private session over TLS.")
+          observerWrapper.onError(e)
         }
       }
   }
@@ -169,6 +215,7 @@ internal constructor(
     private val bsaCacheableArateaTokenProvider:
       BsaTokenProvider<@JvmSuppressWildcards ArateaTokenWithoutChallenge>,
     private val pcsStatsLogger: PcsStatsLogger,
+    private val featureName: PcsPrivateInferenceFeatureName,
     private val e2ePiSessionStartTimer: Timers.Timer =
       timers.start(PrivateInferenceClientTimerNames.END_TO_END_PI_CHANNEL_SETUP),
     private val oakSessionOpenTimer: Timers.Timer =
@@ -213,6 +260,7 @@ internal constructor(
                 )
               clientRequests.onNext(
                 pcsPrivateArateaRequest {
+                    featureName = this@PrivateInferenceSessionStreamObserver.featureName
                     deviceAttestationRequest = deviceAttestationRequest {
                       androidKeyStoreEvidence = androidKeyStoreAttestationEvidence {
                         this.certificateChain += certificateChain
@@ -248,6 +296,7 @@ internal constructor(
               )
             clientRequests.onNext(
               pcsPrivateArateaRequest {
+                  featureName = this@PrivateInferenceSessionStreamObserver.featureName
                   anonymousTokenRequest = anonymousTokenRequest {
                     anonymousToken = ByteString.copyFrom(token.toByteArray())
                     encodedExtensions = ByteString.copyFromUtf8(token.encodedExtensions)
@@ -313,6 +362,49 @@ internal constructor(
         wrapped.onError(t)
       }
       scope.cancel("OnError during Noise Session", t)
+    }
+
+    override fun onCompleted() {
+      inferenceTimers.stop()
+      wrapped.onCompleted()
+      scope.cancel()
+    }
+  }
+
+  /**
+   * A wrapper around the client-provided observer for TLS session logging and channel lifecycle.
+   */
+  private class PrivateInferenceTlsSessionStreamObserver(
+    private val scope: CoroutineScope,
+    private val wrapped: StreamObserverSessionClient.OakSessionStreamObserver,
+    private val timers: Timers,
+    private val e2ePiSessionStartTimer: Timers.Timer =
+      timers.start(PrivateInferenceClientTimerNames.END_TO_END_PI_CHANNEL_SETUP),
+    private val oakSessionOpenTimer: Timers.Timer =
+      timers.start(PrivateInferenceClientTimerNames.OAK_SESSION_ESTABLISH_STREAM),
+  ) : StreamObserverSessionClient.OakSessionStreamObserver {
+    private val inferenceTimers: InferenceTimers = InferenceTimers(timers)
+    private val onErrorCompleted = AtomicBoolean(false)
+
+    override fun onSessionOpen(clientRequests: StreamObserver<ByteString>) {
+      // Send device attestation and anonymous token verification requests first
+      oakSessionOpenTimer.stop()
+      e2ePiSessionStartTimer.stop()
+      inferenceTimers.startFirst()
+      wrapped.onSessionOpen(clientRequests)
+    }
+
+    override fun onNext(response: ByteString) {
+      inferenceTimers.response()
+      wrapped.onNext(response)
+    }
+
+    override fun onError(t: Throwable) {
+      inferenceTimers.stop()
+      if (!onErrorCompleted.get()) {
+        wrapped.onError(t)
+      }
+      scope.cancel("OnError during TLS Session", t)
     }
 
     override fun onCompleted() {

@@ -42,5 +42,8 @@ class SuperIconConfigReader(private val flagManager: FlagManager) :
       enableSuperIcon = flagManager.get(SuperIconFlags.ENABLE),
       maxConsentPrompts = flagManager.get(SuperIconFlags.MAX_CONSENT_PROMPTS),
       repromptDuration = flagManager.get(SuperIconFlags.REPROMPT_DURATION_DAYS).days,
+      enableScreenshot = flagManager.get(SuperIconFlags.ENABLE_SCREENSHOT),
+      screenshotTimeoutMs = flagManager.get(SuperIconFlags.SCREENSHOT_TIMEOUT_MS).toLong(),
+      learnMoreUrl = flagManager.get(SuperIconFlags.LEARN_MORE_URL),
     )
 }

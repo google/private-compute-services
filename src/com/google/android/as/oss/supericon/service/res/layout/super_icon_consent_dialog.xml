@@ -21,41 +21,51 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:theme="@style/Theme.Material3.DayNight"
+    app:cardCornerRadius="28dp"
     style="?attr/materialAlertDialogTheme">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:padding="24dp">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
         <ImageView
             android:id="@+id/super_icon_image"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="12dp"
-            android:contentDescription="@string/super_icon_content_description"
-            app:tint="?attr/colorSecondary" />
+            android:layout_marginBottom="16dp"
+            android:contentDescription="@string/super_icon_content_description" />
 
         <TextView
             android:id="@+id/super_icon_consent_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/super_icon_consent_with_p13n_title"
+            android:text="@string/super_icon_consent_title_v1"
             android:importantForAccessibility="yes"
             android:focusable="true"
             android:screenReaderFocusable="true"
             android:gravity="center"
-            android:textAppearance="?attr/textAppearanceHeadlineSmall"
+            android:textAppearance="?attr/textAppearanceTitleLarge"
             android:textColor="?attr/colorOnSurface"
             android:layout_marginBottom="12dp" />
 
         <TextView
+            android:id="@+id/super_icon_consent_body_1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/super_icon_consent_with_p13n_body_1"
+            android:text="@string/super_icon_consent_body_1_v1"
             android:importantForAccessibility="yes"
             android:focusable="true"
             android:screenReaderFocusable="true"
@@ -64,9 +74,10 @@
             android:layout_marginBottom="12dp" />
 
         <TextView
+            android:id="@+id/super_icon_consent_body_2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/super_icon_consent_with_p13n_body_2"
+            android:text="@string/super_icon_consent_body_2_v1"
             android:importantForAccessibility="yes"
             android:focusable="true"
             android:screenReaderFocusable="true"
@@ -75,9 +86,10 @@
             android:layout_marginBottom="12dp" />
 
         <TextView
+            android:id="@+id/super_icon_consent_body_3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/super_icon_consent_with_p13n_body_3"
+            android:text="@string/super_icon_consent_body_3_v1"
             android:importantForAccessibility="yes"
             android:focusable="true"
             android:screenReaderFocusable="true"
@@ -86,17 +98,34 @@
             android:layout_marginBottom="12dp" />
 
         <TextView
+            android:id="@+id/super_icon_consent_body_4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/super_icon_consent_with_p13n_body_4"
+            android:text="@string/super_icon_consent_body_4_v1"
             android:importantForAccessibility="yes"
             android:focusable="true"
             android:screenReaderFocusable="true"
             android:textAppearance="?attr/textAppearanceBodyMedium"
             android:textColor="?attr/colorOnSurfaceVariant"
-            android:layout_marginBottom="20dp" />
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:id="@+id/super_icon_consent_body_5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/super_icon_consent_body_5_v1"
+            android:importantForAccessibility="yes"
+            android:focusable="true"
+            android:screenReaderFocusable="true"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:layout_marginBottom="24dp" />
+
+            </LinearLayout>
+        </ScrollView>
 
         <LinearLayout
+            android:id="@+id/button_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -107,14 +136,16 @@
                 style="?attr/buttonBarNegativeButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:minWidth="0dp"
                 android:text="@string/super_icon_consent_no_button" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_yes"
-                style="?attr/buttonBarPositiveButtonStyle"
+                style="?attr/materialButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
+                android:minWidth="0dp"
                 android:text="@string/super_icon_consent_yes_button" />
         </LinearLayout>
     </LinearLayout>

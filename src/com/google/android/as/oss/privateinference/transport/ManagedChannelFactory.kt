@@ -16,6 +16,8 @@
 
 package com.google.android.`as`.oss.privateinference.transport
 
+import com.google.android.`as`.oss.privateinference.service.api.proto.IpBlindingMode
+import com.google.android.`as`.oss.privateinference.service.api.proto.SessionConfiguration
 import io.grpc.ManagedChannel
 
 /**
@@ -23,6 +25,21 @@ import io.grpc.ManagedChannel
  * Inference.
  */
 interface ManagedChannelFactory {
-  /** Gets a [ManagedChannel] singleton instance to use when calling Private Inference services. */
-  suspend fun getInstance(): ManagedChannel
+  /**
+   * Gets a [ManagedChannel] instance to use when calling Private Inference services. The instance
+   * is singleton per [SessionConfiguration].
+   *
+   * The [SessionConfiguration] is used to configure the PI session, i.e. the Noise session and
+   * subsequent auth request.
+   */
+  suspend fun getInstance(
+    sessionConfiguration: SessionConfiguration = DEFAULT_SESSION_CONFIGURATION
+  ): ManagedChannel
+
+  companion object {
+    val DEFAULT_SESSION_CONFIGURATION =
+      SessionConfiguration.newBuilder()
+        .setIpBlindingMode(IpBlindingMode.IP_BLINDING_MODE_ENABLED)
+        .build()
+  }
 }

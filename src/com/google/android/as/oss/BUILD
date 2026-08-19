@@ -24,6 +24,7 @@ pcs_dev_and_mpm(
     manifest = "AndroidManifest.xml",
     resource_files = glob(["res/**"]),
     deps = [
+        "//java/com/google/android/libraries/pixel/psi/ambientdata:ambient_data_client_module",
         "//src/com/google/android/as/oss/ace:common_modules",  # buildcleaner: keep
         "//src/com/google/android/as/oss/actionlauncher:prod_modules",  # buildcleaner: keep
         "//src/com/google/android/as/oss/ai/config/impl",  # buildcleaner: keep

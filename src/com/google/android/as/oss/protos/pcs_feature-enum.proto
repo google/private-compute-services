@@ -44,5 +44,6 @@ enum FeatureName {
   TOAST_SEARCH = 15;
   PLATFORM_LOGGING = 16;
   NOTIFICATION_INTELLIGENCE = 17;
+  PSI = 18;
   PWM = 19;
 }

@@ -38,4 +38,17 @@ interface OakAsyncClient {
     requestMetadata: PrivateInferenceRequestMetadata,
     sessionStreamObserver: StreamObserverSessionClient.OakSessionStreamObserver,
   )
+
+  /**
+   * Starts a TLS session for Private Inference by using the Oak TLS library.
+   *
+   * @param requestMetadata The request metadata to use for the gRPC call.
+   * @param sessionStreamObserver The observer to receive responses from the server, and that will
+   *   receive the [io.grpc.stub.StreamObserver] to use for sending requests, once the stream is
+   *   open.
+   */
+  fun startTlsSession(
+    requestMetadata: PrivateInferenceRequestMetadata,
+    sessionStreamObserver: StreamObserverSessionClient.OakSessionStreamObserver,
+  )
 }

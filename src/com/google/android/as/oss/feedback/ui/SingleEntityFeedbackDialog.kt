@@ -64,6 +64,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.`as`.oss.delegatedui.service.templates.fonts.FlexFontUtils.withFlexFont
 import com.google.android.`as`.oss.delegatedui.service.templates.motion.ExpressiveMotionUtils
 import com.google.android.`as`.oss.feedback.api.EntityFeedbackDialogData
+import com.google.android.`as`.oss.feedback.api.EntityFeedbackDialogData.FeedbackClient.FEEDBACK_CLIENT_SPOON
+import com.google.android.`as`.oss.feedback.api.EntityFeedbackDialogData.FeedbackClient.FEEDBACK_CLIENT_UNSPECIFIED
 import com.google.android.`as`.oss.feedback.api.FeedbackRatingSentiment
 import com.google.android.`as`.oss.feedback.api.FeedbackRatingSentiment.RATING_SENTIMENT_THUMBS_DOWN
 import com.google.android.`as`.oss.feedback.api.FeedbackRatingSentiment.RATING_SENTIMENT_THUMBS_UP
@@ -71,6 +73,7 @@ import com.google.android.`as`.oss.feedback.api.FeedbackRatingTagSource.RATING_T
 import com.google.android.`as`.oss.feedback.api.FeedbackRatingTagSource.RATING_TAG_SOURCE_POSITIVE_RATING_TAG
 import com.google.android.`as`.oss.feedback.api.FeedbackTagData
 import com.google.android.`as`.oss.feedback.api.gateway.SpoonCUJ
+import com.google.android.`as`.oss.feedback.blueflax.utils.validBlueflaxCuj
 import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory
 import com.google.android.`as`.oss.feedback.domain.DataCollectionCategory.LegacyV1
 import com.google.android.`as`.oss.feedback.domain.FeedbackBodyItem
@@ -107,7 +110,16 @@ fun SingleEntityFeedbackDialog(
       clientSessionId = data.clientSessionId,
       interactionType = InteractionType.INTERACTION_TYPE_VIEW,
     )
-    viewModel.loadDonationData(clientSessionId = data.clientSessionId, loadSpoonData = true)
+    if (viewModel.hasDonationDataExtra) {
+      viewModel.loadDonationDataFromExtra(blueflaxCuj = data.validBlueflaxCuj)
+    } else {
+      viewModel.loadDonationData(
+        clientSessionId = data.clientSessionId,
+        loadSpoonData =
+          data.feedbackClient == FEEDBACK_CLIENT_SPOON ||
+            data.feedbackClient == FEEDBACK_CLIENT_UNSPECIFIED,
+      )
+    }
     launch {
       viewModel.events.collect { event: FeedbackSubmissionEvent ->
         onFeedbackEvent(event)
@@ -194,6 +206,7 @@ fun SingleEntityFeedbackDialog(
                 } else {
                   null
                 },
+              blueflaxCuj = data.validBlueflaxCuj,
               selectedEntityContent = data.entityContent,
               ratingSentiment = data.ratingSentiment,
             )
@@ -399,32 +412,34 @@ private fun SingleEntityFeedbackEditingScreen(
       }
 
       // Opt-in checkbox row
-      val overallOptIn = uiState.dataCollectionStates.values.any { it.isSelected() }
+      if (!renderingData.hideOptInControl) {
+        val overallOptIn = uiState.dataCollectionStates.values.any { it.isSelected() }
 
-      FeedbackOptInControl(
-        modifier = Modifier.fillMaxWidth(),
-        optInCheckboxContentDescription =
-          renderingData.feedbackDialogOptInCheckboxContentDescription,
-        optInChecked = overallOptIn, // Changed
-        onOptInCheckedChanged = onOptInCheckedChanged,
-        viewDataTitle = renderingData.feedbackDialogOptInV2Title,
-        viewDataDescription = renderingData.feedbackDialogOptInV2Description,
-        onViewDataClicked = onViewDataClicked,
-      )
+        FeedbackOptInControl(
+          modifier = Modifier.fillMaxWidth(),
+          optInCheckboxContentDescription =
+            renderingData.feedbackDialogOptInCheckboxContentDescription,
+          optInChecked = overallOptIn, // Changed
+          onOptInCheckedChanged = onOptInCheckedChanged,
+          viewDataTitle = renderingData.feedbackDialogOptInV2Title,
+          viewDataDescription = renderingData.feedbackDialogOptInV2Description,
+          onViewDataClicked = onViewDataClicked,
+        )
 
-      // Opt-in privacy statement
-      FeedbackOptInPrivacyStatement(
-        modifier = Modifier.fillMaxWidth(),
-        optInLabel =
-          if (data.ratingSentiment == FeedbackRatingSentiment.RATING_SENTIMENT_UNDEFINED) {
-            renderingData.feedbackDialogOptInLabelGenericInfoLabel
-          } else {
-            renderingData.feedbackDialogOptInLabel
-          },
-        optInLabelLinkPrivacyPolicy = renderingData.feedbackDialogOptInLabelLinkPrivacyPolicy,
-        optInLabelLinkViewData = renderingData.feedbackDialogOptInLabelLinkViewData,
-        onViewDataClicked = onViewDataClicked,
-      )
+        // Opt-in privacy statement
+        FeedbackOptInPrivacyStatement(
+          modifier = Modifier.fillMaxWidth(),
+          optInLabel =
+            if (data.ratingSentiment == FeedbackRatingSentiment.RATING_SENTIMENT_UNDEFINED) {
+              renderingData.feedbackDialogOptInLabelGenericInfoLabel
+            } else {
+              renderingData.feedbackDialogOptInLabel
+            },
+          optInLabelLinkPrivacyPolicy = renderingData.feedbackDialogOptInLabelLinkPrivacyPolicy,
+          optInLabelLinkViewData = renderingData.feedbackDialogOptInLabelLinkViewData,
+          onViewDataClicked = onViewDataClicked,
+        )
+      }
     }
   }
 }

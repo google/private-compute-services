@@ -18,6 +18,7 @@ package com.google.android.`as`.oss.supericon.config.impl
 
 import com.google.android.`as`.oss.common.config.FlagManager.BooleanFlag
 import com.google.android.`as`.oss.common.config.FlagManager.IntegerFlag
+import com.google.android.`as`.oss.common.config.FlagManager.StringFlag
 
 /** Flag configurations. */
 object SuperIconFlags {
@@ -25,4 +26,7 @@ object SuperIconFlags {
   val ENABLE = BooleanFlag.create("${PREFIX}enable", false)
   val MAX_CONSENT_PROMPTS = IntegerFlag.create("${PREFIX}max_consent_prompts", 3)
   val REPROMPT_DURATION_DAYS = IntegerFlag.create("${PREFIX}reprompt_duration_days", 7)
+  val ENABLE_SCREENSHOT = BooleanFlag.create("${PREFIX}enable_screenshot", false)
+  val SCREENSHOT_TIMEOUT_MS = IntegerFlag.create("${PREFIX}screenshot_timeout_ms", 3000)
+  val LEARN_MORE_URL = StringFlag.create("${PREFIX}learn_more_url", "")
 }
