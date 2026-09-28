@@ -41,6 +41,7 @@ data class MessageMetadataHint(
   val suggestionBackgroundColor: Int? = null,
   val suggestionCornerRadius: Int? = null,
   val disabledActions: List<DisabledAction> = emptyList(),
+  val conversationId: String? = null,
 ) : PrototypeHint(MessageMetadataHintId, this) {
 
   override fun exportDataToBundle(bundle: Bundle) {
@@ -52,6 +53,7 @@ data class MessageMetadataHint(
     suggestionBackgroundColor?.let { bundle.putInt(KEY_SUGGESTION_BACKGROUND_COLOR, it) }
     suggestionCornerRadius?.let { bundle.putInt(KEY_SUGGESTION_CORNER_RADIUS, it) }
     bundle.putIntegerArrayList(KEY_DISABLED_ACTIONS, ArrayList(disabledActions.map { it.ordinal }))
+    conversationId?.let { bundle.putString(KEY_CONVERSATION_ID, it) }
   }
 
   companion object : Creator {
@@ -63,6 +65,7 @@ data class MessageMetadataHint(
     private const val KEY_SUGGESTION_BACKGROUND_COLOR = "suggestion_background_color"
     private const val KEY_SUGGESTION_CORNER_RADIUS = "suggestion_corner_radius"
     private const val KEY_DISABLED_ACTIONS = "disabled_actions"
+    private const val KEY_CONVERSATION_ID = "conversation_id"
 
     override fun create(bundle: Bundle): PrototypeHint {
       val suggestionLimit = bundle.getInt(KEY_SUGGESTION_LIMIT)
@@ -93,6 +96,12 @@ data class MessageMetadataHint(
       val disabledActions =
         disabledActionsOrdinals?.mapNotNull { ordinal -> DisabledAction.entries.getOrNull(ordinal) }
           ?: emptyList()
+      val conversationId =
+        if (bundle.containsKey(KEY_CONVERSATION_ID)) {
+          bundle.getString(KEY_CONVERSATION_ID)
+        } else {
+          null
+        }
 
       return MessageMetadataHint(
         suggestionLimit = suggestionLimit,
@@ -103,6 +112,7 @@ data class MessageMetadataHint(
         suggestionBackgroundColor = suggestionBackgroundColor,
         suggestionCornerRadius = suggestionCornerRadius,
         disabledActions = disabledActions,
+        conversationId = conversationId,
       )
     }
   }

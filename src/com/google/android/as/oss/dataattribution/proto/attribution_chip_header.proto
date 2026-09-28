@@ -16,6 +16,7 @@ edition = "2024";
 
 package com.google.android.as.oss.dataattribution.proto;
 
+
 option java_outer_classname = "AttributionChipHeader";
 option java_package = "com.google.android.as.oss.dataattribution.proto";
 

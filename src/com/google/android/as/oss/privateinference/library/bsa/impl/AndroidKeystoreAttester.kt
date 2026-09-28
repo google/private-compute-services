@@ -44,7 +44,7 @@ constructor(
       androidKeystoreAttesterImpl
         .generateAttestation(
           challenge,
-          includeDeviceProperties = deviceAttestationFlag.useDeviceProperties(),
+          includeDeviceProperties = deviceAttestationFlag.isDeviceIdAttestationEnabled(),
         )
         .map { it.toByteArray() }
     } else {

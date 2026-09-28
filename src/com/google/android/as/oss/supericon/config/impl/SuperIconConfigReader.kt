@@ -45,5 +45,6 @@ class SuperIconConfigReader(private val flagManager: FlagManager) :
       enableScreenshot = flagManager.get(SuperIconFlags.ENABLE_SCREENSHOT),
       screenshotTimeoutMs = flagManager.get(SuperIconFlags.SCREENSHOT_TIMEOUT_MS).toLong(),
       learnMoreUrl = flagManager.get(SuperIconFlags.LEARN_MORE_URL),
+      enableConversationContentV2 = flagManager.get(SuperIconFlags.ENABLE_CONVERSATION_CONTENT_V2),
     )
 }

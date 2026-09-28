@@ -16,9 +16,11 @@
 
 package com.google.android.`as`.oss.privateinference.library.oakutil
 
+import com.google.common.util.concurrent.MoreExecutors
 import com.google.errorprone.annotations.CanIgnoreReturnValue
 import com.google.oak.client.grpc.StreamObserverSessionClient
 import com.google.oak.session.tls.OakSessionTlsContext
+import com.google.oak.session.tls.OakSessionTlsException
 import com.google.oak.session.tls.ReceiveFunction
 import com.google.oak.session.tls.SendFunction
 import com.google.protobuf.ByteString
@@ -31,6 +33,7 @@ import io.grpc.stub.StreamObserver
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.guava.await
 
 /**
  * An asynchronous client for Oak TLS Session based on StreamObservers.
@@ -41,7 +44,8 @@ import kotlinx.coroutines.channels.Channel
 class StreamObserverTlsSessionClient
 @Inject
 constructor(
-  private val oakSessionTlsContextProvider: Provider<@JvmSuppressWildcards OakSessionTlsContext>
+  private val oakSessionTlsContextProvider: Provider<@JvmSuppressWildcards OakSessionTlsContext>,
+  private val repository: PiCertificateRepository? = null,
 ) {
   /** A listener interface to notify hooks when the TLS handshake has completed. */
   interface HandshakeListener {
@@ -61,73 +65,56 @@ constructor(
     sessionStreamObserver: StreamObserverSessionClient.OakSessionStreamObserver,
     streamStarter: (StreamObserver<TlsSessionResponse>) -> StreamObserver<TlsSessionRequest>,
   ): StreamObserverSessionClient.SessionHandle {
-    // Note: If the channel capacity is ever changed to something finite, start paying attention to
-    // trySend errors below.
-    val incomingFrames = Channel<TlsSessionResponse>(Channel.UNLIMITED)
-    val requestObserver: StreamObserver<TlsSessionRequest>?
-    val responseObserver =
-      object : StreamObserver<TlsSessionResponse> {
-        override fun onNext(response: TlsSessionResponse) {
-          // Ignoring trySend return value (unused) is OK because of the unlimited channel size.
-          val unused = incomingFrames.trySend(response)
-        }
-
-        override fun onError(t: Throwable) {
-          incomingFrames.close(t)
-        }
-
-        override fun onCompleted() {
-          incomingFrames.close()
-        }
-      }
-
-    requestObserver = streamStarter(responseObserver)
-
-    val send = SendFunction { data ->
-      requestObserver.onNext(tlsSessionRequest { frame = ByteString.copyFrom(data) })
-    }
-    val receive = ReceiveFunction {
-      val result = incomingFrames.receiveCatching()
-      if (result.isClosed) {
-        val ex = result.exceptionOrNull()
-        val status =
-          if (ex != null) {
-            Status.fromThrowable(ex).withDescription("Failed to read TLS frame").withCause(ex)
-          } else {
-            Status.ABORTED.withDescription("TLS stream closed prematurely without error")
-          }
-        throw status.asRuntimeException()
-      }
-      result.getOrThrow().frame.toByteArray()
-    }
+    var streamSetup = setupStream(streamStarter)
 
     val tlsContext = oakSessionTlsContextProvider.get()
-    val initializedSession = tlsContext.newInitializedSession(send, receive)
+    val initializedSession =
+      try {
+        tlsContext.newInitializedSession(streamSetup.send, streamSetup.receive)
+      } catch (e: OakSessionTlsException) {
+        // Retry with fresh OakCT certificate from repository, in case the handshake failed due to
+        // a missing or invalid certificate.
+        repository
+          ?.getOakCtCertificate(MoreExecutors.newDirectExecutorService(), forceRefresh = true)
+          ?.await()
+
+        // Cancel old stream
+        (streamSetup.requestObserver as? ClientCallStreamObserver<*>)?.cancel(
+          "Handshake failed, retrying",
+          e,
+        )
+
+        // Restart the stream to ensure a clean state for the retry.
+        streamSetup = setupStream(streamStarter)
+        tlsContext.newInitializedSession(streamSetup.send, streamSetup.receive)
+      }
     val session = initializedSession.session
 
-    (requestObserver as? HandshakeListener)?.onHandshakeComplete()
+    (streamSetup.requestObserver as? HandshakeListener)?.onHandshakeComplete()
 
     val clientRequests =
       object : StreamObserver<ByteString> {
         override fun onNext(value: ByteString) {
           val encrypted = session.encrypt(value.toByteArray())
           val bytes = ByteArray(encrypted.remaining()).apply { encrypted.get(this) }
-          requestObserver.onNext(tlsSessionRequest { frame = ByteString.copyFrom(bytes) })
+          streamSetup.requestObserver.onNext(
+            tlsSessionRequest { frame = ByteString.copyFrom(bytes) }
+          )
         }
 
         override fun onError(t: Throwable) {
-          requestObserver.onError(t)
+          streamSetup.requestObserver.onError(t)
         }
 
         override fun onCompleted() {
-          requestObserver.onCompleted()
+          streamSetup.requestObserver.onCompleted()
         }
       }
 
     sessionStreamObserver.onSessionOpen(clientRequests)
 
     while (true) {
-      val result = incomingFrames.receiveCatching()
+      val result = streamSetup.incomingFrames.receiveCatching()
       if (result.isClosed) {
         val ex = result.exceptionOrNull()
         if (ex != null) {
@@ -147,8 +134,59 @@ constructor(
 
     return object : StreamObserverSessionClient.SessionHandle {
       override fun cancel(message: String?, cause: Throwable?) {
-        (requestObserver as? ClientCallStreamObserver<*>)?.cancel(message, cause)
+        (streamSetup.requestObserver as? ClientCallStreamObserver<*>)?.cancel(message, cause)
       }
     }
+  }
+
+  private data class StreamSetup(
+    val send: SendFunction,
+    val receive: ReceiveFunction,
+    val incomingFrames: Channel<TlsSessionResponse>,
+    val requestObserver: StreamObserver<TlsSessionRequest>,
+  )
+
+  private fun setupStream(
+    streamStarter: (StreamObserver<TlsSessionResponse>) -> StreamObserver<TlsSessionRequest>
+  ): StreamSetup {
+    // Note: If the channel capacity is ever changed to something finite, start paying attention to
+    // trySend errors below.
+    val channel = Channel<TlsSessionResponse>(Channel.UNLIMITED)
+    val responseObserver =
+      object : StreamObserver<TlsSessionResponse> {
+        override fun onNext(response: TlsSessionResponse) {
+          // Ignoring trySend return value (unused) is OK because of the unlimited channel size.
+          val unused = channel.trySend(response)
+        }
+
+        override fun onError(t: Throwable) {
+          channel.close(t)
+        }
+
+        override fun onCompleted() {
+          channel.close()
+        }
+      }
+
+    val observer = streamStarter(responseObserver)
+
+    val send = SendFunction { data ->
+      observer.onNext(tlsSessionRequest { frame = ByteString.copyFrom(data) })
+    }
+    val receive = ReceiveFunction {
+      val result = channel.receiveCatching()
+      if (result.isClosed) {
+        val ex = result.exceptionOrNull()
+        val status =
+          if (ex != null) {
+            Status.fromThrowable(ex).withDescription("Failed to read TLS frame").withCause(ex)
+          } else {
+            Status.ABORTED.withDescription("TLS stream closed prematurely without error")
+          }
+        throw status.asRuntimeException()
+      }
+      result.getOrThrow().frame.toByteArray()
+    }
+    return StreamSetup(send, receive, channel, observer)
   }
 }

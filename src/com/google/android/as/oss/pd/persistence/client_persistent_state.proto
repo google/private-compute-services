@@ -16,6 +16,7 @@ edition = "2024";
 
 package com.google.android.as.oss.pd.persistence;
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "ClientPersistentStateOuterClass";
 option java_api_version = 2;
 option java_package = "com.google.android.as.oss.pd.persistence";

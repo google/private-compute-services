@@ -232,6 +232,8 @@ internal constructor(
               donationData.quartzDataDonationV2.quartzNotificationData.conversationMessages,
             conversationHistoricMessages =
               donationData.quartzDataDonationV2.quartzNotificationData.conversationHistoricMessages,
+            detectedLanguage =
+              donationData.quartzDataDonationV2.quartzNotificationData.detectedLanguage,
           )
         } else {
           null

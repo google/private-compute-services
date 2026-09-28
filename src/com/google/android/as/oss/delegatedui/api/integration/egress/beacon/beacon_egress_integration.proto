@@ -16,10 +16,11 @@ edition = "2024";
 
 package com.google.android.as.oss.delegatedui.api.integration.egress.beacon;
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "BeaconEgressIntegration";
 option java_package = "com.google.android.as.oss.delegatedui.api.integration.egress.beacon";
 
-message BeaconEgressData {
+export message BeaconEgressData {
   oneof events {
     SuggestMoreClickEvent suggest_more_click_event = 1;
   }

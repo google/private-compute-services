@@ -21,6 +21,8 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 import android.content.Context;
 import com.google.android.as.oss.attestation.PccAttestationMeasurementClient;
 import com.google.android.as.oss.common.ExecutorAnnotations.AttestationExecutorQualifier;
+import com.google.android.as.oss.common.config.ConfigReader;
+import com.google.android.as.oss.http.config.PcsHttpConfig;
 import com.google.android.as.oss.logging.PcsStatsLog;
 import com.google.android.as.oss.networkusage.db.NetworkUsageLogRepository;
 import dagger.Module;
@@ -29,12 +31,17 @@ import dagger.hilt.InstallIn;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
 import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import io.grpc.Metadata;
+import io.grpc.cronet.CronetChannelBuilder;
 import io.grpc.okhttp.OkHttpChannelBuilder;
 import io.grpc.stub.MetadataUtils;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import javax.inject.Named;
+import javax.inject.Provider;
 import javax.inject.Singleton;
+import org.chromium.net.CronetEngine;
 
 /** Convenience module to provide {@link PccAttestationMeasurementClient}. */
 @Module
@@ -50,9 +57,21 @@ final class PccAttestationMeasurementClientModule {
       @AttestationExecutorQualifier Executor attestationExecutor,
       NetworkUsageLogRepository networkUsageLogRepository,
       PcsStatsLog pcsStatsLogger,
-      @ApplicationContext Context context) {
+      @ApplicationContext Context context,
+      ConfigReader<PcsHttpConfig> configReader,
+      @Named("PcsCronet") Provider<CronetEngine> cronetEngineProvider) {
+
+    ManagedChannelBuilder<?> channelBuilder;
+    if (configReader.getConfig().enableCronetMigration()) {
+      channelBuilder =
+          CronetChannelBuilder.forAddress(
+              ATTESTATION_API_HOST, ATTESTATION_API_PORT, cronetEngineProvider.get());
+    } else {
+      channelBuilder = OkHttpChannelBuilder.forAddress(ATTESTATION_API_HOST, ATTESTATION_API_PORT);
+    }
+
     ManagedChannel managedChannel =
-        OkHttpChannelBuilder.forAddress(ATTESTATION_API_HOST, ATTESTATION_API_PORT)
+        channelBuilder
             .executor(Executors.newSingleThreadExecutor())
             .idleTimeout(1, MINUTES)
             .build();

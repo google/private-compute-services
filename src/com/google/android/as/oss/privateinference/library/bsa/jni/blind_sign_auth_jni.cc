@@ -15,6 +15,7 @@
 #include <jni.h>
 
 #include <cstddef>
+#include <iterator>
 #include <string>
 
 #include "java/com/google/android/apps/miphone/pcs/privateinference/library/bsa/jni/jni_bsa_calls.h"
@@ -104,8 +105,8 @@ static absl::Status RegisterNativeMethods(
     return absl::InternalError("BlindSignAuth class not found");
   }
 
-  jint error = env->RegisterNatives(
-      cls, native_methods, sizeof(native_methods) / sizeof(native_methods[0]));
+  jint error =
+      env->RegisterNatives(cls, native_methods, std::size(native_methods));
   if (error != 0) {
     return absl::InternalError("Failed to register BlindSignAuth methods");
   }

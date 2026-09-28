@@ -16,6 +16,8 @@ edition = "2024";
 
 package com.google.android.as.oss.privateinference.service.api;
 
+import "src/com/google/android/as/oss/privateinference/api/private_proxy_service.proto";
+
 option java_outer_classname = "PrivateInference";
 option java_package = "com.google.android.as.oss.privateinference.service.api.proto";
 
@@ -182,10 +184,15 @@ enum IpBlindingMode {
 }
 
 // Configuration for a Private Inference session.
-// Next ID: 2
+// Next ID: 3
 message SessionConfiguration {
   // The mode of IP binding for the Private Inference session. The default mode
   // is IP_BLINDING_MODE_UNSPECIFIED will be treated as
   // IP_BLINDING_MODE_ENABLED to be consistent with the existing behavior.
   IpBlindingMode ip_blinding_mode = 1;
+
+  // The backend name for the proxy session. The default value is
+  // BACKEND_UNSPECIFIED, which indicates that proxy is disabled for the
+  // session.
+  mdi.privatearatea.PrivateBackend proxy_backend_name = 2;
 }

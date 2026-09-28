@@ -16,7 +16,6 @@
 
 package com.google.android.`as`.oss.supericon.aidl
 
-import android.graphics.Bitmap
 import android.os.Parcel
 import android.os.Parcelable
 import com.google.fcp.client.common.internal.safeparcel.AbstractSafeParcelable
@@ -69,7 +68,6 @@ constructor(
  *
  * @property messages A list of [Message] objects.
  * @property packageName The package name of the app that the conversation is from.
- * @property screenshot The screenshot of the conversation, if available.
  */
 @SafeParcelable.Class(creator = "ConversationDataCreator")
 data class ConversationData
@@ -81,9 +79,6 @@ constructor(
   @field:SafeParcelable.Field(id = 2, getter = "getPackageName")
   @param:SafeParcelable.Param(id = 2)
   val packageName: String? = null,
-  @field:SafeParcelable.Field(id = 3, getter = "getScreenshot")
-  @param:SafeParcelable.Param(id = 3)
-  val screenshot: Bitmap? = null,
 ) : AbstractSafeParcelable() {
 
   override fun equals(other: Any?): Boolean {
@@ -94,7 +89,6 @@ constructor(
 
     if (messages != other.messages) return false
     if (packageName != other.packageName) return false
-    if (screenshot != other.screenshot) return false
 
     return true
   }
@@ -102,7 +96,6 @@ constructor(
   override fun hashCode(): Int {
     var result = messages.hashCode()
     result = 31 * result + (packageName?.hashCode() ?: 0)
-    result = 31 * result + (screenshot?.hashCode() ?: 0)
     return result
   }
 

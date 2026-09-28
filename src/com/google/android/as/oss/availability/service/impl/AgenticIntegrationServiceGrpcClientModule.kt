@@ -17,6 +17,7 @@
 package com.google.android.`as`.oss.availability.service.impl
 
 import android.content.Context
+import android.os.Build
 import com.google.android.`as`.oss.availability.api.agenticintegration.AgenticIntegrationServiceGrpcKt
 import com.google.android.`as`.oss.availability.config.FeatureAvailabilityConfig
 import com.google.android.`as`.oss.common.config.ConfigReader
@@ -32,6 +33,7 @@ import io.grpc.Channel
 import io.grpc.CompressorRegistry
 import io.grpc.DecompressorRegistry
 import io.grpc.binder.AndroidComponentAddress
+import io.grpc.binder.BindServiceFlags
 import io.grpc.binder.BinderChannelBuilder
 import io.grpc.binder.InboundParcelablePolicy
 import java.util.concurrent.TimeUnit.MINUTES
@@ -63,7 +65,13 @@ internal object AgenticIntegrationServiceGrpcClientModule {
     @ApplicationContext context: Context,
     pccSecurityConfigReader: ConfigReader<PccSecurityConfig>,
   ): Channel {
-    return BinderChannelBuilder.forAddress(androidComponentAddress, context)
+    val builder = BinderChannelBuilder.forAddress(androidComponentAddress, context)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+      builder.setBindServiceFlags(
+        BindServiceFlags.DEFAULTS.toBuilder().setAllowActivityStarts(true).build()
+      )
+    }
+    return builder
       .securityPolicy(
         SecurityPolicyUtils.makeSecurityPolicy(
           pccSecurityConfigReader.config.agsaPackageSecurityInfo(),

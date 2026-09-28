@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@bazel_rules_android//android:rules.bzl", "android_library")
+load("//tools/build_defs:tc.bzl", "TCExtractMessages", "TCGenerateLocalizedFiles")
 
 package(
     default_visibility = [
@@ -25,10 +26,28 @@ android_library(
     custom_package = "com.android.personalcontext.ace.visualizer",
     exports_manifest = 1,
     manifest = "AndroidManifest.xml",
-    resource_files = glob(["res/**"]),
+    resource_files = glob(["res/**"]) + [":localized_resources"],
     deps = [
         "//third_party/java/android/android_sdk_linux/extras/android/compatibility/v7/appcompat",
     ],
+)
+
+# TODO: Clean up temporary l10n localization build rules once CardInsight migration lands in 26Q4.
+TCExtractMessages(
+    name = "xmb_files",
+    handler = "android",
+    project = TC_PROJECT_SMART_SUGGESTIONS,
+    source_dir = "java/com/google/android/apps/miphone/pcs/ace/java/com/android/personalcontext/ace/visualizer",
+    source_files = ["res/values/strings.xml"],
+)
+
+TCGenerateLocalizedFiles(
+    name = "localized_resources",
+    srcs = ["res/values/strings.xml"],
+    handler = "android",
+    locales = LOCALES_SETTINGS,
+    options = {"localizedFileNameStyle": "android"},
+    project = TC_PROJECT_SMART_SUGGESTIONS,
 )
 
 android_library(

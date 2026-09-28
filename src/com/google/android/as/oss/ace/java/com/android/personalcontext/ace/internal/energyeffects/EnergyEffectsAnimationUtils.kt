@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import com.android.personalcontext.ace.visualizer.compat.EnergyEffectsAnimationSpec
 import com.google.android.libraries.material.compose.effect.ExperimentalMaterial3EffectApi
 import com.google.android.libraries.material.compose.energy.getEnergyColors
 import com.google.android.libraries.material.gm3.color.tokens.R
@@ -57,6 +58,8 @@ import com.google.android.shaderlib.energyeffects.view.EnergyShaderDrawable
 import com.google.android.systemui.graphics.energycolorslib.EnergyColors
 import com.google.ux.material.libmonet.energy.EnergyColors as MonetEnergyColors
 import com.google.ux.material.libmonet.energy.EnergyColors.BaseColorRole
+import com.google.ux.material.libmonet.energy.EnergyColors.EnergyVersion
+import com.google.ux.material.libmonetkt.energy.EnergyVersion as MonetKtEnergyVersion
 
 /** Helper utilities for rendering and controlling the energy shader effects animations. */
 object EnergyEffectsAnimationUtils {
@@ -116,10 +119,15 @@ object EnergyEffectsAnimationUtils {
           surfaceColor,
           false,
           BaseColorRole.SURFACE,
+          EnergyVersion.V1_1_0,
         )
 
       val energyColors =
-        intArrayOf(colors.getOrElse(0) { baseColor }, colors.getOrElse(1) { baseColor })
+        EnergyColors(
+          mid = colors.getOrElse(0) { baseColor },
+          end = colors.getOrElse(1) { baseColor },
+          neural = colors.getOrElse(1) { baseColor },
+        )
 
       val cardConfig =
         DefaultCardConfig(
@@ -189,7 +197,7 @@ object EnergyEffectsAnimationUtils {
     val stateMap: Map<EffectState, KeyframeSequence>,
     val timeSupplierMs: () -> Long = { System.currentTimeMillis() },
     val timeOffsetMs: Long? = null,
-  )
+  ) : EnergyEffectsAnimationSpec
 
   /**
    * Remembers a themed [GeminiAnimationSpec] for chips.
@@ -228,15 +236,15 @@ object EnergyEffectsAnimationUtils {
         } else {
           R.color.gm3_sys_color_dynamic_light_surface_container
         }
-      val colors = EnergyColors.from(resId, context)
+      val colors = EnergyColors.of(resId, context)
 
-      val energyColor1 = colors[0] // middle
-      val energyColor2 = colors[1] // end
+      val energyColor1 = colors.mid
+      val energyColor2 = colors.end
       val cornerRadii = cornerRadius?.let { CornerRadii(it.x / density) }
       val chipConfig =
         MessageInlineChipConfig(
           surfaceColor = colorScheme.surfaceContainer.toArgb(),
-          energyColors = intArrayOf(energyColor1, energyColor2),
+          energyColors = colors,
           cornerRadii = cornerRadii,
           strokeColor = strokeColor.toArgb(),
           backgroundColor = backgroundColor.toArgb(),
@@ -275,7 +283,8 @@ object EnergyEffectsAnimationUtils {
       object :
         DefaultCardConfig(
           surfaceColor = Color.Transparent.toArgb(),
-          energyColors = intArrayOf(glowColorMidArgb, glowColorEndArgb),
+          energyColors =
+            EnergyColors(mid = glowColorMidArgb, end = glowColorEndArgb, neural = glowColorEndArgb),
         ) {
         override fun cardBaseConfig(): EnergyShaderConfig {
           return super.cardBaseConfig().copy {
@@ -317,7 +326,8 @@ object EnergyEffectsAnimationUtils {
       object :
         DefaultCardConfig(
           surfaceColor = Color.Transparent.toArgb(),
-          energyColors = intArrayOf(glowColorArgb, glowColorArgb),
+          energyColors =
+            EnergyColors(mid = glowColorArgb, end = glowColorArgb, neural = glowColorArgb),
         ) {
         override fun cardBaseConfig(): EnergyShaderConfig {
           return super.cardBaseConfig().copy {
@@ -449,14 +459,14 @@ object EnergyEffectsAnimationUtils {
       colorScheme.tertiary,
       colorScheme.surface,
     ) {
-      getEnergyColors(baseColor, colorScheme)
+      getEnergyColors(baseColor, colorScheme, MonetKtEnergyVersion.V1_1_0)
     }
   }
 }
 
 class MessageInlineChipConfig(
   surfaceColor: Int? = null,
-  energyColors: IntArray? = null,
+  energyColors: EnergyColors? = null,
   private val cornerRadii: CornerRadii? = null,
   private val strokeColor: Int? = null,
   private val backgroundColor: Int? = null,

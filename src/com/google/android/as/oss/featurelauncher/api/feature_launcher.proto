@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-syntax = "proto3";
+edition = "2023";
 
 package com.google.android.as.oss.featurelauncher.api;
 
+
+option features.field_presence = IMPLICIT;
 option java_package = "com.google.android.as.oss.featurelauncher.api.proto";
 option java_multiple_files = true;
 
@@ -36,14 +38,16 @@ message ExecuteFeatureRequest {
 // Response message for executing feature requests.
 message ExecuteFeatureResponse {
   // The results of the feature operations.
-  repeated FeatureResult feature_result = 1;
+  repeated FeatureResult feature_result = 1
+     ;
 }
 
 message Feature {
   FeatureType feature_type = 1;
 
   oneof params {
-    RelationshipsParams relationships_params = 2;
+    RelationshipsParams relationships_params = 2
+       ;
   }
 }
 
@@ -70,6 +74,7 @@ message FeatureResult {
     SUCCESS = 1;
     FAILURE = 2;
   }
+
   Status status = 2;
 
   // The result code from the activity.

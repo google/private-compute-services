@@ -17,6 +17,7 @@
 package com.google.android.as.oss.http.config;
 
 import com.google.auto.value.AutoValue;
+import java.time.Duration;
 
 /** Config that contains Network Usage Log flags. */
 @AutoValue
@@ -27,6 +28,7 @@ public abstract class PcsHttpConfig {
         .setOnReadyHandlerEnabled(true)
         .setIpcStreamingThrottleMs(4000)
         .setWriteToPfd(false)
+        .setDefaultReadTimeout(Duration.ZERO)
         .setEnableCronetMigration(false);
   }
 
@@ -35,6 +37,8 @@ public abstract class PcsHttpConfig {
   public abstract int ipcStreamingThrottleMs();
 
   public abstract boolean writeToPfd();
+
+  public abstract Duration defaultReadTimeout();
 
   public abstract boolean enableCronetMigration();
 
@@ -46,6 +50,8 @@ public abstract class PcsHttpConfig {
     public abstract Builder setIpcStreamingThrottleMs(int value);
 
     public abstract Builder setWriteToPfd(boolean value);
+
+    public abstract Builder setDefaultReadTimeout(Duration value);
 
     public abstract Builder setEnableCronetMigration(boolean value);
 

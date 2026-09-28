@@ -34,6 +34,7 @@ android_library(
         "//src/com/google/android/as/oss/conversationid/util:util_module",
         "@maven//:androidx_annotation_annotation",
         "@maven//:com_google_dagger_dagger",
+        "@maven//:com_google_flogger_google_extensions",
         "@maven//:javax_inject_javax_inject",
     ],
 )
@@ -54,6 +55,7 @@ android_library(
         "//src/com/google/android/as/oss/conversationid/util:util_module",
         "@maven//:androidx_annotation_annotation",
         "@maven//:com_google_dagger_dagger",
+        "@maven//:com_google_flogger_google_extensions",
         "@maven//:javax_inject_javax_inject",
     ],
 )

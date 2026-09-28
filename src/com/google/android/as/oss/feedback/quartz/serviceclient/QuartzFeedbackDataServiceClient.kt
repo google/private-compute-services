@@ -43,6 +43,7 @@ data class QuartzNotificationData(
   val channelId: String = "",
   val conversationMessages: String = "",
   val conversationHistoricMessages: String = "",
+  val detectedLanguage: String = "",
 )
 
 data class QuartzModelData(
@@ -278,6 +279,7 @@ data class QuartzFeedbackDonationData(
       if (notificationData.conversationHistoricMessages.isNotEmpty()) {
         appendLine(notificationData.conversationHistoricMessages)
       }
+      appendLine(notificationData.detectedLanguage)
     }
   }
 

@@ -32,6 +32,7 @@ import com.google.android.`as`.oss.conversationid.service.aidl.IConversationIdLi
 import com.google.android.`as`.oss.conversationid.service.aidl.IConversationIdListenerService
 import com.google.android.`as`.oss.conversationid.util.ConversationIdManager
 import com.google.android.`as`.oss.conversationid.util.ServiceValidator
+import com.google.common.flogger.GoogleLogger
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -72,7 +73,10 @@ class ConversationIdListenerService : Hilt_ConversationIdListenerService() {
   @Inject @ApplicationContext lateinit var context: Context
 
   override fun onBind(intent: Intent): IBinder? {
-    if (!validator.isPixel()) {
+    val isAllowed = validator.isDeviceAllowed()
+    logger.atInfo().log("onBind: isDeviceAllowed=%b", isAllowed)
+    if (!isAllowed) {
+      logger.atWarning().log("onBind: device not allowed, returning null")
       return null
     }
     return ConversationIdServiceBinderStub()
@@ -102,5 +106,9 @@ class ConversationIdListenerService : Hilt_ConversationIdListenerService() {
     override fun unregisterConversationIdListener(listener: IConversationIdListener) {
       conversationIdManager.removeListener(listener)
     }
+  }
+
+  companion object {
+    private val logger = GoogleLogger.forEnclosingClass()
   }
 }

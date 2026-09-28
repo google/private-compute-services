@@ -41,5 +41,6 @@ class ConversationIdConfigReader(private val flagManager: FlagManager) :
     ConversationIdConfig(
       enableConversationId = flagManager.get(ConversationIdFlags.ENABLE),
       enableSecurityPolicy = flagManager.get(ConversationIdFlags.SECURITY_POLICY_ENABLE),
+      allowedNonPixelDevices = flagManager.get(ConversationIdFlags.ALLOWED_NON_PIXEL_DEVICES),
     )
 }

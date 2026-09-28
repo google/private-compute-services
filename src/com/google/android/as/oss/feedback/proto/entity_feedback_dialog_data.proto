@@ -19,11 +19,12 @@ package com.google.android.as.oss.feedback.api;
 import "src/com/google/android/as/oss/feedback/proto/feedback_dialog_common_data.proto";
 import "src/com/google/android/as/oss/feedback/proto/feedback_tag_data.proto";
 
+
 option java_outer_classname = "EntityFeedbackDialogDataOuterClass";
 option java_package = "com.google.android.as.oss.feedback.api";
 
 // The data required to populate the feedback UI for a single entity.
-// Next ID: 8
+// Next ID: 9
 message EntityFeedbackDialogData {
   enum FeedbackClient {
     FEEDBACK_CLIENT_UNSPECIFIED = 0;
@@ -40,7 +41,8 @@ message EntityFeedbackDialogData {
   string client_session_id = 2;
 
   // The rating sentiment of the feedback.
-  FeedbackRatingSentiment rating_sentiment = 3;
+  FeedbackRatingSentiment rating_sentiment = 3
+     ;
 
   // The common dialog data.
   FeedbackDialogCommonData dialog_common_data = 4;
@@ -53,4 +55,10 @@ message EntityFeedbackDialogData {
 
   // The feedback client of the entity.
   FeedbackClient feedback_client = 7;
+
+  // An optional Android Intent URI (created via
+  // Intent#toUri(Intent.URI_INTENT_SCHEME)) to launch when feedback is
+  // submitted with non-positive sentiment (i.e. not thumbs up).
+  string on_negative_feedback_intent_uri = 8
+     ;
 }

@@ -17,7 +17,6 @@
 package com.google.android.`as`.oss.supericon.service
 
 import android.content.Context
-import android.graphics.Bitmap
 import com.google.android.apps.pixel.psi.service.AmbientDataParcelables
 import com.google.android.apps.pixel.psi.service.TakeScreenshotRequest
 import com.google.android.`as`.oss.common.config.ConfigReader
@@ -55,13 +54,14 @@ constructor(
     backgroundScope: CoroutineScope,
     clientCallback: ISuperIconRenderCallback,
     consentVersion: Long = 0L,
+    packageName: String = "",
   ): ConversationData {
     return if (configReader.config.enableScreenshot) {
       logger.atInfo().log("Using awaitCallbackV2 (Asynchronous dynamic screenshots)")
-      awaitCallbackV2(context, backgroundScope, clientCallback, consentVersion)
+      awaitCallbackV2(context, backgroundScope, clientCallback, consentVersion, packageName)
     } else {
       logger.atInfo().log("Using awaitCallbackV1 (Synchronous baseline content)")
-      awaitCallbackV1(context, backgroundScope)
+      awaitCallbackV1(context, backgroundScope, packageName)
     }
   }
 
@@ -74,6 +74,7 @@ constructor(
     backgroundScope: CoroutineScope,
     clientCallback: ISuperIconRenderCallback,
     consentVersion: Long,
+    packageName: String,
   ): ConversationData {
     val isConsentGranted = consentManager.hasGrantedConsent(consentVersion)
     val stateManager = V2OperationStateManager(isConsentGranted)
@@ -89,7 +90,14 @@ constructor(
       withTimeoutOrNull(CALLBACK_TIMEOUT_MS) {
         suspendCancellableCoroutine { continuation ->
           val callback = createV2Callback(continuation, stateManager)
-          val connection = connectionFactory.create(context, backgroundScope, callback)
+          val connection =
+            connectionFactory.create(
+              context,
+              backgroundScope,
+              callback,
+              packageName,
+              configReader.config.enableConversationContentV2,
+            )
 
           stateManager.setConnection(connection)
         }
@@ -185,10 +193,6 @@ constructor(
         } else {
           stateManager.closeImmediately()
         }
-      }
-
-      override fun onScreenshotResponse(screenshot: Bitmap) {
-        logger.atInfo().log("IConversationContentCallback.onScreenshotResponse (ignored)")
       }
     }
 
@@ -302,6 +306,7 @@ constructor(
   private suspend fun awaitCallbackV1(
     context: Context,
     backgroundScope: CoroutineScope,
+    packageName: String,
   ): ConversationData {
     var connection: AutoCloseable? = null
 
@@ -309,7 +314,13 @@ constructor(
       withTimeoutOrNull(CALLBACK_TIMEOUT_MS) {
         suspendCancellableCoroutine { continuation ->
           connection =
-            connectionFactory.create(context, backgroundScope, createV1Callback(continuation))
+            connectionFactory.create(
+              context,
+              backgroundScope,
+              createV1Callback(continuation),
+              packageName,
+              configReader.config.enableConversationContentV2,
+            )
         }
       }
         ?: run {
@@ -352,10 +363,6 @@ constructor(
         }
         // Prevent "Already resumed" crash if timeout already occurred
         if (continuation.isActive) continuation.resume(EMPTY_CONVERSATION_DATA)
-      }
-
-      override fun onScreenshotResponse(screenshot: Bitmap) {
-        logger.atInfo().log("IConversationContentCallback.onScreenshotResponse (V1, ignored)")
       }
     }
 

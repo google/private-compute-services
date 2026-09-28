@@ -31,6 +31,7 @@ import com.google.android.`as`.oss.conversationid.config.ConversationIdConfig
 import com.google.android.`as`.oss.conversationid.service.aidl.IConversationIdUpdateService
 import com.google.android.`as`.oss.conversationid.util.ConversationIdManager
 import com.google.android.`as`.oss.conversationid.util.ServiceValidator
+import com.google.common.flogger.GoogleLogger
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -48,7 +49,10 @@ class ConversationIdUpdateService : Hilt_ConversationIdUpdateService() {
   @Inject @ApplicationContext lateinit var context: Context
 
   override fun onBind(intent: Intent): IBinder? {
-    if (!validator.isPixel()) {
+    val isAllowed = validator.isDeviceAllowed()
+    logger.atInfo().log("onBind: isDeviceAllowed=%b", isAllowed)
+    if (!isAllowed) {
+      logger.atWarning().log("onBind: device not allowed, returning null")
       return null
     }
     return ConversationIdServiceBinderStub()
@@ -77,5 +81,9 @@ class ConversationIdUpdateService : Hilt_ConversationIdUpdateService() {
     override fun exitConversation() {
       conversationIdManager.exitConversation()
     }
+  }
+
+  companion object {
+    private val logger = GoogleLogger.forEnclosingClass()
   }
 }

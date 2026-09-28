@@ -33,6 +33,7 @@ android_library(
     srcs = ["SealedMemoryBackupAgent.kt"],
     exports_manifest = 1,
     manifest = "AndroidManifest.xml",
+    visibility = ["//visibility:public"],
     deps = [
         ":sealed_memory_backup_kt_proto_lite",
         "//src/com/google/android/as/oss/sealedmemory/service/impl:app_search_key_store",

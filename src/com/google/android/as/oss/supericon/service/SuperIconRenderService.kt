@@ -278,6 +278,7 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
       hostInputToken: InputTransferToken,
       callback: ISuperIconRenderCallback,
     ) {
+      logger.atFine().log("uiType: %s, renderOptions: %s", renderOptions.uiType, renderOptions)
       val params = Params(renderOptions, displayId, configuration, hostInputToken, callback)
       if (!params.isValidRenderOptions()) {
         callback.onError(SuperIconErrorCodes.INVALID_PARAMETER, INVALID_PARAMETER_ERROR_MESSAGE)
@@ -289,6 +290,7 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
         logger.atFine().log("ignore render request with exact same options")
         return
       }
+      logger.atFine().log("cancel render job: %s", currentRenderRequests[uiType]?.renderJob)
       currentRenderRequests[uiType]?.renderJob?.cancel()
       currentRenderRequests[uiType]?.contentJob?.cancel()
       currentRenderRequests[uiType] =
@@ -481,7 +483,12 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
                 renderOptions.consentVersion.toLong(),
               )
               callback.onConsentGranted(
-                awaitCallback(context, callback, renderOptions.consentVersion.toLong())
+                awaitCallback(
+                  context,
+                  callback,
+                  renderOptions.consentVersion.toLong(),
+                  renderOptions.packageName ?: "",
+                )
               )
             }
         } else {
@@ -528,6 +535,7 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
       totalDisplayCount: Int,
       icon: Icon?,
       consentVersion: Long,
+      packageName: String = "",
     ): Pair<View, View.OnAttachStateChangeListener> {
       val themedContext = ContextThemeWrapper(renderContext, R.style.Theme_Material3_DayNight)
       val monetContext = DynamicColors.wrapContextIfAvailable(themedContext)
@@ -607,7 +615,7 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
           ) {
             consentManager.recordConsentState(ConsentState.GRANTED, consentVersion)
             callback.onConsentMetricsLogged(ConsentEventConstants.GRANTED, totalDisplayCount)
-            callback.onConsentGranted(awaitCallback(context, callback, consentVersion))
+            callback.onConsentGranted(awaitCallback(context, callback, consentVersion, packageName))
           }
       }
       val denyAction = View.OnClickListener {
@@ -853,7 +861,12 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
             val hasGranted =
               consentManager.hasGrantedConsent(params.renderOptions.consentVersion.toLong())
             val conversationData =
-              awaitCallback(context, params.callback, params.renderOptions.consentVersion.toLong())
+              awaitCallback(
+                context,
+                params.callback,
+                params.renderOptions.consentVersion.toLong(),
+                params.renderOptions.packageName ?: "",
+              )
             if (hasGranted) {
               logger.atFine().log("onClick with consent granted")
               params.callback.onClick(conversationData)
@@ -930,6 +943,7 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
             totalDisplayCount,
             params.renderOptions.icon,
             params.renderOptions.consentVersion.toLong(),
+            params.renderOptions.packageName ?: "",
           )
 
         consentView.focusable = View.NOT_FOCUSABLE
@@ -1295,8 +1309,15 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
       context: Context,
       clientCallback: ISuperIconRenderCallback,
       consentVersion: Long,
+      packageName: String = "",
     ): ConversationData =
-      callbackHelper.awaitCallback(context, backgroundScope, clientCallback, consentVersion)
+      callbackHelper.awaitCallback(
+        context,
+        backgroundScope,
+        clientCallback,
+        consentVersion,
+        packageName,
+      )
 
     private fun CoroutineScope.safeLaunch(
       errorLogMessage: String = "Unhandled exception",

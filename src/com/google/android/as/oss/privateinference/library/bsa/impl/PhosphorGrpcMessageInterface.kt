@@ -19,6 +19,7 @@ package com.google.android.`as`.oss.privateinference.library.bsa.impl
 import com.google.android.`as`.oss.privateinference.config.impl.DeviceInfo
 import com.google.android.`as`.oss.privateinference.library.bsa.BlindSignAuth.MessageInterface
 import com.google.android.`as`.oss.privateinference.library.bsa.proto.ArateaIPBlindingServiceGrpcKt.ArateaIPBlindingServiceCoroutineStub
+import com.google.android.`as`.oss.privateinference.library.oakutil.DeviceAttestationFlag
 import com.google.android.`as`.oss.privateinference.library.oakutil.PrivateInferenceClientTimerNames
 import com.google.android.`as`.oss.privateinference.networkusage.PrivateInferenceNetworkUsageLogHelper
 import com.google.android.`as`.oss.privateinference.networkusage.PrivateInferenceNetworkUsageLogHelper.IPProtectionRequestType
@@ -41,6 +42,10 @@ class PhosphorGrpcMessageInterface(
   @field:ThreadSafe.Suppress(reason = "Timers are thread-safe") private val timerSet: TimerSet,
   @field:ThreadSafe.Suppress(reason = "DeviceInfo is thread-safe after creation")
   private val deviceInfo: Optional<DeviceInfo> = Optional.empty(),
+  @field:ThreadSafe.Suppress(reason = "DeviceAttestationFlag is thread-safe")
+  private val enableIdAttestationModeFlag: Optional<DeviceAttestationFlag> = Optional.empty(),
+  private val deviceReportedIdAttestationSupport: Boolean = false,
+  private val deviceReportedClientManufacturer: String = "",
 ) : MessageInterface {
   // AtomicReference to hold the stub, ensuring thread-safe lazy initialization.
   @delegate:ThreadSafe.Suppress(reason = "gRPC stubs are thread-safe")
@@ -77,7 +82,21 @@ class PhosphorGrpcMessageInterface(
       val requestSize = request.size.toLong()
       try {
         logger.atInfo().log("Sent AttestAndSign request to server with size: %d", requestSize)
-        val response = stub.attestAndSign(AttestAndSignRequest.parseFrom(request)).toByteArray()
+        val manufacturer = deviceReportedClientManufacturer
+        val isDeviceIdAttestationEnabled =
+          enableIdAttestationModeFlag.getOrNull()?.isDeviceIdAttestationEnabled() == true
+
+        val modifiedRequest =
+          AttestAndSignRequest.newBuilder()
+            .mergeFrom(request)
+            .apply {
+              setEnableIdAttestation(
+                isDeviceIdAttestationEnabled && deviceReportedIdAttestationSupport
+              )
+              setClientManufacturer(manufacturer)
+            }
+            .build()
+        val response = stub.attestAndSign(modifiedRequest).toByteArray()
         logger
           .atInfo()
           .log("Received AttestAndSign response from server with size: %d", response.size.toLong())

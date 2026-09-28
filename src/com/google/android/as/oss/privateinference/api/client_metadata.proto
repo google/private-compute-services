@@ -20,6 +20,7 @@ import "third_party/protobuf/cpp_features.proto";
 
 option features.(pb.cpp).string_type = VIEW;
 option java_multiple_files = true;
+option java_outer_classname = "AndroidClientMetadataProto";
 option java_package = "com.google.search.mdi.privatearatea.proto";
 
 // Android-specific device metadata for traffic segmentation.
@@ -28,12 +29,4 @@ message AndroidDeviceMetadata {
   // This value is sourced from android.os.Build.MANUFACTURER and is
   // validated via hardware-based attestation.
   string manufacturer = 1;
-}
-
-// General client metadata wrapper for traffic segmentation.
-message ClientMetadata {
-  // Ensure only one platform's metadata is set at a time.
-  oneof platform_metadata {
-    AndroidDeviceMetadata android_device_metadata = 1;
-  }
 }

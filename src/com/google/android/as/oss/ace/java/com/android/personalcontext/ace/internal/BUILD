@@ -35,6 +35,7 @@ android_library(
     name = "personal_context_templates_dagger_module",
     srcs = ["PersonalContextInternalTemplatesModule.kt"],
     deps = [
+        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/gboard",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard:cards_decoders",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard:rich_card_visualizer_template",

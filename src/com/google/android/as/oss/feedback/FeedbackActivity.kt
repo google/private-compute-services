@@ -16,6 +16,7 @@
 
 package com.google.android.`as`.oss.feedback
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -24,6 +25,7 @@ import com.google.android.`as`.oss.common.config.ConfigReader
 import com.google.android.`as`.oss.feedback.FeedbackApi.EXTRA_ENTITY_FEEDBACK_DIALOG_DATA_PROTO
 import com.google.android.`as`.oss.feedback.FeedbackApi.EXTRA_MULTI_FEEDBACK_DIALOG_DATA_PROTO
 import com.google.android.`as`.oss.feedback.api.EntityFeedbackDialogData
+import com.google.android.`as`.oss.feedback.api.FeedbackRatingSentiment
 import com.google.android.`as`.oss.feedback.api.MultiFeedbackDialogData
 import com.google.android.`as`.oss.feedback.config.FeedbackConfig
 import com.google.android.`as`.oss.feedback.domain.FeedbackSubmissionEvent
@@ -88,7 +90,18 @@ class FeedbackActivity : Hilt_FeedbackActivity() {
               data = entityFeedbackDialogData,
               onFeedbackEvent = { event: FeedbackSubmissionEvent ->
                 when (event) {
-                  is FeedbackSubmissionEvent.Success -> setResult(RESULT_OK)
+                  is FeedbackSubmissionEvent.Success -> {
+                    setResult(RESULT_OK)
+                    if (
+                      entityFeedbackDialogData.onNegativeFeedbackIntentUri.isNotEmpty() &&
+                        entityFeedbackDialogData.ratingSentiment !=
+                          FeedbackRatingSentiment.RATING_SENTIMENT_THUMBS_UP
+                    ) {
+                      this@FeedbackActivity.launchPostFeedbackIntent(
+                        entityFeedbackDialogData.onNegativeFeedbackIntentUri
+                      )
+                    }
+                  }
                   is FeedbackSubmissionEvent.Failed -> setResult(RESULT_CANCELED)
                 }
               },
@@ -144,6 +157,18 @@ class FeedbackActivity : Hilt_FeedbackActivity() {
       MultiEntityFeedbackDialog(data = data, onDismissRequest = onDismissRequest)
     } else {
       MultiEntityFeedbackDialogV1(data = data, onDismissRequest = onDismissRequest)
+    }
+  }
+
+  private fun launchPostFeedbackIntent(uri: String) {
+    try {
+      val postFeedbackIntent =
+        Intent.parseUri(uri, Intent.URI_INTENT_SCHEME).apply {
+          addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+      startActivity(postFeedbackIntent)
+    } catch (e: Exception) {
+      logger.atWarning().withCause(e).log("Failed to launch post-feedback intent")
     }
   }
 

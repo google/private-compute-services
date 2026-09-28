@@ -17,14 +17,17 @@ edition = "2024";
 package com.google.android.as.oss.supericon.service;
 
 
+option features.default_symbol_visibility = STRICT;
 option java_package = "com.google.android.as.oss.supericon.service";
 
 // Represents a historical record of consent state
 message ConsentHistoryEntry {
   // Timestamp in milliseconds
   int64 timestamp_ms = 1;
+
   ConsentStateProto state = 2
      ;
+
   int64 version = 3;
 }
 
@@ -40,8 +43,10 @@ enum ConsentStateProto {
 message SuperIconConsentData {
   ConsentStateProto current_state = 1
      ;
+
   repeated ConsentHistoryEntry history = 2
      ;
+
   int32 consent_form_shown_count = 3
      ;
 }

@@ -213,14 +213,14 @@ class PrivateInferenceConfigReader extends AbstractConfigReader<PrivateInference
     return PrivateInferenceConfig.builder()
         .setAttestationPublisherMode(PrivateInferenceConfig.DEFAULT_ATTESTATION_PUBLISHER_MODE)
         .setTransportMode(PrivateInferenceConfig.DEFAULT_TRANSPORT_MODE)
-        .setEndpointUrl(getPrivateInferenceEndpointUrl(isEvt, isUserDebug))
+        .setEndpointUrl(
+            getPrivateInferenceEndpointUrl(
+                isEvt, isUserDebug, PrivateInferenceConfig.DEFAULT_ARATEA_AUTH_MODE))
         .setTokenIssuanceEndpointUrl(getTokenIssuanceEndpointUrl(isEvt, isUserDebug))
         .setArateaAuthMode(PrivateInferenceConfig.DEFAULT_ARATEA_AUTH_MODE)
         .setProxyAuthMode(PrivateInferenceConfig.DEFAULT_PROXY_AUTH_MODE)
         .setForceIpTunnelCreationForEverySession(
             PrivateInferenceConfig.DEFAULT_FORCE_IP_TUNNEL_CREATION_FOR_EVERY_SESSION)
-        .setUseEndpointSpecificVerificationKeys(
-            PrivateInferenceConfig.DEFAULT_USE_ENDPOINT_SPECIFIC_VERIFICATION_KEYS)
         .setPassForceEzUsageHeader(PrivateInferenceConfig.DEFAULT_PASS_FORCE_EZ_USAGE_HEADER)
         // Flags that can be overridden via Device Config flags.
         .setEnabled(flagManager.get(ENABLED_FLAG))
@@ -267,6 +267,11 @@ class PrivateInferenceConfigReader extends AbstractConfigReader<PrivateInference
         .setSendClientMetadata(flagManager.get(SEND_CLIENT_METADATA_FLAG))
         .setEnableConfigurableIpBlindingMode(
             flagManager.get(ENABLE_CONFIGURABLE_IP_BLINDING_MODE_FLAG))
+        .setOakCtCertificateUrl(getOakCtCertificateUrl())
+        .setOakCtCertificateFilename(getOakCtCertificateFilename())
+        .setTcaRootCertificateUrl(getTcaRootCertificateUrl())
+        .setTcaRootCertificateFilename(getTcaRootCertificateFilename())
+        .setTcaExpectedServerName(getTcaExpectedServerName())
         .build();
   }
 
@@ -280,12 +285,33 @@ class PrivateInferenceConfigReader extends AbstractConfigReader<PrivateInference
     return flagManager.get(DEVICE_ATTESTATION_MODE_FLAG);
   }
 
-  private static String getPrivateInferenceEndpointUrl(boolean isEvt, boolean isUserdebug) {
+  private static String getPrivateInferenceEndpointUrl(
+      boolean isEvt, boolean isUserdebug, ArateaAuthFlag.Mode arateaAuthMode) {
     return PrivateInferenceConfig.PRIVATE_INFERENCE_PROD_ENDPOINT_URL;
   }
 
   private String getTokenIssuanceEndpointUrl(boolean isEvt, boolean isUserdebug) {
     return PrivateInferenceConfig.TOKEN_ISSUANCE_PROD_ENDPOINT_URL;
+  }
+
+  private static String getOakCtCertificateUrl() {
+    return PrivateInferenceConfig.DEV_OAK_CT_CERT_URL;
+  }
+
+  private static String getOakCtCertificateFilename() {
+    return PrivateInferenceConfig.DEV_OAK_CT_CERT_FILENAME;
+  }
+
+  private static String getTcaRootCertificateUrl() {
+    return PrivateInferenceConfig.DEV_TCA_ROOT_CERT_URL;
+  }
+
+  private static String getTcaRootCertificateFilename() {
+    return PrivateInferenceConfig.DEV_TCA_ROOT_CERT_FILENAME;
+  }
+
+  private static String getTcaExpectedServerName() {
+    return PrivateInferenceConfig.DEV_TCA_EXPECTED_SERVER_NAME;
   }
 
   private PrivateInferenceConfigReader(FlagManager flagManager) {

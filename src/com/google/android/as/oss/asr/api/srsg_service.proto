@@ -46,7 +46,8 @@ message RecognitionRequest {
 
     // The additional locales (in bcp-47 format, e.g. en-US) possibly involved
     // in the speech. This is only applicable in the online pipeline.
-    repeated string additional_locale = 4;
+    repeated string additional_locale = 4
+       ;
 
     // The recognizer mode indicates whether the recognition should run
     // on-device only or online as the primary.

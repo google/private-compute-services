@@ -33,6 +33,8 @@ android_library(
     srcs = ["VisualizerServiceConnectorImpl.kt"],
     deps = [
         ":visualizer_service_connector",
+        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype:prototype_utils",
+        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/session:embedded_session_hint",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/common:meta_tags",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/common:pretty_print",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/common/wrappers",

@@ -26,6 +26,9 @@ proto_library(
     name = "private_inference_proto",
     srcs = ["private_inference.proto"],
     has_services = True,
+    deps = [
+        "//src/com/google/android/as/oss/privateinference/api:private_proxy_service_proto",
+    ],
 )
 
 java_lite_proto_library(

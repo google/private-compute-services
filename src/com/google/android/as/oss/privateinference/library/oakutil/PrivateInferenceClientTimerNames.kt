@@ -62,6 +62,12 @@ object PrivateInferenceClientTimerNames {
   const val OAK_SESSION_PERFORM_HANDSHAKE_STEP = "OAK_SESSION_PERFORM_HANDSHAKE_STEP"
 
   /**
+   * Timer for the third phase of the oak session establishment. Measures the time spent performing
+   * the TLS handshake.
+   */
+  const val OAK_SESSION_PERFORM_TLS_HANDSHAKE_STEP = "OAK_SESSION_PERFORM_TLS_HANDSHAKE_STEP"
+
+  /**
    * Timer for terminal token authentication.
    *
    * This occurs after the Oak session is open. It is effectively the first request sent in the

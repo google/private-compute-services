@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.nativePaint
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalDensity
@@ -182,8 +183,8 @@ private fun DrawScope.drawInnerGlow(
     paint.style = PaintingStyle.Stroke
     paint.strokeWidth = glowWidthPx
 
-    val frameworkPaint = paint.asFrameworkPaint()
-    frameworkPaint.maskFilter = BlurMaskFilter(blurRadiusPx, BlurMaskFilter.Blur.NORMAL)
+    val nativePaint = paint.nativePaint
+    nativePaint.maskFilter = BlurMaskFilter(blurRadiusPx, BlurMaskFilter.Blur.NORMAL)
 
     gradientBrush.applyTo(size, paint, alpha = 0.2f * gradientOutlineFadeOut)
 

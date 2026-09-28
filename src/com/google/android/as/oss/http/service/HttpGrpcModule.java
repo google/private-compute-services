@@ -16,9 +16,12 @@
 
 package com.google.android.as.oss.http.service;
 
+import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.apps.miphone.pcs.grpc.Annotations.GrpcService;
 import com.google.android.apps.miphone.pcs.grpc.Annotations.GrpcServiceName;
 import com.google.android.as.oss.http.api.proto.HttpServiceGrpc;
+import com.google.android.as.oss.http.config.PcsHttpConfig;
+import com.google.net.cronet.okhttptransport.CronetInterceptor;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
@@ -27,7 +30,10 @@ import dagger.hilt.components.SingletonComponent;
 import dagger.multibindings.IntoSet;
 import io.grpc.BindableService;
 import java.time.Duration;
+import javax.inject.Named;
+import javax.inject.Provider;
 import okhttp3.OkHttpClient;
+import org.chromium.net.CronetEngine;
 
 @Module
 @InstallIn(SingletonComponent.class)
@@ -50,12 +56,20 @@ abstract class HttpGrpcModule {
   }
 
   @Provides
-  static OkHttpClient provideHttpClient() {
-    return new OkHttpClient.Builder()
-        .connectTimeout(DEFAULT_HTTP_CONN_TIMEOUT)
-        .readTimeout(DEFAULT_HTTP_READ_TIMEOUT)
-        .writeTimeout(DEFAULT_HTTP_WRITE_TIMEOUT)
-        .retryOnConnectionFailure(DEFAULT_HTTP_RETRY_ON_CONN_FAILURE)
-        .build();
+  static OkHttpClient provideHttpClient(
+      ConfigReader<PcsHttpConfig> configReader,
+      @Named("PcsCronet") Provider<CronetEngine> cronetEngineProvider) {
+    OkHttpClient.Builder builder =
+        new OkHttpClient.Builder()
+            .connectTimeout(DEFAULT_HTTP_CONN_TIMEOUT)
+            .readTimeout(DEFAULT_HTTP_READ_TIMEOUT)
+            .writeTimeout(DEFAULT_HTTP_WRITE_TIMEOUT)
+            .retryOnConnectionFailure(DEFAULT_HTTP_RETRY_ON_CONN_FAILURE);
+
+    if (configReader.getConfig().enableCronetMigration()) {
+      CronetEngine engine = cronetEngineProvider.get();
+      builder.addInterceptor(CronetInterceptor.newBuilder(engine).build());
+    }
+    return builder.build();
   }
 }

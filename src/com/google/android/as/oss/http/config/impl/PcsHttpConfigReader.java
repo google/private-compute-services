@@ -23,6 +23,7 @@ import com.google.android.as.oss.common.config.FlagManager;
 import com.google.android.as.oss.common.config.FlagManager.BooleanFlag;
 import com.google.android.as.oss.common.config.FlagManager.IntegerFlag;
 import com.google.android.as.oss.http.config.PcsHttpConfig;
+import java.time.Duration;
 
 /** ConfigReader for {@link PcsHttpConfig}. */
 class PcsHttpConfigReader extends AbstractConfigReader<PcsHttpConfig> {
@@ -33,6 +34,9 @@ class PcsHttpConfigReader extends AbstractConfigReader<PcsHttpConfig> {
 
   static final IntegerFlag IPC_STREAMING_THROTTLE_MS =
       IntegerFlag.create("PcsHttp__ipc_streaming_throttle_ms", 4000);
+
+  static final IntegerFlag DEFAULT_READ_TIMEOUT_MS =
+      IntegerFlag.create("PcsHttp__default_read_timeout_ms", 60000);
 
   static final BooleanFlag WRITE_TO_PFD =
       BooleanFlag.create("PcsHttp__write_to_pfd", BuildCompat.isAtLeastT());
@@ -64,6 +68,7 @@ class PcsHttpConfigReader extends AbstractConfigReader<PcsHttpConfig> {
         .setOnReadyHandlerEnabled(flagManager.get(ENABLE_ON_READY_HANDLER))
         .setIpcStreamingThrottleMs(flagManager.get(IPC_STREAMING_THROTTLE_MS))
         .setWriteToPfd(flagManager.get(WRITE_TO_PFD))
+        .setDefaultReadTimeout(Duration.ofMillis(flagManager.get(DEFAULT_READ_TIMEOUT_MS)))
         .setEnableCronetMigration(flagManager.get(ENABLE_CRONET_MIGRATION))
         .build();
   }

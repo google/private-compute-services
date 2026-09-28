@@ -19,9 +19,9 @@ package com.google.android.`as`.oss.privateinference.library.oakutil
 import android.content.Context
 import com.google.android.`as`.oss.feedback.gateway.getCertFingerprint
 import com.google.android.`as`.oss.privateinference.Annotations.PrivateInferenceAttachCertificateHeader
+import com.google.android.`as`.oss.privateinference.Annotations.PrivateInferenceEndpointUrl
 import com.google.android.`as`.oss.privateinference.Annotations.PrivateInferencePassForceEzUsageHeader
 import com.google.android.`as`.oss.privateinference.Annotations.PrivateInferenceServerGrpcChannel
-import com.google.android.`as`.oss.privateinference.Annotations.PrivateInferenceUseEndpointSpecificVerificationKeys
 import com.google.android.`as`.oss.privateinference.Annotations.PrivateInferenceWaitForGrpcChannelReady
 import com.google.android.`as`.oss.privateinference.config.impl.DeviceInfo
 import com.google.android.`as`.oss.privateinference.library.PrivateInferenceRequestMetadata
@@ -30,6 +30,7 @@ import com.google.android.`as`.oss.privateinference.service.api.proto.sessionCon
 import com.google.android.`as`.oss.privateinference.transport.ManagedChannelFactory
 import com.google.common.flogger.GoogleLogger
 import com.google.search.mdi.privatearatea.proto.PrivateArateaServiceGrpc
+import com.google.search.mdi.privatearatea.proto.PrivateProxyServiceGrpc
 import com.google.search.mdi.privatearatea.proto.PrivateTlsServiceGrpc
 import dagger.Lazy
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -47,8 +48,7 @@ internal constructor(
   @PrivateInferenceServerGrpcChannel val managedChannelFactory: Lazy<ManagedChannelFactory>,
   @PrivateInferenceWaitForGrpcChannelReady val waitForGrpcChannelToBeReady: Boolean,
   @PrivateInferenceAttachCertificateHeader val attachCertificateHeader: Boolean,
-  @PrivateInferenceUseEndpointSpecificVerificationKeys
-  val useEndpointSpecificVerificationKeys: Boolean,
+  @PrivateInferenceEndpointUrl private val endpointUrl: String,
   @PrivateInferencePassForceEzUsageHeader val passForceEzUsageHeader: Boolean,
   val deviceInfo: Optional<DeviceInfo>,
 ) {
@@ -94,11 +94,6 @@ internal constructor(
           DeviceInfo.PcsVersionInterceptor(deviceInfo.getOrNull()),
           DeviceInfo.HardwareRevisionInterceptor(deviceInfo.getOrNull()),
         )
-    }
-
-    if (useEndpointSpecificVerificationKeys) {
-      logger.atInfo().log("Attaching client verification key variant header to the request.")
-      stub = stub.withInterceptors(ClientVerificationKeyVariantInterceptor("nonprod"))
     }
 
     if (passForceEzUsageHeader) {
@@ -150,9 +145,55 @@ internal constructor(
         )
     }
 
-    if (useEndpointSpecificVerificationKeys) {
-      logger.atInfo().log("Attaching client verification key variant header to the request.")
-      stub = stub.withInterceptors(ClientVerificationKeyVariantInterceptor("nonprod"))
+    if (passForceEzUsageHeader) {
+      logger.atInfo().log("Attaching x-use-ez header to the request.")
+      stub = stub.withInterceptors(UseEzInterceptor())
+    }
+
+    return when {
+      authInfo.spatulaHeader.isPresent ->
+        stub.withInterceptors(SpatulaInterceptor(authInfo.spatulaHeader.get()))
+      authInfo.apiKey.isPresent -> stub.withInterceptors(ApiKeyInterceptor(authInfo.apiKey.get()))
+      else -> stub
+    }
+  }
+
+  open suspend fun createPrivateProxyServiceStub(
+    authInfo: PrivateInferenceRequestMetadata.AuthInfo,
+    ipBlindingMode: IpBlindingMode,
+  ): PrivateProxyServiceGrpc.PrivateProxyServiceStub {
+    val sessionConfiguration = sessionConfiguration { this.ipBlindingMode = ipBlindingMode }
+    var stub =
+      if (waitForGrpcChannelToBeReady) {
+        logger.atInfo().log("Waiting for gRPC channel to be ready.")
+        PrivateProxyServiceGrpc.newStub(
+            managedChannelFactory.get().getInstance(sessionConfiguration)
+          )
+          .withWaitForReady()
+      } else {
+        PrivateProxyServiceGrpc.newStub(
+          managedChannelFactory.get().getInstance(sessionConfiguration)
+        )
+      }
+
+    if (attachCertificateHeader) {
+      logger.atInfo().log("Attaching certificate header to the request.")
+      stub =
+        stub.withInterceptors(
+          AndroidPackageAndCertificateInterceptor(
+            context.packageName,
+            getCertFingerprint(context) ?: "",
+          )
+        )
+    }
+
+    deviceInfo.getOrNull()?.let {
+      logger.atFine().log("Attaching device info to the request.")
+      stub =
+        stub.withInterceptors(
+          DeviceInfo.PcsVersionInterceptor(deviceInfo.getOrNull()),
+          DeviceInfo.HardwareRevisionInterceptor(deviceInfo.getOrNull()),
+        )
     }
 
     if (passForceEzUsageHeader) {
@@ -168,11 +209,11 @@ internal constructor(
     }
   }
 
-  companion object {
-    private val logger = GoogleLogger.forEnclosingClass()
+  private companion object {
+    val logger = GoogleLogger.forEnclosingClass()
 
     /** gRPC client interceptor that adds an Android package name to each outgoing request. */
-    private fun AndroidPackageAndCertificateInterceptor(packageName: String, certificate: String) =
+    fun AndroidPackageAndCertificateInterceptor(packageName: String, certificate: String) =
       newAttachHeadersInterceptor(
         /*extraHeaders=*/ Metadata().apply {
           put(ANDROID_PACKAGE_HEADER, packageName)
@@ -181,50 +222,38 @@ internal constructor(
       )
 
     /** gRPC client interceptor that adds an API key to each outgoing request. */
-    private fun ApiKeyInterceptor(apiKey: String) =
+    fun ApiKeyInterceptor(apiKey: String) =
       newAttachHeadersInterceptor(
         /*extraHeaders=*/ Metadata().apply { put(API_KEY_METADATA_HEADER, apiKey) }
       )
 
     /** gRPC client interceptor that adds a Spatula header to each outgoing request. */
-    private fun SpatulaInterceptor(spatula: String) =
+    fun SpatulaInterceptor(spatula: String) =
       newAttachHeadersInterceptor(
         /*extraHeaders=*/ Metadata().apply { put(SPATULA_KEY, spatula) }
       )
 
-    /**
-     * gRPC client interceptor that adds a client verification key variant header to each outgoing
-     * request for nonprod endpoints.
-     */
-    private fun ClientVerificationKeyVariantInterceptor(variant: String) =
-      newAttachHeadersInterceptor(
-        /*extraHeaders=*/ Metadata().apply { put(CLIENT_VERIFICATION_KEY_VARIANT_HEADER, variant) }
-      )
-
     /** gRPC client interceptor that adds a x-use-ez header to each outgoing request. */
-    private fun UseEzInterceptor() =
+    fun UseEzInterceptor() =
       newAttachHeadersInterceptor(
         /*extraHeaders=*/ Metadata().apply { put(X_USE_EZ_HEADER, "true") }
       )
 
-    private val ANDROID_PACKAGE_HEADER: Metadata.Key<String> =
+    val ANDROID_PACKAGE_HEADER: Metadata.Key<String> =
       Metadata.Key.of("X-Android-Package", Metadata.ASCII_STRING_MARSHALLER)
-    private val ANDROID_CERT_HEADER: Metadata.Key<String> =
+    val ANDROID_CERT_HEADER: Metadata.Key<String> =
       Metadata.Key.of("X-Android-Cert", Metadata.ASCII_STRING_MARSHALLER)
 
     // HTTP/gRPC header for Google API keys.
     // https://cloud.google.com/apis/docs/system-parameters
     // https://cloud.google.com/docs/authentication/api-keys
-    private val API_KEY_METADATA_HEADER: Metadata.Key<String> =
+    val API_KEY_METADATA_HEADER: Metadata.Key<String> =
       Metadata.Key.of("x-goog-api-key", Metadata.ASCII_STRING_MARSHALLER)
 
-    private val SPATULA_KEY: Metadata.Key<String> =
+    val SPATULA_KEY: Metadata.Key<String> =
       Metadata.Key.of("x-goog-spatula", Metadata.ASCII_STRING_MARSHALLER)
 
-    private val CLIENT_VERIFICATION_KEY_VARIANT_HEADER: Metadata.Key<String> =
-      Metadata.Key.of("X-Client-Verification-Key-Variant", Metadata.ASCII_STRING_MARSHALLER)
-
-    private val X_USE_EZ_HEADER: Metadata.Key<String> =
+    val X_USE_EZ_HEADER: Metadata.Key<String> =
       Metadata.Key.of("x-use-ez", Metadata.ASCII_STRING_MARSHALLER)
   }
 }

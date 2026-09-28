@@ -18,6 +18,7 @@ package com.google.android.as.oss.delegatedui.api.config;
 
 import "src/com/google/android/as/oss/delegatedui/api/common/common.proto";
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "DataServiceConfig";
 option java_package = "com.google.android.as.oss.delegatedui.api.config";
 

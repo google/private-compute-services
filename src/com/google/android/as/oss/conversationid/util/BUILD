@@ -41,6 +41,7 @@ android_library(
         "//src/com/google/android/as/oss/common/security/api:package_security_info_java_proto_lite",
         "//src/com/google/android/as/oss/common/security/config",
         "//src/com/google/android/as/oss/conversationid/config",
+        "@maven//:com_google_flogger_google_extensions",
     ],
 )
 

@@ -20,15 +20,17 @@ import "src/com/google/android/as/oss/delegatedui/api/integration/templates/ui_i
 import "src/com/google/android/as/oss/feedback/proto/entity_feedback_dialog_data.proto";
 import "src/com/google/android/as/oss/feedback/proto/feedback_dialog_common_data.proto";
 
+
 import option "third_party/protobuf/cpp_features.proto";
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "BeaconTemplateIntegration";
 option features.(pb.cpp).enum_name_uses_string_view = false;
 option features.field_presence = IMPLICIT;
 option java_package = "com.google.android.as.oss.delegatedui.api.integration.templates.beacon";
 
 // Beacon template data.
-message BeaconTemplateData {
+export message BeaconTemplateData {
   BeaconWidget widget = 1 [features.field_presence = EXPLICIT];
 
   // The unique ID of the remote UI session.
@@ -97,11 +99,14 @@ message BeaconGeneralCard {
   string date = 2;
 
   // The original text, if any
-  string detailed_text = 3
-      [features.field_presence = EXPLICIT, deprecated = true];
+  string detailed_text = 3 [
+    features.field_presence = EXPLICIT,
+    deprecated = true
+  ];
 
   // Replaces detailed_text; v2 required to support backwards compatibility
-  string detailed_text_v2 = 25 [features.field_presence = EXPLICIT];
+  string detailed_text_v2 = 25 [
+    features.field_presence = EXPLICIT];
 
   BeaconResponseSource data_source = 4 [features.field_presence = EXPLICIT];
 
@@ -134,10 +139,10 @@ message BeaconGeneralCard {
       [deprecated = true];
 
   string card_expanded_accessibility_content_description = 7
-      [deprecated = true];
+      [ deprecated = true];
 
   string card_collapsed_accessibility_content_description = 8
-      [deprecated = true];
+      [ deprecated = true];
 
   string card_expanded_accessibility_state_description = 18 [deprecated = true];
 
@@ -318,7 +323,9 @@ message BeaconResponseSource {
    */
   int32 pending_intent_index = 3 [features.field_presence = EXPLICIT];
 
-  string source_package_name = 4 [features.field_presence = EXPLICIT];
+  string source_package_name = 4 [
+    features.field_presence = EXPLICIT
+  ];
 
   int64 date_received = 5;
 }

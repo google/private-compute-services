@@ -119,6 +119,7 @@ android_library(
 android_library(
     name = "app_search_module",
     srcs = ["AppSearchModule.kt"],
+    visibility = ["//visibility:public"],
     deps = [
         ":app_search_session_provider",
         ":platform_app_search_session_provider",

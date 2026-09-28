@@ -271,7 +271,7 @@ internal constructor(
     val colorScheme = MaterialTheme.colorScheme
     val strokeColor = MaterialTheme.colorScheme.outlineVariant
     val backgroundColor = MaterialTheme.colorScheme.surface
-    val geminiAnimationSpec =
+    val spec =
       EnergyEffectsAnimationUtils.rememberChipSpec(
         cornerRadius = cornerRadius,
         density = density.density,
@@ -293,7 +293,7 @@ internal constructor(
             modifier =
               Modifier.fillMaxSize()
                 .applyEnergyEffectsAnimation(
-                  geminiAnimationSpec = geminiAnimationSpec,
+                  spec = spec,
                   fallback = {
                     animatedActionBorder(
                       cornerRadius = cornerRadius,

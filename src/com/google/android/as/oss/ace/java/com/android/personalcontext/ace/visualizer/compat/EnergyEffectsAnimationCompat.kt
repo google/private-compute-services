@@ -22,19 +22,18 @@ import android.graphics.drawable.Drawable
 import android.view.View
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.android.personalcontext.ace.internal.energyeffects.EnergyEffectsAnimationUtils.GeminiAnimationSpec
 
 interface EnergyEffectsAnimationCompat {
   /**
    * Modifier that applies the energy effects animation to the composable if enabled, otherwise
    * applies the [fallback] modifier.
    *
-   * @param geminiAnimationSpec The spec of the animation.
+   * @param spec The spec of the animation.
    * @param fallback A modifier to apply if the energy effects animation is not enabled.
    */
   @Composable
   fun Modifier.applyEnergyEffectsAnimation(
-    geminiAnimationSpec: GeminiAnimationSpec,
+    spec: EnergyEffectsAnimationSpec,
     fallback: @Composable Modifier.() -> Modifier,
   ): Modifier = this
 
@@ -42,19 +41,18 @@ interface EnergyEffectsAnimationCompat {
    * Modifier that applies the energy effects animation to the composable if enabled, otherwise
    * returns the original modifier.
    *
-   * @param geminiAnimationSpec The spec of the animation.
+   * @param spec The spec of the animation.
    */
   @Composable
-  fun Modifier.applyEnergyEffectsAnimation(geminiAnimationSpec: GeminiAnimationSpec): Modifier =
-    applyEnergyEffectsAnimation(geminiAnimationSpec = geminiAnimationSpec, fallback = { this })
+  fun Modifier.applyEnergyEffectsAnimation(spec: EnergyEffectsAnimationSpec): Modifier =
+    applyEnergyEffectsAnimation(spec = spec, fallback = { this })
 
   /**
    * Returns a themed [Drawable] that applies the effects animation and starts the animation
    * sequence, or null if not supported.
    *
    * @param view The view to attach the animation to and resolve theme colors/resources.
-   * @param geminiAnimationSpec The spec of the animation.
+   * @param spec The spec of the animation.
    */
-  fun getAndStartEffectsDrawable(view: View, geminiAnimationSpec: GeminiAnimationSpec): Drawable? =
-    null
+  fun getAndStartEffectsDrawable(view: View, spec: EnergyEffectsAnimationSpec): Drawable? = null
 }

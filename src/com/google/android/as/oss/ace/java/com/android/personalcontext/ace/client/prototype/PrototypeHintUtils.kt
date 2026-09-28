@@ -20,6 +20,7 @@ package com.android.personalcontext.ace.client.prototype
 
 import android.service.personalcontext.hint.BundleHint
 import android.service.personalcontext.hint.ContextHint
+import com.android.personalcontext.ace.client.prototype.PrototypeHintId.AppLifecycleHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.BlueflaxMetadataHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.ClientSignalHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.ContactHintId
@@ -27,6 +28,7 @@ import com.android.personalcontext.ace.client.prototype.PrototypeHintId.CrossDev
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.DialerClickEventHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.DialerMetadataHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.DoNotRepublishHintId
+import com.android.personalcontext.ace.client.prototype.PrototypeHintId.EmbeddedSessionHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.EntityTypeHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.ExampleEmbeddedHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.GboardHintId
@@ -37,6 +39,7 @@ import com.android.personalcontext.ace.client.prototype.PrototypeHintId.RenderTo
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.ThemeHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.VisualMetadataHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.WeatherHintId
+import com.android.personalcontext.ace.client.prototype.applifecycle.AppLifecycleHint
 import com.android.personalcontext.ace.client.prototype.blueflax.BlueflaxMetadataHint
 import com.android.personalcontext.ace.client.prototype.clientsignal.ClientSignalHint
 import com.android.personalcontext.ace.client.prototype.contact.ContactHint
@@ -51,6 +54,7 @@ import com.android.personalcontext.ace.client.prototype.message.MessageMetadataH
 import com.android.personalcontext.ace.client.prototype.metadata.VisualMetadataHint
 import com.android.personalcontext.ace.client.prototype.rendertoken.RenderTokenHint
 import com.android.personalcontext.ace.client.prototype.republish.DoNotRepublishHint
+import com.android.personalcontext.ace.client.prototype.session.EmbeddedSessionHint
 import com.android.personalcontext.ace.client.prototype.theme.ThemeHint
 import com.android.personalcontext.ace.client.prototype.weather.WeatherHint
 import com.android.personalcontext.ace.common.builders.HintFilterKt
@@ -97,6 +101,8 @@ object PrototypeHintUtils {
         BlueflaxMetadataHintId -> BlueflaxMetadataHint
         GboardHintId -> GboardHint
         KeyEventHintId -> KeyEventHint
+        AppLifecycleHintId -> AppLifecycleHint
+        EmbeddedSessionHintId -> EmbeddedSessionHint
 
         else -> null
       }

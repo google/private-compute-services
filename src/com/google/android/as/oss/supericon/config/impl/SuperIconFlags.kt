@@ -29,4 +29,6 @@ object SuperIconFlags {
   val ENABLE_SCREENSHOT = BooleanFlag.create("${PREFIX}enable_screenshot", false)
   val SCREENSHOT_TIMEOUT_MS = IntegerFlag.create("${PREFIX}screenshot_timeout_ms", 3000)
   val LEARN_MORE_URL = StringFlag.create("${PREFIX}learn_more_url", "")
+  val ENABLE_CONVERSATION_CONTENT_V2 =
+    BooleanFlag.create("${PREFIX}enable_conversation_content_v2", false)
 }

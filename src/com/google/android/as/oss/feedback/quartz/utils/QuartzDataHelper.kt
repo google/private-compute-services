@@ -166,6 +166,7 @@ class QuartzDataHelper @Inject constructor() {
                     channelId = notificationData.channelId
                     conversationMessages = notificationData.conversationMessages
                     conversationHistoricMessages = notificationData.conversationHistoricMessages
+                    detectedLanguage = notificationData.detectedLanguage
                   }
                 }
               }
@@ -499,7 +500,8 @@ class QuartzDataHelper @Inject constructor() {
       "${quote("content")}: ${quote(quartzNotificationData.content)}, " +
       "${quote("channelId")}: ${quote(quartzNotificationData.channelId)}, " +
       "${quote("conversationMessages")}: ${quote(quartzNotificationData.conversationMessages)}, " +
-      "${quote("conversationHistoricMessages")}: ${quote(quartzNotificationData.conversationHistoricMessages)}" +
+      "${quote("conversationHistoricMessages")}: ${quote(quartzNotificationData.conversationHistoricMessages)}, " +
+      "${quote("detectedLanguage")}: ${quote(quartzNotificationData.detectedLanguage)}" +
       "}"
   }
 

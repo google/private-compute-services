@@ -30,6 +30,11 @@ data class GboardHint(
   val extraInfo: Bundle? = null,
 ) : PrototypeHint(GboardHintId, this) {
 
+  // This should not be here as it only affects the visual rendering of a chip.
+  // TODO: Move this to another hint.
+  val positionalState: PositionalState?
+    get() = PositionalState.fromValue(extraInfo?.getString(EXTRA_KEY_POSITIONAL_STATE))
+
   override fun exportDataToBundle(bundle: Bundle) {
     bundle.putString(KEY_USER_INPUT, userInput)
     bundle.putString(KEY_USER_QUERY, userQuery)
@@ -39,6 +44,8 @@ data class GboardHint(
   }
 
   companion object : Creator {
+    const val EXTRA_KEY_POSITIONAL_STATE = "positional_state"
+
     private const val KEY_USER_INPUT = "user_input"
     private const val KEY_USER_QUERY = "user_query"
     private const val KEY_QUERY_CATEGORY = "query_category"
@@ -53,6 +60,17 @@ data class GboardHint(
         inputFieldMetadata = bundle.getBundle(KEY_INPUT_FIELD_METADATA),
         extraInfo = bundle.getBundle(KEY_EXTRA_INFO),
       )
+  }
+
+  enum class PositionalState(val value: String) {
+    SINGLE("SINGLE"),
+    FIRST("FIRST"),
+    MIDDLE("MIDDLE"),
+    LAST("LAST");
+
+    companion object {
+      fun fromValue(value: String?): PositionalState? = entries.find { it.value == value }
+    }
   }
 
   enum class QueryCategory(val value: String) {

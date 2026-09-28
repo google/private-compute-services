@@ -40,7 +40,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.android.personalcontext.ace.visualizer.R
 import com.android.personalcontext.ace.visualizer.templates.LocalInsightEventReporter
 import com.android.personalcontext.ace.visualizer.templates.LocalPublishedContextInsight
 import com.android.personalcontext.ace.visualizer.templates.LocalRenderToken
@@ -56,6 +58,8 @@ private const val TAG = "CallFeedback"
  *   double-logging. Should only be true iff feedbackInsight is a separate insight from the rest of
  *   the component it is a part of
  */
+// TODO: Clean up temporary stringResource accessibility labels once CardInsight
+// migration lands in 26Q4.
 @Composable
 internal fun FeedbackButtons(feedbackInsight: ContextInsight, shouldReportEvent: Boolean = false) {
   val context = LocalContext.current
@@ -78,7 +82,7 @@ internal fun FeedbackButtons(feedbackInsight: ContextInsight, shouldReportEvent:
     }
   }
 
-  LaunchedEffect(Unit) {
+  LaunchedEffect(feedbackInsight, shouldReportEvent) {
     if (shouldReportEvent) {
       reportEvent(InsightEvent.EVENT_SHOW)
     }
@@ -88,13 +92,15 @@ internal fun FeedbackButtons(feedbackInsight: ContextInsight, shouldReportEvent:
     FeedbackButton(
       modifier = Modifier.testTag("thumbs_up"),
       icon = Icons.Outlined.ThumbUp,
-      contentDescription = "Helpful",
+      contentDescription =
+        stringResource(R.string.attribution_thumbs_up_button_content_description),
       onClick = { reportEvent(InsightEvent.EVENT_USER_FEEDBACK_POSITIVE) },
     )
     FeedbackButton(
       modifier = Modifier.testTag("thumbs_down"),
       icon = Icons.Outlined.ThumbDown,
-      contentDescription = "Not Helpful",
+      contentDescription =
+        stringResource(R.string.attribution_thumbs_down_button_content_description),
       onClick = { reportEvent(InsightEvent.EVENT_USER_FEEDBACK_NEGATIVE) },
     )
   }

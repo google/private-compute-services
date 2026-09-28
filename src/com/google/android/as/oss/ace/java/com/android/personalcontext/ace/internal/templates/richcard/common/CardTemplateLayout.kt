@@ -79,7 +79,7 @@ fun CardTemplateLayout(
       modifier =
         Modifier.then(
             with(energyEffectsAnimationCompat) {
-              Modifier.applyEnergyEffectsAnimation(geminiAnimationSpec = spec, fallback = { this })
+              Modifier.applyEnergyEffectsAnimation(spec = spec, fallback = { this })
             }
           )
           .padding(horizontal = 12.dp, vertical = 16.dp)

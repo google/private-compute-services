@@ -16,11 +16,14 @@
 
 package com.google.android.`as`.oss.privateinference.library.bsa
 
+import android.content.Context
+import android.os.Build
 import com.google.android.`as`.oss.privateinference.Annotations.TokenIssuanceServerGrpcChannel
 import com.google.android.`as`.oss.privateinference.config.impl.DeviceInfo
 import com.google.android.`as`.oss.privateinference.library.bsa.impl.AndroidKeystoreAttester
 import com.google.android.`as`.oss.privateinference.library.bsa.impl.BlindSignAuthImpl
 import com.google.android.`as`.oss.privateinference.library.bsa.impl.PhosphorGrpcMessageInterface
+import com.google.android.`as`.oss.privateinference.library.oakutil.DeviceAttestationFlag
 import com.google.android.`as`.oss.privateinference.networkusage.PrivateInferenceNetworkUsageLogHelper
 import com.google.android.`as`.oss.privateinference.util.timers.Annotations.PrivateInferenceClientTimers
 import com.google.android.`as`.oss.privateinference.util.timers.TimerSet
@@ -28,6 +31,7 @@ import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.grpc.ManagedChannel
 import java.util.Optional
@@ -46,9 +50,19 @@ internal object BlindSignAuthModule {
     androidKeystoreAttester: AndroidKeystoreAttester,
     @PrivateInferenceClientTimers timerSet: TimerSet,
     deviceInfo: Optional<DeviceInfo>,
+    deviceAttestationFlag: DeviceAttestationFlag,
+    @ApplicationContext context: Context,
   ): BlindSignAuth {
     return BlindSignAuthImpl(
-      PhosphorGrpcMessageInterface(managedChannel, networkUsageLogHelper, timerSet, deviceInfo),
+      PhosphorGrpcMessageInterface(
+        managedChannel,
+        networkUsageLogHelper,
+        timerSet,
+        deviceInfo,
+        Optional.of(deviceAttestationFlag),
+        context.packageManager.hasSystemFeature("android.software.device_id_attestation"),
+        Build.MANUFACTURER,
+      ),
       androidKeystoreAttester,
       timerSet,
     )

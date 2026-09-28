@@ -30,4 +30,6 @@ data class SuperIconConfig(
   val screenshotTimeoutMs: Long = 3000L,
   /** The URL to open when the "Learn more" link is clicked. */
   val learnMoreUrl: String = "",
+  /** True if ConversationContent V2 (passing package name and calling V2 RPC) is enabled. */
+  val enableConversationContentV2: Boolean = false,
 )

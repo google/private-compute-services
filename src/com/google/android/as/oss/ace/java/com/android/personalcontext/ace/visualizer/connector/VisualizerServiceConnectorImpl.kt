@@ -42,6 +42,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.android.personalcontext.ace.client.prototype.PrototypeHintUtils.toPrototypeHint
+import com.android.personalcontext.ace.client.prototype.session.EmbeddedSessionHint
 import com.android.personalcontext.ace.common.MetaTags.ACE_EMBEDDED_TAG
 import com.android.personalcontext.ace.common.PrettyPrintUtils.toPrettyPrint
 import com.android.personalcontext.ace.common.wrappers.IInsightSurfaceClientInfo
@@ -207,16 +209,18 @@ constructor(
     }
 
     val content = contents.first()
+    val embeddedSessionUuid = publishedInsight.embeddedSessionUuid
 
     return VisualizerResult.NewView(
       composeViewFactory.createComposeView(context) {
         setContent {
           val currentInfo by clientInfoState
+          val composeStateKey: UUID = embeddedSessionUuid ?: currentInfo.id
 
           val saveableStateRegistry =
-            remember(id) {
+            remember(composeStateKey) {
               SaveableStateRegistry(
-                restoredValues = savedComposeStates[currentInfo.id],
+                restoredValues = savedComposeStates[composeStateKey],
                 canBeSaved = { true },
               )
             }
@@ -263,9 +267,9 @@ constructor(
                 content()
               }
 
-              DisposableEffect(currentInfo.id) {
+              DisposableEffect(composeStateKey) {
                 onDispose {
-                  savedComposeStates[currentInfo.id] = saveableStateRegistry.performSave()
+                  savedComposeStates[composeStateKey] = saveableStateRegistry.performSave()
                 }
               }
             }
@@ -274,6 +278,13 @@ constructor(
       }
     )
   }
+
+  @Suppress("DEPRECATION")
+  private val IPublishedContextInsight.embeddedSessionUuid: UUID?
+    get() =
+      insight.originHints.firstNotNullOfOrNull {
+        it.contextHint.toPrototypeHint<EmbeddedSessionHint>()?.uuid
+      }
 
   override fun onClientUpdated(
     oldClientInfo: IInsightSurfaceClientInfo,

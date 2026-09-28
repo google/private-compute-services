@@ -16,13 +16,15 @@ edition = "2024";
 
 package com.google.android.as.oss.delegatedui.api.integration.templates.freesia;
 
+
 import option "third_party/protobuf/cpp_features.proto";
 
+option features.default_symbol_visibility = STRICT;
 option java_package = "com.google.android.as.oss.delegatedui.api.integration.templates.freesia";
 
 // The template data for Freesia.
 // Next ID: 2
-message FreesiaTemplateData {
+export message FreesiaTemplateData {
   repeated FreesiaEvent events = 1;
 }
 

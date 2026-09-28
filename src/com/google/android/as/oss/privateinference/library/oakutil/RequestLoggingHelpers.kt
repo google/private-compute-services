@@ -20,6 +20,7 @@ import com.google.android.`as`.oss.privateinference.util.timers.Timers
 import com.google.oak.session.v1.SessionRequest
 import com.google.oak.session.v1.SessionResponse
 import com.google.search.mdi.privatearatea.proto.PrivateArateaServiceGrpc
+import com.google.search.mdi.privatearatea.proto.PrivateProxyServiceGrpc
 import com.google.search.mdi.privatearatea.proto.PrivateTlsServiceGrpc
 import com.google.search.mdi.privatearatea.proto.TlsSessionRequest
 import com.google.search.mdi.privatearatea.proto.TlsSessionResponse
@@ -52,6 +53,16 @@ class RequestLoggingHelpers(private val timers: Timers) {
     )
   }
 
+  fun startProxySessionWithHandshakeLogging(
+    proxyStub: PrivateProxyServiceGrpc.PrivateProxyServiceStub,
+    responseObserver: StreamObserver<SessionResponse>,
+  ): StreamObserver<SessionRequest> {
+    return StreamObserverHook(
+      proxyStub.startNoiseSession(StreamObserverHook(responseObserver, this::logHandshakeResponse)),
+      this::logHandshakeRequest,
+    )
+  }
+
   private fun logHandshakeRequest(request: SessionRequest) {
     when (request.requestCase) {
       SessionRequest.RequestCase.HANDSHAKE_REQUEST ->
@@ -79,10 +90,10 @@ class RequestLoggingHelpers(private val timers: Timers) {
   }
 
   private fun logTlsHandshakeRequest(request: TlsSessionRequest) {
-    // if (!tlsHandshakeComplete) {
-    //   handshakeTimer =
-    //     timers.start(<TLS_HANDSHAKE_TIMER_NAME>)
-    // }
+    if (!tlsHandshakeComplete) {
+      handshakeTimer =
+        timers.start(PrivateInferenceClientTimerNames.OAK_SESSION_PERFORM_TLS_HANDSHAKE_STEP)
+    }
   }
 
   private fun logTlsHandshakeResponse(response: TlsSessionResponse) {

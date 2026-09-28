@@ -48,6 +48,8 @@ class ConversationContentConnection(
   private val context: Context,
   private val scope: CoroutineScope,
   private val callback: IConversationContentCallback,
+  private val packageName: String = "",
+  private val enableConversationContentV2: Boolean = false,
 ) : AutoCloseable, ServiceConnection {
   private var conversationContentService: IConversationContentService? = null
     @Synchronized set
@@ -84,7 +86,32 @@ class ConversationContentConnection(
     delayedRebind?.cancel()
     delayedRebind = null
     rebindAttempts = 0
-    conversationContentService?.requestConversationContent(callback)
+    requestConversationContentSafely()
+  }
+
+  private fun requestConversationContentSafely() {
+    val service = conversationContentService ?: return
+    if (enableConversationContentV2 && packageName.isNotEmpty()) {
+      try {
+        val success =
+          service.requestConversationContentV2(
+            callback,
+            packageName,
+            /* requestScreenshot = */ false,
+          )
+        if (success) {
+          logger.atDebug().log("requestConversationContentV2 called successfully")
+          return
+        }
+        logger.atInfo().log("requestConversationContentV2 returned false, falling back to V1")
+      } catch (e: Exception) {
+        logger
+          .atWarning()
+          .withCause(e)
+          .log("requestConversationContentV2 failed with exception, falling back to V1")
+      }
+    }
+    service.requestConversationContent(callback)
   }
 
   /** Called when the service is unexpectedly disconnected. Attempts to rebind. */

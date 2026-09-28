@@ -39,12 +39,15 @@ import com.google.oak.client.grpc.StreamObserverSessionClient
 import com.google.oak.session.tls.OakSessionTlsContext
 import com.google.privacy.ppn.proto.PrivacyPassTokenData
 import com.google.protobuf.ByteString
+import com.google.search.mdi.privatearatea.proto.PrivateBackend
 import com.google.search.mdi.privatearatea.proto.androidDeviceMetadata
 import com.google.search.mdi.privatearatea.proto.androidKeyStoreAttestationEvidence
 import com.google.search.mdi.privatearatea.proto.anonymousTokenRequest
+import com.google.search.mdi.privatearatea.proto.authorizationRequest
 import com.google.search.mdi.privatearatea.proto.clientMetadata
 import com.google.search.mdi.privatearatea.proto.deviceAttestationRequest
 import com.google.search.mdi.privatearatea.proto.pcsPrivateArateaRequest
+import com.google.search.mdi.privatearatea.proto.proxyRequest
 import io.grpc.Status
 import io.grpc.StatusException
 import io.grpc.stub.StreamObserver
@@ -116,8 +119,9 @@ internal constructor(
       .atFine()
       .log(
         "PrivateInferenceOakAsyncClient.startNoiseSession with" +
-          " device_attestation_mode flag mode %s",
+          " device_attestation_mode flag mode %s, proxy_backend %s",
         deviceAttestationFlag.mode(),
+        requestMetadata.proxyBackend,
       )
     // Some session initialization may do file I/O, so we need to run it in the background.
     // We create a new CoroutineScope for each `startNoiseSession` and treat the lifecycle of the
@@ -128,33 +132,65 @@ internal constructor(
         context = dispatcher + CoroutineName("StartNoiseSession_${nextSessionId.getAndIncrement()}")
       )
       .launch {
-        val asyncStub =
-          stubFactory.createStub(requestMetadata.authInfo, requestMetadata.ipBlindingMode)
         try {
-          streamObserverSessionClient.startSession(
-            sessionStreamObserver =
-              PrivateInferenceSessionStreamObserver(
-                scope = this@launch,
-                wrapped = sessionStreamObserver,
-                deviceAttestationGenerator = deviceAttestationGenerator,
-                deviceAttestationFlag = deviceAttestationFlag,
-                clientMetadataFlag = clientMetadataFlag,
-                arateaAuthFlag = arateaAuthFlag,
-                timers = timers,
-                backgroundExecutor = backgroundExecutor,
-                bsaArateaTokenProvider = bsaArateaTokenProvider,
-                bsaCacheableArateaTokenProvider = bsaCacheableArateaTokenProvider,
-                pcsStatsLogger = pcsStatsLogger,
-                featureName = requestMetadata.featureName,
-              ),
-            streamStarter = { observer ->
-              RequestLoggingHelpers(timers)
-                .startSessionWithHandshakeLogging(
-                  asyncStub = asyncStub,
-                  responseObserver = observer,
-                )
-            },
-          )
+          if (requestMetadata.proxyBackend != PrivateBackend.BACKEND_UNSPECIFIED) {
+            val asyncStub =
+              stubFactory.createPrivateProxyServiceStub(
+                requestMetadata.authInfo,
+                requestMetadata.ipBlindingMode,
+              )
+            streamObserverSessionClient.startSession(
+              sessionStreamObserver =
+                PrivateProxySessionStreamObserver(
+                  scope = this@launch,
+                  wrapped = sessionStreamObserver,
+                  deviceAttestationGenerator = deviceAttestationGenerator,
+                  deviceAttestationFlag = deviceAttestationFlag,
+                  clientMetadataFlag = clientMetadataFlag,
+                  arateaAuthFlag = arateaAuthFlag,
+                  timers = timers,
+                  backgroundExecutor = backgroundExecutor,
+                  bsaArateaTokenProvider = bsaArateaTokenProvider,
+                  bsaCacheableArateaTokenProvider = bsaCacheableArateaTokenProvider,
+                  pcsStatsLogger = pcsStatsLogger,
+                  proxyBackend = requestMetadata.proxyBackend,
+                ),
+              streamStarter = { observer ->
+                RequestLoggingHelpers(timers)
+                  .startProxySessionWithHandshakeLogging(
+                    proxyStub = asyncStub,
+                    responseObserver = observer,
+                  )
+              },
+            )
+          } else {
+            val asyncStub =
+              stubFactory.createStub(requestMetadata.authInfo, requestMetadata.ipBlindingMode)
+            streamObserverSessionClient.startSession(
+              sessionStreamObserver =
+                PrivateInferenceSessionStreamObserver(
+                  scope = this@launch,
+                  wrapped = sessionStreamObserver,
+                  deviceAttestationGenerator = deviceAttestationGenerator,
+                  deviceAttestationFlag = deviceAttestationFlag,
+                  clientMetadataFlag = clientMetadataFlag,
+                  arateaAuthFlag = arateaAuthFlag,
+                  timers = timers,
+                  backgroundExecutor = backgroundExecutor,
+                  bsaArateaTokenProvider = bsaArateaTokenProvider,
+                  bsaCacheableArateaTokenProvider = bsaCacheableArateaTokenProvider,
+                  pcsStatsLogger = pcsStatsLogger,
+                  featureName = requestMetadata.featureName,
+                ),
+              streamStarter = { observer ->
+                RequestLoggingHelpers(timers)
+                  .startSessionWithHandshakeLogging(
+                    asyncStub = asyncStub,
+                    responseObserver = observer,
+                  )
+              },
+            )
+          }
         } catch (e: Exception) {
           logger.atSevere().withCause(e).log("Failed to start noise session.")
           sessionStreamObserver.onError(e)
@@ -250,7 +286,7 @@ internal constructor(
               val certificateChain =
                 deviceAttestationGenerator.generateAttestation(
                   sessionBindingToken,
-                  deviceAttestationFlag.useDeviceProperties(),
+                  deviceAttestationFlag.isDeviceIdAttestationEnabled(),
                 )
               logger
                 .atFine()
@@ -366,6 +402,186 @@ internal constructor(
 
     override fun onCompleted() {
       inferenceTimers.stop()
+      wrapped.onCompleted()
+      scope.cancel()
+    }
+  }
+
+  /**
+   * A wrapper around the client-provided observer for PrivateProxyService Noise session logging,
+   * authentication, and message framing.
+   */
+  private class PrivateProxySessionStreamObserver(
+    private val scope: CoroutineScope,
+    private val wrapped: StreamObserverSessionClient.OakSessionStreamObserver,
+    private val deviceAttestationGenerator: DeviceAttestationGenerator,
+    private val deviceAttestationFlag: DeviceAttestationFlag,
+    private val clientMetadataFlag: ClientMetadataFlag,
+    private val arateaAuthFlag: ArateaAuthFlag,
+    private val timers: Timers,
+    private val backgroundExecutor: ListeningExecutorService,
+    private val bsaArateaTokenProvider: BsaTokenProvider<@JvmSuppressWildcards ArateaToken>,
+    private val bsaCacheableArateaTokenProvider:
+      BsaTokenProvider<@JvmSuppressWildcards ArateaTokenWithoutChallenge>,
+    private val pcsStatsLogger: PcsStatsLogger,
+    private val proxyBackend: PrivateBackend,
+    private val e2ePiSessionStartTimer: Timers.Timer =
+      timers.start(PrivateInferenceClientTimerNames.END_TO_END_PI_CHANNEL_SETUP),
+    private val oakSessionOpenTimer: Timers.Timer =
+      timers.start(PrivateInferenceClientTimerNames.OAK_SESSION_ESTABLISH_STREAM),
+  ) : StreamObserverSessionClient.OakSessionStreamObserver {
+    private val onErrorCompleted = AtomicBoolean(false)
+
+    override fun onSessionOpen(clientRequests: StreamObserver<ByteString>) {
+      oakSessionOpenTimer.stop()
+
+      fun openSessionAndStartTimers() {
+        e2ePiSessionStartTimer.stop()
+        wrapped.onSessionOpen(clientRequests)
+      }
+
+      val sessionBindingToken =
+        (clientRequests as StreamObserverSessionClient.ClientSessionAccess)
+          .oakClientSession
+          .getSessionBindingToken(PRIVATE_INFERENCE_SESSION_BINDING_TOKEN_INFO)
+
+      val arateaAuthMode =
+        when (proxyBackend) {
+          PrivateBackend.BACKEND_UNSPECIFIED -> arateaAuthFlag.mode()
+          PrivateBackend.BACKEND_CONFIGURATION_TARGETING_SERVICE ->
+            ArateaAuthFlag.Mode.DEVICE_ATTESTATION
+          else -> ArateaAuthFlag.Mode.ANONYMOUS_TOKEN
+        }
+
+      logger
+        .atInfo()
+        .log("arateaAuthMode is set to %s with proxy backend %s", arateaAuthMode, proxyBackend)
+
+      when (arateaAuthMode) {
+        ArateaAuthFlag.Mode.DEVICE_ATTESTATION -> {
+          if (deviceAttestationFlag.enabled()) {
+            backgroundExecutor.execute {
+              val generateKeyPairTimer =
+                timers.start(PrivateInferenceClientTimerNames.DEVICE_ATTESTATION_GENERATE_KEY_PAIR)
+              val certificateChain =
+                deviceAttestationGenerator.generateAttestation(
+                  sessionBindingToken,
+                  deviceAttestationFlag.isDeviceIdAttestationEnabled(),
+                )
+              logger
+                .atFine()
+                .log(
+                  "Sending device attestation to proxy server with %d certificates.",
+                  certificateChain.size,
+                )
+              clientRequests.onNext(
+                proxyRequest {
+                    authorizationRequest = authorizationRequest {
+                      backendName = proxyBackend
+                      deviceAttestationRequest = deviceAttestationRequest {
+                        androidKeyStoreEvidence = androidKeyStoreAttestationEvidence {
+                          this.certificateChain += certificateChain
+                        }
+                      }
+                    }
+                  }
+                  .toByteString()
+              )
+              generateKeyPairTimer.stop()
+              openSessionAndStartTimers()
+            }
+          } else {
+            logger.atFine().log("Device attestation is disabled for proxy session.")
+            wrapped.onError(
+              Status.INVALID_ARGUMENT.withDescription(
+                  "Device attestation is disabled for proxy session"
+                )
+                .asRuntimeException()
+            )
+            onErrorCompleted.set(true)
+            clientRequests.onCompleted()
+          }
+        }
+        ArateaAuthFlag.Mode.ANONYMOUS_TOKEN -> {
+          logger.atFine().log("Fetching anonymous token for proxy server.")
+          val terminalTokenAuthTimer =
+            timers.start(PrivateInferenceClientTimerNames.IPP_ANONYMOUS_TOKEN_AUTH)
+          try {
+            val token = fetchArateaToken(sessionBindingToken)
+            logger
+              .atFine()
+              .log(
+                "Received anonymous token for proxy server: {token: %s, encodedExtensions: %s}",
+                token.token,
+                token.encodedExtensions,
+              )
+            clientRequests.onNext(
+              proxyRequest {
+                  authorizationRequest = authorizationRequest {
+                    backendName = proxyBackend
+                    anonymousTokenRequest = anonymousTokenRequest {
+                      anonymousToken = ByteString.copyFrom(token.toByteArray())
+                      encodedExtensions = ByteString.copyFromUtf8(token.encodedExtensions)
+                      if (clientMetadataFlag.enabled()) {
+                        clientMetadata = clientMetadata {
+                          androidDeviceMetadata = androidDeviceMetadata {
+                            manufacturer = Build.MANUFACTURER
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                .toByteString()
+            )
+            openSessionAndStartTimers()
+            terminalTokenAuthTimer.stop()
+          } catch (e: ExecutionException) {
+            logger.atSevere().withCause(e).log("Failed to fetch anonymous token for proxy server")
+            val errorStatus =
+              if (e.cause is StatusException) {
+                (e.cause as StatusException).status
+              } else {
+                Status.UNKNOWN.withDescription("Failed to fetch anonymous token")
+              }
+            wrapped.onError(errorStatus.asRuntimeException())
+            onErrorCompleted.set(true)
+            clientRequests.onCompleted()
+          }
+        }
+      }
+    }
+
+    private fun fetchArateaToken(sessionBindingToken: ByteArray): PrivacyPassTokenData {
+      return pcsStatsLogger.getResultAndLogStatus(METRIC_ID_MAP) {
+        val tokenBytes =
+          if (arateaAuthFlag.isCacheEnabled()) {
+            bsaCacheableArateaTokenProvider
+              .fetchTokenFuture(backgroundExecutor, CacheableArateaTokenParams())
+              .get()
+              .bytes
+          } else {
+            bsaArateaTokenProvider
+              .fetchTokenFuture(backgroundExecutor, ArateaTokenParams(sessionBindingToken))
+              .get()
+              .bytes
+          }
+        PrivacyPassTokenData.parseFrom(tokenBytes.toByteArray())
+      }
+    }
+
+    override fun onNext(response: ByteString) {
+      wrapped.onNext(response)
+    }
+
+    override fun onError(t: Throwable) {
+      if (!onErrorCompleted.get()) {
+        wrapped.onError(t)
+      }
+      scope.cancel("OnError during Proxy Noise Session", t)
+    }
+
+    override fun onCompleted() {
       wrapped.onCompleted()
       scope.cancel()
     }

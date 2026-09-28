@@ -28,10 +28,12 @@ service PrivateTlsService {
 
 // Request message for the TLS session.
 message TlsSessionRequest {
-  bytes frame = 1;
+  bytes frame = 1
+      ;
 }
 
 // Response message for the TLS session.
 message TlsSessionResponse {
-  bytes frame = 1;
+  bytes frame = 1
+      ;
 }

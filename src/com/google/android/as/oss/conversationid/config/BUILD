@@ -22,5 +22,6 @@ android_library(
     name = "config",
     srcs = ["ConversationIdConfig.kt"],
     deps = [
+        "@maven//:com_google_guava_guava",
     ],
 )

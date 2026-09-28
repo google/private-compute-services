@@ -40,8 +40,8 @@ object EnergyColorUtils {
         } else {
           android.R.color.system_surface_container_light
         }
-      val colors = EnergyColors.from(resId, context)
-      arrayOf(Color(colors[0]), Color(colors[1]))
+      val colors = EnergyColors.of(resId, context)
+      arrayOf(Color(colors.mid), Color(colors.end))
     }
   }
 }

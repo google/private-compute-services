@@ -71,6 +71,7 @@ android_library(
         "//src/com/google/android/as/oss/feedback/domain:feedback_ui_state",
         "//src/com/google/android/as/oss/feedback/domain:feedback_view_model",
         "//src/com/google/android/as/oss/feedback/proto:entity_feedback_dialog_data_kt_proto_lite",
+        "//src/com/google/android/as/oss/feedback/proto:feedback_tag_data_kt_proto_lite",
         "//src/com/google/android/as/oss/feedback/proto:multi_feedback_dialog_data_kt_proto_lite",
         "//src/com/google/android/as/oss/feedback/ui:multi_entity_feedback_dialog",
         "//src/com/google/android/as/oss/feedback/ui:single_entity_feedback_dialog",

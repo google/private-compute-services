@@ -78,12 +78,16 @@ public abstract class PrivateInferenceConfig {
         .setArateaAuthMode(DEFAULT_ARATEA_AUTH_MODE)
         .setProxyAuthMode(DEFAULT_PROXY_AUTH_MODE)
         .setPiServerChannelIdleTimeoutMinutes(DEFAULT_PI_SERVER_CHANNEL_IDLE_TIMEOUT_MINUTES)
-        .setUseEndpointSpecificVerificationKeys(DEFAULT_USE_ENDPOINT_SPECIFIC_VERIFICATION_KEYS)
         .setPassForceEzUsageHeader(DEFAULT_PASS_FORCE_EZ_USAGE_HEADER)
         .setIpRelayFallbackMode(DEFAULT_IP_RELAY_FALLBACK_MODE)
         .setSendClientMetadata(DEFAULT_SEND_CLIENT_METADATA)
         .setEnableTlsBasedSession(DEFAULT_ENABLE_TLS_BASED_SESSION)
-        .setEnableConfigurableIpBlindingMode(DEFAULT_ENABLE_CONFIGURABLE_IP_BLINDING_MODE);
+        .setEnableConfigurableIpBlindingMode(DEFAULT_ENABLE_CONFIGURABLE_IP_BLINDING_MODE)
+        .setOakCtCertificateUrl(DEV_OAK_CT_CERT_URL)
+        .setOakCtCertificateFilename(DEV_OAK_CT_CERT_FILENAME)
+        .setTcaRootCertificateUrl(DEV_TCA_ROOT_CERT_URL)
+        .setTcaRootCertificateFilename(DEV_TCA_ROOT_CERT_FILENAME)
+        .setTcaExpectedServerName(DEV_TCA_EXPECTED_SERVER_NAME);
   }
 
   /** Returns the current attestation publisher mode. */
@@ -94,9 +98,6 @@ public abstract class PrivateInferenceConfig {
 
   /** Returns the endpoint URL for the Private Inference service. */
   public abstract String endpointUrl();
-
-  /** Returns whether to use endpoint specific verification keys. */
-  public abstract boolean useEndpointSpecificVerificationKeys();
 
   /** Returns whether to pass x-use-ez header. */
   public abstract boolean passForceEzUsageHeader();
@@ -199,9 +200,32 @@ public abstract class PrivateInferenceConfig {
   /** Returns whether configurable IP blinding mode is enabled. */
   public abstract boolean enableConfigurableIpBlindingMode();
 
+  /** Returns the URL for downloading the OakCT certificate. */
+  public abstract String oakCtCertificateUrl();
+
+  /** Returns the filename for storing the OakCT certificate. */
+  public abstract String oakCtCertificateFilename();
+
+  /** Returns the URL for downloading the TCA root certificate. */
+  public abstract String tcaRootCertificateUrl();
+
+  /** Returns the filename for storing the TCA root certificate. */
+  public abstract String tcaRootCertificateFilename();
+
+  /** Returns the expected server name for TCA hostname verification in Oak TLS sessions. */
+  public abstract String tcaExpectedServerName();
+
   public static final String PRIVATE_INFERENCE_PROD_ENDPOINT_URL =
       "privatearatea.pa.googleapis.com";
   public static final String TOKEN_ISSUANCE_PROD_ENDPOINT_URL = "phosphor-pa.googleapis.com";
+
+  public static final String DEV_TCA_EXPECTED_SERVER_NAME = "";
+  public static final String DEV_OAK_CT_CERT_URL =
+      "https://www.gstatic.com/oakct.transparentrelease.goog/tcadev/dev_tca_root_certificate.pem/dev_tca_root_certificate.pem.pem";
+  public static final String DEV_OAK_CT_CERT_FILENAME = "dev_oakct_cert.pem";
+  public static final String DEV_TCA_ROOT_CERT_URL =
+      "https://www.gstatic.com/oakct.transparentrelease.goog/tcadev/dev_tca_root_certificate.pem/dev_tca_root_certificate.pem";
+  public static final String DEV_TCA_ROOT_CERT_FILENAME = "dev_tca_root_cert.pem";
 
   // Default values
   public static final AttestationPublisherFlag.Mode DEFAULT_ATTESTATION_PUBLISHER_MODE =
@@ -264,8 +288,6 @@ public abstract class PrivateInferenceConfig {
 
   public static final IpRelayFallbackFlag.Mode DEFAULT_IP_RELAY_FALLBACK_MODE =
       IpRelayFallbackFlag.Mode.DEFAULT;
-
-  public static final boolean DEFAULT_USE_ENDPOINT_SPECIFIC_VERIFICATION_KEYS = false;
 
   public static final boolean DEFAULT_PASS_FORCE_EZ_USAGE_HEADER = false;
 
@@ -342,8 +364,6 @@ public abstract class PrivateInferenceConfig {
 
     public abstract Builder setIpRelayFallbackMode(IpRelayFallbackFlag.Mode mode);
 
-    public abstract Builder setUseEndpointSpecificVerificationKeys(boolean value);
-
     public abstract Builder setPassForceEzUsageHeader(boolean value);
 
     public abstract Builder setSendClientMetadata(boolean value);
@@ -351,6 +371,16 @@ public abstract class PrivateInferenceConfig {
     public abstract Builder setEnableTlsBasedSession(boolean value);
 
     public abstract Builder setEnableConfigurableIpBlindingMode(boolean value);
+
+    public abstract Builder setOakCtCertificateUrl(String value);
+
+    public abstract Builder setOakCtCertificateFilename(String value);
+
+    public abstract Builder setTcaRootCertificateUrl(String value);
+
+    public abstract Builder setTcaRootCertificateFilename(String value);
+
+    public abstract Builder setTcaExpectedServerName(String value);
 
     public abstract PrivateInferenceConfig build();
   }

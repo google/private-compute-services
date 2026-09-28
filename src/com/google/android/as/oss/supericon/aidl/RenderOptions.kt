@@ -117,6 +117,7 @@ constructor(
   val backgroundWidth: Int = DEFAULT_BACKGROUND_SIZE,
   @field:SafeParcelable.Field(id = 34, getter = "getBackgroundHeight", defaultValue = "-1")
   val backgroundHeight: Int = DEFAULT_BACKGROUND_SIZE,
+  @field:SafeParcelable.Field(id = 35, getter = "getPackageName") val packageName: String? = null,
 ) : AbstractSafeParcelable() {
 
   @SafeParcelable.Constructor
@@ -155,6 +156,7 @@ constructor(
     @SafeParcelable.Param(id = 32) consentVersion: Int,
     @SafeParcelable.Param(id = 33) backgroundWidth: Int,
     @SafeParcelable.Param(id = 34) backgroundHeight: Int,
+    @SafeParcelable.Param(id = 35) packageName: String?,
   ) : this(
     width = width,
     height = height,
@@ -191,6 +193,7 @@ constructor(
     consentVersion = consentVersion,
     backgroundWidth = backgroundWidth,
     backgroundHeight = backgroundHeight,
+    packageName = packageName,
   )
 
   // SafeParcelable requires a Creator and specific writing logic
@@ -244,7 +247,8 @@ constructor(
       textWeight == otherOptions.textWeight &&
       consentVersion == otherOptions.consentVersion &&
       backgroundWidth == otherOptions.backgroundWidth &&
-      backgroundHeight == otherOptions.backgroundHeight
+      backgroundHeight == otherOptions.backgroundHeight &&
+      packageName == otherOptions.packageName
   }
 
   override fun hashCode(): Int {
@@ -283,11 +287,12 @@ constructor(
       consentVersion,
       backgroundWidth,
       backgroundHeight,
+      packageName,
     )
   }
 
   override fun toString(): String {
-    return "RenderOptions(width=$width, height=$height, minWidth=$minWidth, minHeight=$minHeight, maxWidth=$maxWidth, maxHeight=$maxHeight, uiType=$uiType, icon=$icon, iconWidth=$iconWidth, iconHeight=$iconHeight, iconScaleX=$iconScaleX, iconScaleY=$iconScaleY, background=$background, label=$label, labelColor=$labelColor, fontFamily=$fontFamily, textSizeInPixels=$textSizeInPixels, textScaleX=$textScaleX, windowToken=$windowToken, contentDescription=$contentDescription, roleDescription=$roleDescription, accessibilityPaneTitle=$accessibilityPaneTitle, subIcon=$subIcon, subIconWidth=$subIconWidth, subIconHeight=$subIconHeight, subIconScaleX=$subIconScaleX, subIconScaleY=$subIconScaleY, backgroundRippleColor=$backgroundRippleColor, lineSpacingExtra=$lineSpacingExtra, lineSpacingMultiplier=$lineSpacingMultiplier, textWeight=$textWeight, consentVersion=$consentVersion, backgroundWidth=$backgroundWidth, backgroundHeight=$backgroundHeight)"
+    return "RenderOptions(width=$width, height=$height, minWidth=$minWidth, minHeight=$minHeight, maxWidth=$maxWidth, maxHeight=$maxHeight, uiType=$uiType, icon=$icon, iconWidth=$iconWidth, iconHeight=$iconHeight, iconScaleX=$iconScaleX, iconScaleY=$iconScaleY, background=$background, label=$label, labelColor=$labelColor, fontFamily=$fontFamily, textSizeInPixels=$textSizeInPixels, textScaleX=$textScaleX, windowToken=$windowToken, contentDescription=$contentDescription, roleDescription=$roleDescription, accessibilityPaneTitle=$accessibilityPaneTitle, subIcon=$subIcon, subIconWidth=$subIconWidth, subIconHeight=$subIconHeight, subIconScaleX=$subIconScaleX, subIconScaleY=$subIconScaleY, backgroundRippleColor=$backgroundRippleColor, lineSpacingExtra=$lineSpacingExtra, lineSpacingMultiplier=$lineSpacingMultiplier, textWeight=$textWeight, consentVersion=$consentVersion, backgroundWidth=$backgroundWidth, backgroundHeight=$backgroundHeight, packageName=$packageName)"
   }
 
   companion object {

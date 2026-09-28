@@ -33,6 +33,5 @@ service FeedbackDataService {
   // of PCC.
   rpc GetFeedbackDonationData(GetFeedbackDonationDataRequest)
       returns (GetFeedbackDonationDataResponse) {
-    option deadline = 5.0;
   }
 }

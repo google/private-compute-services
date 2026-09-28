@@ -98,5 +98,30 @@ public final class Annotations {
   @Retention(RetentionPolicy.RUNTIME)
   public @interface PrivateInferenceEnableConfigurableIpBlindingMode {}
 
+  /** Annotation for the OakCT certificate URL. */
+  @Qualifier
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface OakCtCertificateUrl {}
+
+  /** Annotation for the OakCT certificate filename. */
+  @Qualifier
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface OakCtCertificateFilename {}
+
+  /** Annotation for the TCA root certificate URL. */
+  @Qualifier
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface TcaRootCertificateUrl {}
+
+  /** Annotation for the TCA root certificate filename. */
+  @Qualifier
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface TcaRootCertificateFilename {}
+
+  /** Annotation for the expected server name for TCA in Oak TLS session. */
+  @Qualifier
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface TcaExpectedServerName {}
+
   private Annotations() {}
 }

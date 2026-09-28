@@ -72,6 +72,7 @@ pcs_dev_and_mpm(
         "//src/com/google/android/as/oss/grpc/perapp:pcs",  # buildcleaner: keep
         "//src/com/google/android/as/oss/http/config/impl",  # buildcleaner: keep
         "//src/com/google/android/as/oss/http/service",  # buildcleaner: keep
+        "//src/com/google/android/as/oss/http/transport",
         "//src/com/google/android/as/oss/logging/impl:impl_module",
         "//src/com/google/android/as/oss/networkusage/config/impl",
         "//src/com/google/android/as/oss/networkusage/db/impl",

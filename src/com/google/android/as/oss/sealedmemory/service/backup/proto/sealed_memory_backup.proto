@@ -16,6 +16,7 @@ edition = "2024";
 
 package com.google.android.as.oss.sealedmemory.service.backup;
 
+option features.default_symbol_visibility = STRICT;
 option features.field_presence = IMPLICIT;
 option java_package = "com.google.android.as.oss.sealedmemory.service.backup";
 option java_outer_classname = "SealedMemoryBackup";

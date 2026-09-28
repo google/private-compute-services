@@ -16,6 +16,7 @@ edition = "2024";
 
 package com.google.android.as.oss.features.optin.api;
 
+
 option features.field_presence = IMPLICIT;
 option java_package = "com.google.android.as.oss.features.optin.api.proto";
 
@@ -53,13 +54,15 @@ message OptInSetting {
 // Request message for writing opt-in statuses.
 message WriteOptInStatusRequest {
   // The settings to write.
-  repeated OptInSetting settings_to_write = 1;
+  repeated OptInSetting settings_to_write = 1
+     ;
 }
 
 // Response message for writing opt-in statuses.
 message WriteOptInStatusResponse {
   // The results of the write operations.
-  repeated WriteResult write_results = 1;
+  repeated WriteResult write_results = 1
+     ;
 }
 
 // Represents the result of a single write operation for an opt-in setting.

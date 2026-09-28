@@ -16,6 +16,7 @@ edition = "2024";
 
 package com.google.android.as.oss.delegatedui.config.beacon;
 
+option features.default_symbol_visibility = STRICT;
 option java_package = "com.google.android.as.oss.delegatedui.config.beacon";
 
 // UI configs for Beacon
@@ -37,8 +38,10 @@ message BeaconUiConfigs {
   // expanded state
   int32 general_card_title_text_expanded_line_count = 4;
 
-  /** The maximum UI version that general cards can be displayed in. If backend
+  /**
+   * The maximum UI version that general cards can be displayed in. If backend
    * requests a higher version than this one, then the version here will be
-   * displayed. */
+   * displayed.
+   */
   int32 general_cards_maximum_display_ui_version = 5;
 }

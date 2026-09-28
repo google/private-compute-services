@@ -16,8 +16,11 @@
 
 package com.google.android.`as`.oss.conversationid.config
 
+import com.google.common.collect.ImmutableList
+
 /** Configuration for the ConversationId feature. */
 data class ConversationIdConfig(
   val enableConversationId: Boolean,
   val enableSecurityPolicy: Boolean,
+  val allowedNonPixelDevices: ImmutableList<String> = ImmutableList.of(),
 )

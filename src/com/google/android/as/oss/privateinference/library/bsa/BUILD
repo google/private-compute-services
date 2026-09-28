@@ -48,6 +48,7 @@ android_library(
         "//src/com/google/android/as/oss/privateinference/library/bsa/impl:android_keystore_attester",
         "//src/com/google/android/as/oss/privateinference/library/bsa/impl:blind_sign_auth_impl",
         "//src/com/google/android/as/oss/privateinference/library/bsa/impl:phosphor_grpc_message_interface",
+        "//src/com/google/android/as/oss/privateinference/library/oakutil:device_attestation_flag",
         "//src/com/google/android/as/oss/privateinference/networkusage",
         "//src/com/google/android/as/oss/privateinference/util/timers:annotations",
         "//src/com/google/android/as/oss/privateinference/util/timers:timer_set",

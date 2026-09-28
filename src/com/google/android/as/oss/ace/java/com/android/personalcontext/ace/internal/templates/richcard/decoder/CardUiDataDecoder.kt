@@ -22,6 +22,7 @@ import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.DisplayInsight
 import android.service.personalcontext.insight.InsightCollection
 import androidx.compose.foundation.layout.WindowInsets
+import com.android.personalcontext.ace.client.prototype.PrototypeHintUtils.toPrototypeHint
 import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.isPrototypeInsight
 import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsight
 import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsight
@@ -29,6 +30,8 @@ import com.android.personalcontext.ace.client.prototype.card.CardInsight
 import com.android.personalcontext.ace.client.prototype.loading.LoadingInsight
 import com.android.personalcontext.ace.client.prototype.richcard.RichCardHint
 import com.android.personalcontext.ace.client.prototype.serversideclose.ServerSideCloseInsight
+import com.android.personalcontext.ace.client.prototype.theme.ThemeHint
+import com.android.personalcontext.ace.client.prototype.theme.ThemeType
 import com.android.personalcontext.ace.common.DisplayableInsight
 import com.android.personalcontext.ace.common.asDisplayableInsight
 import com.android.personalcontext.ace.internal.findprototypehint.FindPrototypeHint.findPrototypeHint
@@ -60,6 +63,11 @@ abstract class CardUiDataDecoder<T : DeprecatedUiCardContext> {
     val dismissInsight = getDismissInsight()
     val cardTitle = getCardTitle(titleDisplayableInsight)
     val icon = getCardIcon(titleDisplayableInsight)
+    val showBrandedIcon =
+      toContextInsight().originHints.any {
+        val themeHint = it.contextHint.toPrototypeHint<ThemeHint>() ?: return@any false
+        themeHint.type == ThemeType.SHOW_BRANDED_ICON && themeHint.data
+      }
     val cardContext = body.toCardContext()
     val cardContextAction = getCardContextAction()
     val actions = (actions as? InsightCollection)?.toCardActions()
@@ -70,6 +78,7 @@ abstract class CardUiDataDecoder<T : DeprecatedUiCardContext> {
       cardActionDetails = cardActionDetails,
       cardTitle = cardTitle,
       icon = icon,
+      showBrandedIcon = showBrandedIcon,
       titleInsight = titleDisplayableInsight,
       dismissInsight = dismissInsight,
       attribution = attribution,

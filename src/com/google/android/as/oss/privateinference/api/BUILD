@@ -56,7 +56,7 @@ proto_library(
     srcs = ["anonymous_token_request.proto"],
     deps = [
         "",
-        ":client_metadata_proto",
+        "//search/mdi/privatearatea/proto:client_metadata_proto",
         "//third_party/protobuf:cpp_features_proto",
     ],
 )
@@ -168,4 +168,35 @@ java_grpc_library(
     constraints = ["android"],
     flavor = "lite",
     deps = [":private_tls_service_java_proto_lite"],
+)
+
+proto_library(
+    name = "private_proxy_service_proto",
+    srcs = [
+        "private_proxy_service.proto",
+    ],
+    has_services = True,
+    deps = [
+        ":anonymous_token_request_proto",
+        ":device_attestation_request_proto",
+        "//third_party/oak/proto/session:session_proto",
+    ],
+)
+
+java_lite_proto_library(
+    name = "private_proxy_service_java_proto_lite",
+    deps = [":private_proxy_service_proto"],
+)
+
+kt_jvm_lite_proto_library(
+    name = "private_proxy_service_kt_proto_lite",
+    deps = [":private_proxy_service_proto"],
+)
+
+java_grpc_library(
+    name = "private_proxy_service_java_lite_grpc",
+    srcs = [":private_proxy_service_proto"],
+    constraints = ["android"],
+    flavor = "lite",
+    deps = [":private_proxy_service_java_proto_lite"],
 )

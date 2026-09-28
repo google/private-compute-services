@@ -18,6 +18,7 @@ package com.google.android.as.oss.privateinference.library;
 
 import com.google.android.as.oss.privateinference.service.api.proto.IpBlindingMode;
 import com.google.android.as.oss.privateinference.service.api.proto.PcsPrivateInferenceFeatureName;
+import com.google.search.mdi.privatearatea.proto.PrivateBackend;
 import java.util.Optional;
 
 /**
@@ -50,9 +51,19 @@ public interface PrivateInferenceRequestMetadata {
    * Returns the IP binding mode for the session.
    *
    * <p>The default mode is IP_BLINDING_MODE_ENABLED to be consistent with the existing behavior of
-   * the PAC library w/o explicit configuration..
+   * the PAC library w/o explicit configuration.
    */
   default IpBlindingMode getIpBlindingMode() {
     return IpBlindingMode.IP_BLINDING_MODE_ENABLED;
+  }
+
+  /**
+   * Returns the proxy backend for the session.
+   *
+   * <p>The default backend is BACKEND_UNSPECIFIED, which indicates that proxy is disabled for the
+   * session.
+   */
+  default PrivateBackend getProxyBackend() {
+    return PrivateBackend.BACKEND_UNSPECIFIED;
   }
 }

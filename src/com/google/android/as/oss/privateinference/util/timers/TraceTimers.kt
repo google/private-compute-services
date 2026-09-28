@@ -60,6 +60,7 @@ class TraceTimers @Inject internal constructor() : Timers {
         PrivateInferenceClientTimerNames.OAK_SESSION_ESTABLISH_STREAM,
         PrivateInferenceClientTimerNames.OAK_SESSION_EXCHANGE_ATTESTATION_EVIDENCE,
         PrivateInferenceClientTimerNames.OAK_SESSION_PERFORM_HANDSHAKE_STEP,
+        PrivateInferenceClientTimerNames.OAK_SESSION_PERFORM_TLS_HANDSHAKE_STEP,
         PrivateInferenceClientTimerNames.IPP_ANONYMOUS_TOKEN_AUTH,
         PrivateInferenceClientTimerNames.IPP_GET_PROXY_TOKEN,
         PrivateInferenceClientTimerNames.IPP_CREATE_PROXY_TOKEN,

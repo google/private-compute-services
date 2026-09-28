@@ -28,5 +28,5 @@ interface DeviceAttestationFlag {
 
   fun enabled(): Boolean = mode() != Mode.DISABLED
 
-  fun useDeviceProperties(): Boolean = mode() == Mode.ENABLED_WITH_DEVICE_PROPERTIES
+  fun isDeviceIdAttestationEnabled(): Boolean = mode() == Mode.ENABLED_WITH_DEVICE_PROPERTIES
 }

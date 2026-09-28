@@ -33,6 +33,8 @@ android_library(
         "//java/com/google/android/systemui/graphics/shaderlib:view",
         "//java/com/google/android/systemui/graphics/shaderlib/ane/colors",
         "//java/com/google/ux/material/libmonet/energy:energy_colors",
+        "//java/com/google/ux/material/libmonetkt/energy:energy_colors",
+        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/visualizer/compat:energy_effects_animation_compat",
         "//third_party/java/androidx/compose/animation/animation_core",
         "//third_party/java/androidx/compose/foundation",
         "//third_party/java/androidx/compose/material3",

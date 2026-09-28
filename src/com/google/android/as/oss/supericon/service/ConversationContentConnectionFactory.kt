@@ -26,7 +26,15 @@ open class ConversationContentConnectionFactory @Inject constructor() {
     context: Context,
     scope: CoroutineScope,
     callback: IConversationContentCallback,
+    packageName: String = "",
+    enableConversationContentV2: Boolean = false,
   ): AutoCloseable {
-    return ConversationContentConnection(context, scope, callback)
+    return ConversationContentConnection(
+      context,
+      scope,
+      callback,
+      packageName,
+      enableConversationContentV2,
+    )
   }
 }

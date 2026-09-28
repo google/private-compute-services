@@ -19,6 +19,7 @@ package com.android.personalcontext.ace.visualizer.embeddedtheme
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.TypedArray
+import android.view.ContextThemeWrapper
 import androidx.annotation.AttrRes
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -83,14 +84,16 @@ private fun resolveEmbeddedTheme(
   themeResourceId: Int,
   density: Density,
 ): ResolvedTheme {
+  if (themeResourceId == 0) return ResolvedTheme()
+
   val clientContext =
     try {
-      context.createPackageContext(packageName, 0)
+      // Apply the client's custom theme to allow attribute references (values starting with ?)
+      // to be resolved correctly.
+      ContextThemeWrapper(context.createPackageContext(packageName, 0), themeResourceId)
     } catch (_: Exception) {
-      null
+      return ResolvedTheme()
     }
-
-  if (clientContext == null || themeResourceId == 0) return ResolvedTheme()
 
   val embeddedViewThemeResId =
     clientContext.resolveAttribute(themeResourceId, android.R.attr.embeddedViewTheme) {

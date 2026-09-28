@@ -29,19 +29,18 @@
       android:adjustViewBounds="true"
       android:layout_gravity="center"
       android:layout_marginStart="12dp"
-      android:layout_marginEnd="6dp"
+      android:layout_marginEnd="8dp"
       android:importantForAccessibility="no"
-      android:scaleType="fitCenter">
-  </ImageView>
+      android:scaleType="fitCenter" />
   <com.google.android.material.textview.MaterialTextView
       android:id="@+id/text"
       android:textColor="@color/material_grey_800"
       android:fontFamily="google-sans-text-medium"
       android:maxLines="1"
       android:textSize="14sp"
+      android:includeFontPadding="false"
       android:layout_gravity="center"
       android:layout_marginEnd="12dp"
       android:layout_width="wrap_content"
-      android:layout_height="wrap_content">
-  </com.google.android.material.textview.MaterialTextView>
+      android:layout_height="wrap_content" />
 </LinearLayout>

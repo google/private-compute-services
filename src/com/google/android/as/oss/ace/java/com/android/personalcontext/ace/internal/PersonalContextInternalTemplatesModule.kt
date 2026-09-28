@@ -16,6 +16,7 @@
 
 package com.android.personalcontext.ace.internal
 
+import com.android.personalcontext.ace.internal.templates.gboard.GboardVisualizerTemplate
 import com.android.personalcontext.ace.internal.templates.richcard.RichCardVisualizerTemplate
 import com.android.personalcontext.ace.internal.templates.weather.WeatherVisualizerTemplate
 import com.android.personalcontext.ace.visualizer.templates.VisualizerTemplate
@@ -42,6 +43,12 @@ interface PersonalContextInternalTemplatesModule {
     fun provideRichCardVisualizerTemplate(
       impl: Lazy<RichCardVisualizerTemplate>
     ): VisualizerTemplate {
+      return impl.get()
+    }
+
+    @Provides
+    @IntoSet
+    fun provideGboardVisualizerTemplate(impl: Lazy<GboardVisualizerTemplate>): VisualizerTemplate {
       return impl.get()
     }
   }

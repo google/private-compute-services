@@ -18,6 +18,7 @@ package com.google.android.as.oss.privateinference.library.oakutil;
 
 import "google/protobuf/timestamp.proto";
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "PublicKeys";
 option java_package = "com.google.android.as.oss.privateinference.library.oakutil.proto";
 

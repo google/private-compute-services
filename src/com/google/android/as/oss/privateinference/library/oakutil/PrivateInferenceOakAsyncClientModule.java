@@ -16,14 +16,21 @@
 
 package com.google.android.as.oss.privateinference.library.oakutil;
 
+import android.content.Context;
+import com.google.android.as.oss.common.ExecutorAnnotations.PiCertDownloadExecutorQualifier;
 import com.google.android.as.oss.common.ExecutorAnnotations.PiExecutorQualifier;
 import com.google.android.as.oss.common.time.TimeSource;
+import com.google.android.as.oss.privateinference.Annotations.TcaExpectedServerName;
 import com.google.android.as.oss.privateinference.util.timers.Annotations.PrivateInferenceClientTimers;
 import com.google.android.as.oss.privateinference.util.timers.LatencyLoggingTimer;
 import com.google.android.as.oss.privateinference.util.timers.PiDebugLogTimers;
 import com.google.android.as.oss.privateinference.util.timers.TimerSet;
 import com.google.android.as.oss.privateinference.util.timers.Timers;
 import com.google.android.as.oss.privateinference.util.timers.TraceTimers;
+import com.google.android.downloader.AndroidConnectivityHandler;
+import com.google.android.downloader.CronetUrlEngine;
+import com.google.android.downloader.Downloader;
+import com.google.android.downloader.FloggerDownloaderLogger;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.oak.client.grpc.StreamObserverSessionClient;
@@ -36,15 +43,18 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
 import dagger.multibindings.IntoSet;
 import java.util.Set;
 import javax.inject.Provider;
 import javax.inject.Singleton;
+import org.chromium.net.CronetEngine;
 
 @Module
 @InstallIn(SingletonComponent.class)
 abstract class PrivateInferenceOakAsyncClientModule {
+
   @Binds
   @Singleton
   @PiExecutorQualifier
@@ -53,6 +63,18 @@ abstract class PrivateInferenceOakAsyncClientModule {
 
   @Binds
   abstract OakAsyncClient bindsOakAsyncClient(PrivateInferenceOakAsyncClient impl);
+
+  @Binds
+  @Singleton
+  abstract PiCertificateRepository bindsPiCertificateRepository(PiCertificateRepositoryImpl impl);
+
+  @Binds
+  @Singleton
+  abstract PiCertificateDownloader bindsPiCertificateDownloader(PiCertificateDownloaderImpl impl);
+
+  @Binds
+  @Singleton
+  abstract PiCertificateCache bindsPiCertificateCache(PiCertificateCacheImpl impl);
 
   @Provides
   @Singleton
@@ -64,20 +86,40 @@ abstract class PrivateInferenceOakAsyncClientModule {
   @Provides
   @Singleton
   static StreamObserverTlsSessionClient provideStreamObserverTlsSessionClient(
-      Provider<OakSessionTlsContext> tlsContextProvider) {
-    return new StreamObserverTlsSessionClient(tlsContextProvider);
+      Provider<OakSessionTlsContext> tlsContextProvider, PiCertificateRepository repository) {
+    return new StreamObserverTlsSessionClient(tlsContextProvider, repository);
   }
 
   @Provides
-  static OakSessionTlsContext provideOakSessionTlsContext() {
+  static OakSessionTlsContext provideOakSessionTlsContext(
+      OakCtCustomCertVerifier customCertVerifier,
+      TcaTrustAnchorProvider trustAnchorProvider,
+      @TcaExpectedServerName String expectedServerName) {
     try {
       return OakSessionTlsContext.create(
           OakSessionClientTlsContext.Config.builder()
-              .customCertVerifier((certChain, standardResult) -> {})
+              .customCertVerifier(customCertVerifier)
+              .serverTrustAnchorProvider(trustAnchorProvider)
+              .expectedServerName(expectedServerName)
               .build());
     } catch (OakSessionTlsException e) {
       throw new IllegalStateException("Failed to create OakSessionTlsContext", e);
     }
+  }
+
+  @Provides
+  @Singleton
+  static Downloader provideDownloader(
+      @ApplicationContext Context context,
+      @PiCertDownloadExecutorQualifier ListeningScheduledExecutorService executor) {
+    CronetEngine cronetEngine = new CronetEngine.Builder(context).build();
+    CronetUrlEngine cronetUrlEngine = new CronetUrlEngine(cronetEngine, executor);
+    return new Downloader.Builder()
+        .withIOExecutor(executor)
+        .addUrlEngine("https", cronetUrlEngine)
+        .withLogger(new FloggerDownloaderLogger())
+        .withConnectivityHandler(new AndroidConnectivityHandler(context, executor, 10_000L))
+        .build();
   }
 
   @Binds

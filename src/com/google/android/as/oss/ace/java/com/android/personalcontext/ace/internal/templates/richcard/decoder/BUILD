@@ -28,6 +28,8 @@ android_library(
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/loading",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/richcard",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/serversideclose",
+        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/theme",
+        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/theme:theme_type",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/common:displayable_context_insight",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/findprototypehint",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard:card_ui_data",

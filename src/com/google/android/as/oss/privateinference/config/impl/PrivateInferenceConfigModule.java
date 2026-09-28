@@ -20,6 +20,8 @@ import com.google.android.as.oss.common.ExecutorAnnotations.GeneralExecutorQuali
 import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.common.config.FlagManagerFactory;
 import com.google.android.as.oss.common.config.FlagNamespace;
+import com.google.android.as.oss.privateinference.Annotations.OakCtCertificateFilename;
+import com.google.android.as.oss.privateinference.Annotations.OakCtCertificateUrl;
 import com.google.android.as.oss.privateinference.Annotations.PiServerChannelIdleTimeoutMinutes;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceAttachCertificateHeader;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceEnableArateaTokenCache;
@@ -28,8 +30,10 @@ import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceEn
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceEndpointUrl;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceForceIpTunnelCreationForEverySession;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferencePassForceEzUsageHeader;
-import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceUseEndpointSpecificVerificationKeys;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceWaitForGrpcChannelReady;
+import com.google.android.as.oss.privateinference.Annotations.TcaExpectedServerName;
+import com.google.android.as.oss.privateinference.Annotations.TcaRootCertificateFilename;
+import com.google.android.as.oss.privateinference.Annotations.TcaRootCertificateUrl;
 import com.google.android.as.oss.privateinference.Annotations.TokenIssuanceEndpointUrl;
 import com.google.android.as.oss.privateinference.config.PrivateInferenceConfig;
 import com.google.android.as.oss.privateinference.library.oakutil.AttestationPublisherFlag;
@@ -140,13 +144,6 @@ interface PrivateInferenceConfigModule {
   }
 
   @Provides
-  @PrivateInferenceUseEndpointSpecificVerificationKeys
-  static boolean providesUseEndpointSpecificVerificationKeys(
-      ConfigReader<PrivateInferenceConfig> configReader) {
-    return configReader.getConfig().useEndpointSpecificVerificationKeys();
-  }
-
-  @Provides
   @PrivateInferencePassForceEzUsageHeader
   static boolean providePassForceEzUsageHeader(ConfigReader<PrivateInferenceConfig> configReader) {
     return configReader.getConfig().passForceEzUsageHeader();
@@ -157,5 +154,36 @@ interface PrivateInferenceConfigModule {
   static boolean provideEnableConfigurableIpBlindingMode(
       ConfigReader<PrivateInferenceConfig> configReader) {
     return configReader.getConfig().enableConfigurableIpBlindingMode();
+  }
+
+  @Provides
+  @OakCtCertificateUrl
+  static String provideOakCtCertificateUrl(ConfigReader<PrivateInferenceConfig> configReader) {
+    return configReader.getConfig().oakCtCertificateUrl();
+  }
+
+  @Provides
+  @OakCtCertificateFilename
+  static String provideOakCtCertificateFilename(ConfigReader<PrivateInferenceConfig> configReader) {
+    return configReader.getConfig().oakCtCertificateFilename();
+  }
+
+  @Provides
+  @TcaRootCertificateUrl
+  static String provideTcaRootCertificateUrl(ConfigReader<PrivateInferenceConfig> configReader) {
+    return configReader.getConfig().tcaRootCertificateUrl();
+  }
+
+  @Provides
+  @TcaRootCertificateFilename
+  static String provideTcaRootCertificateFilename(
+      ConfigReader<PrivateInferenceConfig> configReader) {
+    return configReader.getConfig().tcaRootCertificateFilename();
+  }
+
+  @Provides
+  @TcaExpectedServerName
+  static String provideTcaExpectedServerName(ConfigReader<PrivateInferenceConfig> configReader) {
+    return configReader.getConfig().tcaExpectedServerName();
   }
 }

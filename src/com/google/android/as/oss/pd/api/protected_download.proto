@@ -179,7 +179,11 @@ message BlobConstraints {
 
     // Pixel8 (SoC: Zuma)
     PIXEL = 2;
+
+    // Claimed by qc_sm8650.
     SAMSUNG_QC = 3;
+
+    // Claimed by slsi.
     SAMSUNG_SLSI = 4;
 
     VARIANT_5 = 5;

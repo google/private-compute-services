@@ -17,9 +17,13 @@
 package com.google.android.`as`.oss.conversationid.config.impl
 
 import com.google.android.`as`.oss.common.config.FlagManager.BooleanFlag
+import com.google.android.`as`.oss.common.config.FlagManager.StringListFlag
+import com.google.common.collect.ImmutableList
 
 object ConversationIdFlags {
   const val PREFIX = "PcsConvId__"
   val ENABLE = BooleanFlag.create("${PREFIX}enable", false)
   val SECURITY_POLICY_ENABLE = BooleanFlag.create("${PREFIX}enable_security_policy", false)
+  val ALLOWED_NON_PIXEL_DEVICES =
+    StringListFlag.create("${PREFIX}allowed_non_pixel_devices", ImmutableList.of())
 }

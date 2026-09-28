@@ -107,9 +107,11 @@ android_library(
 
 android_library(
     name = "energy_effects_animation_compat",
-    srcs = ["EnergyEffectsAnimationCompat.kt"],
+    srcs = [
+        "EnergyEffectsAnimationCompat.kt",
+        "EnergyEffectsAnimationSpec.kt",
+    ],
     deps = [
-        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/energyeffects",
         "//third_party/java/androidx/compose/runtime",
         "//third_party/java/androidx/compose/ui",
         "//third_party/java/androidx/compose/ui/geometry",

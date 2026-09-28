@@ -18,18 +18,19 @@ package com.google.android.as.oss.delegatedui.api.common;
 
 import option "third_party/protobuf/cpp_features.proto";
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "Common";
 option features.(pb.cpp).enum_name_uses_string_view = false;
 option java_package = "com.google.android.as.oss.delegatedui.api.common";
 
-message DelegatedUiClientId {
+export message DelegatedUiClientId {
   // The package name of the client app.
   string client_package_name = 1;
   DelegatedUiUseCase use_case = 2;
 }
 
 // Next ID: 9
-message DelegatedUiClientInputs {
+export message DelegatedUiClientInputs {
   // Client data to use to generate remote content.
   common.DelegatedUiIngressData ingress_data = 1;
 
@@ -73,7 +74,7 @@ message DelegatedUiClientInputs {
   bool no_touch_hint = 8;
 }
 
-message DelegatedUiDataProviderInfo {
+export message DelegatedUiDataProviderInfo {
   enum DelegatedUiDataProvider {
     DATA_PROVIDER_UNSPECIFIED = 0;
 
@@ -90,19 +91,19 @@ message DelegatedUiDataProviderInfo {
 // Client extensions
 
 // Ingress data from clients to the delegated UI service.
-message DelegatedUiIngressData {
+export message DelegatedUiIngressData {
   extensions 16 to 100;
 }
 
 // Describes the client's delegated UI use-case.
-message DelegatedUiUseCase {
+export message DelegatedUiUseCase {
   extensions 16 to 100;
 }
 
 // Hints from the delegated UI service to the calling client, adding
 // additional information about the currently rendered remote content. The
 // hints would be sent to calling client without any user consent (i.e. click).
-enum DelegatedUiHint {
+export enum DelegatedUiHint {
   HINT_UNSPECIFIED = 0;
 
   // Hint that indicates that the currently rendered remote content may contain

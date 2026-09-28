@@ -30,11 +30,10 @@
 
     <ImageView
         android:id="@+id/consent_toggle_icon"
-        android:layout_width="24sp"
-        android:layout_height="24sp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:layout_marginStart="6dp"
         android:layout_marginEnd="14dp"
-        android:layout_gravity="center_vertical"
         android:visibility="gone"
         android:tint="?attr/colorOnSurface"
         android:contentDescription="@null"
@@ -48,6 +47,7 @@
         android:layout_marginEnd="12dp"
         android:textColor="?attr/colorOnSurface"
         android:textAppearance="?attr/textAppearanceLabelLarge"
+        android:includeFontPadding="false"
         android:maxLines="2"
         android:ellipsize="end"
         android:visibility="gone" />
@@ -57,7 +57,6 @@
         app:thumbIcon="@drawable/super_icon_consent_thumb_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
         android:clickable="false"
         android:focusable="false"
         android:importantForAccessibility="no" />

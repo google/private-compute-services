@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
 edition = "2024";
 
 package google.internal.abuse.ondevicesafety.v1alpha;
 
 import "google/api/annotations.proto";
 
+option features.default_symbol_visibility = LOCAL_ALL;
 option features.field_presence = IMPLICIT;
 option java_outer_classname = "ProgramBlobServiceProto";
 option java_package = "com.google.android.as.oss.pd.service.api.proto";
@@ -34,7 +36,7 @@ service ProgramBlobService {
 }
 
 // Label expresses a generic constraint in blob selection.
-message Label {
+export message Label {
   string attribute = 1;
   string value = 2;
 }
@@ -93,7 +95,7 @@ message CryptoKeys {
 
 // Metadata is the wrapper of all the device information to be sent in the
 // DownloadBlobRequest rpc.
-message Metadata {
+export message Metadata {
   // Constraints placed on the blob in blob selection.
   BlobConstraints blob_constraints = 1;
   Counters counters = 2;

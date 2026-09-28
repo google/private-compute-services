@@ -24,6 +24,7 @@ import com.google.android.`as`.oss.common.security.api.PackageSecurityInfo
 import com.google.android.`as`.oss.common.security.api.PackageSecurityInfoList
 import com.google.android.`as`.oss.common.security.config.PccSecurityConfig
 import com.google.android.`as`.oss.conversationid.config.ConversationIdConfig
+import com.google.common.flogger.GoogleLogger
 
 /**
  * Validates binder caller's app signature. Only allow Gboard and ASI to call the ConversationId
@@ -35,6 +36,24 @@ class ServiceValidator(
 ) {
   fun isPixel(): Boolean {
     return Build.BRAND.contains("google", ignoreCase = true)
+  }
+
+  fun isDeviceAllowed(): Boolean {
+    val isPixel = isPixel()
+    val device = Build.DEVICE
+    val allowedDevices = configReader.config.allowedNonPixelDevices
+    val isAllowed = isPixel || allowedDevices.contains(device)
+    logger
+      .atInfo()
+      .log(
+        "isDeviceAllowed: isPixel=%b, brand=%s, device=%s, allowedDevices=%s, result=%b",
+        isPixel,
+        Build.BRAND,
+        device,
+        allowedDevices,
+        isAllowed,
+      )
+    return isAllowed
   }
 
   fun validateGboardCaller(context: Context, callingUid: Int): Boolean {
@@ -59,13 +78,21 @@ class ServiceValidator(
     packageSecurityInfo: PackageSecurityInfo,
   ): Boolean {
     if (!configReader.config.enableSecurityPolicy) {
+      logger.atInfo().log("validateCaller: security policy disabled, skipping check.")
       return true // Skip security policy check.
     }
-    return SecurityPolicyUtils.isCallerAuthorized(
-      PackageSecurityInfoList.newBuilder().addPackageSecurityInfos(packageSecurityInfo).build(),
-      context,
-      callingUid,
-      /* allowTestKeys= */ true,
-    )
+    val isAuthorized =
+      SecurityPolicyUtils.isCallerAuthorized(
+        PackageSecurityInfoList.newBuilder().addPackageSecurityInfos(packageSecurityInfo).build(),
+        context,
+        callingUid,
+        /* allowTestKeys= */ true,
+      )
+    logger.atInfo().log("validateCaller: callingUid=%d, isAuthorized=%b", callingUid, isAuthorized)
+    return isAuthorized
+  }
+
+  companion object {
+    private val logger = GoogleLogger.forEnclosingClass()
   }
 }

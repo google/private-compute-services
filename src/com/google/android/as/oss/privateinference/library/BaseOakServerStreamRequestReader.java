@@ -27,6 +27,7 @@ import com.google.android.as.oss.privateinference.service.api.proto.SessionIniti
 import com.google.common.flogger.GoogleLogger;
 import com.google.oak.client.grpc.StreamObserverSessionClient;
 import com.google.protobuf.ByteString;
+import com.google.search.mdi.privatearatea.proto.PrivateBackend;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.io.InputStream;
@@ -199,6 +200,11 @@ public class BaseOakServerStreamRequestReader
           return IpBlindingMode.IP_BLINDING_MODE_ENABLED;
         }
         return ipBlindingMode;
+      }
+
+      @Override
+      public PrivateBackend getProxyBackend() {
+        return request.getSessionConfiguration().getProxyBackendName();
       }
     };
   }

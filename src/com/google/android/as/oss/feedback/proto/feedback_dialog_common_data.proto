@@ -16,16 +16,20 @@ edition = "2024";
 
 package com.google.android.as.oss.feedback.api;
 
+
 option java_outer_classname = "FeedbackDialogCommonDataOuterClass";
 option java_package = "com.google.android.as.oss.feedback.api";
 
 message FeedbackDialogCommonData {
   // Label shown when donation data can't be fetched.
-  string donation_data_failure_label = 1;
+  string donation_data_failure_label = 1
+     ;
 
   // Button text shown when donation data can't be fetched.
-  string donation_data_failure_button_text = 2;
+  string donation_data_failure_button_text = 2
+     ;
 
   // Back button content description when donation data can't be fetched.
-  string donation_data_failure_back_button_content_description = 3;
+  string donation_data_failure_back_button_content_description = 3
+     ;
 }

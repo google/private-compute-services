@@ -1,0 +1,80 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+edition = "2023";
+
+package mdi.privatearatea;
+
+import "src/com/google/android/as/oss/privateinference/api/anonymous_token_request.proto";
+import "src/com/google/android/as/oss/privateinference/api/device_attestation_request.proto";
+import "third_party/oak/proto/session/session.proto";
+
+option java_multiple_files = true;
+option java_package = "com.google.search.mdi.privatearatea.proto";
+option java_outer_classname = "PrivateProxyServiceProto";
+
+// Service for proxying requests to private backends.
+service PrivateProxyService {
+  // Starts a Noise session by performing remote attestation, and a secure
+  // handshake. <http://www.noiseprotocol.org/noise.html>
+  //
+  // After a secure session is established, the client and server exchange a
+  // stream of encrypted messages. The client sends serialized `ProxyRequest`
+  // in the encrypted payload, and the server responds with serialized
+  // `ProxyResponse` in the encrypted payload.
+  rpc StartNoiseSession(stream oak.session.v1.SessionRequest)
+      returns (stream oak.session.v1.SessionResponse) {
+    option deadline = 600.0;
+  }
+}
+
+// Actual payload sent by the client in `StartNoiseSession`'s request stream.
+// The first message in the stream must be an `AuthorizationRequest`.
+// Next ID: 3
+message ProxyRequest {
+  oneof request {
+    AuthorizationRequest authorization_request = 1;
+    ProxyMessage proxy_message = 2;
+  }
+}
+
+// Actual payload sent by the server in `StartNoiseSession`'s response stream.
+// Next ID: 2
+message ProxyResponse {
+  ProxyMessage proxy_message = 1;
+}
+
+// Authorization request sent by the client in `StartNoiseSession`'s request
+// stream. This should be the first message in the stream.
+// Next ID: 4
+message AuthorizationRequest {
+  PrivateBackend backend_name = 1;
+
+  oneof auth_request {
+    DeviceAttestationRequest device_attestation_request = 2;
+    AnonymousTokenRequest anonymous_token_request = 3;
+  }
+}
+
+// Enumeration of supported backends.
+enum PrivateBackend {
+  BACKEND_UNSPECIFIED = 0;
+  BACKEND_CONFIGURATION_TARGETING_SERVICE = 1001;
+  BACKEND_CHROME_MODEL_EXECUTION_SERVICE = 1002;
+}
+
+// The proto used to be extended by individual backend request/response protos.
+message ProxyMessage {
+  extensions 530000000 to max
+}

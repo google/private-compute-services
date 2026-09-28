@@ -40,6 +40,7 @@ import java.util.UUID
  * @property cardActionDetails The action details of the card click event.
  * @property cardTitle The state of the card title/insight.
  * @property icon The optional icon to be displayed with the card title.
+ * @property showBrandedIcon Whether to render the title icon with branded effects (gradient).
  * @property titleInsight The original title insight used for logging.
  * @property dismissInsight The dismiss button insight for the data. If null, do not render the
  *   dismiss button.
@@ -53,6 +54,7 @@ data class CardUiData<out C : DeprecatedUiCardContext>(
   val cardActionDetails: InsightActionDetails? = null,
   val cardTitle: CardTitle? = null,
   val icon: Icon? = null,
+  val showBrandedIcon: Boolean = false,
   val titleInsight: DisplayableInsight? = null,
   val dismissInsight: ServerSideCloseInsight? = null,
   val attribution: Attribution? = null,

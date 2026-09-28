@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright 2025 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+
+<resources>
+  <!-- TODO: Clean up temporary l10n strings once CardInsight migration lands in 26Q4. -->
+  <!-- Content description for the Thumbs Up feedback button on Magic Cue cards. If the user clicks on this button, a feedback bottom sheet will appear and the user can provide the appropriate feedback for the retrieved data. [CHAR LIMIT=NONE] -->
+  <string name="attribution_thumbs_up_button_content_description">Good feedback</string>
+  <!-- Content description for the Thumbs Down feedback button on Magic Cue cards. If the user clicks on this button, a feedback bottom sheet will appear and the user can provide the appropriate feedback for the retrieved data. [CHAR LIMIT=NONE] -->
+  <string name="attribution_thumbs_down_button_content_description">Bad feedback</string>
+</resources>
