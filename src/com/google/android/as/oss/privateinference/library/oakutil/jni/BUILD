@@ -37,6 +37,7 @@ rust_library(
         "//third_party/oak/oak_time",
         "//third_party/rust/anyhow/v1:anyhow",  # buildcleaner: keep
         "//third_party/rust/jni/v0_21:jni",  # buildcleaner: keep
+        "@oak_crates_index//:prost",
     ],
     alwayslink = 1,
 )

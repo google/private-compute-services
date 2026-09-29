@@ -52,6 +52,16 @@ You can learn more about Private Compute Services in this
     downloading of resources to the device with support for a binary
     transparency log based verification, ensuring these are the official
     resources provided by Google.
+*   Confidential inference: Enables Private Compute Core features to send
+    inference requests to a remote Private Aratea service through PCS. PCS
+    establishes an Oak encrypted session, authorizes the request, and forwards
+    opaque request bytes; the server-side inference workload and request schema
+    are not included in this repository.
+
+For confidential inference, workload attestation can be configured with Oak
+reference values. When present, PCS requires the peer to present matching
+workload evidence during Oak session setup and fails closed before sending
+inference data if that proof is missing or does not verify.
 
 ## Note on dependencies
 
