@@ -182,7 +182,6 @@ internal constructor(
   @Composable
   fun MessageClientActionChip(clientActionChip: ClientActionChip) {
     Log.i(TAG, "[MessagesEmbedded] MessageClientActionChip: ${clientActionChip.title}")
-    val context = LocalContext.current
     val info = LocalInsightSurfaceClientInfo.current
     MessageOutlinedButton(
       chipOnClick = {
@@ -196,7 +195,7 @@ internal constructor(
         subtitle = clientActionChip.subtitle,
         contentDescription = clientActionChip.contentDescription,
         icon = clientActionChip.icon,
-        isIconTintable = clientActionChip.trailingIcon != null && !clientActionChip.isIconGradient,
+        isIconTintable = clientActionChip.isIconTintable,
         isIconGradient = clientActionChip.isIconGradient,
         trailingIcon = clientActionChip.trailingIcon,
       )
@@ -206,7 +205,6 @@ internal constructor(
   @Composable
   internal fun MessageSuggestionChip(suggestionChip: SuggestionChip) {
     Log.i(TAG, "[MessagesEmbedded] MessageSuggestionChip: ${suggestionChip.title}")
-    val context = LocalContext.current
     val info = LocalInsightSurfaceClientInfo.current
     MessageOutlinedButton(
       chipOnClick = {
@@ -220,7 +218,7 @@ internal constructor(
         subtitle = suggestionChip.subtitle,
         contentDescription = suggestionChip.contentDescription,
         icon = suggestionChip.icon,
-        isIconTintable = !suggestionChip.isIconGradient,
+        isIconTintable = suggestionChip.isIconTintable,
         isIconGradient = suggestionChip.isIconGradient,
       )
     }

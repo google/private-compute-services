@@ -18,7 +18,9 @@ package com.google.android.as.oss.privateinference.library;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.android.as.oss.privateinference.library.oakutil.PrivateInferenceOakAsyncClient;
+import com.google.android.as.oss.logging.PcsStatsEnums.CountMetricId;
+import com.google.android.as.oss.privateinference.library.oakutil.OakAsyncClient;
+import com.google.android.as.oss.privateinference.logging.PcsStatsLogger;
 import com.google.android.as.oss.privateinference.service.api.proto.IpBlindingMode;
 import com.google.android.as.oss.privateinference.service.api.proto.PcsPrivateInferenceFeatureName;
 import com.google.android.as.oss.privateinference.service.api.proto.PrivateInferenceRequest;
@@ -32,6 +34,7 @@ import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 
@@ -60,17 +63,18 @@ public class BaseOakServerStreamRequestReader
     implements StreamObserver<PrivateInferenceSessionRequest> {
 
   @Nullable public final InputStream parcelInputStream;
-  private final PrivateInferenceOakAsyncClient oakAsyncClient;
+  private final OakAsyncClient oakAsyncClient;
   private final StreamObserverSessionClient.OakSessionStreamObserver
       oakServerStreamResponseObserver;
 
   private final AtomicReference<StreamObserver<ByteString>> directOakClientRequestObserver;
   private final boolean enableTlsBasedSession;
+  @Nullable private final PcsStatsLogger pcsStatsLogger;
 
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
 
   public BaseOakServerStreamRequestReader(
-      PrivateInferenceOakAsyncClient oakAsyncClient,
+      OakAsyncClient oakAsyncClient,
       StreamObserverSessionClient.OakSessionStreamObserver oakServerStreamResponseObserver,
       AtomicReference<StreamObserver<ByteString>> directOakClientRequestObserver,
       @Nullable InputStream parcelInputStream) {
@@ -79,20 +83,38 @@ public class BaseOakServerStreamRequestReader
         oakServerStreamResponseObserver,
         directOakClientRequestObserver,
         parcelInputStream,
-        /* enableTlsBasedSession= */ false);
+        /* enableTlsBasedSession= */ false,
+        /* pcsStatsLogger= */ null);
   }
 
   public BaseOakServerStreamRequestReader(
-      PrivateInferenceOakAsyncClient oakAsyncClient,
+      OakAsyncClient oakAsyncClient,
       StreamObserverSessionClient.OakSessionStreamObserver oakServerStreamResponseObserver,
       AtomicReference<StreamObserver<ByteString>> directOakClientRequestObserver,
       @Nullable InputStream parcelInputStream,
       boolean enableTlsBasedSession) {
+    this(
+        oakAsyncClient,
+        oakServerStreamResponseObserver,
+        directOakClientRequestObserver,
+        parcelInputStream,
+        enableTlsBasedSession,
+        /* pcsStatsLogger= */ null);
+  }
+
+  public BaseOakServerStreamRequestReader(
+      OakAsyncClient oakAsyncClient,
+      StreamObserverSessionClient.OakSessionStreamObserver oakServerStreamResponseObserver,
+      AtomicReference<StreamObserver<ByteString>> directOakClientRequestObserver,
+      @Nullable InputStream parcelInputStream,
+      boolean enableTlsBasedSession,
+      @Nullable PcsStatsLogger pcsStatsLogger) {
     this.parcelInputStream = parcelInputStream;
     this.oakAsyncClient = oakAsyncClient;
     this.oakServerStreamResponseObserver = oakServerStreamResponseObserver;
     this.directOakClientRequestObserver = directOakClientRequestObserver;
     this.enableTlsBasedSession = enableTlsBasedSession;
+    this.pcsStatsLogger = pcsStatsLogger;
   }
 
   @Override
@@ -100,14 +122,12 @@ public class BaseOakServerStreamRequestReader
     if (privateInferenceSessionRequest.hasSessionInitializationRequest()) {
       SessionInitializationRequest initializationRequest =
           privateInferenceSessionRequest.getSessionInitializationRequest();
+      PrivateInferenceRequestMetadata requestMetadata =
+          buildPrivateInferenceRequestMetadata(initializationRequest);
       if (enableTlsBasedSession) {
-        oakAsyncClient.startTlsSession(
-            buildPrivateInferenceRequestMetadata(initializationRequest),
-            oakServerStreamResponseObserver);
+        startTlsSessionWithFallback(requestMetadata);
       } else {
-        oakAsyncClient.startNoiseSession(
-            buildPrivateInferenceRequestMetadata(initializationRequest),
-            oakServerStreamResponseObserver);
+        oakAsyncClient.startNoiseSession(requestMetadata, oakServerStreamResponseObserver);
       }
     } else if (privateInferenceSessionRequest.hasInferenceRequest()) {
       // oakClientStreamObserver should have been created in during the handshake.
@@ -207,6 +227,45 @@ public class BaseOakServerStreamRequestReader
         return request.getSessionConfiguration().getProxyBackendName();
       }
     };
+  }
+
+  private void startTlsSessionWithFallback(PrivateInferenceRequestMetadata requestMetadata) {
+    AtomicBoolean fallbackTriggered = new AtomicBoolean(false);
+    AtomicBoolean sessionOpened = new AtomicBoolean(false);
+    var streamObserverWithNoiseFallback =
+        new StreamObserverSessionClient.OakSessionStreamObserver() {
+
+          @Override
+          public void onSessionOpen(StreamObserver<ByteString> clientRequests) {
+            sessionOpened.set(true);
+            oakServerStreamResponseObserver.onSessionOpen(clientRequests);
+          }
+
+          @Override
+          public void onNext(ByteString byteString) {
+            oakServerStreamResponseObserver.onNext(byteString);
+          }
+
+          @Override
+          public void onError(Throwable t) {
+            if (!sessionOpened.get() && fallbackTriggered.compareAndSet(false, true)) {
+              if (pcsStatsLogger != null) {
+                pcsStatsLogger.logEventCount(CountMetricId.PCS_PI_TLS_FAILURE_NOISE_FALLBACK);
+              }
+              logger.atWarning().withCause(t).log(
+                  "TLS-based session creation failed, falling back to Noise-based session.");
+              oakAsyncClient.startNoiseSession(requestMetadata, oakServerStreamResponseObserver);
+            } else {
+              oakServerStreamResponseObserver.onError(t);
+            }
+          }
+
+          @Override
+          public void onCompleted() {
+            oakServerStreamResponseObserver.onCompleted();
+          }
+        };
+    oakAsyncClient.startTlsSession(requestMetadata, streamObserverWithNoiseFallback);
   }
 
   public void tryCloseInputStream(@Nullable InputStream inputStream) {

@@ -98,7 +98,8 @@ class FeedbackActivity : Hilt_FeedbackActivity() {
                           FeedbackRatingSentiment.RATING_SENTIMENT_THUMBS_UP
                     ) {
                       this@FeedbackActivity.launchPostFeedbackIntent(
-                        entityFeedbackDialogData.onNegativeFeedbackIntentUri
+                        entityFeedbackDialogData.onNegativeFeedbackIntentUri,
+                        event.interactionId ?: "",
                       )
                     }
                   }
@@ -160,11 +161,21 @@ class FeedbackActivity : Hilt_FeedbackActivity() {
     }
   }
 
-  private fun launchPostFeedbackIntent(uri: String) {
+  private fun launchPostFeedbackIntent(uri: String, interactionId: String? = "") {
     try {
       val postFeedbackIntent =
         Intent.parseUri(uri, Intent.URI_INTENT_SCHEME).apply {
           addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+          putExtra("EXTRA_ISSUE_TITLE", "[Pcs Feedback] Link Key: Interaction ID $interactionId")
+          val interactionKeyComment = "Interaction ID: $interactionId"
+          val existingComment = getStringExtra("EXTRA_ADDITIONAL_COMMENT")
+          val updatedComment =
+            if (existingComment.isNullOrBlank()) {
+              interactionKeyComment
+            } else {
+              "$interactionKeyComment\n$existingComment"
+            }
+          putExtra("EXTRA_ADDITIONAL_COMMENT", updatedComment)
         }
       startActivity(postFeedbackIntent)
     } catch (e: Exception) {

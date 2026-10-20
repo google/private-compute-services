@@ -89,13 +89,10 @@ android_library(
 android_library(
     name = "cards_decoders",
     exports = [
-        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/calendar:decoder_module",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/decoder:card_decoder_module",
-        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/flight:decoder_module",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/grid:decoder_module",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/imagegallery:decoder_module",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/loading:decoder_module",
-        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/locationpreview:decoder_module",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/placeholder:decoder_module",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/stackcard:decoder_module",
     ],
@@ -104,12 +101,9 @@ android_library(
 android_library(
     name = "cards_renderers",
     exports = [
-        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/calendar:renderer_module",
-        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/flight:renderer_module",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/grid:renderer_module",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/imagegallery:renderer_module",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/loading:renderer_module",
-        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/locationpreview:renderer_module",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/placeholder:renderer_module",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/renderer:card_renderer_module",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/internal/templates/richcard/stackcard:renderer_module",

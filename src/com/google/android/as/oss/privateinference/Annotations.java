@@ -108,6 +108,11 @@ public final class Annotations {
   @Retention(RetentionPolicy.RUNTIME)
   public @interface OakCtCertificateFilename {}
 
+  /** Annotation for the OakCT namespace. */
+  @Qualifier
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface OakCtNamespace {}
+
   /** Annotation for the TCA root certificate URL. */
   @Qualifier
   @Retention(RetentionPolicy.RUNTIME)

@@ -22,6 +22,7 @@ import com.google.android.as.oss.common.config.FlagManagerFactory;
 import com.google.android.as.oss.common.config.FlagNamespace;
 import com.google.android.as.oss.privateinference.Annotations.OakCtCertificateFilename;
 import com.google.android.as.oss.privateinference.Annotations.OakCtCertificateUrl;
+import com.google.android.as.oss.privateinference.Annotations.OakCtNamespace;
 import com.google.android.as.oss.privateinference.Annotations.PiServerChannelIdleTimeoutMinutes;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceAttachCertificateHeader;
 import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceEnableArateaTokenCache;
@@ -166,6 +167,12 @@ interface PrivateInferenceConfigModule {
   @OakCtCertificateFilename
   static String provideOakCtCertificateFilename(ConfigReader<PrivateInferenceConfig> configReader) {
     return configReader.getConfig().oakCtCertificateFilename();
+  }
+
+  @Provides
+  @OakCtNamespace
+  static String provideOakCtNamespace(ConfigReader<PrivateInferenceConfig> configReader) {
+    return configReader.getConfig().oakCtNamespace();
   }
 
   @Provides

@@ -19,11 +19,12 @@ package com.google.android.as.oss.dataattribution.proto;
 import "src/com/google/android/as/oss/feedback/proto/feedback_dialog_common_data.proto";
 
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "AttributionDialog";
 option java_package = "com.google.android.as.oss.dataattribution.proto";
 
 // The data required to populate [DataAttributionDialog].
-message AttributionDialogData {
+export message AttributionDialogData {
   // the header of the dialog.
   string title = 1;
 

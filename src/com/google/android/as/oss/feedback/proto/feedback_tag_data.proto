@@ -17,11 +17,12 @@ edition = "2024";
 package com.google.android.as.oss.feedback.api;
 
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "FeedbackTagDataOuterClass";
 option java_package = "com.google.android.as.oss.feedback.api";
 
 // Represents a feedback chip.
-message FeedbackTagData {
+export message FeedbackTagData {
   // The label of the tag.
   string label = 1;
 
@@ -42,6 +43,7 @@ message FeedbackTagData {
 
 message FeedbackGroundTruthItem {
   string text = 1;
+
   string source_app = 2;
 }
 
@@ -57,7 +59,7 @@ enum FeedbackRatingTagSource {
 }
 
 // The sentiment of a feedback rating.
-enum FeedbackRatingSentiment {
+export enum FeedbackRatingSentiment {
   RATING_SENTIMENT_UNDEFINED = 0;
   RATING_SENTIMENT_THUMBS_UP = 1;
   RATING_SENTIMENT_THUMBS_DOWN = 2;

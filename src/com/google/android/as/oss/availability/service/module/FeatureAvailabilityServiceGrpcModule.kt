@@ -70,11 +70,28 @@ internal object FeatureAvailabilityServiceGrpcModule {
     @ApplicationContext context: Context,
     pccSecurityConfigReader: ConfigReader<PccSecurityConfig>,
   ): SecurityPolicy {
-    return SecurityPolicyUtils.makeSecurityPolicy(
-      pccSecurityConfigReader.config.psiPackageSecurityInfo(),
-      context,
-      /* allowTestKeys= */ !SecurityPolicyUtils.isUserBuild(),
-    ) ?: SecurityPolicies.permissionDenied("No valid security policies configured")
+    val psiPolicy =
+      SecurityPolicyUtils.makeSecurityPolicy(
+        pccSecurityConfigReader.config.psiPackageSecurityInfo(),
+        context,
+        /* allowTestKeys= */ !SecurityPolicyUtils.isUserBuild(),
+      )
+    val asiPolicy =
+      SecurityPolicyUtils.makeSecurityPolicy(
+        pccSecurityConfigReader.config.asiPackageSecurityInfo(),
+        context,
+        /* allowTestKeys= */ !SecurityPolicyUtils.isUserBuild(),
+      )
+    val policies = mutableListOf<SecurityPolicy>()
+    psiPolicy?.let { policies.add(it) }
+    asiPolicy?.let { policies.add(it) }
+    if (policies.isEmpty()) {
+      return SecurityPolicies.permissionDenied("No valid security policies configured")
+    }
+    if (policies.size == 1) {
+      return policies[0]
+    }
+    return SecurityPolicies.anyOf(*policies.toTypedArray())
   }
 
   @Provides

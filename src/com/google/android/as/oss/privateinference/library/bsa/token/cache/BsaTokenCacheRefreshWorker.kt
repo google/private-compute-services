@@ -26,13 +26,13 @@ import androidx.work.ListenableWorker
 import androidx.work.NetworkType
 import androidx.work.Operation
 import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
 import com.google.android.`as`.oss.common.config.ConfigReader
 import com.google.android.`as`.oss.common.config.asFlow
 import com.google.android.`as`.oss.common.initializer.PcsInitializer
+import com.google.android.`as`.oss.common.jobs.SafeWorkManager
 import com.google.android.`as`.oss.privateinference.config.PrivateInferenceConfig
 import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaToken
 import com.google.android.`as`.oss.privateinference.library.bsa.token.ArateaTokenWithoutChallenge
@@ -124,37 +124,38 @@ class BsaTokenCacheRefreshWorker(
     }
 
     private fun onConfig(intervalMinutes: Int) {
-      val workManager = WorkManager.getInstance(appContext)
-      val uniqueWorkName = createWorkName(tokenClass)
-      if (intervalMinutes == PrivateInferenceConfig.CACHE_REFRESH_INTERVAL_NEVER) {
-        latestOperation.value = workManager.cancelUniqueWork(uniqueWorkName = uniqueWorkName)
-        latestRequest.value = null
-      } else {
-        val request =
-          PeriodicWorkRequestBuilder<BsaTokenCacheRefreshWorker>(
-              repeatInterval = Duration.ofMinutes(intervalMinutes.toLong())
+      SafeWorkManager.runWhenUnlocked(appContext) { workManager ->
+        val uniqueWorkName = createWorkName(tokenClass)
+        if (intervalMinutes == PrivateInferenceConfig.CACHE_REFRESH_INTERVAL_NEVER) {
+          latestOperation.value = workManager.cancelUniqueWork(uniqueWorkName = uniqueWorkName)
+          latestRequest.value = null
+        } else {
+          val request =
+            PeriodicWorkRequestBuilder<BsaTokenCacheRefreshWorker>(
+                repeatInterval = Duration.ofMinutes(intervalMinutes.toLong())
+              )
+              .setConstraints(
+                Constraints.Builder()
+                  .setRequiresBatteryNotLow(true)
+                  .setRequiredNetworkType(NetworkType.UNMETERED)
+                  .build()
+              )
+              .setInitialDelay(Duration.ZERO)
+              .setInputData(
+                Data.Builder()
+                  .putString(INPUT_DATA_KEY_TOKEN_TYPE_NAME, tokenClass.stableTokenClassName)
+                  .build()
+              )
+              .setTraceTag(uniqueWorkName)
+              .build()
+          latestOperation.value =
+            workManager.enqueueUniquePeriodicWork(
+              uniqueWorkName = uniqueWorkName,
+              existingPeriodicWorkPolicy = ExistingPeriodicWorkPolicy.UPDATE,
+              request = request,
             )
-            .setConstraints(
-              Constraints.Builder()
-                .setRequiresBatteryNotLow(true)
-                .setRequiredNetworkType(NetworkType.UNMETERED)
-                .build()
-            )
-            .setInitialDelay(Duration.ZERO)
-            .setInputData(
-              Data.Builder()
-                .putString(INPUT_DATA_KEY_TOKEN_TYPE_NAME, tokenClass.stableTokenClassName)
-                .build()
-            )
-            .setTraceTag(uniqueWorkName)
-            .build()
-        latestOperation.value =
-          workManager.enqueueUniquePeriodicWork(
-            uniqueWorkName = uniqueWorkName,
-            existingPeriodicWorkPolicy = ExistingPeriodicWorkPolicy.UPDATE,
-            request = request,
-          )
-        latestRequest.value = request
+          latestRequest.value = request
+        }
       }
     }
   }

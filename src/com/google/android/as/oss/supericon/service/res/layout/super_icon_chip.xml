@@ -24,9 +24,10 @@
     android:layout_gravity="center">
     <View
         android:id="@+id/background"
-        android:layout_gravity="center"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:duplicateParentState="true"/>
     <ImageView
         android:id="@+id/icon"
         android:layout_width="24dp"
@@ -34,5 +35,5 @@
         android:layout_gravity="center"
         android:adjustViewBounds="true"
         android:importantForAccessibility="no"
-        android:scaleType="fitCenter" />
+        android:scaleType="fitCenter"/>
 </FrameLayout>

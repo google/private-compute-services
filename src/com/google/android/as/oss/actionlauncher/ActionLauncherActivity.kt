@@ -73,6 +73,8 @@ class ActionLauncherActivity : Hilt_ActionLauncherActivity() {
     val geminiTextQuery = intent.getStringExtra(Constants.GEMINI_TEXT_QUERY_KEY)
     val shouldAutoSubmit = intent.getBooleanExtra(Constants.SHOULD_AUTO_SUBMIT_KEY, true)
     val shouldAutomate = intent.getBooleanExtra(Constants.SHOULD_AUTOMATE_KEY, false)
+    val shouldUseFullScreenMode =
+      intent.getBooleanExtra(Constants.SHOULD_USE_FULL_SCREEN_MODE_KEY, false)
     val binder = intent.extras?.getBinder("EXTRA_SHARED_MEMORY_BINDER")
 
     scope.launch {
@@ -92,6 +94,7 @@ class ActionLauncherActivity : Hilt_ActionLauncherActivity() {
             geminiTextQuery,
             shouldAutoSubmit,
             shouldAutomate,
+            shouldUseFullScreenMode,
             toastMessageOnFailure,
           )
         logger
@@ -112,6 +115,7 @@ class ActionLauncherActivity : Hilt_ActionLauncherActivity() {
     inputText: String,
     autoSubmit: Boolean,
     automate: Boolean,
+    useFullScreenMode: Boolean,
     toastMessageOnFailure: String? = null,
   ): Boolean {
     val requestReceivedAt = Durations.fromMillis(timeSource.now().toEpochMilli())
@@ -122,6 +126,7 @@ class ActionLauncherActivity : Hilt_ActionLauncherActivity() {
           query = inputText
           shouldAutoSubmit = autoSubmit
           shouldAutomate = automate
+          shouldUseFullScreenMode = useFullScreenMode
         }
         requestStartTime = requestReceivedAt
       }

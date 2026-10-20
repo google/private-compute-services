@@ -30,6 +30,14 @@ data class GboardHint(
   val extraInfo: Bundle? = null,
 ) : PrototypeHint(GboardHintId, this) {
 
+  /** Maximum number of insights the client can render for this hint. */
+  val maxCount: Int?
+    get() = extraInfo?.getIntOrNull(EXTRA_KEY_MAX_COUNT)
+
+  /** Index, within the collection of insights returned for this query, of the one to render. */
+  val itemIndex: Int?
+    get() = extraInfo?.getIntOrNull(EXTRA_KEY_ITEM_INDEX)
+
   // This should not be here as it only affects the visual rendering of a chip.
   // TODO: Move this to another hint.
   val positionalState: PositionalState?
@@ -45,6 +53,8 @@ data class GboardHint(
 
   companion object : Creator {
     const val EXTRA_KEY_POSITIONAL_STATE = "positional_state"
+    const val EXTRA_KEY_MAX_COUNT = "max_count"
+    const val EXTRA_KEY_ITEM_INDEX = "item_index"
 
     private const val KEY_USER_INPUT = "user_input"
     private const val KEY_USER_QUERY = "user_query"
@@ -85,3 +95,6 @@ data class GboardHint(
     }
   }
 }
+
+/** Reads an [Int] that a client may not have written at all, as opposed to writing `0`. */
+private fun Bundle.getIntOrNull(key: String): Int? = if (containsKey(key)) getInt(key) else null

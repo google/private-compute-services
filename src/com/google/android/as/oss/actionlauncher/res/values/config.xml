@@ -20,8 +20,10 @@
 <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner
          LAUNCH_ACTION permissions. The digest should be computed over the DER encoding
          of the trusted certificate using the SHA-256 digest algorithm. -->
-    <string-array name="config_action_launcher_launch_action_permission_known_certs">
+    <string-array name="config_action_launcher_launch_action_permission_known_certs" translatable="false">
     <!-- PSI Prod Cert -->
     <item>d439bedff4c060a637ffc07c33ea9fa04a091165c40ee883717c2a89bd5a908f</item>
+    <!-- ASI Prod Cert -->
+    <item>3af39ab967aaa5d279e49b5f769cb66e40799838bc8799343ee57ae435d2455b</item>
     </string-array>
 </resources>

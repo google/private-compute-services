@@ -20,21 +20,32 @@ import android.os.Bundle
 import com.android.personalcontext.ace.client.prototype.PrototypeHint
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.AaCardMetadataHintId
 
-/** A hint for the AA Card use case. */
+/**
+ * A hint for the AA Card use case.
+ *
+ * @property clientSessionId Client session UUID.
+ * @property dataSourceBlockList List of String representing blocklisted data sources. Note: If user
+ *   disallows GMAIL, WONDER_CARD should also be passed.
+ */
 data class AaCardMetadataHint(
   /* Client session UUID. */
-  val clientSessionId: String
-  // TODO: add more fields
+  val clientSessionId: String,
+  val dataSourceBlockList: List<String> = emptyList(),
 ) : PrototypeHint(AaCardMetadataHintId, this) {
 
   override fun exportDataToBundle(bundle: Bundle) {
     bundle.putString(KEY_CLIENT_SESSION_ID, clientSessionId)
+    bundle.putStringArrayList(KEY_DATA_SOURCE_BLOCK_LIST, ArrayList(dataSourceBlockList))
   }
 
   companion object : Creator {
     private const val KEY_CLIENT_SESSION_ID = "client_session_id"
+    private const val KEY_DATA_SOURCE_BLOCK_LIST = "data_source_block_list"
 
     override fun create(bundle: Bundle): PrototypeHint =
-      AaCardMetadataHint(clientSessionId = bundle.getString(KEY_CLIENT_SESSION_ID) ?: "")
+      AaCardMetadataHint(
+        clientSessionId = bundle.getString(KEY_CLIENT_SESSION_ID) ?: "",
+        dataSourceBlockList = bundle.getStringArrayList(KEY_DATA_SOURCE_BLOCK_LIST) ?: emptyList(),
+      )
   }
 }

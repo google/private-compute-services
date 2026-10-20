@@ -13,7 +13,6 @@
 # limitations under the License.
 
 load("@bazel_rules_android//android:rules.bzl", "android_library", "kt_jvm_library_with_nullness_check")
-load("//java/com/google/net/cronet/providers_checker:providers_checker.bzl", "PROVIDERS", "check_bundled_cronet_providers")
 
 package(default_visibility = [
     "//visibility:public",
@@ -73,16 +72,6 @@ android_library(
         "@maven//:com_google_flogger_google_extensions",
         "@maven//:io_grpc_grpc_api",
         "@maven//:javax_inject_javax_inject",
-    ],
-)
-
-check_bundled_cronet_providers(
-    name = "cronet_providers_checker_release",
-    binary_target = "//src/com/google/android/as/oss:pcs-release",
-    expected_providers = [
-        PROVIDERS.HTTPENGINE,
-        PROVIDERS.STATICALLY_LINKED_CRONET,
-        PROVIDERS.FALLBACK_CRONET,
     ],
 )
 

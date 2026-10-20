@@ -106,15 +106,35 @@ constructor(
   override fun handleInsight(
     publishedInsight: IPublishedContextInsight
   ): (@Composable () -> Unit)? {
-    var insight = publishedInsight.insight
-    if (insight is InsightCollection) {
-      if (insight.insights.size != 1) return null
-      insight = insight.insights[0] ?: return null
-    }
-    if (insight !is DisplayInsight) return null
-    val gboardHint = insight.findPrototypeHint<GboardHint>() ?: return null
-    val isNesta = gboardHint.queryCategory == GboardHint.QueryCategory.NESTA
+    val rawInsight = publishedInsight.insight
+    val displayInsights =
+      when (rawInsight) {
+        is InsightCollection -> rawInsight.insights.filterIsInstance<DisplayInsight>()
+        is DisplayInsight -> listOf(rawInsight)
+        else -> emptyList()
+      }
+
+    if (displayInsights.isEmpty()) return null
+
+    val gboardHint = displayInsights.first().findPrototypeHint<GboardHint>() ?: return null
     val positionalState = gboardHint.positionalState
+    // A client that sends no item index also sends no max count, so PSI limits the query to a
+    // single insight and index 0 is the only valid target.
+    val targetIndex = gboardHint.itemIndex ?: 0
+    val insight = displayInsights.getOrNull(targetIndex) ?: return null
+    val maxCount = gboardHint.maxCount ?: 1
+    val effectivePositionalState =
+      if (maxCount > 1 && displayInsights.size < maxCount) {
+        when {
+          displayInsights.size == 1 -> GboardHint.PositionalState.SINGLE
+          targetIndex == 0 -> GboardHint.PositionalState.FIRST
+          targetIndex == displayInsights.lastIndex -> GboardHint.PositionalState.LAST
+          else -> positionalState
+        }
+      } else {
+        positionalState
+      }
+    val isNesta = gboardHint.queryCategory == GboardHint.QueryCategory.NESTA
     if (isNesta) {
       logger.atInfo().log("Entering GboardHint.QueryCategory.NESTA")
     } else {
@@ -128,7 +148,7 @@ constructor(
         energyEffectsAnimationCompat = energyEffectsAnimationCompat,
         themeCompat = themeCompat,
         isNesta = isNesta,
-        positionalState = positionalState,
+        positionalState = effectivePositionalState,
       )
     }
   }
@@ -176,7 +196,7 @@ fun GboardVisualizer(
             }
           )
           .clickable {
-            info.onReceiveInsight(publishedInsight.insight)
+            info.onReceiveInsight(insight)
             personalContextManager?.reportInsightEvent(
               publishedInsight.unwrap() ?: return@clickable,
               InsightEvent.EVENT_USER_TAP,
@@ -261,7 +281,7 @@ private fun PhysicalKeyNavigationEffect(
 
   LaunchedEffect(isKeyEventVerified, isTrustedPresentation) {
     if (!isKeyEventVerified || !isTrustedPresentation) return@LaunchedEffect
-    info.onReceiveInsight(publishedInsight.insight)
+    info.onReceiveInsight(currentInsight)
     personalContextManager?.reportInsightEvent(
       publishedInsight.unwrap() ?: return@LaunchedEffect,
       InsightEvent.EVENT_USER_TAP,
@@ -409,11 +429,12 @@ fun Icon.toBitmap(context: Context): Bitmap? {
 fun GboardChipText(title: String, subtitle: String?, modifier: Modifier = Modifier) {
   val embeddedTextColor = EmbeddedTheme.InlineSuggestion.colorScheme.text
   // Android OS's inlineSuggestion style attributes do not include a secondary/subtitle text color.
-  // In Gboard's styles.xml, android:strokeColor is set to ?colorOutline, so we repurpose
-  // embeddedStrokeColor here to style the subtitle text, falling back to MaterialTheme outline.
+  // In Gboard's styles.xml, android:strokeColor is set to ?colorOnSurfaceVariant, so we repurpose
+  // embeddedStrokeColor here to style the subtitle text, falling back to MaterialTheme
+  // onSurfaceVariant.
   val embeddedStrokeColor = EmbeddedTheme.InlineSuggestion.colorScheme.stroke
   val textColor = embeddedTextColor ?: MaterialTheme.colorScheme.onSurface
-  val subtitleColor = embeddedStrokeColor ?: MaterialTheme.colorScheme.outline
+  val subtitleColor = embeddedStrokeColor ?: MaterialTheme.colorScheme.onSurfaceVariant
   Layout(
     content = {
       Text(

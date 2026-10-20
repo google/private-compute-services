@@ -17,10 +17,11 @@ edition = "2024";
 package com.google.android.as.oss.feedback.api;
 
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "FeedbackDialogCommonDataOuterClass";
 option java_package = "com.google.android.as.oss.feedback.api";
 
-message FeedbackDialogCommonData {
+export message FeedbackDialogCommonData {
   // Label shown when donation data can't be fetched.
   string donation_data_failure_label = 1
      ;

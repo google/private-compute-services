@@ -16,7 +16,6 @@ load("@bazel_rules_android//android:rules.bzl", "android_library")
 
 package(default_visibility = [
     "//java/com/google/android/apps/inputmethod/libs/jarvis:__subpackages__",
-    "//java/com/google/android/apps/inputmethod/libs/jarvis/prompt:__subpackages__",
     "//java/com/google/android/libraries/inputmethod:__subpackages__",
     "//javatests/com/google/android/libraries/inputmethod/supericon:__subpackages__",
     "//visibility:public",

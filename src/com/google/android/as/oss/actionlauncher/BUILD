@@ -31,7 +31,6 @@ android_library(
         "//src/com/google/android/as/oss/actionlauncher/config",
         "//src/com/google/android/as/oss/availability/api/agenticintegration:agentic_integration_service_api",
         "//src/com/google/android/as/oss/availability/api/agenticintegration:error_code_kt_proto_lite",
-        "//src/com/google/android/as/oss/availability/service/impl:agentic_integration_service_grpc_client_module",
         "//src/com/google/android/as/oss/common",
         "//src/com/google/android/as/oss/common/config",
         "//src/com/google/android/as/oss/common/security:security_policy_utils",
@@ -61,5 +60,6 @@ android_library(
     exports = [
         ":action_launcher_activity_prod",
         "//src/com/google/android/as/oss/actionlauncher/config:module",
+        "//src/com/google/android/as/oss/availability/service/impl:agentic_integration_service_grpc_client_module",
     ],
 )

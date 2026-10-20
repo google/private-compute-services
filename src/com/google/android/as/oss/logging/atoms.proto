@@ -25,6 +25,7 @@ import "src/com/google/android/as/oss/logging/enums.proto";
 
 import option "third_party/java/protobuf/java_features.proto";
 
+option features.default_symbol_visibility = STRICT;
 option features.utf8_validation = NONE;
 option java_package = "com.google.android.as.oss.logging";
 option java_outer_classname = "PcsAtomsProto";

@@ -21,10 +21,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.SelectableDropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -41,6 +42,7 @@ import com.google.android.`as`.oss.feedback.domain.GroundTruthData
  * @param onOptionToggled A callback that is invoked when an option is toggled by the user.
  * @param onDismissRequest A callback that is invoked when the user requests to dismiss the menu.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun GroundTruthSelector(
   expanded: Boolean,
@@ -70,7 +72,7 @@ fun GroundTruthSelector(
       options.forEachIndexed { index, option ->
         val isSelected = selectedOptions.contains(option)
 
-        DropdownMenuItem(
+        SelectableDropdownMenuItem(
           text = { Text(text = option.label) },
           onClick = { onOptionToggled(option) },
           selected = isSelected,

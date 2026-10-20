@@ -16,16 +16,17 @@ edition = "2024";
 
 package com.google.android.as.oss.availability.api;
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "FeatureAvailabilityServiceIsFeatureAvailable";
 option java_package = "com.google.android.as.oss.availability.api";
 
 // Request to check if a feature is available.
-message FeatureAvailabilityRequest {
+export message FeatureAvailabilityRequest {
   // The feature to check availability for.
   repeated Feature feature = 1;
 }
 
-message FeatureAvailabilityResponse {
+export message FeatureAvailabilityResponse {
   repeated FeatureAvailability feature_availability = 1;
 }
 

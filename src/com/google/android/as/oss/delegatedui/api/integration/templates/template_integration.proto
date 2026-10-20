@@ -26,6 +26,7 @@ import "src/com/google/android/as/oss/delegatedui/api/integration/templates/sund
 
 import option "third_party/protobuf/cpp_features.proto";
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "TemplateIntegration";
 option java_package = "com.google.android.as.oss.delegatedui.api.integration.templates";
 
@@ -33,7 +34,7 @@ option java_package = "com.google.android.as.oss.delegatedui.api.integration.tem
 
 // A list of supported UI templates.
 // Next ID: 11
-enum DelegatedUiTemplateType {
+export enum DelegatedUiTemplateType {
   option features.(pb.cpp).enum_name_uses_string_view = false;
 
   TEMPLATE_TYPE_UNSPECIFIED = 0;
@@ -55,7 +56,7 @@ enum DelegatedUiTemplateType {
 
 // Detailed data formats for the UI templates.
 // Next ID: 10
-message DelegatedUiTemplateData {
+export message DelegatedUiTemplateData {
   oneof template_data {
     example.ExampleTemplateData example_template_data = 1;
     bugle.BugleTemplateData bugle_template_data = 2;
@@ -73,7 +74,7 @@ message DelegatedUiTemplateData {
   reserved 7;
 }
 
-message DelegatedUiAdditionalData {
+export message DelegatedUiAdditionalData {
   oneof additional_data {
     example.ExampleAdditionalData example_additional_data = 1;
     bugle.BugleAdditionalData bugle_additional_data = 2;

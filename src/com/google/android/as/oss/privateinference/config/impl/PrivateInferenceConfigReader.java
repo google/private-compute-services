@@ -210,12 +210,13 @@ class PrivateInferenceConfigReader extends AbstractConfigReader<PrivateInference
         SystemProperties.get(BUILD_FINGERPRINT_SYSTEM_PROPERTY).contains("userdebug");
 
     logger.atInfo().log("computeConfig: isEvt: %s, isUserDebug: %s", isEvt, isUserDebug);
+    String endpointUrl =
+        getPrivateInferenceEndpointUrl(
+            isEvt, isUserDebug, PrivateInferenceConfig.DEFAULT_ARATEA_AUTH_MODE);
     return PrivateInferenceConfig.builder()
         .setAttestationPublisherMode(PrivateInferenceConfig.DEFAULT_ATTESTATION_PUBLISHER_MODE)
         .setTransportMode(PrivateInferenceConfig.DEFAULT_TRANSPORT_MODE)
-        .setEndpointUrl(
-            getPrivateInferenceEndpointUrl(
-                isEvt, isUserDebug, PrivateInferenceConfig.DEFAULT_ARATEA_AUTH_MODE))
+        .setEndpointUrl(endpointUrl)
         .setTokenIssuanceEndpointUrl(getTokenIssuanceEndpointUrl(isEvt, isUserDebug))
         .setArateaAuthMode(PrivateInferenceConfig.DEFAULT_ARATEA_AUTH_MODE)
         .setProxyAuthMode(PrivateInferenceConfig.DEFAULT_PROXY_AUTH_MODE)
@@ -267,11 +268,12 @@ class PrivateInferenceConfigReader extends AbstractConfigReader<PrivateInference
         .setSendClientMetadata(flagManager.get(SEND_CLIENT_METADATA_FLAG))
         .setEnableConfigurableIpBlindingMode(
             flagManager.get(ENABLE_CONFIGURABLE_IP_BLINDING_MODE_FLAG))
-        .setOakCtCertificateUrl(getOakCtCertificateUrl())
-        .setOakCtCertificateFilename(getOakCtCertificateFilename())
-        .setTcaRootCertificateUrl(getTcaRootCertificateUrl())
-        .setTcaRootCertificateFilename(getTcaRootCertificateFilename())
-        .setTcaExpectedServerName(getTcaExpectedServerName())
+        .setOakCtCertificateUrl(getOakCtCertificateUrl(endpointUrl))
+        .setOakCtCertificateFilename(getOakCtCertificateFilename(endpointUrl))
+        .setOakCtNamespace(getOakCtNamespace(endpointUrl))
+        .setTcaRootCertificateUrl(getTcaRootCertificateUrl(endpointUrl))
+        .setTcaRootCertificateFilename(getTcaRootCertificateFilename(endpointUrl))
+        .setTcaExpectedServerName(getTcaExpectedServerName(endpointUrl))
         .build();
   }
 
@@ -294,24 +296,28 @@ class PrivateInferenceConfigReader extends AbstractConfigReader<PrivateInference
     return PrivateInferenceConfig.TOKEN_ISSUANCE_PROD_ENDPOINT_URL;
   }
 
-  private static String getOakCtCertificateUrl() {
-    return PrivateInferenceConfig.DEV_OAK_CT_CERT_URL;
+  static String getOakCtCertificateUrl(String endpointUrl) {
+    return PrivateInferenceConfig.PROD_OAK_CT_CERT_URL;
   }
 
-  private static String getOakCtCertificateFilename() {
-    return PrivateInferenceConfig.DEV_OAK_CT_CERT_FILENAME;
+  static String getOakCtCertificateFilename(String endpointUrl) {
+    return PrivateInferenceConfig.PROD_OAK_CT_CERT_FILENAME;
   }
 
-  private static String getTcaRootCertificateUrl() {
-    return PrivateInferenceConfig.DEV_TCA_ROOT_CERT_URL;
+  static String getOakCtNamespace(String endpointUrl) {
+    return PrivateInferenceConfig.PROD_OAK_CT_NAMESPACE;
   }
 
-  private static String getTcaRootCertificateFilename() {
-    return PrivateInferenceConfig.DEV_TCA_ROOT_CERT_FILENAME;
+  static String getTcaRootCertificateUrl(String endpointUrl) {
+    return PrivateInferenceConfig.PROD_TCA_ROOT_CERT_URL;
   }
 
-  private static String getTcaExpectedServerName() {
-    return PrivateInferenceConfig.DEV_TCA_EXPECTED_SERVER_NAME;
+  static String getTcaRootCertificateFilename(String endpointUrl) {
+    return PrivateInferenceConfig.PROD_TCA_ROOT_CERT_FILENAME;
+  }
+
+  static String getTcaExpectedServerName(String endpointUrl) {
+    return PrivateInferenceConfig.PROD_TCA_EXPECTED_SERVER_NAME;
   }
 
   private PrivateInferenceConfigReader(FlagManager flagManager) {

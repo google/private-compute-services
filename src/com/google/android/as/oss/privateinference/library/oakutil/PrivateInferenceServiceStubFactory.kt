@@ -116,14 +116,17 @@ internal constructor(
    * interceptor to the stub if required.
    */
   open suspend fun createPrivateTlsServiceStub(
-    authInfo: PrivateInferenceRequestMetadata.AuthInfo
+    authInfo: PrivateInferenceRequestMetadata.AuthInfo,
+    ipBlindingMode: IpBlindingMode = IpBlindingMode.IP_BLINDING_MODE_UNSPECIFIED,
   ): PrivateTlsServiceGrpc.PrivateTlsServiceStub {
+    val sessionConfiguration = sessionConfiguration { this.ipBlindingMode = ipBlindingMode }
     var stub =
       if (waitForGrpcChannelToBeReady) {
         logger.atInfo().log("Waiting for gRPC channel to be ready.")
-        PrivateTlsServiceGrpc.newStub(managedChannelFactory.get().getInstance()).withWaitForReady()
+        PrivateTlsServiceGrpc.newStub(managedChannelFactory.get().getInstance(sessionConfiguration))
+          .withWaitForReady()
       } else {
-        PrivateTlsServiceGrpc.newStub(managedChannelFactory.get().getInstance())
+        PrivateTlsServiceGrpc.newStub(managedChannelFactory.get().getInstance(sessionConfiguration))
       }
     if (attachCertificateHeader) {
       logger.atInfo().log("Attaching certificate header to the request.")

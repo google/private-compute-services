@@ -50,6 +50,8 @@ public class PccSecurityConfigReader extends AbstractConfigReader<PccSecurityCon
               .setPackageName("com.google.android.as.oss")
               .addAllowedReleaseKeys(
                   "071f09456bf1a8e8ad2e808ffe6a0ebc13582a7e6f9aba13e47280ad9a85d833")
+              .addAllowedTestKeys(
+                  "44514d399830656009b17ce76762745c43098e5247fcec0cc8f236f58ec2c4f9")
               .build(),
           /* merge= */ false);
 
@@ -60,6 +62,8 @@ public class PccSecurityConfigReader extends AbstractConfigReader<PccSecurityCon
               .setPackageName("com.google.android.apps.pixel.psi")
               .addAllowedReleaseKeys(
                   "d439bedff4c060a637ffc07c33ea9fa04a091165c40ee883717c2a89bd5a908f")
+              .addAllowedTestKeys(
+                  "9311c8d7198d1be7a7fc1152c8c300921a904858f5aebc787f9cecc5e41468fa")
               .build(),
           /* merge= */ false);
 

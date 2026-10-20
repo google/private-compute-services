@@ -53,6 +53,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.android.personalcontext.ace.visualizer.templates.LocalInsightEventReporter
@@ -114,6 +115,13 @@ private fun CallDetailedCardContent(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun CardItem(details: InsightDisplayDetails) {
+  val title = details.title?.toString()?.trim()
+  val subtitle = details.subtitle?.toString()?.trim()
+  val customContentDescription =
+    details.contentDescription?.toString()?.trim()?.takeUnless {
+      it.isBlank() || it.equals(title, ignoreCase = true) || it.equals(subtitle, ignoreCase = true)
+    }
+
   Surface(
     modifier = Modifier.fillMaxSize(),
     shape = RoundedCornerShape(16.dp),
@@ -123,9 +131,13 @@ private fun CardItem(details: InsightDisplayDetails) {
       modifier =
         Modifier.fillMaxSize()
           .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
-          .thenIfNotNull(details.contentDescription?.toString()) {
-            Modifier.clearAndSetSemantics { contentDescription = it }
-          }
+          .then(
+            if (customContentDescription != null) {
+              Modifier.clearAndSetSemantics { contentDescription = customContentDescription }
+            } else {
+              Modifier.semantics(mergeDescendants = true) {}
+            }
+          )
     ) {
       Text(
         text = details.title?.toString() ?: "",
@@ -212,14 +224,3 @@ private fun RowScope.CardTitle(title: String, titleInsight: DisplayInsight) {
     color = MaterialTheme.colorScheme.onSurface,
   )
 }
-
-/**
- * Applies [modify] to this modifier if [value] is not null. The non-null [value] is passed as the
- * argument to the [modify] lambda.
- */
-private fun <T> Modifier.thenIfNotNull(value: T?, modify: (T) -> Modifier): Modifier =
-  if (value != null) {
-    this.then(modify(value))
-  } else {
-    this
-  }

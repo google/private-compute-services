@@ -66,3 +66,13 @@ android_library(
         "@maven//:com_google_dagger_hilt-android",
     ],
 )
+
+android_library(
+    name = "workmanager",
+    srcs = ["SafeWorkManager.kt"],
+    deps = [
+        "//java/com/google/android/libraries/directboot",
+        "//third_party/java/androidx/work",
+        "@maven//:com_google_flogger_google_extensions",
+    ],
+)

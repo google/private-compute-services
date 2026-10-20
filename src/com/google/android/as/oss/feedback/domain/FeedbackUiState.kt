@@ -113,7 +113,8 @@ enum class FeedbackSubmitState {
 /** One time events. */
 sealed class FeedbackSubmissionEvent(open val message: String?) {
 
-  data class Success(override val message: String?) : FeedbackSubmissionEvent(message)
+  data class Success(override val message: String?, val interactionId: String? = "") :
+    FeedbackSubmissionEvent(message)
 
   data class Failed(override val message: String?) : FeedbackSubmissionEvent(message)
 }

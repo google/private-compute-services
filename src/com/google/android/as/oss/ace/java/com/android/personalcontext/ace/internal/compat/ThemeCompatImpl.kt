@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+// Suppression needed because PersonalContext platform APIs (e.g. originHints, contextHint) are
+// deprecated in newer SDKs but have no non-deprecated replacements.
+@file:Suppress("DEPRECATION")
+
 package com.android.personalcontext.ace.internal.compat
 
 import android.service.personalcontext.insight.ContextInsight
@@ -42,6 +46,14 @@ class ThemeCompatImpl @Inject constructor() : ThemeCompat {
       val themeHint = it.contextHint.toPrototypeHint<ThemeHint>() ?: return@any false
 
       themeHint.type == ThemeType.SHOW_BRANDED_ICON && themeHint.data
+    }
+  }
+
+  override fun ContextInsight.shouldShowTintableIcon(): Boolean {
+    return this.originHints.any {
+      val themeHint = it.contextHint.toPrototypeHint<ThemeHint>() ?: return@any false
+
+      themeHint.type == ThemeType.SHOW_TINTABLE_ICON && themeHint.data
     }
   }
 }

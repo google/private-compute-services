@@ -51,7 +51,7 @@ public class PrivateComputeServicesApplication extends Hilt_PrivateComputeServic
 
     // Run initializers in order of their priorities.
     initializers.stream()
-        .sorted(Comparator.comparing(PcsInitializer::getPriority).reversed())
+        .sorted(Comparator.comparingInt(PcsInitializer::getPriority).reversed())
         .forEach(PcsInitializer::run);
   }
 
@@ -63,6 +63,10 @@ public class PrivateComputeServicesApplication extends Hilt_PrivateComputeServic
     return new Configuration.Builder()
         .setWorkerFactory(delegatingFactory)
         .setExecutor(workManagerExecutor)
+        .setInitializationExceptionHandler(
+            throwable ->
+                logger.atWarning().withCause(throwable).log(
+                    "Suppressed WorkManager initialization exception"))
         .build();
   }
 }

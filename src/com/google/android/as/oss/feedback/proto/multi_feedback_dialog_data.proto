@@ -22,6 +22,7 @@ import "src/com/google/android/as/oss/feedback/proto/gateway/quartz_log.proto";
 import "src/com/google/android/as/oss/feedback/proto/gateway/spoon.proto";
 
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "MultiFeedbackDialogDataOuterClass";
 option java_package = "com.google.android.as.oss.feedback.api";
 

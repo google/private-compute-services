@@ -16,6 +16,7 @@ edition = "2024";
 
 package com.google.android.as.oss.attestation.api;
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "Attestation";
 option features.utf8_validation = NONE;
 option java_package = "com.google.android.as.oss.attestation.api.proto";
@@ -27,9 +28,9 @@ option java_package = "com.google.android.as.oss.attestation.api.proto";
 message AttestationMeasurementResponse {
   repeated bytes key_attestation_certificate_chain = 1;
   string payload = 2;
-  bytes signature_bytes = 3 ;
+  bytes signature_bytes = 3;
 
-  bytes public_key = 4 ;
+  bytes public_key = 4;
 
   bool content_binding_as_challenge = 5;
 }

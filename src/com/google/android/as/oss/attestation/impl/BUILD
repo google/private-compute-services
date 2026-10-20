@@ -59,6 +59,7 @@ android_library(
         "//src/com/google/android/as/oss/networkusage/db:repository",
         "//third_party/java/android_libs/cronet:cronet_api",
         "//third_party/java/grpc:cronet_android",
+        "//third_party/java/grpc:cronet_api_android",
         "//third_party/java/grpc:okhttp_android",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",

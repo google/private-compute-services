@@ -24,4 +24,7 @@ interface ThemeCompat {
 
   /** Whether this [ContextInsight] should show the branded icon. */
   fun ContextInsight.shouldShowBrandedIcon(): Boolean = false
+
+  /** Whether this [ContextInsight]'s icon should be tinted with the app theme color. */
+  fun ContextInsight.shouldShowTintableIcon(): Boolean = false
 }

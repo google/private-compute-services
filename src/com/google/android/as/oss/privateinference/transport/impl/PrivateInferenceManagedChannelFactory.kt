@@ -16,6 +16,7 @@
 
 package com.google.android.`as`.oss.privateinference.transport.impl
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.os.ext.SdkExtensions
@@ -37,7 +38,7 @@ import com.google.android.`as`.oss.privateinference.logging.MetricIdMap
 import com.google.android.`as`.oss.privateinference.logging.PcsStatsLogger
 import com.google.android.`as`.oss.privateinference.service.api.proto.IpBlindingMode
 import com.google.android.`as`.oss.privateinference.service.api.proto.SessionConfiguration
-import com.google.android.`as`.oss.privateinference.service.api.proto.sessionConfiguration
+import com.google.android.`as`.oss.privateinference.service.api.proto.copy
 import com.google.android.`as`.oss.privateinference.transport.IpRelayFallbackFlag
 import com.google.android.`as`.oss.privateinference.transport.ManagedChannelFactory
 import com.google.android.`as`.oss.privateinference.transport.ProxyConfigManager
@@ -106,7 +107,7 @@ constructor(
             "IpBlindingMode in SessionInitializationRequest is unspecified, falling back to " +
               "IP_BLINDING_MODE_ENABLED."
           )
-        sessionConfiguration { ipBlindingMode = IpBlindingMode.IP_BLINDING_MODE_ENABLED }
+        sessionConfiguration.copy { ipBlindingMode = IpBlindingMode.IP_BLINDING_MODE_ENABLED }
       } else {
         sessionConfiguration
       }
@@ -116,9 +117,9 @@ constructor(
   private suspend fun getManagedChannelInstance(
     sessionConfiguration: SessionConfiguration
   ): ManagedChannel = mutex.withLock {
-    val ipBlindingMode =
+    val effectiveSessionConfiguration =
       if (enableConfigurableIpBlindingMode) {
-        sessionConfiguration.ipBlindingMode
+        sessionConfiguration
       } else {
         if (sessionConfiguration.ipBlindingMode == IpBlindingMode.IP_BLINDING_MODE_DISABLED) {
           logger
@@ -128,8 +129,9 @@ constructor(
                 "EnableConfigurableIpBlindingMode flag is disabled."
             )
         }
-        IpBlindingMode.IP_BLINDING_MODE_ENABLED
+        sessionConfiguration.copy { ipBlindingMode = IpBlindingMode.IP_BLINDING_MODE_ENABLED }
       }
+    val ipBlindingMode = effectiveSessionConfiguration.ipBlindingMode
     // TODO: [forceIpTunnelCreationForEverySession] is a debug only flag to force IP
     // blinding tunnel creation for every session. Refactor it to be generic to non-IP blinding
     // tunnels too.
@@ -144,7 +146,7 @@ constructor(
       cronetEngineInstances.remove(ipBlindingMode)
     }
     managedChannelInstances.get(ipBlindingMode)
-      ?: create(sessionConfiguration).also {
+      ?: create(effectiveSessionConfiguration).also {
         if (it is UnusableManagedChannel) {
           logger.atWarning().log("Created UnusableManagedChannel, will not cache it.")
         } else {
@@ -153,6 +155,8 @@ constructor(
       }
   }
 
+  // Module minSdk is 24; runtime SDK_INT check is required for SdkExtensions (API 30+).
+  @SuppressLint("ObsoleteSdkInt")
   private fun proxyApisAvailable(): Boolean =
     // Protects the call against SdkExtensions, which was introduced in API level 30 (R)
     // http://[redacted]

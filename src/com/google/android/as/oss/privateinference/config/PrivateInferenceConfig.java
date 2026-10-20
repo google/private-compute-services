@@ -83,11 +83,12 @@ public abstract class PrivateInferenceConfig {
         .setSendClientMetadata(DEFAULT_SEND_CLIENT_METADATA)
         .setEnableTlsBasedSession(DEFAULT_ENABLE_TLS_BASED_SESSION)
         .setEnableConfigurableIpBlindingMode(DEFAULT_ENABLE_CONFIGURABLE_IP_BLINDING_MODE)
-        .setOakCtCertificateUrl(DEV_OAK_CT_CERT_URL)
-        .setOakCtCertificateFilename(DEV_OAK_CT_CERT_FILENAME)
-        .setTcaRootCertificateUrl(DEV_TCA_ROOT_CERT_URL)
-        .setTcaRootCertificateFilename(DEV_TCA_ROOT_CERT_FILENAME)
-        .setTcaExpectedServerName(DEV_TCA_EXPECTED_SERVER_NAME);
+        .setOakCtCertificateUrl(DEFAULT_OAK_CT_CERT_URL)
+        .setOakCtCertificateFilename(DEFAULT_OAK_CT_CERT_FILENAME)
+        .setOakCtNamespace(DEFAULT_OAK_CT_NAMESPACE)
+        .setTcaRootCertificateUrl(DEFAULT_TCA_ROOT_CERT_URL)
+        .setTcaRootCertificateFilename(DEFAULT_TCA_ROOT_CERT_FILENAME)
+        .setTcaExpectedServerName(DEFAULT_TCA_EXPECTED_SERVER_NAME);
   }
 
   /** Returns the current attestation publisher mode. */
@@ -206,6 +207,9 @@ public abstract class PrivateInferenceConfig {
   /** Returns the filename for storing the OakCT certificate. */
   public abstract String oakCtCertificateFilename();
 
+  /** Returns the namespace for OakCT certificate verification. */
+  public abstract String oakCtNamespace();
+
   /** Returns the URL for downloading the TCA root certificate. */
   public abstract String tcaRootCertificateUrl();
 
@@ -219,13 +223,15 @@ public abstract class PrivateInferenceConfig {
       "privatearatea.pa.googleapis.com";
   public static final String TOKEN_ISSUANCE_PROD_ENDPOINT_URL = "phosphor-pa.googleapis.com";
 
-  public static final String DEV_TCA_EXPECTED_SERVER_NAME = "";
-  public static final String DEV_OAK_CT_CERT_URL =
-      "https://www.gstatic.com/oakct.transparentrelease.goog/tcadev/dev_tca_root_certificate.pem/dev_tca_root_certificate.pem.pem";
-  public static final String DEV_OAK_CT_CERT_FILENAME = "dev_oakct_cert.pem";
-  public static final String DEV_TCA_ROOT_CERT_URL =
-      "https://www.gstatic.com/oakct.transparentrelease.goog/tcadev/dev_tca_root_certificate.pem/dev_tca_root_certificate.pem";
-  public static final String DEV_TCA_ROOT_CERT_FILENAME = "dev_tca_root_cert.pem";
+  public static final String PROD_TCA_EXPECTED_SERVER_NAME =
+      "pa-frontend.prod.google.com.prod.google.com.tca.pcit.goog";
+  public static final String PROD_OAK_CT_CERT_URL =
+      "https://www.gstatic.com/oakct.transparentrelease.goog/tca/prod_tca_root_certificate.pem/prod_tca_root_certificate.pem.pem";
+  public static final String PROD_OAK_CT_CERT_FILENAME = "prod_oakct_cert.pem";
+  public static final String PROD_OAK_CT_NAMESPACE = "tca";
+  public static final String PROD_TCA_ROOT_CERT_URL =
+      "https://www.gstatic.com/oakct.transparentrelease.goog/tca/prod_tca_root_certificate.pem/prod_tca_root_certificate.pem";
+  public static final String PROD_TCA_ROOT_CERT_FILENAME = "prod_tca_root_cert.pem";
 
   // Default values
   public static final AttestationPublisherFlag.Mode DEFAULT_ATTESTATION_PUBLISHER_MODE =
@@ -247,6 +253,12 @@ public abstract class PrivateInferenceConfig {
   public static final int DEFAULT_PROXY_PORT = 0;
   public static final String DEFAULT_PROXY_AUTH_HEADER = "ToBeProvidedByFlags";
   public static final boolean DEFAULT_ENABLE_CONFIGURABLE_IP_BLINDING_MODE = false;
+  public static final String DEFAULT_OAK_CT_CERT_URL = PROD_OAK_CT_CERT_URL;
+  public static final String DEFAULT_OAK_CT_CERT_FILENAME = PROD_OAK_CT_CERT_FILENAME;
+  public static final String DEFAULT_OAK_CT_NAMESPACE = PROD_OAK_CT_NAMESPACE;
+  public static final String DEFAULT_TCA_ROOT_CERT_URL = PROD_TCA_ROOT_CERT_URL;
+  public static final String DEFAULT_TCA_ROOT_CERT_FILENAME = PROD_TCA_ROOT_CERT_FILENAME;
+  public static final String DEFAULT_TCA_EXPECTED_SERVER_NAME = PROD_TCA_EXPECTED_SERVER_NAME;
 
   /**
    * Possible value for {@link PrivateInferenceConfig#proxyTokenCacheRefreshIntervalMinutes()},
@@ -375,6 +387,8 @@ public abstract class PrivateInferenceConfig {
     public abstract Builder setOakCtCertificateUrl(String value);
 
     public abstract Builder setOakCtCertificateFilename(String value);
+
+    public abstract Builder setOakCtNamespace(String value);
 
     public abstract Builder setTcaRootCertificateUrl(String value);
 

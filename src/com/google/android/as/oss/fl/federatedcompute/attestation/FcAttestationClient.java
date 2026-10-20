@@ -83,7 +83,7 @@ public class FcAttestationClient implements AttestationClient {
 
     FluentFuture.from(requestMeasurementDelay())
         .transformAsync(
-            unused ->
+            _ ->
                 attestationMeasurementClient.requestAttestationMeasurement(
                     attestationMeasurementRequest),
             executor)

@@ -66,11 +66,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.dismiss
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.personalcontext.ace.common.EnergyColorUtils.getEnergyColors
@@ -150,20 +147,17 @@ private fun DataAttributionScaffold(
   onDismissRequest: () -> Unit,
 ) {
   MainTheme {
-    Surface(color = MaterialTheme.colorScheme.surfaceContainerLow) {
+    Surface(
+      color = MaterialTheme.colorScheme.surfaceContainerLow,
+      modifier =
+        Modifier.semantics {
+          dismiss {
+            onDismissRequest()
+            true
+          }
+        },
+    ) {
       Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-        // Virtual dismiss button for TalkBack.
-        Box(
-          modifier =
-            Modifier.fillMaxWidth()
-              .semantics {
-                role = Role.Button
-                contentDescription = data.dismissButtonText
-                traversalIndex = 1f // Don't initially focus on this element.
-              }
-              .clickable { onDismissRequest() }
-        )
-
         // Title and logo
         Row(
           modifier = Modifier.fillMaxWidth().padding(start = 16.dp, top = 16.dp, end = 16.dp),
@@ -268,7 +262,11 @@ private fun AttributionChip(data: AttributionChipData) {
           modifier =
             Modifier.sizeIn(minWidth = 24.dp, minHeight = 24.dp)
               .brandedIconGradientTint(data.isBrandedIcon),
-          tint = getBrandedIconTint(data.isBrandedIcon),
+          tint =
+            getBrandedIconTint(
+              data.isBrandedIcon,
+              defaultTint = MaterialTheme.colorScheme.onSecondaryContainer,
+            ),
         )
       }
     }

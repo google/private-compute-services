@@ -22,11 +22,12 @@ import "src/com/google/android/as/oss/feedback/proto/gateway/pixel_apex_api.prot
 import "src/com/google/android/as/oss/feedback/proto/gateway/quartz_log.proto";
 import "src/com/google/android/as/oss/feedback/proto/gateway/spoon.proto";
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "GetFeedbackDonationData";
 option java_package = "com.google.android.as.oss.feedback.api.dataservice";
 
 // Request for getting feedback donation data.
-message GetFeedbackDonationDataRequest {
+export message GetFeedbackDonationDataRequest {
   // The ID that represents the feedback client session.
   string client_session_id = 1;
 
@@ -47,7 +48,7 @@ message GetFeedbackDonationDataRequest {
 }
 
 // Response for GetFeedbackDonationDataRequest.
-message GetFeedbackDonationDataResponse {
+export message GetFeedbackDonationDataResponse {
   feedback.api.gateway.UserDonation donation_data = 1;
   string app_id = 2;
 
@@ -74,79 +75,56 @@ message GetFeedbackDonationDataResponse {
 //
 // Next ID: 31
 message FeedbackUiRenderingData {
-  string feedback_dialog_good_feedback_title = 5
-     ;
+  string feedback_dialog_good_feedback_title = 5;
 
-  string feedback_dialog_bad_feedback_title = 6
-     ;
+  string feedback_dialog_bad_feedback_title = 6;
 
-  string feedback_dialog_fallback_title = 19
-     ;
+  string feedback_dialog_fallback_title = 19;
 
-  string feedback_dialog_free_form_label = 7
-     ;
+  string feedback_dialog_free_form_label = 7;
 
-  string feedback_dialog_free_form_hint = 8
-     ;
+  string feedback_dialog_free_form_hint = 8;
 
-  string feedback_dialog_opt_in_checkbox_content_description = 21
-     ;
+  string feedback_dialog_opt_in_checkbox_content_description = 21;
 
-  string feedback_dialog_opt_in_label = 9
-     ;
+  string feedback_dialog_opt_in_label = 9;
 
-  string feedback_dialog_opt_in_label_generic_info_label = 20
-     ;
+  string feedback_dialog_opt_in_label_generic_info_label = 20;
 
-  string feedback_dialog_opt_in_label_link_privacy_policy = 18
-     ;
+  string feedback_dialog_opt_in_label_link_privacy_policy = 18;
 
-  string feedback_dialog_opt_in_label_link_view_data = 10
-     ;
+  string feedback_dialog_opt_in_label_link_view_data = 10;
 
-  string feedback_dialog_button_label = 11
-     ;
+  string feedback_dialog_button_label = 11;
 
   repeated FeedbackTagData feedback_chips = 12;
-  string feedback_dialog_view_data_title = 13
-     ;
+  string feedback_dialog_view_data_title = 13;
 
-  string feedback_dialog_view_data_back_button_content_description = 14
-     ;
+  string feedback_dialog_view_data_back_button_content_description = 14;
 
-  string feedback_dialog_view_data_header = 15
-      [ deprecated = true];
+  string feedback_dialog_view_data_header = 15 [deprecated = true];
 
-  string feedback_dialog_sent_successfully_toast = 16
-     ;
+  string feedback_dialog_sent_successfully_toast = 16;
 
-  string feedback_dialog_sent_failed_toast = 17
-     ;
+  string feedback_dialog_sent_failed_toast = 17;
 
-  string feedback_dialog_opt_in_v2_title = 23
-     ;
+  string feedback_dialog_opt_in_v2_title = 23;
 
-  string feedback_dialog_opt_in_v2_description = 24
-     ;
+  string feedback_dialog_opt_in_v2_description = 24;
 
-  string feedback_dialog_ground_truth_title = 25
-     ;
+  string feedback_dialog_ground_truth_title = 25;
 
-  string feedback_source_l1_tile_title = 26
-     ;
+  string feedback_source_l1_tile_title = 26;
 
-  string feedback_source_document_l0_tile_title = 27
-     ;
+  string feedback_source_document_l0_tile_title = 27;
 
   // The title of the additional comment section in the feedback dialog.
   // In addition to free form text, this allows the caller app to collect
   // additional information via a text input.
-  string feedback_additional_comment_title = 28
-     ;
+  string feedback_additional_comment_title = 28;
 
   // The hint text of the additional comment section in the feedback dialog.
-  string feedback_additional_comment_hint = 29
-     ;
+  string feedback_additional_comment_hint = 29;
 
   FeedbackViewDataCategoryTitles feedback_view_data_category_titles = 22;
 
@@ -157,8 +135,7 @@ message FeedbackUiRenderingData {
 
 // Next ID: 12
 message FeedbackViewDataCategoryTitles {
-  string triggering_messages_title = 1
-     ;
+  string triggering_messages_title = 1;
 
   string intent_queries_title = 2;
 
@@ -166,22 +143,17 @@ message FeedbackViewDataCategoryTitles {
 
   string memory_entities_title = 4;
 
-  string selected_entity_content_title = 5
-     ;
+  string selected_entity_content_title = 5;
 
-  string expand_category_button_semantics_description = 6
-     ;
+  string expand_category_button_semantics_description = 6;
 
-  string collapse_category_button_semantics_description = 7
-     ;
+  string collapse_category_button_semantics_description = 7;
 
-  string notification_content_title = 8
-     ;
+  string notification_content_title = 8;
 
   string app_info_title = 9;
 
-  string quartz_model_outputs_title = 10
-     ;
+  string quartz_model_outputs_title = 10;
 
   string failure_reason_title = 11;
 }

@@ -70,6 +70,7 @@ android_library(
         ":cache_control_plane",
         "//src/com/google/android/as/oss/common/config",
         "//src/com/google/android/as/oss/common/initializer",
+        "//src/com/google/android/as/oss/common/jobs:workmanager",
         "//src/com/google/android/as/oss/privateinference/config",
         "//src/com/google/android/as/oss/privateinference/library/bsa/token",
         "//third_party/java/androidx/work",

@@ -22,6 +22,7 @@ import "third_party/java/arcs/policy.proto";
 
 import option "third_party/java/protobuf/java_features.proto";
 
+option features.default_symbol_visibility = STRICT;
 option features.field_presence = IMPLICIT;
 option java_package = "com.google.android.as.oss.proto";
 option java_outer_classname = "PcsProtos";

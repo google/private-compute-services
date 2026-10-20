@@ -62,10 +62,11 @@ final class PccAttestationMeasurementClientModule {
       @Named("PcsCronet") Provider<CronetEngine> cronetEngineProvider) {
 
     ManagedChannelBuilder<?> channelBuilder;
-    if (configReader.getConfig().enableCronetMigration()) {
+    CronetEngine cronetEngine =
+        configReader.getConfig().enableCronetMigration() ? cronetEngineProvider.get() : null;
+    if (cronetEngine != null) {
       channelBuilder =
-          CronetChannelBuilder.forAddress(
-              ATTESTATION_API_HOST, ATTESTATION_API_PORT, cronetEngineProvider.get());
+          CronetChannelBuilder.forAddress(ATTESTATION_API_HOST, ATTESTATION_API_PORT, cronetEngine);
     } else {
       channelBuilder = OkHttpChannelBuilder.forAddress(ATTESTATION_API_HOST, ATTESTATION_API_PORT);
     }

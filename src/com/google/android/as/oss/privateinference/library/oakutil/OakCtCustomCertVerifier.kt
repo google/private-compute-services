@@ -16,19 +16,19 @@
 
 package com.google.android.`as`.oss.privateinference.library.oakutil
 
-import android.content.Context
 import androidx.annotation.VisibleForTesting
+import com.google.android.`as`.oss.privateinference.Annotations.OakCtNamespace
+import com.google.common.util.concurrent.MoreExecutors
 import com.google.oak.session.tls.CustomCertVerifier
 import com.google.security.oak.oakct.OakCtVerifier
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.ByteArrayInputStream
-import java.io.File
 import java.nio.charset.StandardCharsets.UTF_8
 import java.security.KeyStore
 import java.security.cert.CertificateException
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import java.util.Base64
+import java.util.concurrent.ExecutionException
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.net.ssl.TrustManagerFactory
@@ -54,19 +54,22 @@ class OakCtCustomCertVerifier
 internal constructor(
   private val verifier: OakCtVerifier,
   private val oakCtCerts: Array<X509Certificate>?,
-  private val namespace: String = DEFAULT_NAMESPACE,
+  private val namespace: String,
   private val baseDomain: String = DEFAULT_BASE_DOMAIN,
-  private val context: Context? = null,
+  private val repository: PiCertificateRepository? = null,
+  private val tcaRootCert: X509Certificate? = null,
 ) : CustomCertVerifier {
   @Inject
   constructor(
-    @ApplicationContext context: Context
+    repository: PiCertificateRepository,
+    @OakCtNamespace namespace: String,
   ) : this(
     verifier = createOakCtVerifier(),
     oakCtCerts = null,
-    namespace = DEFAULT_NAMESPACE,
+    namespace = namespace,
     baseDomain = DEFAULT_BASE_DOMAIN,
-    context = context,
+    repository = repository,
+    tcaRootCert = null,
   )
 
   override fun verify(certChainDer: List<ByteArray>, standardResult: CertificateException?) {
@@ -76,26 +79,29 @@ internal constructor(
         standardResult,
       )
     }
-    if (certChainDer.isEmpty()) {
-      throw OakCtCertificateException("Certificate chain is empty")
-    }
     val certs =
       try {
         oakCtCerts
-          ?: context?.let { getCachedOakCtCert(it) }
-          ?: throw OakCtCertificateException("No OakCT certificates or context provided")
+          ?: repository?.let { loadOakCtCertChain(it) }
+          ?: throw OakCtCertificateException("No OakCT certificates or repository provided")
       } catch (e: CertificateException) {
         throw e
       } catch (e: Exception) {
         throw OakCtCertificateException("Failed to load OakCT certificates", e)
       }
-    // Convert DER bytes of the root certificate (last in certChainDer) to PEM format.
-    // The TLS certChainDer's root cert is passed as verifier.verify's content arg,
+    // Convert the TCA root certificate from the repository to PEM format.
+    // The TCA root cert is passed as verifier.verify's content arg,
     // and oakCtCerts is passed as verifier.verify's contentCerts arg.
-    val rootCertDer = certChainDer.last()
-    val certFactory = CertificateFactory.getInstance("X.509")
     val rootCert =
-      certFactory.generateCertificate(ByteArrayInputStream(rootCertDer)) as X509Certificate
+      try {
+        tcaRootCert
+          ?: repository?.let { loadTcaRootCert(it) }
+          ?: throw OakCtCertificateException("No TCA root certificate or repository provided")
+      } catch (e: CertificateException) {
+        throw e
+      } catch (e: Exception) {
+        throw OakCtCertificateException("Failed to load TCA root certificate", e)
+      }
     val pemContent = getPemForCert(rootCert)
     try {
       verifier.verify(
@@ -110,12 +116,9 @@ internal constructor(
   }
 
   companion object {
-    const val DEFAULT_NAMESPACE = "tcadev"
     const val DEFAULT_BASE_DOMAIN = "oakct.transparentrelease.goog"
     private const val PEM_HEADER = "-----BEGIN CERTIFICATE-----"
     private const val PEM_FOOTER = "-----END CERTIFICATE-----"
-    @VisibleForTesting internal const val CACHE_DIR_NAME = "pi_certs"
-    @VisibleForTesting internal const val DEFAULT_CERT_FILE_NAME = "dev_oakct_cert.pem"
 
     private fun getPemForCert(cert: X509Certificate): String {
       val text =
@@ -134,18 +137,45 @@ internal constructor(
       return OakCtVerifier(trustManager)
     }
 
-    private fun getCachedOakCtCert(context: Context): Array<X509Certificate> {
-      val cacheDir = File(context.filesDir, CACHE_DIR_NAME)
-      val cacheFile = File(cacheDir, DEFAULT_CERT_FILE_NAME)
-      if (!cacheFile.exists() || cacheFile.length() == 0L) {
-        throw OakCtCertificateException("OakCT certificate not available in cache")
+    private fun loadOakCtCertChain(repository: PiCertificateRepository): Array<X509Certificate> {
+      try {
+        val pem = repository.getOakCtCertificate(MoreExecutors.newDirectExecutorService()).get()
+        val certFactory = CertificateFactory.getInstance("X.509")
+        val certs =
+          certFactory
+            .generateCertificates(ByteArrayInputStream(pem.toByteArray(UTF_8)))
+            .map { it as X509Certificate }
+            .toTypedArray()
+        if (certs.isEmpty()) {
+          throw OakCtCertificateException("OakCT certificate not available")
+        }
+        return certs
+      } catch (e: InterruptedException) {
+        Thread.currentThread().interrupt()
+        throw OakCtCertificateException("Interrupted while loading OakCT certificates", e)
+      } catch (e: ExecutionException) {
+        throw OakCtCertificateException("Failed to load OakCT certificates from repository", e)
       }
-      val pemContent = cacheFile.readText(UTF_8)
-      val certFactory = CertificateFactory.getInstance("X.509")
-      return certFactory
-        .generateCertificates(ByteArrayInputStream(pemContent.toByteArray(UTF_8)))
-        .map { it as X509Certificate }
-        .toTypedArray()
+    }
+
+    private fun loadTcaRootCert(repository: PiCertificateRepository): X509Certificate {
+      try {
+        val pem = repository.getTcaRootCertificate(MoreExecutors.newDirectExecutorService()).get()
+        val certFactory = CertificateFactory.getInstance("X.509")
+        val certs =
+          certFactory.generateCertificates(ByteArrayInputStream(pem.toByteArray(UTF_8))).map {
+            it as X509Certificate
+          }
+        if (certs.isEmpty()) {
+          throw OakCtCertificateException("TCA root certificate not available")
+        }
+        return certs.first()
+      } catch (e: InterruptedException) {
+        Thread.currentThread().interrupt()
+        throw OakCtCertificateException("Interrupted while loading TCA root certificate", e)
+      } catch (e: ExecutionException) {
+        throw OakCtCertificateException("Failed to load TCA root certificate from repository", e)
+      }
     }
   }
 }

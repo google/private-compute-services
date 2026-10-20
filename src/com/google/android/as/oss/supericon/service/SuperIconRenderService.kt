@@ -1064,10 +1064,14 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
         SuperIconUi(host, params, view, measuredSize, renderContext, display, attachListener)
       var success = false
       try {
-        (view.parent as? ViewGroup)?.removeView(view)
-        val viewToSet = FrameLayout(renderContext)
-        viewToSet.addView(view)
-        propagateAccessibilityPaneTitle(viewToSet, view, params.renderOptions)
+        val viewToSet =
+          wrapView(
+            view,
+            renderContext,
+            measuredSize,
+            params.renderOptions,
+            superIconUi.originalPaneTitle,
+          )
 
         host.setView(viewToSet, measuredSize.width, measuredSize.height)
         logger.atFine().log("create a host %s", host)
@@ -1151,15 +1155,49 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
         surfaceControlViewHostFactory.create(context, display, hostInputToken)
       }
 
-    private fun propagateAccessibilityPaneTitle(
-      viewToSet: View,
+    /**
+     * Wraps the provided view in a [FrameLayout] container configured with explicit layout
+     * parameters and centers content vertically. Propagates the accessibility pane title to the
+     * container while clearing it from the inner view to prevent duplicate TalkBack announcements.
+     *
+     * @param view the inner view to wrap
+     * @param renderContext the context used to instantiate the container
+     * @param measuredSize the target dimensions of the container
+     * @param renderOptions the render options containing fallback titles
+     * @param originalPaneTitle the original cached pane title of the inner view
+     * @return the configured container holding the view
+     */
+    internal fun wrapView(
       view: View,
+      renderContext: Context,
+      measuredSize: Size,
       renderOptions: RenderOptions,
-    ) {
+      originalPaneTitle: CharSequence?,
+    ): FrameLayout {
+      (view.parent as? ViewGroup)?.removeView(view)
+      val viewToSet = FrameLayout(renderContext)
+      // Ensure the container FrameLayout matches the measured size and centers the content
+      // vertically to align with Gboard's UI expectations.
+      val layoutParams =
+        FrameLayout.LayoutParams(measuredSize.width, measuredSize.height).apply {
+          gravity = Gravity.CENTER_VERTICAL
+        }
+      viewToSet.layoutParams = layoutParams
+      viewToSet.addView(view)
+
+      if (
+        renderOptions.uiType == SuperIconUiType.SUPER_ICON ||
+          renderOptions.uiType == SuperIconUiType.SUPER_ICON_IN_PANEL ||
+          renderOptions.uiType == SuperIconUiType.SPELL_CHECKER_CHIP
+      ) {
+        // Do not set pane titles for simple icons/chips, otherwise TalkBack treats
+        // them as separate windows and breaks host app linear navigation.
+        ViewCompat.setAccessibilityPaneTitle(view, null)
+        return viewToSet
+      }
+
       val paneTitle =
-        ViewCompat.getAccessibilityPaneTitle(view)
-          ?: renderOptions.accessibilityPaneTitle
-          ?: renderOptions.label
+        originalPaneTitle ?: renderOptions.accessibilityPaneTitle ?: renderOptions.label
       paneTitle
         ?.takeIf { it.isNotEmpty() }
         ?.let { title ->
@@ -1167,6 +1205,7 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
           // Clear it from the inner view to prevent TalkBack from announcing nested panes
           ViewCompat.setAccessibilityPaneTitle(view, null)
         }
+      return viewToSet
     }
 
     internal inner class SuperIconUiWrapper(internal val weakRef: WeakReference<SuperIconUi>) :
@@ -1193,6 +1232,12 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
       val display: Display,
       val attachListener: View.OnAttachStateChangeListener? = null,
     ) {
+      // Cache the native accessibility pane title before wrapView() clears it
+      // from `view` to prevent duplicate announcements. This ensures
+      // subsequent SurfaceControlViewHost recreations in getSurfacePackage()
+      // retain the title.
+      internal val originalPaneTitle: CharSequence? = ViewCompat.getAccessibilityPaneTitle(view)
+
       fun releaseSurfaceControlViewHost(uiType: Int) {
         mainScope.launch {
           releaseResourcesInternal()
@@ -1234,15 +1279,8 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
             // during release(). We must remove our inner `view` from it to avoid an
             // IllegalStateException ("The specified child already has a parent") and wrap it
             // in a fresh FrameLayout for the new host.
-            (view.parent as? ViewGroup)?.removeView(view)
-            val viewToSet = FrameLayout(renderContext)
-            // Ensure the container FrameLayout matches the measured size and centers the content
-            // vertically to align with Gboard's UI expectations.
-            val layoutParams = FrameLayout.LayoutParams(measuredSize.width, measuredSize.height)
-            layoutParams.gravity = Gravity.CENTER_VERTICAL
-            viewToSet.layoutParams = layoutParams
-            viewToSet.addView(view)
-            propagateAccessibilityPaneTitle(viewToSet, view, params.renderOptions)
+            val viewToSet =
+              wrapView(view, renderContext, measuredSize, params.renderOptions, originalPaneTitle)
             if (attachListener != null) {
               // Safe to re-attach the listener now that the recreation detachments are done.
               view.addOnAttachStateChangeListener(attachListener)

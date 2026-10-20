@@ -583,15 +583,18 @@ constructor(
         .map { request -> request.uploadFeedback() }
         .all { success -> success }
     logger.atInfo().log("FeedbackViewModel#submitFeedback completed")
-    return if (successful) successEvent() else failureEvent()
+    val interactionId = data?.interactionId ?: quartzData?.interactionId ?: ""
+    return if (successful) successEvent(interactionId) else failureEvent()
   }
 
-  private fun successEvent() =
+  private fun successEvent(interactionId: String? = "") =
     FeedbackSubmissionEvent.Success(
-      uiStateFlow.value.feedbackDonationData
-        ?.getOrNull()
-        ?.feedbackUiRenderingData
-        ?.feedbackDialogSentSuccessfullyToast
+      message =
+        uiStateFlow.value.feedbackDonationData
+          ?.getOrNull()
+          ?.feedbackUiRenderingData
+          ?.feedbackDialogSentSuccessfullyToast,
+      interactionId = interactionId,
     )
 
   private fun failureEvent() =

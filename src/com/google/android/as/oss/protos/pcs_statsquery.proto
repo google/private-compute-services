@@ -18,6 +18,7 @@ package com.google.android.as.oss.proto;
 
 import option "third_party/java/protobuf/java_features.proto";
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "PcsStatsquery";
 option java_package = "com.google.android.as.oss.proto";
 

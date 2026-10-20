@@ -16,6 +16,8 @@
 
 package com.google.android.`as`.oss.privateinference.library.oakutil
 
+import com.google.android.`as`.oss.logging.PcsStatsEnums.CountMetricId
+import com.google.android.`as`.oss.privateinference.logging.PcsStatsLogger
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.errorprone.annotations.CanIgnoreReturnValue
 import com.google.oak.client.grpc.StreamObserverSessionClient
@@ -32,8 +34,10 @@ import io.grpc.stub.ClientCallStreamObserver
 import io.grpc.stub.StreamObserver
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.guava.await
+import kotlinx.coroutines.isActive
 
 /**
  * An asynchronous client for Oak TLS Session based on StreamObservers.
@@ -46,10 +50,23 @@ class StreamObserverTlsSessionClient
 constructor(
   private val oakSessionTlsContextProvider: Provider<@JvmSuppressWildcards OakSessionTlsContext>,
   private val repository: PiCertificateRepository? = null,
+  private val pcsStatsLogger: PcsStatsLogger? = null,
 ) {
   /** A listener interface to notify hooks when the TLS handshake has completed. */
   interface HandshakeListener {
     fun onHandshakeComplete()
+  }
+
+  /**
+   * An observer interface for TLS sessions where [onSessionOpen] can suspend.
+   *
+   * Because [onSessionOpen] is invoked by [startSession] as a suspending call before entering the
+   * frame-receiving loop, any asynchronous session initialization (such as fetching anonymous
+   * tokens or generating device attestation) completes before [onNext], [onError], or [onCompleted]
+   * callbacks can be delivered from the stream.
+   */
+  interface OakTlsSessionStreamObserver : StreamObserver<ByteString> {
+    suspend fun onSessionOpen(clientRequests: StreamObserver<ByteString>)
   }
 
   /**
@@ -62,31 +79,48 @@ constructor(
    */
   @CanIgnoreReturnValue
   suspend fun startSession(
-    sessionStreamObserver: StreamObserverSessionClient.OakSessionStreamObserver,
+    sessionStreamObserver: OakTlsSessionStreamObserver,
     streamStarter: (StreamObserver<TlsSessionResponse>) -> StreamObserver<TlsSessionRequest>,
   ): StreamObserverSessionClient.SessionHandle {
     var streamSetup = setupStream(streamStarter)
-
     val tlsContext = oakSessionTlsContextProvider.get()
     val initializedSession =
       try {
         tlsContext.newInitializedSession(streamSetup.send, streamSetup.receive)
       } catch (e: OakSessionTlsException) {
-        // Retry with fresh OakCT certificate from repository, in case the handshake failed due to
-        // a missing or invalid certificate.
-        repository
-          ?.getOakCtCertificate(MoreExecutors.newDirectExecutorService(), forceRefresh = true)
-          ?.await()
-
         // Cancel old stream
         (streamSetup.requestObserver as? ClientCallStreamObserver<*>)?.cancel(
           "Handshake failed, retrying",
           e,
         )
+        pcsStatsLogger?.logEventCount(CountMetricId.PCS_PI_TLS_FAILURE_TLS_RETRY)
+        // Retry with fresh certificates from repository, in case the handshake failed due to
+        // missing or invalid certificates.
+        val oakCtFuture =
+          repository?.getOakCtCertificate(
+            MoreExecutors.newDirectExecutorService(),
+            forceRefresh = true,
+          )
+        val tcaRootFuture =
+          repository?.getTcaRootCertificate(
+            MoreExecutors.newDirectExecutorService(),
+            forceRefresh = true,
+          )
+        @Suppress("AwaitOnFutureVariable") oakCtFuture?.await()
+        @Suppress("AwaitOnFutureVariable") tcaRootFuture?.await()
 
         // Restart the stream to ensure a clean state for the retry.
         streamSetup = setupStream(streamStarter)
-        tlsContext.newInitializedSession(streamSetup.send, streamSetup.receive)
+        try {
+          tlsContext.newInitializedSession(streamSetup.send, streamSetup.receive)
+        } catch (e: OakSessionTlsException) {
+          // Cancel old stream
+          (streamSetup.requestObserver as? ClientCallStreamObserver<*>)?.cancel(
+            "Second handshake failed",
+            e,
+          )
+          throw e
+        }
       }
     val session = initializedSession.session
 
@@ -113,7 +147,7 @@ constructor(
 
     sessionStreamObserver.onSessionOpen(clientRequests)
 
-    while (true) {
+    while (coroutineContext.isActive) {
       val result = streamSetup.incomingFrames.receiveCatching()
       if (result.isClosed) {
         val ex = result.exceptionOrNull()

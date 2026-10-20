@@ -111,7 +111,7 @@ public class VirtualMachineRunnerImpl implements VirtualMachineRunner {
     }
 
     return FluentFuture.from(runVm(virtualMachine))
-        .transformAsync(unused -> readOrCreatePersistentState(), executor)
+        .transformAsync(_ -> readOrCreatePersistentState(), executor)
         .transformAsync(
             previousState -> {
               byte[] publicKey = runTartarusService(virtualMachine).getSerializedPublicKey();
@@ -123,13 +123,13 @@ public class VirtualMachineRunnerImpl implements VirtualMachineRunner {
             },
             executor)
         .<Void>transform(
-            unused -> {
+            _ -> {
               virtualMachine.close();
               return null;
             },
             executor)
         .transform(
-            unused -> {
+            _ -> {
               try {
                 return virtualMachine.toDescriptor();
               } catch (VirtualMachineException e) {

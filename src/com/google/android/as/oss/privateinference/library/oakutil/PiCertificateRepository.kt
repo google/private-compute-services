@@ -30,13 +30,17 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue
  */
 interface PiCertificateRepository {
   /**
-   * Asynchronously downloads and caches the OakCT verification certificate on device.
+   * Asynchronously fetches the OakCT certificate from the on-device cache. If not cached, it
+   * downloads and caches the certificate.
    *
-   * This runs the HTTP download on the provided executor thread to unblock the calling thread.
+   * This runs the HTTP download on the provided executor thread to unblock the calling thread. If
+   * the download fails, the returned future completes exceptionally with the underlying failure
+   * (e.g. [java.io.IOException]).
    *
    * @param executor The executor to run the download task on.
    * @param forceRefresh If true, forces a re-download of the certificate even if cached.
-   * @return A [ListenableFuture] resolving to the certificate content.
+   * @return A [ListenableFuture] resolving to the certificate content, or failing with an exception
+   *   if the download fails.
    */
   @CanIgnoreReturnValue
   fun getOakCtCertificate(
@@ -45,13 +49,21 @@ interface PiCertificateRepository {
   ): ListenableFuture<String>
 
   /**
-   * Asynchronously downloads and caches the TCA root certificate on device.
+   * Asynchronously fetches the TCA root certificate from the on-device cache. If not cached, it
+   * downloads and caches the certificate.
    *
-   * This runs the HTTP download on the provided executor thread to unblock the calling thread.
+   * This runs the HTTP download on the provided executor thread to unblock the calling thread. If
+   * the download fails, the returned future completes exceptionally with the underlying failure
+   * (e.g. [java.io.IOException]).
    *
    * @param executor The executor to run the download task on.
-   * @return A [ListenableFuture] resolving to the certificate content.
+   * @param forceRefresh If true, forces a re-download of the certificate even if cached.
+   * @return A [ListenableFuture] resolving to the certificate content, or failing with an exception
+   *   if the download fails.
    */
   @CanIgnoreReturnValue
-  fun getTcaRootCertificate(executor: ListeningExecutorService): ListenableFuture<String>
+  fun getTcaRootCertificate(
+    executor: ListeningExecutorService,
+    forceRefresh: Boolean = false,
+  ): ListenableFuture<String>
 }

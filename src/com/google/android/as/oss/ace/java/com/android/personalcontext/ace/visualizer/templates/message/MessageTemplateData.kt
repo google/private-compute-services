@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-@file:Suppress("FlaggedApi", "NewApi")
+// Suppression needed because PersonalContext platform APIs (e.g. originHints, contextHint) are
+// deprecated in newer SDKs but have no non-deprecated replacements.
+@file:Suppress("DEPRECATION", "FlaggedApi", "NewApi")
 
 package com.android.personalcontext.ace.visualizer.templates.message
 
@@ -103,6 +105,7 @@ data class SuggestionChip(
   override val icon: Icon?,
   override val insight: ContextInsight,
   override val isIconGradient: Boolean,
+  val isIconTintable: Boolean = false,
 ) : MessageChip {
   companion object {
     private const val TAG = "SuggestionChip"
@@ -116,6 +119,7 @@ data class SuggestionChip(
         icon = details.icon,
         insight = this,
         isIconGradient = with(themeCompat) { shouldShowBrandedIcon() },
+        isIconTintable = with(themeCompat) { shouldShowTintableIcon() },
       )
     }
   }
@@ -162,6 +166,7 @@ data class ClientActionChip(
   override val insight: ContextInsight,
   val trailingIcon: Icon? = null,
   override val isIconGradient: Boolean,
+  val isIconTintable: Boolean = false,
 ) : MessageChip {
   companion object {
     private const val TAG = "ClientActionChip"
@@ -181,6 +186,7 @@ data class ClientActionChip(
           insight = this,
           trailingIcon = trailingIcon,
           isIconGradient = with(themeCompat) { shouldShowBrandedIcon() },
+          isIconTintable = with(themeCompat) { shouldShowTintableIcon() },
         )
       }
         ?: run {

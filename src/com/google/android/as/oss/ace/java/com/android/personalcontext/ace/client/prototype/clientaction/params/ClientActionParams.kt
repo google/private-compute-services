@@ -30,6 +30,7 @@ enum class ClientActionParamId(val uid: Int) {
   SHARE_LIVE_LOCATION(5),
   HIDE_KEYBOARD(6),
   BLUEFLAX(7),
+  ADD_TO_LIST(8),
 }
 
 /** Base class for Bundle-backed ClientActionParams. */

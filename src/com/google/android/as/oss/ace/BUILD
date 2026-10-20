@@ -36,10 +36,7 @@ bzl_library(
     name = "build_constants_bzl",
     srcs = ["build_constants.bzl"],
     parse_tests = False,
-    visibility = [
-        "//javatests/com/google/android/apps/miphone/pcs/ace:__subpackages__",
-        "//visibility:public",
-    ],
+    visibility = ["//visibility:public"],
 )
 
 genquery(

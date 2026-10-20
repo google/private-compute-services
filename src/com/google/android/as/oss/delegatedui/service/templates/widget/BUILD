@@ -17,7 +17,7 @@ load("@bazel_rules_android//android:rules.bzl", "android_library")
 package(default_visibility = [
     "//visibility:public",
     # Allow Subzero to use the shared Composable.
-    "//java/com/google/android/apps/pixel/subzero:libraries_visibility",
+    "//java/com/google/android/apps/pixel/subzero/visibility:libraries_visibility",
 ])
 
 android_library(

@@ -20,6 +20,7 @@ import "google/protobuf/duration.proto";
 import "logs/proto/logs_annotations/logs_annotations.proto";
 
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "AgenticIntegrationServiceOuterClass";
 option (logs_proto.file_not_used_for_logging_except_enums) = true;
 option java_package = "com.google.android.as.oss.availability.api.agenticintegration";
@@ -124,9 +125,7 @@ message TextQuery {
   string query = 1;
 
   bool should_auto_submit = 2;
-
   bool should_automate = 4;
-
   repeated File files = 3;
 
   // If true, the full screen mode will be used. Otherwise, Floaty mode will be

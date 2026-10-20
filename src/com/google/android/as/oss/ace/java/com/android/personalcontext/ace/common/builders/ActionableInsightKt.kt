@@ -28,12 +28,14 @@ import android.service.personalcontext.insight.InsightDisplayDetails
 inline fun actionableInsight(
   actionDetails: InsightActionDetails,
   displayDetails: InsightDisplayDetails,
-  originHints: Collection<PublishedContextHint>,
+  originHints: Collection<PublishedContextHint>? = null,
   block: ActionableInsightKt.Dsl.() -> Unit = {},
 ): ActionableInsight =
   ActionableInsightKt.Dsl(ActionableInsight.Builder(actionDetails, displayDetails))
-    .apply { this.originHints += originHints }
-    .apply(block)
+    .apply {
+      originHints?.let { this.originHints += it }
+      block()
+    }
     .build()
 
 object ActionableInsightKt {

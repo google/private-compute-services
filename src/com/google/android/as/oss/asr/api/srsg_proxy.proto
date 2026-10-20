@@ -18,6 +18,7 @@ package com.google.android.as.oss.asr.api;
 
 import "src/com/google/android/as/oss/asr/api/srsg_feature_config.proto";
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "SrsgProxy";
 option java_package = "com.google.android.as.oss.asr.api";
 
@@ -31,6 +32,7 @@ service SrsgProxyService {
   rpc RecognitionSession(stream SrsgRequest) returns (stream SrsgResponse) {
     option deadline = 36000;  // 10 hrs in seconds
   }
+
   // Checks model availability
   rpc CheckModelAvailability(SrsgModelAvailabilityRequest)
       returns (stream SrsgModelAvailabilityResponse);
@@ -112,6 +114,7 @@ message SrsgModelAvailabilityRequest {
   // The application id of the client requesting the model availability.
   // e.g., "com.google.android.as"
   string application_id = 1;
+
   // The AI feature id to download (e.g., 288 for ASR continuous streaming
   // models).
   int32 ai_feature_id = 2;
@@ -125,11 +128,14 @@ message SrsgModelAvailabilityResponse {
 
 message SrsgModelInfo {
   string locale = 1;
+
   int64 size_bytes = 2;
   string version = 3;
+
   // The AI feature id to download (e.g., 288 for ASR continuous streaming
   // models).
   int32 ai_feature_id = 4;
+
   // Only include fields that Live Caption needs
 }
 
@@ -137,8 +143,10 @@ message SrsgModelDownloadRequest {
   // The application id of the client requesting the model download.
   // e.g., "com.google.android.as"
   string application_id = 1;
+
   // BCP-47 language tag.
   string locale = 2;
+
   // The AI feature id to download (e.g., 288 for ASR continuous streaming
   // models).
   int32 ai_feature_id = 3;
@@ -154,8 +162,10 @@ message SrsgModelDownloadResponse {
 message SrsgDownloadProgress {
   // The current download progress (from 0 to 100).
   int32 download_progress = 1;
+
   // The downloaded size of the download in bytes.
   int64 downloaded_bytes = 2;
+
   // The total size of the download in bytes.
   int64 total_bytes = 3;
 }
@@ -168,7 +178,9 @@ message SrsgDownloadEnd {
     MODEL_UNAVAILABLE = 3;
     SCHEDULED = 4;
     NO_INTERNET = 5;
+
     // Add more reasons as needed
   }
+
   Reason reason = 1;
 }

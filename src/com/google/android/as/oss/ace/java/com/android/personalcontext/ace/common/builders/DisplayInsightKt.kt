@@ -26,12 +26,14 @@ import android.service.personalcontext.insight.InsightDisplayDetails
 /** Creates a [DisplayInsight] using an idiomatic Kotlin DSL. */
 inline fun displayInsight(
   displayDetails: InsightDisplayDetails,
-  originHints: Collection<PublishedContextHint>,
+  originHints: Collection<PublishedContextHint>? = null,
   block: DisplayInsightKt.Dsl.() -> Unit = {},
 ): DisplayInsight =
   DisplayInsightKt.Dsl(DisplayInsight.Builder(displayDetails))
-    .apply { this.originHints += originHints }
-    .apply(block)
+    .apply {
+      originHints?.let { this.originHints += it }
+      block()
+    }
     .build()
 
 object DisplayInsightKt {

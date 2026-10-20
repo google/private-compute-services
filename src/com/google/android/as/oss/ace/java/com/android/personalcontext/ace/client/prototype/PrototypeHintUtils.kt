@@ -18,9 +18,11 @@
 
 package com.android.personalcontext.ace.client.prototype
 
+import android.app.personalcontext.hint.ContextHint as AppContextHint
 import android.service.personalcontext.hint.BundleHint
 import android.service.personalcontext.hint.ContextHint
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.AppLifecycleHintId
+import com.android.personalcontext.ace.client.prototype.PrototypeHintId.AutofillRemoteAppHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.BlueflaxMetadataHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.ClientSignalHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.ContactHintId
@@ -28,6 +30,7 @@ import com.android.personalcontext.ace.client.prototype.PrototypeHintId.CrossDev
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.DialerClickEventHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.DialerMetadataHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.DoNotRepublishHintId
+import com.android.personalcontext.ace.client.prototype.PrototypeHintId.DryRunHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.EmbeddedSessionHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.EntityTypeHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.ExampleEmbeddedHintId
@@ -40,11 +43,13 @@ import com.android.personalcontext.ace.client.prototype.PrototypeHintId.ThemeHin
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.VisualMetadataHintId
 import com.android.personalcontext.ace.client.prototype.PrototypeHintId.WeatherHintId
 import com.android.personalcontext.ace.client.prototype.applifecycle.AppLifecycleHint
+import com.android.personalcontext.ace.client.prototype.autofillremoteapp.AutofillRemoteAppHint
 import com.android.personalcontext.ace.client.prototype.blueflax.BlueflaxMetadataHint
 import com.android.personalcontext.ace.client.prototype.clientsignal.ClientSignalHint
 import com.android.personalcontext.ace.client.prototype.contact.ContactHint
 import com.android.personalcontext.ace.client.prototype.crossdevice.CrossDeviceIntentHint
 import com.android.personalcontext.ace.client.prototype.dialer.DialerMetadataHint
+import com.android.personalcontext.ace.client.prototype.dryrun.DryRunHint
 import com.android.personalcontext.ace.client.prototype.entitytype.EntityTypeHint
 import com.android.personalcontext.ace.client.prototype.example.ExampleEmbeddedHint
 import com.android.personalcontext.ace.client.prototype.gboard.GboardHint
@@ -58,7 +63,6 @@ import com.android.personalcontext.ace.client.prototype.session.EmbeddedSessionH
 import com.android.personalcontext.ace.client.prototype.theme.ThemeHint
 import com.android.personalcontext.ace.client.prototype.weather.WeatherHint
 import com.android.personalcontext.ace.common.builders.HintFilterKt
-import com.android.personalcontext.ace.common.builders.HintFilterKt.HintFilterDslMarker
 import com.android.personalcontext.ace.common.builders.bundleHint
 
 private const val PROTOTYPE_HINT_ID_KEY = "prototype_hint_id_key"
@@ -94,6 +98,7 @@ object PrototypeHintUtils {
         VisualMetadataHintId -> VisualMetadataHint
         RenderTokenHintId -> RenderTokenHint
         DoNotRepublishHintId -> DoNotRepublishHint
+        AutofillRemoteAppHintId -> AutofillRemoteAppHint
         LookupHintId -> LookupHint
         ThemeHintId -> ThemeHint
         DialerMetadataHintId -> DialerMetadataHint
@@ -103,6 +108,7 @@ object PrototypeHintUtils {
         KeyEventHintId -> KeyEventHint
         AppLifecycleHintId -> AppLifecycleHint
         EmbeddedSessionHintId -> EmbeddedSessionHint
+        DryRunHintId -> DryRunHint
 
         else -> null
       }
@@ -123,7 +129,16 @@ object PrototypeHintUtils {
     return toPrototypeHint() is T
   }
 
+  /**
+   * Returns whether a [android.app.personalcontext.hint.ContextHint] is a [PrototypeHint] of type
+   * [id].
+   */
+  fun AppContextHint.isPrototypeHint(id: PrototypeHintId): Boolean {
+    return hintTypeName == id.typeName
+  }
+
   /** Adds a filter that matches a specific [PrototypeHint] using its [PrototypeHintId]. */
-  @HintFilterDslMarker
-  fun HintFilterKt.FilterScope.prototypeHint(id: PrototypeHintId) = bundleHint(id.typeName)
+  fun HintFilterKt.FilterScope.prototypeHint(id: PrototypeHintId) {
+    bundleHint(id.typeName)
+  }
 }

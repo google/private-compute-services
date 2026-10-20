@@ -12,14 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-edition = "2023";
+edition = "2024";
 
 package com.google.android.as.oss.featurelauncher.api;
 
 
+option features.default_symbol_visibility = STRICT;
+option java_outer_classname = "FeatureLauncher";
 option features.field_presence = IMPLICIT;
 option java_package = "com.google.android.as.oss.featurelauncher.api.proto";
-option java_multiple_files = true;
 
 // Service for executing authorized features on behalf of clients
 service PcsFeatureLauncherService {
@@ -48,6 +49,11 @@ message Feature {
   oneof params {
     RelationshipsParams relationships_params = 2
        ;
+
+    AddToListParams add_to_list_params = 3
+       ;
+    SaveToKeepNoteParams save_to_keep_note_params = 4
+       ;
   }
 }
 
@@ -57,10 +63,25 @@ enum FeatureType {
   FEATURE_TYPE_RELATIONSHIPS_ONBOARDING_CONSENT = 1;
   FEATURE_TYPE_RELATIONSHIPS_SETTINGS = 2;
   FEATURE_TYPE_RELATIONSHIPS_REMOVE_VIP_CONFIRMATION = 3;
+  FEATURE_TYPE_ADD_TO_KEEP_LIST = 4;
+  FEATURE_TYPE_SAVE_TO_KEEP_NOTE = 5;
 }
 
 message RelationshipsParams {
   int64 contact_id = 1;
+}
+
+message AddToListParams {
+  string list_name = 1;
+
+  repeated string items = 2;
+  int64 reminder_time_millis = 3;
+}
+
+message SaveToKeepNoteParams {
+  string title = 1;
+  string text = 2;
+  int64 reminder_time_millis = 3;
 }
 
 // Represents the result of a single feature operation.

@@ -40,8 +40,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -90,7 +88,7 @@ internal fun DeeplinkText(
   var hasReportedImpression by rememberSaveable { mutableStateOf(false) }
   LaunchedEffect(Unit) {
     if (!hasReportedImpression && deeplinkInsight != null) {
-      Log.e(TAG, "[CallEmbedded] Logging DeeplinkText impression")
+      Log.d(TAG, "[CallEmbedded] Logging DeeplinkText impression")
       reportEvent(deeplinkInsight, InsightEvent.EVENT_SHOW)
       hasReportedImpression = true
     }
@@ -119,8 +117,7 @@ internal fun DeeplinkText(
           indication = null,
           onClick = onClickLambda,
           role = Role.Button,
-        )
-        .semantics { contentDescription = text },
+        ),
   ) {
     Text(
       text = annotatedString,

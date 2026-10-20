@@ -16,6 +16,7 @@ edition = "2024";
 
 package com.google.android.as.oss.asr.api;
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "SrsgFeatureConfigOuterClass";
 option java_package = "com.google.android.as.oss.asr.api";
 
@@ -48,14 +49,14 @@ message AudioSourceConfig {
 
 // Provides the metadata of the client app that calls through the
 // GoogleRecognitionService and DataShareService gRPC services.
-message ClientInfo {
+export message ClientInfo {
   // The package name used to identify the client app.
   string package_name = 1;
 
   reserved 2, 3, 4, 5;
 }
 
-message FeatureConfig {
+export message FeatureConfig {
   // Limit on the maximum number of results to return.
   int32 max_results = 1;
 
@@ -90,9 +91,7 @@ message FeatureConfig {
   // The configuration for external audio source
   AudioSourceConfig audio_source_config = 14;
 
-  // Configuration to enhance ASR quality. The policy needs flag
-  // TranscriptionDeviceConstants.enable_soda_aicore_asr flag to be enabled to
-  // take effect.
+  // Configuration to enhance ASR quality.
   AsrEnhancementPolicy asr_enhancement_policy = 17;
 
   // Client specific request extensions
@@ -148,7 +147,7 @@ message FormattingConfig {
 }
 
 // The configuration to enable language detection.
-message LanguageDetectionConfig {
+export message LanguageDetectionConfig {
   // Whether to enable language detection.
   bool enabled = 1;
 
@@ -158,7 +157,7 @@ message LanguageDetectionConfig {
 }
 
 // The configuration to enable automatic language switch.
-message AutoLanguageSwitchConfig {
+export message AutoLanguageSwitchConfig {
   // Whether to enable automatic language switch.
   bool enabled = 1;
 

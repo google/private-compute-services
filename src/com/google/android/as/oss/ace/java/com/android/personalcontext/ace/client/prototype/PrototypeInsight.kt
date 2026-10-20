@@ -67,7 +67,17 @@ sealed class PrototypeInsight(val id: PrototypeInsightId, val creator: Creator) 
 
   /** Final toString implementation to prevent subclass implementations that might leak PII. */
   final override fun toString(): String {
-    return "${this.javaClass.simpleName}(id=$id, originHints=[${originHints.size} items redacted], tokens=$tokens, redacted...)"
+    val details = buildList {
+      if (originHints.isNotEmpty()) {
+        val count = originHints.size
+        val itemText = if (count == 1) "item" else "items"
+        add("originHints=[$count $itemText]")
+      }
+      if (tokens.isNotEmpty()) {
+        add("tokens=$tokens")
+      }
+    }
+    return "${this.javaClass.simpleName}(${details.joinToString(", ")})"
   }
 
   /**

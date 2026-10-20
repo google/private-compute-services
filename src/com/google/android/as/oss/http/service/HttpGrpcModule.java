@@ -68,7 +68,9 @@ abstract class HttpGrpcModule {
 
     if (configReader.getConfig().enableCronetMigration()) {
       CronetEngine engine = cronetEngineProvider.get();
-      builder.addInterceptor(CronetInterceptor.newBuilder(engine).build());
+      if (engine != null) {
+        builder.addInterceptor(CronetInterceptor.newBuilder(engine).build());
+      }
     }
     return builder.build();
   }

@@ -71,7 +71,8 @@ public class PcsOakServerStreamRequestReader extends BaseOakServerStreamRequestR
         oakServerStreamResponseObserver,
         directOakClientRequestObserver,
         parcelInputStream,
-        configReader.getConfig().enableTlsBasedSession());
+        configReader.getConfig().enableTlsBasedSession(),
+        pcsStatsLogger);
     this.configReader = configReader;
     this.buildFlavor = buildFlavor;
     this.clientSessionResponseObserver = clientSessionResponseObserver;

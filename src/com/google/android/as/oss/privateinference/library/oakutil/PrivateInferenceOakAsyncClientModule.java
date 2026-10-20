@@ -21,6 +21,7 @@ import com.google.android.as.oss.common.ExecutorAnnotations.PiCertDownloadExecut
 import com.google.android.as.oss.common.ExecutorAnnotations.PiExecutorQualifier;
 import com.google.android.as.oss.common.time.TimeSource;
 import com.google.android.as.oss.privateinference.Annotations.TcaExpectedServerName;
+import com.google.android.as.oss.privateinference.logging.PcsStatsLogger;
 import com.google.android.as.oss.privateinference.util.timers.Annotations.PrivateInferenceClientTimers;
 import com.google.android.as.oss.privateinference.util.timers.LatencyLoggingTimer;
 import com.google.android.as.oss.privateinference.util.timers.PiDebugLogTimers;
@@ -86,8 +87,10 @@ abstract class PrivateInferenceOakAsyncClientModule {
   @Provides
   @Singleton
   static StreamObserverTlsSessionClient provideStreamObserverTlsSessionClient(
-      Provider<OakSessionTlsContext> tlsContextProvider, PiCertificateRepository repository) {
-    return new StreamObserverTlsSessionClient(tlsContextProvider, repository);
+      Provider<OakSessionTlsContext> tlsContextProvider,
+      PiCertificateRepository repository,
+      PcsStatsLogger pcsStatsLogger) {
+    return new StreamObserverTlsSessionClient(tlsContextProvider, repository, pcsStatsLogger);
   }
 
   @Provides

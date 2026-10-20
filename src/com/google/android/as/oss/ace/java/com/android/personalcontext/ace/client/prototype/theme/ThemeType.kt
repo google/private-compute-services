@@ -20,4 +20,5 @@ package com.android.personalcontext.ace.client.prototype.theme
 enum class ThemeType {
   SHOW_ANIMATION_V2,
   SHOW_BRANDED_ICON,
+  SHOW_TINTABLE_ICON,
 }

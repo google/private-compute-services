@@ -17,12 +17,13 @@ edition = "2024";
 package com.google.android.as.oss.dataattribution.proto;
 
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "AttributionChipHeader";
 option java_package = "com.google.android.as.oss.dataattribution.proto";
 
 // The data required to populate [AttributionChipData].
 // Next ID: 5
-message AttributionChipData {
+export message AttributionChipData {
   // A bitmap that should match the icon/image the user sees on the long-pressed
   // entity.
   oneof chip_bitmap {

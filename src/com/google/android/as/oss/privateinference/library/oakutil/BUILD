@@ -326,7 +326,9 @@ android_library(
         "PiCertificateRepositoryImpl.kt",
     ],
     deps = [
+        "//src/com/google/android/as/oss/logging:enums_java_proto_lite",
         "//src/com/google/android/as/oss/privateinference:annotations",
+        "//src/com/google/android/as/oss/privateinference/logging",
         "//third_party/java/android_libs/downloader",
         "//third_party/java/android_libs/downloader:simple_file_download_destination",
         "//third_party/kotlin/kotlinx_coroutines:kotlinx_coroutines-android",

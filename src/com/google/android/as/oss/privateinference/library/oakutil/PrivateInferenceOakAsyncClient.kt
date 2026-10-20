@@ -56,10 +56,12 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.guava.await
 import kotlinx.coroutines.launch
 
 /** An asynchronous client for Private Inference based on StreamObservers. */
@@ -123,6 +125,7 @@ internal constructor(
         deviceAttestationFlag.mode(),
         requestMetadata.proxyBackend,
       )
+    pcsStatsLogger.logEventCount(CountMetricId.PCS_PI_NOISE_SESSION_SETUP_COUNT)
     // Some session initialization may do file I/O, so we need to run it in the background.
     // We create a new CoroutineScope for each `startNoiseSession` and treat the lifecycle of the
     // Session as the CoroutineScope's lifecycle.
@@ -210,6 +213,15 @@ internal constructor(
     requestMetadata: PrivateInferenceRequestMetadata,
     sessionStreamObserver: StreamObserverSessionClient.OakSessionStreamObserver,
   ) {
+    logger
+      .atFine()
+      .log(
+        "PrivateInferenceOakAsyncClient.startTlsSession with" +
+          " device_attestation_mode flag mode %s, proxy_backend %s",
+        deviceAttestationFlag.mode(),
+        requestMetadata.proxyBackend,
+      )
+    pcsStatsLogger.logEventCount(CountMetricId.PCS_PI_TLS_SESSION_SETUP_COUNT)
     CoroutineScope(
         context =
           dispatcher + CoroutineName("StartPrivateSession_${nextSessionId.getAndIncrement()}")
@@ -219,10 +231,23 @@ internal constructor(
           PrivateInferenceTlsSessionStreamObserver(
             scope = this@launch,
             wrapped = sessionStreamObserver,
+            deviceAttestationGenerator = deviceAttestationGenerator,
+            deviceAttestationFlag = deviceAttestationFlag,
+            clientMetadataFlag = clientMetadataFlag,
+            arateaAuthFlag = arateaAuthFlag,
             timers = timers,
+            backgroundExecutor = backgroundExecutor,
+            bsaArateaTokenProvider = bsaArateaTokenProvider,
+            bsaCacheableArateaTokenProvider = bsaCacheableArateaTokenProvider,
+            pcsStatsLogger = pcsStatsLogger,
+            featureName = requestMetadata.featureName,
           )
         try {
-          val tlsStub = stubFactory.createPrivateTlsServiceStub(requestMetadata.authInfo)
+          val tlsStub =
+            stubFactory.createPrivateTlsServiceStub(
+              requestMetadata.authInfo,
+              requestMetadata.ipBlindingMode,
+            )
           streamObserverTlsSessionClient.startSession(
             sessionStreamObserver = observerWrapper,
             streamStarter = { observer ->
@@ -231,6 +256,9 @@ internal constructor(
             },
           )
         } catch (e: Exception) {
+          if (e is CancellationException) {
+            throw e
+          }
           logger.atSevere().withCause(e).log("Failed to start private session over TLS.")
           observerWrapper.onError(e)
         }
@@ -256,12 +284,19 @@ internal constructor(
       timers.start(PrivateInferenceClientTimerNames.END_TO_END_PI_CHANNEL_SETUP),
     private val oakSessionOpenTimer: Timers.Timer =
       timers.start(PrivateInferenceClientTimerNames.OAK_SESSION_ESTABLISH_STREAM),
+    private val handshakeStartTime: Long = System.currentTimeMillis(),
   ) : StreamObserverSessionClient.OakSessionStreamObserver {
     private val inferenceTimers: InferenceTimers = InferenceTimers(timers)
     private val onErrorCompleted = AtomicBoolean(false)
 
     override fun onSessionOpen(clientRequests: StreamObserver<ByteString>) {
       oakSessionOpenTimer.stop()
+      val handshakeLatencyMs = System.currentTimeMillis() - handshakeStartTime
+      pcsStatsLogger.logEventCount(CountMetricId.PCS_PI_NOISE_SESSION_SETUP_SUCCESS)
+      pcsStatsLogger.logEventLatency(
+        ValueMetricId.PCS_PI_NOISE_HANDSHAKE_LATENCY,
+        handshakeLatencyMs,
+      )
 
       // The final logic to run in both attested and unattested cases.
       fun openSessionAndStartTimers() {
@@ -429,11 +464,18 @@ internal constructor(
       timers.start(PrivateInferenceClientTimerNames.END_TO_END_PI_CHANNEL_SETUP),
     private val oakSessionOpenTimer: Timers.Timer =
       timers.start(PrivateInferenceClientTimerNames.OAK_SESSION_ESTABLISH_STREAM),
+    private val handshakeStartTime: Long = System.currentTimeMillis(),
   ) : StreamObserverSessionClient.OakSessionStreamObserver {
     private val onErrorCompleted = AtomicBoolean(false)
 
     override fun onSessionOpen(clientRequests: StreamObserver<ByteString>) {
       oakSessionOpenTimer.stop()
+      val handshakeLatencyMs = System.currentTimeMillis() - handshakeStartTime
+      pcsStatsLogger.logEventCount(CountMetricId.PCS_PI_NOISE_SESSION_SETUP_SUCCESS)
+      pcsStatsLogger.logEventLatency(
+        ValueMetricId.PCS_PI_NOISE_HANDSHAKE_LATENCY,
+        handshakeLatencyMs,
+      )
 
       fun openSessionAndStartTimers() {
         e2ePiSessionStartTimer.stop()
@@ -588,36 +630,168 @@ internal constructor(
   }
 
   /**
-   * A wrapper around the client-provided observer for TLS session logging and channel lifecycle.
+   * A wrapper around the client-provided observer for TLS session logging, authentication, and
+   * channel lifecycle.
    */
   private class PrivateInferenceTlsSessionStreamObserver(
     private val scope: CoroutineScope,
     private val wrapped: StreamObserverSessionClient.OakSessionStreamObserver,
+    private val deviceAttestationGenerator: DeviceAttestationGenerator,
+    private val deviceAttestationFlag: DeviceAttestationFlag,
+    private val clientMetadataFlag: ClientMetadataFlag,
+    private val arateaAuthFlag: ArateaAuthFlag,
     private val timers: Timers,
+    private val backgroundExecutor: ListeningExecutorService,
+    private val bsaArateaTokenProvider: BsaTokenProvider<@JvmSuppressWildcards ArateaToken>,
+    private val bsaCacheableArateaTokenProvider:
+      BsaTokenProvider<@JvmSuppressWildcards ArateaTokenWithoutChallenge>,
+    private val pcsStatsLogger: PcsStatsLogger,
+    private val featureName: PcsPrivateInferenceFeatureName,
     private val e2ePiSessionStartTimer: Timers.Timer =
       timers.start(PrivateInferenceClientTimerNames.END_TO_END_PI_CHANNEL_SETUP),
     private val oakSessionOpenTimer: Timers.Timer =
       timers.start(PrivateInferenceClientTimerNames.OAK_SESSION_ESTABLISH_STREAM),
-  ) : StreamObserverSessionClient.OakSessionStreamObserver {
+    private val handshakeStartTime: Long = System.currentTimeMillis(),
+  ) : StreamObserverTlsSessionClient.OakTlsSessionStreamObserver {
     private val inferenceTimers: InferenceTimers = InferenceTimers(timers)
     private val onErrorCompleted = AtomicBoolean(false)
 
-    override fun onSessionOpen(clientRequests: StreamObserver<ByteString>) {
-      // Send device attestation and anonymous token verification requests first
+    override suspend fun onSessionOpen(clientRequests: StreamObserver<ByteString>) {
       oakSessionOpenTimer.stop()
-      e2ePiSessionStartTimer.stop()
-      inferenceTimers.startFirst()
-      wrapped.onSessionOpen(clientRequests)
+      val handshakeLatencyMs = System.currentTimeMillis() - handshakeStartTime
+      pcsStatsLogger.logEventCount(CountMetricId.PCS_PI_TLS_SESSION_SETUP_SUCCESS)
+      pcsStatsLogger.logEventLatency(ValueMetricId.PCS_PI_TLS_HANDSHAKE_LATENCY, handshakeLatencyMs)
+
+      // The final logic to run in both attested and unattested cases.
+      fun openSessionAndStartTimers() {
+        e2ePiSessionStartTimer.stop()
+        inferenceTimers.startFirst()
+        wrapped.onSessionOpen(clientRequests)
+      }
+
+      val sessionBindingToken =
+        (clientRequests as? StreamObserverSessionClient.ClientSessionAccess)
+          ?.oakClientSession
+          ?.getSessionBindingToken(PRIVATE_INFERENCE_SESSION_BINDING_TOKEN_INFO) ?: ByteArray(0)
+
+      when (arateaAuthFlag.mode()) {
+        ArateaAuthFlag.Mode.DEVICE_ATTESTATION -> {
+          logger.atInfo().log("Device attestation mode is set for TLS.")
+          if (deviceAttestationFlag.enabled()) {
+            logger.atInfo().log("Device attestation is enabled.")
+            // Attestation generation runs directly here because onSessionOpen is already invoked
+            // on backgroundExecutor via startTlsSession's coroutine dispatcher.
+            val generateKeyPairTimer =
+              timers.start(PrivateInferenceClientTimerNames.DEVICE_ATTESTATION_GENERATE_KEY_PAIR)
+            val certificateChain =
+              deviceAttestationGenerator.generateAttestation(
+                sessionBindingToken,
+                deviceAttestationFlag.isDeviceIdAttestationEnabled(),
+              )
+            logger
+              .atFine()
+              .log(
+                "Sending device attestation to server over TLS with %d certificates.",
+                certificateChain.size,
+              )
+            clientRequests.onNext(
+              pcsPrivateArateaRequest {
+                  featureName = this@PrivateInferenceTlsSessionStreamObserver.featureName
+                  deviceAttestationRequest = deviceAttestationRequest {
+                    androidKeyStoreEvidence = androidKeyStoreAttestationEvidence {
+                      this.certificateChain += certificateChain
+                    }
+                  }
+                }
+                .toByteString()
+            )
+            generateKeyPairTimer.stop()
+            // Call openSessionAndStartTimers() once, *after* any attestation has occurred.
+            openSessionAndStartTimers()
+          } else {
+            logger.atFine().log("Device attestation is disabled.")
+            // Call openSessionAndStartTimers() once, *after* any attestation has occurred.
+            openSessionAndStartTimers()
+          }
+        }
+        ArateaAuthFlag.Mode.ANONYMOUS_TOKEN -> {
+          logger.atFine().log("Fetching anonymous token from server.")
+          val terminalTokenAuthTimer =
+            timers.start(PrivateInferenceClientTimerNames.IPP_ANONYMOUS_TOKEN_AUTH)
+          // Get the token from the BsaTokenProvider and send it to the server.
+          try {
+            val token = fetchArateaToken(sessionBindingToken)
+            logger
+              .atFine()
+              .log(
+                "Received anonymous token from server: {token: %s, encodedExtensions: %s}",
+                token.token,
+                token.encodedExtensions,
+              )
+            clientRequests.onNext(
+              pcsPrivateArateaRequest {
+                  featureName = this@PrivateInferenceTlsSessionStreamObserver.featureName
+                  anonymousTokenRequest = anonymousTokenRequest {
+                    anonymousToken = ByteString.copyFrom(token.toByteArray())
+                    encodedExtensions = ByteString.copyFromUtf8(token.encodedExtensions)
+                    if (clientMetadataFlag.enabled()) {
+                      clientMetadata = clientMetadata {
+                        androidDeviceMetadata = androidDeviceMetadata {
+                          manufacturer = Build.MANUFACTURER
+                        }
+                      }
+                    }
+                  }
+                }
+                .toByteString()
+            )
+            // Call openSessionAndStartTimers() once, *after* any attestation has occurred.
+            openSessionAndStartTimers()
+            terminalTokenAuthTimer.stop()
+          } catch (e: Exception) {
+            if (e is CancellationException) {
+              throw e
+            }
+            logger.atSevere().withCause(e).log("Failed to fetch anonymous token")
+            if (onErrorCompleted.compareAndSet(false, true)) {
+              wrapped.onError(e)
+            }
+            clientRequests.onCompleted()
+            scope.cancel("Failed to fetch anonymous token", e)
+          }
+        }
+      }
+    }
+
+    private suspend fun fetchArateaToken(sessionBindingToken: ByteArray): PrivacyPassTokenData {
+      return pcsStatsLogger.getResultAndLogStatusAsync(METRIC_ID_MAP) {
+        val tokenBytes =
+          if (arateaAuthFlag.isCacheEnabled()) {
+            bsaCacheableArateaTokenProvider
+              .fetchTokenFuture(backgroundExecutor, CacheableArateaTokenParams())
+              .await()
+              .bytes
+          } else {
+            bsaArateaTokenProvider
+              .fetchTokenFuture(backgroundExecutor, ArateaTokenParams(sessionBindingToken))
+              .await()
+              .bytes
+          }
+        PrivacyPassTokenData.parseFrom(tokenBytes.toByteArray())
+      }
     }
 
     override fun onNext(response: ByteString) {
+      if (onErrorCompleted.get()) {
+        return
+      }
       inferenceTimers.response()
       wrapped.onNext(response)
     }
 
     override fun onError(t: Throwable) {
       inferenceTimers.stop()
-      if (!onErrorCompleted.get()) {
+      if (onErrorCompleted.compareAndSet(false, true)) {
         wrapped.onError(t)
       }
       scope.cancel("OnError during TLS Session", t)
@@ -625,7 +799,9 @@ internal constructor(
 
     override fun onCompleted() {
       inferenceTimers.stop()
-      wrapped.onCompleted()
+      if (onErrorCompleted.compareAndSet(false, true)) {
+        wrapped.onCompleted()
+      }
       scope.cancel()
     }
   }

@@ -19,11 +19,12 @@ package com.google.android.as.oss.delegatedui.api.infra.dataservice;
 import "src/com/google/android/as/oss/delegatedui/api/common/common.proto";
 import "src/com/google/android/as/oss/delegatedui/api/integration/templates/template_integration.proto";
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "DataServiceGetTemplateData";
 option java_package = "com.google.android.as.oss.delegatedui.api.infra.dataservice";
 
 // Get the delegated ui template data for the given ingress data
-message DelegatedUiGetTemplateDataRequest {
+export message DelegatedUiGetTemplateDataRequest {
   // Configuration from the local Context. Used to construct a remote Context.
   // This will be sent through RPC metadata headers, and is only documented here
   // for the record.
@@ -48,7 +49,7 @@ message DelegatedUiGetTemplateDataRequest {
   int32 measure_spec_height = 6 [deprecated = true];
 }
 
-message DelegatedUiGetTemplateDataResponse {
+export message DelegatedUiGetTemplateDataResponse {
   // The template to use for the delegated UI content.
   integration.templates.DelegatedUiTemplateType template_type = 1;
 

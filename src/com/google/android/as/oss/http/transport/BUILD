@@ -26,7 +26,6 @@ android_library(
     manifest = "//src/com/google/android/as/oss/common:AndroidManifest.xml",
     deps = [
         "//java/com/google/android/libraries/net/downloader",
-        "//java/com/google/android/libraries/net/downloader:cronet",
         "//src/com/google/android/as/oss/common/config",
         "//src/com/google/android/as/oss/grpc:status",
         "//src/com/google/android/as/oss/http/api:http_java_proto_lite",
@@ -61,6 +60,5 @@ android_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:com_google_flogger_google_extensions",
         "@maven//:com_google_guava_guava",
-        "@maven//:javax_inject_javax_inject",
     ],
 )

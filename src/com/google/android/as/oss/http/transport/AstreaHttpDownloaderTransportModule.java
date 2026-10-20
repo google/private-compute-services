@@ -18,18 +18,17 @@ package com.google.android.as.oss.http.transport;
 
 import android.content.Context;
 import android.os.Build;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresExtension;
-import com.google.android.as.oss.common.config.ConfigReader;
-import com.google.android.as.oss.http.config.PcsHttpConfig;
-import com.google.android.libraries.net.downloader.CronetDownloaderTransport;
 import com.google.android.libraries.net.downloader.DownloaderTransport;
+import com.google.common.flogger.GoogleLogger;
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
 import javax.inject.Named;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 import org.chromium.net.CronetEngine;
 import org.chromium.net.CronetProvider;
@@ -39,32 +38,28 @@ import org.chromium.net.CronetProvider;
 @Module
 @InstallIn(SingletonComponent.class)
 abstract class PcsHttpDownloaderTransportModule {
-
-  private static final String HTTP_ENGINE_NATIVE_PROVIDER =
-      "org.chromium.net.impl.HttpEngineNativeProvider";
+  private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
 
   @Provides
   @Singleton
   @Named("PcsCronet")
+  @Nullable
   @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
   static CronetEngine provideCronetEngine(@ApplicationContext Context context) {
-    for (CronetProvider provider : CronetProvider.getAllProviders(context)) {
-      if (provider.getClass().getName().equals(HTTP_ENGINE_NATIVE_PROVIDER)
-          && provider.isEnabled()) {
-        return provider.createBuilder().enableQuic(true).build();
+    try {
+      for (CronetProvider provider : CronetProvider.getAllProviders(context)) {
+        if (provider.getName().equals(CronetProvider.PROVIDER_NAME_HTTPENGINE_NATIVE)
+            && provider.isEnabled()) {
+          return provider.createBuilder().enableQuic(true).build();
+        }
       }
+    } catch (Throwable t) {
+      logger.atWarning().withCause(t).log("Failed to initialize HttpEngine CronetEngine");
     }
-    throw new IllegalStateException("HttpEngineNativeProvider not found or not enabled");
+    return null;
   }
 
-  @Provides
-  static DownloaderTransport provideDownloaderTransport(
-      ConfigReader<PcsHttpConfig> configReader,
-      @Named("PcsCronet") Provider<CronetEngine> cronetEngineProvider,
-      Provider<PcsHttpDownloaderTransport> pcsTransportProvider) {
-    if (configReader.getConfig().enableCronetMigration()) {
-      return new CronetDownloaderTransport(cronetEngineProvider.get());
-    }
-    return pcsTransportProvider.get();
-  }
+  @Binds
+  abstract DownloaderTransport bindDownloaderTransport(
+      PcsHttpDownloaderTransport downloaderTransport);
 }

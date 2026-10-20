@@ -20,12 +20,13 @@ import "src/com/google/android/as/oss/feedback/proto/feedback_dialog_common_data
 import "src/com/google/android/as/oss/feedback/proto/feedback_tag_data.proto";
 
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "EntityFeedbackDialogDataOuterClass";
 option java_package = "com.google.android.as.oss.feedback.api";
 
 // The data required to populate the feedback UI for a single entity.
 // Next ID: 9
-message EntityFeedbackDialogData {
+export message EntityFeedbackDialogData {
   enum FeedbackClient {
     FEEDBACK_CLIENT_UNSPECIFIED = 0;
     FEEDBACK_CLIENT_SPOON = 1;
