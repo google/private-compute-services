@@ -31,7 +31,9 @@ object PeerAttestedClientSessionConfigBuilder {
    *
    * @param publicKeyset The public keyset for attestation verification.
    * @param clock The clock to use for attestation verification time validation.
-   * @param An optional publisher to publisher attestation evidence on successful session setups.
+   * @param publisher Optional publisher for attestation evidence on successful session setups.
+   * @param workloadReferenceValues Serialized Oak ReferenceValues for workload verification.
+   * @param workloadAttestationId Attestation ID expected for the workload evidence.
    */
   @JvmStatic
   @JvmOverloads
@@ -39,8 +41,16 @@ object PeerAttestedClientSessionConfigBuilder {
     publicKeyset: ByteArray,
     clock: AttestationVerificationClock,
     publisher: AttestationPublisher? = null,
+    workloadReferenceValues: ByteArray = ByteArray(0),
+    workloadAttestationId: String = "",
   ): OakSessionConfigBuilder {
-    return nativeGet(publicKeyset, clock, publisher)
+    return nativeGet(
+      publicKeyset,
+      clock,
+      publisher,
+      workloadReferenceValues,
+      workloadAttestationId,
+    )
   }
 
   @JvmStatic
@@ -48,5 +58,7 @@ object PeerAttestedClientSessionConfigBuilder {
     publicKeyset: ByteArray,
     clock: AttestationVerificationClock,
     publisher: AttestationPublisher?,
+    workloadReferenceValues: ByteArray,
+    workloadAttestationId: String,
   ): OakSessionConfigBuilder
 }

@@ -42,13 +42,29 @@ internal object PeerAttestedClientSessionConfigBuilderModule {
   ): OakSessionConfigBuilder {
     val validUntil = verificationKeys.validUntil.toJavaInstant()
     if (validUntil.isBefore(Instant.ofEpochMilli(clock.millisecondsSinceEpoch()))) {
-      throw AttestationVerificationException("Verification keys have expired since $validUntil")
+      throw AttestationVerificationException("Verification policy has expired since $validUntil")
     }
+
+    val hasWorkloadReferenceValues = verificationKeys.hasWorkloadReferenceValues()
+    if (verificationKeys.requireWorkloadReferenceValues && !hasWorkloadReferenceValues) {
+      throw AttestationVerificationException("Workload reference values are required but missing")
+    }
+    if (hasWorkloadReferenceValues && verificationKeys.workloadAttestationId.isBlank()) {
+      throw AttestationVerificationException(
+        "Workload attestation ID is required when workload reference values are present"
+      )
+    }
+
+    val workloadReferenceValues =
+      if (hasWorkloadReferenceValues) verificationKeys.workloadReferenceValues.toByteArray()
+      else ByteArray(0)
 
     return PeerAttestedClientSessionConfigBuilder.get(
       verificationKeys.tinkSerializedPublicKeyset.toByteArray(),
       clock,
       publisher.getOrNull(),
+      workloadReferenceValues,
+      verificationKeys.workloadAttestationId,
     )
   }
 }
