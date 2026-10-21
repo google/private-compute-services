@@ -19,6 +19,6 @@
 
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/fragment_preferences"
-    class="com.google.android.as.oss.settings.ui.PcsSettingsFragment"
+    class="com.google.android.as.oss.settings.ui.sSettingsFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent" />
