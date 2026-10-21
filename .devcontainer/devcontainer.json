@@ -1,0 +1,130 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11"
+    },
+    "ghcr.io/devcontainers/features/go:1": {
+      "version": "1.23"
+    },
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "21",
+      "installMaven": true,
+      "installGradle": true
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.vscode-typescript-next",
+        "ms-python.python",
+        "golang.go",
+        "redhat.vscode-yaml",
+        "ms-vscode.makefile-tools",
+        "GitHub.copilot",
+        "esbenp.prettier-vscode",
+        "ms-vscode.extension-pack-for-python",
+        "Extension.ms-vscode-remote-remote-containers",
+        "vscjava.extension-pack-for-java",
+        "redhat.java",
+        "vscjava.vscode-maven",
+        "vscjava.vscode-gradle",
+        "ms-python.vscode-pylance",
+        "golang.go-nightly"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": true,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "[python]": {
+          "editor.defaultFormatter": "ms-python.python",
+          "editor.formatOnSave": true
+        },
+        "[go]": {
+          "editor.formatOnSave": true,
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+          }
+        },
+        "[java]": {
+          "editor.defaultFormatter": "redhat.java",
+          "editor.formatOnSave": true
+        },
+        "java.server.launchMode": "Standard",
+        "java.import.maven.exclusions": ["**/node_modules/**", "**/.m2/**"],
+        "java.configuration.maven.globalSettings": "/home/node/.m2/settings.xml"
+      }
+    }
+  },
+  "forwardPorts": [
+    3000,
+    5000,
+    8000,
+    8080,
+    8443,
+    9000,
+    27017,
+    5432,
+    6379
+  ],
+  "portsAttributes": {
+    "3000": {
+      "label": "Application",
+      "onAutoForward": "notify"
+    },
+    "5000": {
+      "label": "Flask/API",
+      "onAutoForward": "notify"
+    },
+    "8000": {
+      "label": "Development Server",
+      "onAutoForward": "notify"
+    },
+    "8080": {
+      "label": "HTTP",
+      "onAutoForward": "notify"
+    },
+    "8443": {
+      "label": "HTTPS",
+      "onAutoForward": "notify"
+    },
+    "9000": {
+      "label": "Java Debug",
+      "onAutoForward": "silent"
+    },
+    "27017": {
+      "label": "MongoDB",
+      "onAutoForward": "silent"
+    },
+    "5432": {
+      "label": "PostgreSQL",
+      "onAutoForward": "silent"
+    },
+    "6379": {
+      "label": "Redis",
+      "onAutoForward": "silent"
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "remoteUser": "node",
+  "mounts": [
+    "source=${localEnv:HOME}/.ssh,target=/home/node/.ssh,readonly",
+    "source=${localEnv:HOME}/.gitconfig,target=/home/node/.gitconfig,readonly",
+    "source=${localEnv:HOME}/.m2,target=/home/node/.m2"
+  ],
+  "remoteEnv": {
+    "NODE_ENV": "development",
+    "PYTHONUNBUFFERED": "1",
+    "GOPATH": "/home/node/go"
+  },
+  "containerEnv": {
+    "TZ": "UTC"
+  }
+}
