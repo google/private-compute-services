@@ -57,23 +57,21 @@ class PersistentStateManagerSharedPreferencesImpl implements PersistentStateMana
 
   @Override
   public ListenableFuture<Optional<ClientPersistentState>> readState(String clientId) {
-    return executorService.submit(
-        () ->
-            toClientState(
-                Optional.ofNullable(
-                    getSharedPreferences().getString(toClientStateKey(clientId), null))));
+    return executorService.submit(() ->
+        toClientState(
+            Optional.ofNullable(
+                getSharedPreferences().getString(toClientStateKey(clientId), null))));
   }
 
   @Override
   public ListenableFuture<Void> writeState(String clientId, ClientPersistentState state) {
-    return executorService.submit(
-        () -> {
-          getSharedPreferences()
-              .edit()
-              .putString(toClientStateKey(clientId), toClientStateValue(state))
-              .apply();
-          return null;
-        });
+    return executorService.submit(() -> {
+      getSharedPreferences()
+          .edit()
+          .putString(toClientStateKey(clientId), toClientStateValue(state))
+          .apply();
+      return null;
+    });
   }
 
   private SharedPreferences getSharedPreferences() {

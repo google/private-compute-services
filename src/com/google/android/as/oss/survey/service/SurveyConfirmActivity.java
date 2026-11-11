@@ -145,16 +145,15 @@ public final class SurveyConfirmActivity extends Hilt_SurveyConfirmActivity {
 
   private void updateConfirmDialogContent(LayoutInflater layoutInflater, ViewGroup container) {
     surveyResponsesMap.entrySet().stream()
-        .map(
-            entry -> {
-              View view = layoutInflater.inflate(R.layout.survey_confirm_item, container, false);
-              TextView questionText = view.findViewById(R.id.survey_confirm_question_text);
-              TextView answerText = view.findViewById(R.id.survey_confirm_answer_text);
-              questionText.setText(entry.getKey());
-              answerText.setText(entry.getValue());
-              container.addView(view);
-              return view;
-            })
+        .map(entry -> {
+          View view = layoutInflater.inflate(R.layout.survey_confirm_item, container, false);
+          TextView questionText = view.findViewById(R.id.survey_confirm_question_text);
+          TextView answerText = view.findViewById(R.id.survey_confirm_answer_text);
+          questionText.setText(entry.getKey());
+          answerText.setText(entry.getValue());
+          container.addView(view);
+          return view;
+        })
         .forEach(view -> view.setVisibility(View.VISIBLE));
   }
 

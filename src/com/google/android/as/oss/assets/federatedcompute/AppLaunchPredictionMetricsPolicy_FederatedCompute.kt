@@ -17,7 +17,7 @@
 package com.google.android.libraries.pcc.policies.federatedcompute
 
 /** Data policy. */
-val AppLaunchPredictionMetricsPolicy_FederatedCompute =
+val AppLaunchPredictionMetricsPolicy_FederatedCompute: FlavoredPolicies =
   flavoredPolicies(
     name = "AppLaunchPredictionMetricsPolicy_FederatedCompute",
     policyType = MonitorOrImproveUserExperienceWithFederatedCompute,

@@ -98,8 +98,10 @@ class BsaTokenCacheRefreshWorker(
     val tokenClass: Class<out BsaToken>,
     val coroutineScope: CoroutineScope,
   ) : PcsInitializer {
-    @VisibleForTesting val latestOperation = MutableStateFlow<Operation?>(null)
-    @VisibleForTesting val latestRequest = MutableStateFlow<WorkRequest?>(null)
+    @VisibleForTesting
+    val latestOperation: MutableStateFlow<Operation?> = MutableStateFlow<Operation?>(null)
+    @VisibleForTesting
+    val latestRequest: MutableStateFlow<WorkRequest?> = MutableStateFlow<WorkRequest?>(null)
 
     override fun getPriority(): Int = PcsInitializer.PRIORITY_LOW
 

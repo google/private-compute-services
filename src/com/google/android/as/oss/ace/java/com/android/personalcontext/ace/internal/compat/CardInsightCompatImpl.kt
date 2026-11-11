@@ -17,7 +17,7 @@
 package com.android.personalcontext.ace.internal.compat
 
 import android.service.personalcontext.insight.ContextInsight
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsight
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsightV1
 import com.android.personalcontext.ace.client.prototype.card.CardInsight
 import com.android.personalcontext.ace.visualizer.compat.CardInsightCompat
 import com.android.personalcontext.ace.visualizer.compat.CardInsightCompat.SafeCardInsight
@@ -30,7 +30,7 @@ import javax.inject.Inject
 class CardInsightCompatImpl @Inject constructor() : CardInsightCompat {
 
   override fun <T> ifCardInsight(insight: ContextInsight, block: (SafeCardInsight) -> T): T? =
-    insight.toPrototypeInsight<CardInsight>()?.let { cardInsight ->
+    insight.toPrototypeInsightV1<CardInsight>()?.let { cardInsight ->
       block(
         object : SafeCardInsight {
           override val title: ContextInsight?

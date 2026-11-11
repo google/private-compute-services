@@ -460,14 +460,13 @@ public final class PcsExampleStoreService extends Hilt_PcsExampleStoreService {
       networkUsageLogRepository
           .getDbExecutor()
           .get()
-          .execute(
-              () ->
-                  networkUsageLogRepository.insertNetworkUsageEntity(
-                      NetworkUsageLogUtils.createFcTrainingStartQueryNetworkUsageEntity(
-                          NetworkUsageLogUtils.createFcTrainingStartQueryConnectionDetails(
-                              query.getFeatureName().name(), query.getClientName()),
-                          runId,
-                          Optional.of(query.getPolicy()))));
+          .execute(() ->
+              networkUsageLogRepository.insertNetworkUsageEntity(
+                  NetworkUsageLogUtils.createFcTrainingStartQueryNetworkUsageEntity(
+                      NetworkUsageLogUtils.createFcTrainingStartQueryConnectionDetails(
+                          query.getFeatureName().name(), query.getClientName()),
+                      runId,
+                      Optional.of(query.getPolicy()))));
     }
   }
 }

@@ -73,7 +73,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsight
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsightV1
 import com.android.personalcontext.ace.client.prototype.serversideclose.ServerSideCloseInsight
 import com.android.personalcontext.ace.client.prototype.weather.WeatherHint
 import com.android.personalcontext.ace.client.prototype.weather.WeatherHint.SuggestionType
@@ -236,7 +236,7 @@ private fun LocationCard(chip: ChipContent, reportEvent: (Int) -> Unit, showBran
     modifier = Modifier.fillMaxWidth().height(117.dp).padding(horizontal = 16.dp),
     onDismiss = {
       // Tells client that the user dismissed the embedded session.
-      info.onReceiveInsight(ServerSideCloseInsight().toContextInsight())
+      info.onReceiveInsight(ServerSideCloseInsight().toContextInsightV1())
       // Tells pingback handler to update interaction Db
       reportEvent(InsightEvent.EVENT_USER_DISMISS)
     },

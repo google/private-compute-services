@@ -90,74 +90,70 @@ public class HttpDownloaderClient {
       stub = HttpServiceGrpc.newStub(onDeviceChannel);
     }
 
-    return CallbackToFutureAdapter.getFuture(
-        completer -> {
-          SettableFuture<ClientCallStreamObserver<HttpDownloadRequest>> requestStreamFuture =
-              SettableFuture.create();
-          completer.addCancellationListener(
-              () -> {
-                try {
-                  ClientCallStreamObserver<HttpDownloadRequest> streamObserver =
-                      Futures.getDone(requestStreamFuture);
-                  logger.atFine().log(
-                      "Cancelling download for url [%s] requestStream [%s]",
-                      httpDownloadRequest.getUrl(), streamObserver);
-                  streamObserver.cancel("Client cancelled.", null);
-                } catch (ExecutionException e) {
-                  logger.atSevere().withCause(e).log(
-                      "Invariant violated: it should be impossible to cancel before setting the"
-                          + " observer for url[%s]",
-                      httpDownloadRequest.getUrl());
-                }
-              },
-              MoreExecutors.directExecutor());
-          stub.download(
-              httpDownloadRequest,
-              new ClientResponseObserver<HttpDownloadRequest, HttpDownloadResponse>() {
-                @Override
-                public void beforeStart(
-                    ClientCallStreamObserver<HttpDownloadRequest> requestStream) {
-                  logger.atFine().log(
-                      "Client call stream established for url [%s]", httpDownloadRequest.getUrl());
-                  requestStreamFuture.set(requestStream);
-                }
+    return CallbackToFutureAdapter.getFuture(completer -> {
+      SettableFuture<ClientCallStreamObserver<HttpDownloadRequest>> requestStreamFuture =
+          SettableFuture.create();
+      completer.addCancellationListener(
+          () -> {
+            try {
+              ClientCallStreamObserver<HttpDownloadRequest> streamObserver =
+                  Futures.getDone(requestStreamFuture);
+              logger.atFine().log(
+                  "Cancelling download for url [%s] requestStream [%s]",
+                  httpDownloadRequest.getUrl(), streamObserver);
+              streamObserver.cancel("Client cancelled.", null);
+            } catch (ExecutionException e) {
+              logger.atSevere().withCause(e).log(
+                  "Invariant violated: it should be impossible to cancel before setting the"
+                      + " observer for url[%s]",
+                  httpDownloadRequest.getUrl());
+            }
+          },
+          MoreExecutors.directExecutor());
+      stub.download(
+          httpDownloadRequest,
+          new ClientResponseObserver<HttpDownloadRequest, HttpDownloadResponse>() {
+            @Override
+            public void beforeStart(ClientCallStreamObserver<HttpDownloadRequest> requestStream) {
+              logger.atFine().log(
+                  "Client call stream established for url [%s]", httpDownloadRequest.getUrl());
+              requestStreamFuture.set(requestStream);
+            }
 
-                @Override
-                public void onNext(HttpDownloadResponse result) {
-                  switch (result.getResponseCase()) {
-                    case RESPONSE_HEADERS ->
-                        callback.onDownloadStarted(result.getResponseHeaders());
-                    case RESPONSE_BODY_CHUNK ->
-                        callback.onDownloadedChunk(
-                            result.getResponseBodyChunk().getResponseBytes().toByteArray());
-                    default ->
-                        callback.onError(
-                            new IllegalArgumentException(
-                                "Unexpected response case " + result.getResponseCase()));
-                  }
-                }
+            @Override
+            public void onNext(HttpDownloadResponse result) {
+              switch (result.getResponseCase()) {
+                case RESPONSE_HEADERS -> callback.onDownloadStarted(result.getResponseHeaders());
+                case RESPONSE_BODY_CHUNK ->
+                    callback.onDownloadedChunk(
+                        result.getResponseBodyChunk().getResponseBytes().toByteArray());
+                default ->
+                    callback.onError(
+                        new IllegalArgumentException(
+                            "Unexpected response case " + result.getResponseCase()));
+              }
+            }
 
-                @Override
-                public void onError(Throwable t) {
-                  logDownloadFailure();
-                  callback.onError(t);
-                  completer.setException(t);
-                }
+            @Override
+            public void onError(Throwable t) {
+              logDownloadFailure();
+              callback.onError(t);
+              completer.setException(t);
+            }
 
-                // TODO: throw an IllegalArgumentException if headers haven't been returned.
-                @Override
-                public void onCompleted() {
-                  logger.atFine().log(
-                      "Download complete from url='%s'", httpDownloadRequest.getUrl());
-                  logDownloadSuccess();
-                  callback.onDownloadComplete();
-                  completer.set(null);
-                }
-              });
-          // Invariant: download() doesn't return before cancelation handler is installed.
-          Preconditions.checkState(requestStreamFuture.isDone());
-          return "HTTP download scheduled for " + httpDownloadRequest.getUrl();
-        });
+            // TODO: throw an IllegalArgumentException if headers haven't been returned.
+            @Override
+            public void onCompleted() {
+              logger.atFine().log("Download complete from url='%s'", httpDownloadRequest.getUrl());
+              logDownloadSuccess();
+              callback.onDownloadComplete();
+              completer.set(null);
+            }
+          });
+      // Invariant: download() doesn't return before cancelation handler is installed.
+      Preconditions.checkState(requestStreamFuture.isDone());
+      return "HTTP download scheduled for " + httpDownloadRequest.getUrl();
+    });
   }
 
   private void logDownloadSuccess() {

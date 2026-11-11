@@ -16,11 +16,12 @@ edition = "2024";
 
 package com.google.android.as.oss.delegatedui.api.infra.uiservice;
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "UiServiceNestedScroll";
 option java_package = "com.google.android.as.oss.delegatedui.api.infra.uiservice";
 
 // Remote UI reports a nested scroll event.
-message DelegatedUiNestedScrollResponse {
+export message DelegatedUiNestedScrollResponse {
   float scroll_x = 1;  // Deprecated.
   float scroll_y = 2;  // Deprecated.
 
@@ -49,7 +50,7 @@ message NestedScrollStop {
 }
 
 // Remote UI reports a nested fling event. Deprecated.
-message DelegatedUiNestedFlingResponse {
+export message DelegatedUiNestedFlingResponse {
   float velocity_x = 1;
   float velocity_y = 2;
 }

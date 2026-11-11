@@ -17,10 +17,11 @@ edition = "2024";
 package com.google.android.as.oss.feedback.api.gateway;
 
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "Spoon";
 option java_package = "com.google.android.as.oss.feedback.api.gateway";
 
-enum SpoonCUJ {
+export enum SpoonCUJ {
   SPOON_CUJ_UNKNOWN = 0;
 
   SPOON_CUJ_MR_NOTIFICATION = 1;
@@ -40,7 +41,7 @@ enum SpoonCUJ {
 }
 
 // Next ID: 8
-message SpoonFeedbackDataDonation {
+export message SpoonFeedbackDataDonation {
   repeated string triggering_messages = 1
      ;
 
@@ -50,7 +51,6 @@ message SpoonFeedbackDataDonation {
   repeated string model_outputs = 3;
 
   repeated MemoryEntity memory_entities = 4;
-
   string selected_entity_content = 5
      ;
 
@@ -65,15 +65,18 @@ message SpoonFeedbackDataDonation {
   string failure_reason = 7;
 }
 
-message SpoonUserInput {
+export message SpoonUserInput {
   string optional_spoon_comment = 1;
+
   repeated string ground_truth_list = 6
      ;
 }
 
 message SourceDocument {
   string l0_title = 1;
+
   string l0_content = 2;
+
   MemoryEntity memory_entity = 3;
 }
 

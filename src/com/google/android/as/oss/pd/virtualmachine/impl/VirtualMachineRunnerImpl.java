@@ -141,56 +141,55 @@ public class VirtualMachineRunnerImpl implements VirtualMachineRunner {
 
   @NonNull
   private ListenableFuture<Void> runVm(VirtualMachine virtualMachine) {
-    return CallbackToFutureAdapter.getFuture(
-        completer -> {
-          try {
-            virtualMachine.setCallback(
-                executor,
-                new VirtualMachineCallback() {
-                  @Override
-                  public void onPayloadStarted(VirtualMachine vm) {
-                    logger.atFine().log("onPayloadStarted received from VM.");
-                  }
+    return CallbackToFutureAdapter.getFuture(completer -> {
+      try {
+        virtualMachine.setCallback(
+            executor,
+            new VirtualMachineCallback() {
+              @Override
+              public void onPayloadStarted(VirtualMachine vm) {
+                logger.atFine().log("onPayloadStarted received from VM.");
+              }
 
-                  @Override
-                  public void onPayloadReady(VirtualMachine vm) {
-                    logger.atFine().log("onPayloadReady received from VM.");
-                    vm.clearCallback();
-                    completer.set(null);
-                  }
+              @Override
+              public void onPayloadReady(VirtualMachine vm) {
+                logger.atFine().log("onPayloadReady received from VM.");
+                vm.clearCallback();
+                completer.set(null);
+              }
 
-                  @Override
-                  public void onPayloadFinished(VirtualMachine vm, int exitCode) {
-                    vm.clearCallback();
-                    completer.setException(
-                        new VmException(
-                            "onPayloadFinished received from VM with exitCode: " + exitCode));
-                  }
+              @Override
+              public void onPayloadFinished(VirtualMachine vm, int exitCode) {
+                vm.clearCallback();
+                completer.setException(
+                    new VmException(
+                        "onPayloadFinished received from VM with exitCode: " + exitCode));
+              }
 
-                  @Override
-                  public void onError(VirtualMachine vm, int errorCode, String message) {
-                    vm.clearCallback();
-                    completer.setException(
-                        new VmException(
-                            "onError received from VM with errorCode: "
-                                + errorCode
-                                + " and message "
-                                + message));
-                  }
+              @Override
+              public void onError(VirtualMachine vm, int errorCode, String message) {
+                vm.clearCallback();
+                completer.setException(
+                    new VmException(
+                        "onError received from VM with errorCode: "
+                            + errorCode
+                            + " and message "
+                            + message));
+              }
 
-                  @Override
-                  public void onStopped(VirtualMachine vm, int reason) {
-                    vm.clearCallback();
-                    completer.setException(
-                        new VmException("onStopped received from VM with reason: " + reason));
-                  }
-                });
-            virtualMachine.run();
-          } catch (VirtualMachineException e) {
-            completer.setException(new VmException("Failure while running VM.", e));
-          }
-          return "payloadReady future";
-        });
+              @Override
+              public void onStopped(VirtualMachine vm, int reason) {
+                vm.clearCallback();
+                completer.setException(
+                    new VmException("onStopped received from VM with reason: " + reason));
+              }
+            });
+        virtualMachine.run();
+      } catch (VirtualMachineException e) {
+        completer.setException(new VmException("Failure while running VM.", e));
+      }
+      return "payloadReady future";
+    });
   }
 
   private VirtualMachine getOrCreateVm(GetVmRequest request) {

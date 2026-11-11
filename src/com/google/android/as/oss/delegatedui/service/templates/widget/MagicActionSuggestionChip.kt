@@ -38,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
@@ -92,7 +93,7 @@ data class ChipTheme(
   val fadeDelayMillis: Int = 1000,
 )
 
-val LocalChipTheme = staticCompositionLocalOf { ChipTheme() }
+val LocalChipTheme: ProvidableCompositionLocal<ChipTheme> = staticCompositionLocalOf { ChipTheme() }
 
 /**
  * A data model representing the content of a single suggestion chip. This is used by

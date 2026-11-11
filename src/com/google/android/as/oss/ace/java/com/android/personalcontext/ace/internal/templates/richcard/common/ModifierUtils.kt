@@ -32,7 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.platform.LocalContext
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsight
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsightV1
 import com.android.personalcontext.ace.client.prototype.serversideclose.ServerSideCloseInsight
 import com.android.personalcontext.ace.internal.templates.richcard.CardContextAction
 import com.android.personalcontext.ace.visualizer.templates.LocalInsightSurfaceClientInfo
@@ -98,7 +98,7 @@ fun Modifier.cardContextActionClickable(action: CardContextAction?): Modifier = 
     scope.launch {
       // Delay dismissal slightly to allow ripple animation to show.
       delay(200)
-      info.onReceiveInsight(ServerSideCloseInsight().toContextInsight())
+      info.onReceiveInsight(ServerSideCloseInsight().toContextInsightV1())
     }
   }
 }

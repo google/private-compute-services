@@ -123,10 +123,9 @@ public class PccAttestationMeasurementClientImpl implements PccAttestationMeasur
             .build());
     attestationMeasurementRequest
         .contentBinding()
-        .ifPresent(
-            contentBinding ->
-                checkArgument(
-                    !contentBinding.isEmpty(), "Content binding should not be an empty string."));
+        .ifPresent(contentBinding ->
+            checkArgument(
+                !contentBinding.isEmpty(), "Content binding should not be an empty string."));
 
     return Futures.transformAsync(
         requestChallenge(attestationMeasurementRequest),

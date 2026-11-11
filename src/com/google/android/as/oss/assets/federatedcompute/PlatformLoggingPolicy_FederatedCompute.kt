@@ -17,7 +17,7 @@
 package com.google.android.libraries.pcc.policies.federatedcompute
 
 /** Federated compute policy for platform logs logged via statsd. */
-val PlatformLoggingPolicy_FederatedCompute =
+val PlatformLoggingPolicy_FederatedCompute: FlavoredPolicies =
   flavoredPolicies(
     name = "PlatformLoggingPolicy_FederatedCompute",
     policyType = MonitorOrImproveUserExperienceWithFederatedCompute,

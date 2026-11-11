@@ -40,7 +40,9 @@ class ConversationIdConfigReader(private val flagManager: FlagManager) :
   override fun computeConfig() =
     ConversationIdConfig(
       enableConversationId = flagManager.get(ConversationIdFlags.ENABLE),
+      enableBroadcast = flagManager.get(ConversationIdFlags.ENABLE_BROADCAST),
       enableSecurityPolicy = flagManager.get(ConversationIdFlags.SECURITY_POLICY_ENABLE),
       allowedNonPixelDevices = flagManager.get(ConversationIdFlags.ALLOWED_NON_PIXEL_DEVICES),
+      enableSessionBoundBinding = flagManager.get(ConversationIdFlags.SESSION_BOUND_BINDING_ENABLE),
     )
 }

@@ -133,12 +133,14 @@ public class PcsOakServerStreamRequestReader extends BaseOakServerStreamRequestR
   private void logRequestCountEvent(PcsPrivateInferenceFeatureName featureName) {
     CountMetricId countMetricId = loggingMetricIdProvider.getRequestCountMetricId(featureName);
     pcsStatsLogger.logEventCount(countMetricId);
+    pcsStatsLogger.logEventCount(CountMetricId.PCS_PI_COUNT, featureName);
   }
 
   private void logInferenceSessionCountEvent(PcsPrivateInferenceFeatureName featureName) {
     CountMetricId countMetricId =
         loggingMetricIdProvider.getInferenceSessionCountMetricId(featureName);
     pcsStatsLogger.logEventCount(countMetricId);
+    pcsStatsLogger.logEventCount(CountMetricId.PCS_PI_SESSION_COUNT, featureName);
   }
 
   private static final PrivateInferenceSessionResponse SESSION_INITIALIZATION_DISABLED_RESPONSE =

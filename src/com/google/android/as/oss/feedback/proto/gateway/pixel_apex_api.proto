@@ -22,6 +22,7 @@ import "src/com/google/android/as/oss/feedback/proto/gateway/quartz_log.proto";
 import "src/com/google/android/as/oss/feedback/proto/gateway/spoon.proto";
 
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "PixelApexApi";
 option features.field_presence = IMPLICIT;
 option java_package = "com.google.android.as.oss.feedback.api.gateway";
@@ -68,7 +69,7 @@ message BlobDonation {
 }
 
 // The runtime config of the app.
-message RuntimeConfig {
+export message RuntimeConfig {
   // The build type of the app.
   string app_build_type = 1;
 
@@ -112,13 +113,14 @@ message StructuredUserInput {
     // This is used for user input corresponds to the Advanced Organizer.
     QuartzUserInput quartz_user_input = 4
        ;
+
     BlueflaxUserInput blueflax_user_input = 5;
   }
 }
 
 // The user data donation for the Apex API service. Structured proto data
 // donation, storage proto defined by each app.
-message UserDonation {
+export message UserDonation {
   oneof data_donation {
     SpoonFeedbackDataDonation structured_data_donation = 1
        ;

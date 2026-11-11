@@ -18,6 +18,54 @@ package com.google.android.as.oss.asr.service;
 
 import static com.google.frameworks.client.data.android.server.contrib.parcelables.ParcelableOverMetadataClientInterceptorKt.withParcelableOverMetadata;
 
+import android.annotation.SuppressLint;
+import android.content.AttributionSource;
+import android.content.Context;
+import android.content.ContextParams;
+import android.os.Build;
+import android.os.ParcelFileDescriptor;
+import androidx.annotation.RequiresApi;
+import com.google.android.as.oss.asr.api.AsrEnhancementPolicy;
+import com.google.android.as.oss.asr.api.AudioSourceConfig;
+import com.google.android.as.oss.asr.api.AutoLanguageSwitchConfig;
+import com.google.android.as.oss.asr.api.ClientInfo;
+import com.google.android.as.oss.asr.api.FeatureConfig;
+import com.google.android.as.oss.asr.api.FormattingConfig;
+import com.google.android.as.oss.asr.api.GoogleAsrServiceGrpc;
+import com.google.android.as.oss.asr.api.GoogleAsrServiceParcelables;
+import com.google.android.as.oss.asr.api.InitialSrsgRequest;
+import com.google.android.as.oss.asr.api.LanguageDetectionConfig;
+import com.google.android.as.oss.asr.api.ModelAvailabilityRequest;
+import com.google.android.as.oss.asr.api.ModelAvailabilityResponse;
+import com.google.android.as.oss.asr.api.ModelDownloadRequest;
+import com.google.android.as.oss.asr.api.ModelDownloadResponse;
+import com.google.android.as.oss.asr.api.MultiSegmentConfig;
+import com.google.android.as.oss.asr.api.RecognitionRequest;
+import com.google.android.as.oss.asr.api.RecognitionRequest.StartAction;
+import com.google.android.as.oss.asr.api.RecognitionResponse;
+import com.google.android.as.oss.asr.api.RecognizerMode;
+import com.google.android.as.oss.asr.api.SerializedProtoEvent;
+import com.google.android.as.oss.asr.api.SrsgModelAvailabilityRequest;
+import com.google.android.as.oss.asr.api.SrsgModelAvailabilityResponse;
+import com.google.android.as.oss.asr.api.SrsgModelDownloadRequest;
+import com.google.android.as.oss.asr.api.SrsgModelDownloadResponse;
+import com.google.android.as.oss.asr.api.SrsgProxyServiceGrpc;
+import com.google.android.as.oss.asr.api.SrsgRequest;
+import com.google.android.as.oss.asr.api.SrsgResponse;
+import com.google.common.flogger.GoogleLogger;
+import com.google.frameworks.client.data.android.server.contrib.parcelables.ParcelableOverMetadataKeys;
+import dagger.hilt.android.qualifiers.ApplicationContext;
+import io.grpc.Contexts;
+import io.grpc.Metadata;
+import io.grpc.ServerCall;
+import io.grpc.ServerCallHandler;
+import io.grpc.ServerInterceptor;
+import io.grpc.stub.StreamObserver;
+import java.io.IOException;
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Provider;
+
 /**
  * A gRPC service that acts as a proxy between a client (e.g., Live Caption) and the
  * GoogleASRService (SRSG).
@@ -110,13 +158,6 @@ public class SrsgProxyServiceImpl extends SrsgProxyServiceGrpc.SrsgProxyServiceI
         ModelAvailabilityRequest.newBuilder()
             .setClientInfo(ClientInfo.newBuilder().setPackageName(request.getApplicationId()));
 
-    if (request.hasAiFeatureId()) {
-      srsgRequestBuilder.setAicoreFeatureRequest(
-          AiCoreFeatureRequest.newBuilder().setFeatureId(request.getAiFeatureId()).build());
-    } else {
-      srsgRequestBuilder.setApplicationDomain(ApplicationDomain.AMBIENT_CONTINUOUS);
-    }
-
     GoogleAsrServiceGrpc.GoogleAsrServiceStub srsgStub = srsgClientProvider.get();
     srsgStub.checkModelAvailability(
         srsgRequestBuilder.build(), new AvailabilityResponseForwarder(responseObserver));
@@ -143,14 +184,7 @@ public class SrsgProxyServiceImpl extends SrsgProxyServiceGrpc.SrsgProxyServiceI
             .setEnableProgressUpdate(true)
             .setClientInfo(ClientInfo.newBuilder().setPackageName(request.getApplicationId()));
 
-    if (request.hasAiFeatureId()) {
-      srsgRequestBuilder.setAicoreFeatureDownloadRequest(
-          AiCoreFeatureDownloadRequest.newBuilder().setFeatureId(request.getAiFeatureId()).build());
-    } else {
-      srsgRequestBuilder
-          .setLocale(request.getLocale())
-          .setApplicationDomain(ApplicationDomain.AMBIENT_CONTINUOUS);
-    }
+    srsgRequestBuilder.setLocale(request.getLocale());
 
     GoogleAsrServiceGrpc.GoogleAsrServiceStub srsgStub = srsgClientProvider.get();
     srsgStub.downloadModel(
@@ -356,7 +390,11 @@ public class SrsgProxyServiceImpl extends SrsgProxyServiceGrpc.SrsgProxyServiceI
         io.grpc.Context newContext = io.grpc.Context.current();
 
         if (pfd != null) {
+          logger.atFine().log(
+              "getPfdAndAttrSrcExtractorInterceptor(): Extracted PFD from metadata");
           newContext = newContext.withValue(CONTEXT_PFD_KEY, pfd);
+        } else {
+          logger.atFine().log("getPfdAndAttrSrcExtractorInterceptor(): PFD is null in metadata");
         }
         // Extract Client's AttributionSource (for Android V+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {

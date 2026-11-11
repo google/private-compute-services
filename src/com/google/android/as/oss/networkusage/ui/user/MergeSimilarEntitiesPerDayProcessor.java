@@ -57,13 +57,12 @@ class MergeSimilarEntitiesPerDayProcessor implements EntityListProcessor {
   NetworkUsageItemWrapper mergeItems(Collection<NetworkUsageItemWrapper> networkUsageItems) {
     checkArgument(!networkUsageItems.isEmpty());
     return networkUsageItems.stream()
-        .reduce(
-            (item1, item2) ->
-                new NetworkUsageItemWrapper(
-                    ImmutableList.<NetworkUsageEntity>builder()
-                        .addAll(item1.networkUsageEntities())
-                        .addAll(item2.networkUsageEntities())
-                        .build()))
+        .reduce((item1, item2) ->
+            new NetworkUsageItemWrapper(
+                ImmutableList.<NetworkUsageEntity>builder()
+                    .addAll(item1.networkUsageEntities())
+                    .addAll(item2.networkUsageEntities())
+                    .build()))
         .orElseThrow(AssertionError::new);
   }
 }

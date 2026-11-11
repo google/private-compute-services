@@ -17,6 +17,7 @@ edition = "2024";
 package com.google.android.as.oss.features.optin.api;
 
 
+option features.default_symbol_visibility = STRICT;
 option features.field_presence = IMPLICIT;
 option java_package = "com.google.android.as.oss.features.optin.api.proto";
 

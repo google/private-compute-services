@@ -31,6 +31,20 @@ service GoogleAsrService {
       returns (stream RecognitionResponse) {
     option deadline = 36000;  // 10 hrs in seconds
   }
+
+  // A unary method to check the availability of the language packs that contain
+  // the speech models.
+  rpc CheckModelAvailability(ModelAvailabilityRequest)
+      returns (ModelAvailabilityResponse) {
+    option deadline = 600;  // 10 mins in seconds
+  }
+
+  // A unary method to request download of a language pack that contains the
+  // desired speech model.
+  rpc DownloadModel(ModelDownloadRequest)
+      returns (stream ModelDownloadResponse) {
+    option deadline = 3600;  // 1 hr in seconds
+  }
 }
 
 // Streaming recognition request action, can be one of the
@@ -101,4 +115,67 @@ enum RecognizerMode {
 
 message RecognitionResponse {
   reserved 1;
+}
+
+message LanguagepackInfo {
+  string locale = 1;
+  int32 version = 2;
+  int64 size_bytes = 4;
+
+  reserved 3;
+}
+
+message ModelAvailabilityRequest {
+  ClientInfo client_info = 1;
+
+  reserved 2 to 8;
+}
+
+message ModelAvailabilityResponse {
+  message ModelInfo {
+    oneof response_type {
+      LanguagepackInfo languagepack_info = 4;
+    }
+
+    reserved 1 to 3, 5 to 7;
+  }
+
+  repeated ModelInfo downloaded_model = 1;
+  repeated ModelInfo downloadable_model = 2;
+  repeated ModelInfo downloading_model = 3;
+}
+
+message ModelDownloadRequest {
+  string locale = 1;
+  bool skip_user_confirmation = 3;
+  bool enable_progress_update = 4 [default = true];
+  ClientInfo client_info = 5;
+
+  reserved 2, 6 to 9;
+}
+
+message ModelDownloadResponse {
+  message EndEvent {
+    enum EndReason {
+      END_REASON_UNKNOWN = 0;
+      END_REASON_COMPLETE = 1;
+      END_REASON_SCHEDULED = 2;
+      END_REASON_MODEL_UNAVAILABLE = 3;
+      END_REASON_DOWNLOAD_ERROR = 4;
+      END_REASON_NO_INTERNET_CONNECTION = 5;
+    }
+
+    EndReason end_reason = 1;
+  }
+
+  message ProgressEvent {
+    int32 download_progress = 1;
+    int64 download_total_size = 2;
+    int64 downloaded_size = 3;
+  }
+
+  oneof event_type {
+    EndEvent end_event = 1;
+    ProgressEvent progress_event = 2;
+  }
 }

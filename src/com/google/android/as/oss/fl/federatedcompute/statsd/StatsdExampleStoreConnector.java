@@ -150,16 +150,15 @@ public class StatsdExampleStoreConnector implements ExampleStoreConnector {
             0,
             new Intent(ACTION_RESTRICTED_METRICS_CHANGED),
             PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-    return executor.submit(
-        () -> {
-          try {
-            return Longs.asList(
-                statsManager.setRestrictedMetricsChangedOperation(
-                    getConfigId(), getConfigPackageName(), pi));
-          } catch (StatsUnavailableException | RuntimeException e) {
-            return ImmutableList.of();
-          }
-        });
+    return executor.submit(() -> {
+      try {
+        return Longs.asList(
+            statsManager.setRestrictedMetricsChangedOperation(
+                getConfigId(), getConfigPackageName(), pi));
+      } catch (StatsUnavailableException | RuntimeException e) {
+        return ImmutableList.of();
+      }
+    });
   }
 
   @Nullable

@@ -16,6 +16,7 @@ load("@bazel_rules_android//android:rules.bzl", "android_library")
 load("@rules_proto_grpc//java:defs.bzl", "java_grpc_library")
 load("//third_party/protobuf/bazel:java_lite_proto_library.bzl", "java_lite_proto_library")
 load("//third_party/protobuf/bazel:proto_library.bzl", "proto_library")
+load("//third_party/protobuf/build_defs:kt_jvm_proto_library.bzl", "kt_jvm_lite_proto_library")
 
 package(default_visibility = [
     "//javatests/com/google/android/apps/miphone/pcs/asr:__subpackages__",
@@ -35,6 +36,11 @@ proto_library(
 
 java_lite_proto_library(
     name = "srsg_proxy_java_proto_lite",
+    deps = [":srsg_proxy_proto"],
+)
+
+kt_jvm_lite_proto_library(
+    name = "srsg_proxy_kt_proto_lite",
     deps = [":srsg_proxy_proto"],
 )
 

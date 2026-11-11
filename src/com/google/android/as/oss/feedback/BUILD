@@ -78,6 +78,7 @@ android_library(
         "//third_party/java/androidx/activity/compose",
         "//third_party/java/androidx/appcompat",
         "//third_party/java/androidx/compose/runtime",
+        "@maven//:androidx_core_core",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_flogger_google_extensions",
         "@maven//:javax_inject_javax_inject",

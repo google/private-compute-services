@@ -20,7 +20,7 @@ package com.android.personalcontext.ace.internal.findprototypehint
 
 import android.service.personalcontext.insight.ContextInsight
 import com.android.personalcontext.ace.client.prototype.PrototypeHint
-import com.android.personalcontext.ace.client.prototype.PrototypeHintUtils.toPrototypeHint
+import com.android.personalcontext.ace.client.prototype.PrototypeHintUtils.toPrototypeHintV1
 
 object FindPrototypeHint {
 
@@ -37,6 +37,6 @@ object FindPrototypeHint {
   @JvmSynthetic
   inline fun <reified T : PrototypeHint> ContextInsight.findPrototypeHint(): T? =
     originHints.firstNotNullOfOrNull {
-      it.contextHint.toPrototypeHint<T>()
+      it.contextHint.toPrototypeHintV1<T>()
     }
 }

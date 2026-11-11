@@ -72,7 +72,7 @@ public class FcpLoggerInvokerImpl implements FcpLoggerInvoker {
         FcInvoker.upload(context, executor, fcOptions, fcCallback, exampleStoreAdapter);
     return invocationTask.onSuccessTask(
         executor,
-        (fcInvocation) ->
+        fcInvocation ->
             Tasks.forResult(
                 new FcpInvocation() {
                   @Override

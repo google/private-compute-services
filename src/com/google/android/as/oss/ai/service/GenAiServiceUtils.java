@@ -102,23 +102,22 @@ final class GenAiServiceUtils {
           throws RemoteException {
         try {
           ICancellationCallback cancellationCallback =
-              checkNonNullAidlResponse(
-                  () ->
-                      summarizationService.runCancellableInference(
-                          request,
-                          new ISummarizationResultCallback.Stub() {
-                            @Override
-                            public void onSummarizationInferenceSuccess(
-                                SummarizationResult response) throws RemoteException {
-                              callback.onSummarizationInferenceSuccess(response);
-                            }
+              checkNonNullAidlResponse(() ->
+                  summarizationService.runCancellableInference(
+                      request,
+                      new ISummarizationResultCallback.Stub() {
+                        @Override
+                        public void onSummarizationInferenceSuccess(SummarizationResult response)
+                            throws RemoteException {
+                          callback.onSummarizationInferenceSuccess(response);
+                        }
 
-                            @Override
-                            public void onSummarizationInferenceFailure(int err)
-                                throws RemoteException {
-                              callback.onSummarizationInferenceFailure(err);
-                            }
-                          }));
+                        @Override
+                        public void onSummarizationInferenceFailure(int err)
+                            throws RemoteException {
+                          callback.onSummarizationInferenceFailure(err);
+                        }
+                      }));
           return createCancellationCallback(cancellationCallback);
         } catch (RemoteException e) {
           // Binder doesn't propagate exceptions across processes.
@@ -133,27 +132,26 @@ final class GenAiServiceUtils {
           IPrepareInferenceEngineCallback callback) throws RemoteException {
         try {
           ICancellationCallback cancellationCallback =
-              checkNonNullAidlResponse(
-                  () ->
-                      summarizationService.prepareInferenceEngine(
-                          new IPrepareInferenceEngineCallback.Stub() {
-                            @Override
-                            public void onPreparationSuccess() throws RemoteException {
-                              callback.onPreparationSuccess();
-                            }
+              checkNonNullAidlResponse(() ->
+                  summarizationService.prepareInferenceEngine(
+                      new IPrepareInferenceEngineCallback.Stub() {
+                        @Override
+                        public void onPreparationSuccess() throws RemoteException {
+                          callback.onPreparationSuccess();
+                        }
 
-                            @Override
-                            public void onPreparationFailure(@InferenceError int err)
-                                throws RemoteException {
-                              callback.onPreparationFailure(err);
-                            }
+                        @Override
+                        public void onPreparationFailure(@InferenceError int err)
+                            throws RemoteException {
+                          callback.onPreparationFailure(err);
+                        }
 
-                            @Override
-                            public void onPreparationFailure2(AiCoreException error)
-                                throws RemoteException {
-                              callback.onPreparationFailure2(error);
-                            }
-                          }));
+                        @Override
+                        public void onPreparationFailure2(AiCoreException error)
+                            throws RemoteException {
+                          callback.onPreparationFailure2(error);
+                        }
+                      }));
           return createCancellationCallback(cancellationCallback);
         } catch (RemoteException e) {
           // When any of the above fail due to an exception, binder doesn't propagate it across
@@ -175,22 +173,20 @@ final class GenAiServiceUtils {
           TarsRequest request, PccTarsResultCallback callback) throws RemoteException {
         try {
           ICancellationCallback cancellationCallback =
-              checkNonNullAidlResponse(
-                  () ->
-                      tarsService.runCancellableInference(
-                          request,
-                          new ITarsResultCallback.Stub() {
-                            @Override
-                            public void onTarsSuccess(TarsResult response) throws RemoteException {
-                              callback.onTarsInferenceSuccess(response);
-                            }
+              checkNonNullAidlResponse(() ->
+                  tarsService.runCancellableInference(
+                      request,
+                      new ITarsResultCallback.Stub() {
+                        @Override
+                        public void onTarsSuccess(TarsResult response) throws RemoteException {
+                          callback.onTarsInferenceSuccess(response);
+                        }
 
-                            @Override
-                            public void onTarsFailure(@InferenceError int err)
-                                throws RemoteException {
-                              callback.onTarsInferenceFailure(err);
-                            }
-                          }));
+                        @Override
+                        public void onTarsFailure(@InferenceError int err) throws RemoteException {
+                          callback.onTarsInferenceFailure(err);
+                        }
+                      }));
           return createCancellationCallback(cancellationCallback);
         } catch (RemoteException e) {
           callback.onTarsInferenceFailure(InferenceError.IPC_ERROR);
@@ -211,23 +207,22 @@ final class GenAiServiceUtils {
           throws RemoteException {
         try {
           ICancellationCallback cancellationCallback =
-              checkNonNullAidlResponse(
-                  () ->
-                      textEmbeddingService.runCancellableInference(
-                          request,
-                          new ITextEmbeddingResultCallback.Stub() {
-                            @Override
-                            public void onTextEmbeddingInferenceSuccess(
-                                TextEmbeddingResult response) throws RemoteException {
-                              callback.onTextEmbeddingInferenceSuccess(response);
-                            }
+              checkNonNullAidlResponse(() ->
+                  textEmbeddingService.runCancellableInference(
+                      request,
+                      new ITextEmbeddingResultCallback.Stub() {
+                        @Override
+                        public void onTextEmbeddingInferenceSuccess(TextEmbeddingResult response)
+                            throws RemoteException {
+                          callback.onTextEmbeddingInferenceSuccess(response);
+                        }
 
-                            @Override
-                            public void onTextEmbeddingInferenceFailure(int err)
-                                throws RemoteException {
-                              callback.onTextEmbeddingInferenceFailure(err);
-                            }
-                          }));
+                        @Override
+                        public void onTextEmbeddingInferenceFailure(int err)
+                            throws RemoteException {
+                          callback.onTextEmbeddingInferenceFailure(err);
+                        }
+                      }));
           return createCancellationCallback(cancellationCallback);
         } catch (RemoteException e) {
           // When any of the above fail due to an exception, binder doesn't propagate it across
@@ -273,22 +268,21 @@ final class GenAiServiceUtils {
           LLMRequest request, PccLlmResultCallback callback) throws RemoteException {
         try {
           ICancellationCallback cancellationCallback =
-              checkNonNullAidlResponse(
-                  () ->
-                      llmService.runCancellableInference(
-                          request,
-                          new ILLMResultCallback.Stub() {
-                            @Override
-                            public void onLLMInferenceSuccess(LLMResult response)
-                                throws RemoteException {
-                              callback.onLLMInferenceSuccess(response);
-                            }
+              checkNonNullAidlResponse(() ->
+                  llmService.runCancellableInference(
+                      request,
+                      new ILLMResultCallback.Stub() {
+                        @Override
+                        public void onLLMInferenceSuccess(LLMResult response)
+                            throws RemoteException {
+                          callback.onLLMInferenceSuccess(response);
+                        }
 
-                            @Override
-                            public void onLLMInferenceFailure(int err) throws RemoteException {
-                              callback.onLLMInferenceFailure(err);
-                            }
-                          }));
+                        @Override
+                        public void onLLMInferenceFailure(int err) throws RemoteException {
+                          callback.onLLMInferenceFailure(err);
+                        }
+                      }));
           return createCancellationCallback(cancellationCallback);
         } catch (RemoteException e) {
           // When any of the above fail due to an exception, binder doesn't propagate it across
@@ -311,23 +305,21 @@ final class GenAiServiceUtils {
           SmartReplyRequest request, PccSmartReplyResultCallback callback) throws RemoteException {
         try {
           ICancellationCallback cancellationCallback =
-              checkNonNullAidlResponse(
-                  () ->
-                      smartReplyService.runCancellableInference(
-                          request,
-                          new ISmartReplyResultCallback.Stub() {
-                            @Override
-                            public void onSmartReplyInferenceSuccess(SmartReplyResult response)
-                                throws RemoteException {
-                              callback.onSmartReplyInferenceSuccess(response);
-                            }
+              checkNonNullAidlResponse(() ->
+                  smartReplyService.runCancellableInference(
+                      request,
+                      new ISmartReplyResultCallback.Stub() {
+                        @Override
+                        public void onSmartReplyInferenceSuccess(SmartReplyResult response)
+                            throws RemoteException {
+                          callback.onSmartReplyInferenceSuccess(response);
+                        }
 
-                            @Override
-                            public void onSmartReplyInferenceFailure(int err)
-                                throws RemoteException {
-                              callback.onSmartReplyInferenceFailure(err);
-                            }
-                          }));
+                        @Override
+                        public void onSmartReplyInferenceFailure(int err) throws RemoteException {
+                          callback.onSmartReplyInferenceFailure(err);
+                        }
+                      }));
           return createCancellationCallback(cancellationCallback);
         } catch (RemoteException e) {
           // When any of the above fail due to an exception, binder doesn't propagate it across
@@ -348,27 +340,26 @@ final class GenAiServiceUtils {
           IPrepareInferenceEngineCallback callback) throws RemoteException {
         try {
           ICancellationCallback cancellationCallback =
-              checkNonNullAidlResponse(
-                  () ->
-                      smartReplyService.prepareInferenceEngine(
-                          new IPrepareInferenceEngineCallback.Stub() {
-                            @Override
-                            public void onPreparationSuccess() throws RemoteException {
-                              callback.onPreparationSuccess();
-                            }
+              checkNonNullAidlResponse(() ->
+                  smartReplyService.prepareInferenceEngine(
+                      new IPrepareInferenceEngineCallback.Stub() {
+                        @Override
+                        public void onPreparationSuccess() throws RemoteException {
+                          callback.onPreparationSuccess();
+                        }
 
-                            @Override
-                            public void onPreparationFailure(@InferenceError int err)
-                                throws RemoteException {
-                              callback.onPreparationFailure(err);
-                            }
+                        @Override
+                        public void onPreparationFailure(@InferenceError int err)
+                            throws RemoteException {
+                          callback.onPreparationFailure(err);
+                        }
 
-                            @Override
-                            public void onPreparationFailure2(AiCoreException error)
-                                throws RemoteException {
-                              callback.onPreparationFailure2(error);
-                            }
-                          }));
+                        @Override
+                        public void onPreparationFailure2(AiCoreException error)
+                            throws RemoteException {
+                          callback.onPreparationFailure2(error);
+                        }
+                      }));
           return createCancellationCallback(cancellationCallback);
         } catch (RemoteException e) {
           // When any of the above fail due to an exception, binder doesn't propagate it across

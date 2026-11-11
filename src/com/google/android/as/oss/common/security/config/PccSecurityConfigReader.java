@@ -173,6 +173,18 @@ public class PccSecurityConfigReader extends AbstractConfigReader<PccSecurityCon
               .build(),
           /* merge= */ false);
 
+  public static final ProtoFlag<PackageSecurityInfo> NAS_PACKAGE_SECURITY_INFO =
+      ProtoFlag.create(
+          FLAG_PREFIX + "nas_package_security_info",
+          PackageSecurityInfo.newBuilder()
+              .setPackageName("com.google.android.nas")
+              .addAllowedReleaseKeys(
+                  "d4bb2df211900de457f3c4973880646dca8b7a032c7e5d1449bd9818fda68ca4")
+              .addAllowedTestKeys(
+                  "9c051f0c2ff4a3326c7f46b90bdbf65ce9079eb9f65c4b1fda687284a32a848d")
+              .build(),
+          /* merge= */ false);
+
   private static final BooleanFlag ENABLE_SECURITY_CHECK =
       BooleanFlag.create(FLAG_PREFIX + "enable_security_check", false);
 
@@ -184,12 +196,11 @@ public class PccSecurityConfigReader extends AbstractConfigReader<PccSecurityCon
     instance
         .flagManager
         .listenable()
-        .addListener(
-            (flagNames) -> {
-              if (FlagListener.anyHasPrefix(flagNames, FLAG_PREFIX)) {
-                instance.refreshConfig();
-              }
-            });
+        .addListener(flagNames -> {
+          if (FlagListener.anyHasPrefix(flagNames, FLAG_PREFIX)) {
+            instance.refreshConfig();
+          }
+        });
 
     return instance;
   }
@@ -204,12 +215,14 @@ public class PccSecurityConfigReader extends AbstractConfigReader<PccSecurityCon
         .setAgsaPackageSecurityInfo(flagManager.get(AGSA_PACKAGE_SECURITY_INFO))
         .setBlueflaxPackageSecurityInfo(flagManager.get(BLUEFLAX_PACKAGE_SECURITY_INFO))
         .setGlassesCorePackageSecurityInfo(flagManager.get(GLASSES_CORE_PACKAGE_SECURITY_INFO))
+        .setNasPackageSecurityInfo(flagManager.get(NAS_PACKAGE_SECURITY_INFO))
         .setEnableAllowlistedOnly(flagManager.get(ENABLE_SECURITY_CHECK))
         .setSecurityInfoList(
             PackageSecurityInfoList.newBuilder()
                 .addAllPackageSecurityInfos(
                     Stream.of(
                             flagManager.get(ASI_PACKAGE_SECURITY_INFO),
+                            flagManager.get(PCS_PACKAGE_SECURITY_INFO),
                             flagManager.get(PSI_PACKAGE_SECURITY_INFO),
                             flagManager.get(GBOARD_PACKAGE_SECURITY_INFO),
                             flagManager.get(GBOARD_CANARY_PACKAGE_SECURITY_INFO),
@@ -219,7 +232,8 @@ public class PccSecurityConfigReader extends AbstractConfigReader<PccSecurityCon
                             flagManager.get(PLAYPROTECT_PACKAGE_SECURITY_INFO),
                             flagManager.get(SAFETYCORE_PACKAGE_SECURITY_INFO),
                             flagManager.get(BLUEFLAX_PACKAGE_SECURITY_INFO),
-                            flagManager.get(GLASSES_CORE_PACKAGE_SECURITY_INFO))
+                            flagManager.get(GLASSES_CORE_PACKAGE_SECURITY_INFO),
+                            flagManager.get(NAS_PACKAGE_SECURITY_INFO))
                         .collect(toImmutableList()))
                 .build())
         .build();

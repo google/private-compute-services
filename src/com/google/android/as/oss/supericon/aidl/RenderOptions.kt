@@ -59,6 +59,8 @@ import java.util.Objects
  * @property consentVersion The version of the consent.
  * @property backgroundWidth The custom width of the background.
  * @property backgroundHeight The custom height of the background.
+ * @property supportsRenderCancelledError Whether the client handles
+ *   `SuperIconErrorCodes.RENDER_CANCELLED` without treating it as a fatal render failure.
  */
 @SafeParcelable.Class(creator = "RenderOptionsCreator")
 class RenderOptions
@@ -118,6 +120,12 @@ constructor(
   @field:SafeParcelable.Field(id = 34, getter = "getBackgroundHeight", defaultValue = "-1")
   val backgroundHeight: Int = DEFAULT_BACKGROUND_SIZE,
   @field:SafeParcelable.Field(id = 35, getter = "getPackageName") val packageName: String? = null,
+  @field:SafeParcelable.Field(
+    id = 36,
+    getter = "getSupportsRenderCancelledError",
+    defaultValue = "false",
+  )
+  val supportsRenderCancelledError: Boolean = false,
 ) : AbstractSafeParcelable() {
 
   @SafeParcelable.Constructor
@@ -157,6 +165,7 @@ constructor(
     @SafeParcelable.Param(id = 33) backgroundWidth: Int,
     @SafeParcelable.Param(id = 34) backgroundHeight: Int,
     @SafeParcelable.Param(id = 35) packageName: String?,
+    @SafeParcelable.Param(id = 36) supportsRenderCancelledError: Boolean,
   ) : this(
     width = width,
     height = height,
@@ -194,6 +203,7 @@ constructor(
     backgroundWidth = backgroundWidth,
     backgroundHeight = backgroundHeight,
     packageName = packageName,
+    supportsRenderCancelledError = supportsRenderCancelledError,
   )
 
   // SafeParcelable requires a Creator and specific writing logic
@@ -248,7 +258,8 @@ constructor(
       consentVersion == otherOptions.consentVersion &&
       backgroundWidth == otherOptions.backgroundWidth &&
       backgroundHeight == otherOptions.backgroundHeight &&
-      packageName == otherOptions.packageName
+      packageName == otherOptions.packageName &&
+      supportsRenderCancelledError == otherOptions.supportsRenderCancelledError
   }
 
   override fun hashCode(): Int {
@@ -288,11 +299,12 @@ constructor(
       backgroundWidth,
       backgroundHeight,
       packageName,
+      supportsRenderCancelledError,
     )
   }
 
   override fun toString(): String {
-    return "RenderOptions(width=$width, height=$height, minWidth=$minWidth, minHeight=$minHeight, maxWidth=$maxWidth, maxHeight=$maxHeight, uiType=$uiType, icon=$icon, iconWidth=$iconWidth, iconHeight=$iconHeight, iconScaleX=$iconScaleX, iconScaleY=$iconScaleY, background=$background, label=$label, labelColor=$labelColor, fontFamily=$fontFamily, textSizeInPixels=$textSizeInPixels, textScaleX=$textScaleX, windowToken=$windowToken, contentDescription=$contentDescription, roleDescription=$roleDescription, accessibilityPaneTitle=$accessibilityPaneTitle, subIcon=$subIcon, subIconWidth=$subIconWidth, subIconHeight=$subIconHeight, subIconScaleX=$subIconScaleX, subIconScaleY=$subIconScaleY, backgroundRippleColor=$backgroundRippleColor, lineSpacingExtra=$lineSpacingExtra, lineSpacingMultiplier=$lineSpacingMultiplier, textWeight=$textWeight, consentVersion=$consentVersion, backgroundWidth=$backgroundWidth, backgroundHeight=$backgroundHeight, packageName=$packageName)"
+    return "RenderOptions(width=$width, height=$height, minWidth=$minWidth, minHeight=$minHeight, maxWidth=$maxWidth, maxHeight=$maxHeight, uiType=$uiType, icon=$icon, iconWidth=$iconWidth, iconHeight=$iconHeight, iconScaleX=$iconScaleX, iconScaleY=$iconScaleY, background=$background, label=$label, labelColor=$labelColor, fontFamily=$fontFamily, textSizeInPixels=$textSizeInPixels, textScaleX=$textScaleX, windowToken=$windowToken, contentDescription=$contentDescription, roleDescription=$roleDescription, accessibilityPaneTitle=$accessibilityPaneTitle, subIcon=$subIcon, subIconWidth=$subIconWidth, subIconHeight=$subIconHeight, subIconScaleX=$subIconScaleX, subIconScaleY=$subIconScaleY, backgroundRippleColor=$backgroundRippleColor, lineSpacingExtra=$lineSpacingExtra, lineSpacingMultiplier=$lineSpacingMultiplier, textWeight=$textWeight, consentVersion=$consentVersion, backgroundWidth=$backgroundWidth, backgroundHeight=$backgroundHeight, packageName=$packageName, supportsRenderCancelledError=$supportsRenderCancelledError)"
   }
 
   companion object {

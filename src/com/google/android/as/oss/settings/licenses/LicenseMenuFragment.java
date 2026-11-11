@@ -76,13 +76,12 @@ public final class LicenseMenuFragment extends Fragment implements LoaderCallbac
     parentActivity.getSupportLoaderManager().initLoader(LOADER_ID, null, this);
     ListView listView = (ListView) view.findViewById(R.id.license_list);
     listView.setAdapter(listAdapter);
-    listView.setOnItemClickListener(
-        (parent, view1, position, id) -> {
-          License license = (License) parent.getItemAtPosition(position);
-          if (licenseSelectionListener != null) {
-            licenseSelectionListener.onLicenseSelected(license);
-          }
-        });
+    listView.setOnItemClickListener((parent, view1, position, id) -> {
+      License license = (License) parent.getItemAtPosition(position);
+      if (licenseSelectionListener != null) {
+        licenseSelectionListener.onLicenseSelected(license);
+      }
+    });
   }
 
   @Override

@@ -18,14 +18,15 @@ package com.google.android.as.oss.delegatedui.api.infra.uiservice;
 
 import "src/com/google/android/as/oss/delegatedui/api/common/common.proto";
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "UiServiceUpdate";
 option java_package = "com.google.android.as.oss.delegatedui.api.infra.uiservice";
 
 // Update - send updates from client that that may impact the delegated UI
-message DelegatedUiUpdateRequest {
+export message DelegatedUiUpdateRequest {
   common.DelegatedUiClientInputs client_inputs = 1;
 }
 
 // Client needs to know when the update call has been handled, so send back an
 // empty message.
-message DelegatedUiUpdateResponse {}
+export message DelegatedUiUpdateResponse {}

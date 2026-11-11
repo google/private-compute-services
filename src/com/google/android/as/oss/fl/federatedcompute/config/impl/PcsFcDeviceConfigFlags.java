@@ -35,7 +35,7 @@ public final class PcsFcDeviceConfigFlags extends PcsFcFlags {
   private static final String FLAG_NAMESPACE =
       FlagNamespace.DEVICE_PERSONALIZATION_SERVICES.toString();
 
-  static PcsFcDeviceConfigFlags create() {
+  public static PcsFcDeviceConfigFlags create() {
     return new PcsFcDeviceConfigFlags();
   }
 

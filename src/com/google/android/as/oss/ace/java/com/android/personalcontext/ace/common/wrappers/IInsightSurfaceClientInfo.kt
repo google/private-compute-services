@@ -20,8 +20,11 @@ package com.android.personalcontext.ace.common.wrappers
 
 import android.content.res.Configuration
 import android.graphics.Color
+import android.os.Build
+import android.os.Bundle
 import android.service.personalcontext.embedded.InsightSurfaceClientInfo
 import android.service.personalcontext.insight.ContextInsight
+import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import java.util.UUID
 
@@ -69,6 +72,9 @@ sealed interface IInsightSurfaceClientInfo {
 
   /** @see InsightSurfaceClientInfo.onReceiveInsight */
   fun onReceiveInsight(insight: ContextInsight)
+
+  /** @see InsightSurfaceClientInfo.extras */
+  @get:RequiresApi(Build.VERSION_CODES_FULL.CINNAMON_BUN_2) val extras: Bundle
 }
 
 /** Creates an [IInsightSurfaceClientInfo] from a [InsightSurfaceClientInfo]. */
@@ -111,6 +117,9 @@ private class InsightSurfaceClientInfoWrapper(private val original: InsightSurfa
   override val configuration: Configuration
     get() = original.configuration
 
+  override val extras: Bundle
+    get() = original.extras
+
   override fun onReceiveInsight(insight: ContextInsight) = original.onReceiveInsight(insight)
 }
 
@@ -127,6 +136,7 @@ class InsightSurfaceClientInfoForTesting(
   override val themeResourceId: Int = 0,
   override val packageName: String = "",
   override val configuration: Configuration = Configuration(),
+  override val extras: Bundle = Bundle.EMPTY,
   private val onReceiveInsight: (ContextInsight) -> Unit = {},
 ) : IInsightSurfaceClientInfo {
   override fun unwrap() = null

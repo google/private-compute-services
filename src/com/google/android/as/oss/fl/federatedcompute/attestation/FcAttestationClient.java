@@ -47,6 +47,7 @@ public class FcAttestationClient implements AttestationClient {
   private final TimeSource timeSource;
 
   private final ConfigReader<PcsAttestationMeasurementConfig> attestationMeasurementConfigReader;
+  private final boolean includeContentBinding;
 
   private final Random randomGenerator;
 
@@ -55,12 +56,14 @@ public class FcAttestationClient implements AttestationClient {
       Executor executor,
       TimeSource timeSource,
       ConfigReader<PcsAttestationMeasurementConfig> attestationMeasurementConfigReader,
+      boolean includeContentBinding,
       Random randomGenerator) {
     return new FcAttestationClient(
         attestationMeasurementClient,
         executor,
         timeSource,
         attestationMeasurementConfigReader,
+        includeContentBinding,
         randomGenerator);
   }
 
@@ -74,12 +77,12 @@ public class FcAttestationClient implements AttestationClient {
     AttestationMeasurementRequest.Builder attestationMeasurementRequestBuilder =
         AttestationMeasurementRequest.builder();
 
-    if (!contentBinding.isEmpty()) {
+    if (includeContentBinding && !contentBinding.isEmpty()) {
       attestationMeasurementRequestBuilder.setContentBinding(contentBinding);
     }
 
     AttestationMeasurementRequest attestationMeasurementRequest =
-        AttestationMeasurementRequest.builder().build();
+        attestationMeasurementRequestBuilder.build();
 
     FluentFuture.from(requestMeasurementDelay())
         .transformAsync(
@@ -171,11 +174,13 @@ public class FcAttestationClient implements AttestationClient {
       Executor executor,
       TimeSource timeSource,
       ConfigReader<PcsAttestationMeasurementConfig> attestationMeasurementConfigReader,
+      boolean includeContentBinding,
       Random randomGenerator) {
     this.attestationMeasurementClient = attestationMeasurementClient;
     this.executor = executor;
     this.timeSource = timeSource;
     this.attestationMeasurementConfigReader = attestationMeasurementConfigReader;
+    this.includeContentBinding = includeContentBinding;
     this.randomGenerator = randomGenerator;
   }
 }

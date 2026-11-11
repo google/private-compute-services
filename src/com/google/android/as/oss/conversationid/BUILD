@@ -23,6 +23,7 @@ android_library(
     srcs = glob(["*.kt"]),
     exports_manifest = True,
     manifest = "AndroidManifest.xml",
+    resource_files = ["res/values/config.xml"],
     deps = [
         "//src/com/google/android/as/oss/conversationid/service:conversation_id_listener_service",
         "//src/com/google/android/as/oss/conversationid/service:conversation_id_update_service",

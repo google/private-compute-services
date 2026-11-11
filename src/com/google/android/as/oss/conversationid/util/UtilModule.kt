@@ -16,8 +16,10 @@
 
 package com.google.android.`as`.oss.conversationid.util
 
+import android.content.Context
 import android.os.Build.VERSION_CODES
 import androidx.annotation.RequiresApi
+import com.google.android.apps.common.inject.annotation.ApplicationContext
 import com.google.android.`as`.oss.common.config.ConfigReader
 import com.google.android.`as`.oss.common.security.config.PccSecurityConfig
 import com.google.android.`as`.oss.conversationid.config.ConversationIdConfig
@@ -49,6 +51,8 @@ internal object UtilModule {
   @Singleton
   @RequiresApi(VERSION_CODES.BAKLAVA)
   fun provideConversationIdManager(
-    conversationIdHolder: ConversationIdHolder
-  ): ConversationIdManager = ConversationIdManager(conversationIdHolder)
+    conversationIdHolder: ConversationIdHolder,
+    @ApplicationContext context: Context,
+    configReader: ConfigReader<ConversationIdConfig>,
+  ): ConversationIdManager = ConversationIdManager(conversationIdHolder, context, configReader)
 }

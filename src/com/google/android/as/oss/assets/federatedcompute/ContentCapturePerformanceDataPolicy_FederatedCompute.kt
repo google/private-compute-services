@@ -17,7 +17,7 @@
 package com.google.android.libraries.pcc.policies.federatedcompute
 
 /** Content Capture Performance Data FederatedCompute policy. */
-val ContentCapturePerformanceDataPolicy_FederatedCompute =
+val ContentCapturePerformanceDataPolicy_FederatedCompute: FlavoredPolicies =
   flavoredPolicies(
     name = "ContentCapturePerformanceDataPolicy_FederatedCompute",
     policyType = MonitorOrImproveUserExperienceWithFederatedCompute,

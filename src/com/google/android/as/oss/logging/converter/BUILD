@@ -14,9 +14,7 @@
 
 load("@bazel_rules_android//android:rules.bzl", "android_library")
 
-package(default_visibility = [
-    "//visibility:public",
-])
+package(default_visibility = ["//visibility:public"])
 
 android_library(
     name = "converter",

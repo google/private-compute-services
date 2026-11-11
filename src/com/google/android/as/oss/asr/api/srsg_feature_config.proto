@@ -34,6 +34,14 @@ message AsrEnhancementPolicy {
 
   Policy policy = 1;
 
+  enum OptimizationMode {
+    OPTIMIZATION_MODE_UNSPECIFIED = 0;
+    QUALITY = 1;
+    LATENCY = 2;
+  }
+
+  OptimizationMode optimization_mode = 5;
+
   reserved 2, 3, 4;
 }
 

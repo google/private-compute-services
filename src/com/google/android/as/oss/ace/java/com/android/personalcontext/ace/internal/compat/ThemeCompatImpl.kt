@@ -21,7 +21,7 @@
 package com.android.personalcontext.ace.internal.compat
 
 import android.service.personalcontext.insight.ContextInsight
-import com.android.personalcontext.ace.client.prototype.PrototypeHintUtils.toPrototypeHint
+import com.android.personalcontext.ace.client.prototype.PrototypeHintUtils.toPrototypeHintV1
 import com.android.personalcontext.ace.client.prototype.theme.ThemeHint
 import com.android.personalcontext.ace.client.prototype.theme.ThemeType
 import com.android.personalcontext.ace.visualizer.compat.ThemeCompat
@@ -35,7 +35,7 @@ class ThemeCompatImpl @Inject constructor() : ThemeCompat {
 
   override fun ContextInsight.shouldShowAnimationV2(): Boolean {
     return this.originHints.any {
-      val themeHint = it.contextHint.toPrototypeHint<ThemeHint>() ?: return@any false
+      val themeHint = it.contextHint.toPrototypeHintV1<ThemeHint>() ?: return@any false
 
       themeHint.type == ThemeType.SHOW_ANIMATION_V2 && themeHint.data
     }
@@ -43,7 +43,7 @@ class ThemeCompatImpl @Inject constructor() : ThemeCompat {
 
   override fun ContextInsight.shouldShowBrandedIcon(): Boolean {
     return this.originHints.any {
-      val themeHint = it.contextHint.toPrototypeHint<ThemeHint>() ?: return@any false
+      val themeHint = it.contextHint.toPrototypeHintV1<ThemeHint>() ?: return@any false
 
       themeHint.type == ThemeType.SHOW_BRANDED_ICON && themeHint.data
     }
@@ -51,7 +51,7 @@ class ThemeCompatImpl @Inject constructor() : ThemeCompat {
 
   override fun ContextInsight.shouldShowTintableIcon(): Boolean {
     return this.originHints.any {
-      val themeHint = it.contextHint.toPrototypeHint<ThemeHint>() ?: return@any false
+      val themeHint = it.contextHint.toPrototypeHintV1<ThemeHint>() ?: return@any false
 
       themeHint.type == ThemeType.SHOW_TINTABLE_ICON && themeHint.data
     }

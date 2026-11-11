@@ -17,11 +17,12 @@ edition = "2024";
 package com.google.android.as.oss.feedback.api.gateway;
 
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "MessageArmour";
 option java_package = "com.google.android.as.oss.feedback.api.gateway";
 
 // This enum defines the specific CUJs within Message Armour.
-enum MessageArmourCUJ {
+export enum MessageArmourCUJ {
   // Default value. Should not be used explicitly.
   MESSAGE_ARMOUR_CUJ_UNSPECIFIED = 0;
 
@@ -35,7 +36,7 @@ enum MessageArmourCUJ {
 
 // This message allows to store specific data related to the Message Armour CUJ,
 // such as user data donation.
-message MessageArmourDataDonation {
+export message MessageArmourDataDonation {
   // This oneof allows to store specific data donation based on the Message
   // Armour CUJ.
   oneof cuj_specific_data_donation {
@@ -53,7 +54,7 @@ message MessageArmourDataDonation {
 // Message Armour specific user input data. This proto is used to store the user
 // input and the data included in this proto will be stored in the storage
 // regardless of the user's donation option.
-message MessageArmourUserInput {
+export message MessageArmourUserInput {
   // This oneof allows to store specific user input based on the Message
   // Armour CUJ.
   oneof cuj_specific_user_input {

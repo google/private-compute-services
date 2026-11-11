@@ -24,6 +24,15 @@ public abstract class PcsFcFlags {
   /** Whether to read FC flags from DeviceConfig. */
   public abstract boolean enableDeviceConfigOverrides();
 
+  /**
+   * Whether to include the content binding in the {@link
+   * com.google.android.as.oss.attestation.AttestationMeasurementRequest} in {@link
+   * com.google.android.as.oss.fl.federatedcompute.attestation.FcAttestationClient}.
+   */
+  public boolean includeContentBindingInAttestationRequest() {
+    return false;
+  }
+
   public int inappTrainingOnTrimMemoryInterruptLevel() {
     return ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
   }

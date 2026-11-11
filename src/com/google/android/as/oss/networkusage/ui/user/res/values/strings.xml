@@ -292,8 +292,8 @@
   <string name="feature_name_aicore_service">AICore</string>
   <!-- Description of AICore Service data downloads, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
   <string name="description_aicore_service">Updated the on-device models for Google AI Services</string>
-  <string name="url_regex_aicore_service" translatable="false">https://dl.google.com/mdi-serving/aicore-models/.*</string>
-  <string name="url_regex_aicore_service_edgedl" translatable="false">https://edgedl.me.gvt1.com/edgedl/mdi-serving/aicore-models/.*</string>
+  <string name="url_regex_aicore_service" translatable="false">https://dl.google.com/(mdi-serving/aicore-models|aicore)/.*</string>
+  <string name="url_regex_aicore_service_edgedl" translatable="false">https://edgedl.me.gvt1.com/edgedl/(mdi-serving/aicore-models|aicore)/.*</string>
 
   <!-- Safety filters for Aicore -->
   <string name="url_regex_aicore_safety" translatable="false">https://dl.google.com/mdi-serving/on-device-safety/.*</string>
@@ -389,10 +389,10 @@
   <string name="feature_name_gboard_conversational_writing_tools">Gboard conversational writing tools</string>
   <!-- Description of the Gboard conversational writing tools feature, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
   <string name="description_pi_gboard_conversational_writing_tools">Text input was processed in a Private AI Compute environment.</string>
-  <!-- Name of the Soltaire SD feature, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
-  <string name="feature_name_soltaire_sd">Soltaire SD</string>
-  <!-- Description of the Soltaire SD feature, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
-  <string name="description_pi_soltaire_sd">Text and image input was processed in a Private AI Compute environment.</string>
+  <!-- Name of the Google Messages Scam Detection feature, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="feature_name_soltaire_sd">Google Messages scam detection</string>
+  <!-- Description of the Google Messages Scam Detection feature, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
+  <string name="description_pi_soltaire_sd">Conversational content was processed in a Private AI Compute environment.</string>
    <!-- Name of the MagicPointer suggestion chips feature, displayed in the network usage log. [CHAR_LIMIT=NONE] -->
   <string name="feature_name_magicpointer_suggestion_chips">MagicPointer suggestion chips</string>
   <!-- Description of the MagicPointer suggestion chips feature, displayed in the network usage log. [CHAR_LIMIT=NONE] -->

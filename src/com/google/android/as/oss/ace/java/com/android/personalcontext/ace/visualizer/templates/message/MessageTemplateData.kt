@@ -27,7 +27,7 @@ import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.DisplayInsight
 import android.service.personalcontext.insight.InsightCollection
 import android.util.Log
-import com.android.personalcontext.ace.client.prototype.PrototypeHintUtils.toPrototypeHint
+import com.android.personalcontext.ace.client.prototype.PrototypeHintUtils.toPrototypeHintV1
 import com.android.personalcontext.ace.client.prototype.message.MessageMetadataHint
 import com.android.personalcontext.ace.visualizer.compat.ClientActionInsightCompat
 import com.android.personalcontext.ace.visualizer.compat.ThemeCompat
@@ -81,7 +81,7 @@ data class MessageTemplateData(
 
       val styleConfig =
         this.originHints.firstNotNullOfOrNull {
-          it.contextHint.toPrototypeHint<MessageMetadataHint>()
+          it.contextHint.toPrototypeHintV1<MessageMetadataHint>()
         }
       return MessageTemplateData(messageChipList, styleConfig)
     }

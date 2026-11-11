@@ -46,6 +46,7 @@ proto_library(
     option_deps = ["//third_party/java/protobuf:java_features_proto"],
     deps = [
         ":enums_proto",
+        "//src/com/google/android/as/oss/privateinference/service/api:private_inference_proto",
     ],
 )
 

@@ -53,12 +53,11 @@ class ProtectedDownloadConfigReader extends AbstractConfigReader<ProtectedDownlo
   private void initialize() {
     flagManager
         .listenable()
-        .addListener(
-            flagNames -> {
-              if (FlagListener.anyHasPrefix(flagNames, FLAG_PREFIX)) {
-                refreshConfig();
-              }
-            });
+        .addListener(flagNames -> {
+          if (FlagListener.anyHasPrefix(flagNames, FLAG_PREFIX)) {
+            refreshConfig();
+          }
+        });
   }
 
   private ProtectedDownloadConfigReader(FlagManager flagManager) {

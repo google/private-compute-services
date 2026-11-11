@@ -174,6 +174,10 @@ constructor(
     // Check if it's an InsightCollection of ActionableInsights or DisplayInsights. If not, return
     // null
     if (!insightCollection.isActionableOrDisplayInsightCollection()) {
+      Log.w(
+        TAG,
+        "[CallEmbedded] #toCallVisualizerGeneralCards dropped InsightCollection: not all children are ActionableInsight or DisplayInsight (size=${insightCollection.insights.size})",
+      )
       return null
     }
 
@@ -187,6 +191,10 @@ constructor(
       }
 
     if (generalCards.isEmpty()) {
+      Log.w(
+        TAG,
+        "[CallEmbedded] #toCallVisualizerGeneralCards dropped InsightCollection: mapped child generalCards is empty (inputSize=${insightCollection.insights.size})",
+      )
       return null
     }
 

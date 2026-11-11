@@ -22,10 +22,10 @@ import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.DisplayInsight
 import android.service.personalcontext.insight.InsightCollection
 import androidx.compose.foundation.layout.WindowInsets
-import com.android.personalcontext.ace.client.prototype.PrototypeHintUtils.toPrototypeHint
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.isPrototypeInsight
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsight
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsight
+import com.android.personalcontext.ace.client.prototype.PrototypeHintUtils.toPrototypeHintV1
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.isPrototypeInsightV1
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsightV1
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsightV1
 import com.android.personalcontext.ace.client.prototype.card.CardInsight
 import com.android.personalcontext.ace.client.prototype.loading.LoadingInsight
 import com.android.personalcontext.ace.client.prototype.richcard.RichCardHint
@@ -64,14 +64,14 @@ abstract class CardUiDataDecoder<T : DeprecatedUiCardContext> {
     val cardTitle = getCardTitle(titleDisplayableInsight)
     val icon = getCardIcon(titleDisplayableInsight)
     val showBrandedIcon =
-      toContextInsight().originHints.any {
-        val themeHint = it.contextHint.toPrototypeHint<ThemeHint>() ?: return@any false
+      toContextInsightV1().originHints.any {
+        val themeHint = it.contextHint.toPrototypeHintV1<ThemeHint>() ?: return@any false
         themeHint.type == ThemeType.SHOW_BRANDED_ICON && themeHint.data
       }
     val cardContext = body.toCardContext()
     val cardContextAction = getCardContextAction()
     val actions = (actions as? InsightCollection)?.toCardActions()
-    val richCardHint = toContextInsight().findPrototypeHint<RichCardHint>()
+    val richCardHint = toContextInsightV1().findPrototypeHint<RichCardHint>()
     val insets = richCardHint?.bottomInsetPx?.let { WindowInsets(bottom = it) } ?: WindowInsets()
 
     return CardUiData(
@@ -135,7 +135,7 @@ abstract class CardUiDataDecoder<T : DeprecatedUiCardContext> {
   private fun CardInsight.getDismissInsight(): ServerSideCloseInsight? {
     val titleCollection = title as? InsightCollection
     return titleCollection?.insights?.firstNotNullOfOrNull {
-      it.toPrototypeInsight<ServerSideCloseInsight>()
+      it.toPrototypeInsightV1<ServerSideCloseInsight>()
     }
   }
 
@@ -152,9 +152,9 @@ abstract class CardUiDataDecoder<T : DeprecatedUiCardContext> {
     // Is loading if the current title is LoadingInsight or contains a LoadingInsight
     val isLoading =
       when {
-        currentTitle?.isPrototypeInsight<LoadingInsight>() == true -> true
+        currentTitle?.isPrototypeInsightV1<LoadingInsight>() == true -> true
         currentTitle is InsightCollection ->
-          currentTitle.insights.any { it.isPrototypeInsight<LoadingInsight>() }
+          currentTitle.insights.any { it.isPrototypeInsightV1<LoadingInsight>() }
         else -> false
       }
 

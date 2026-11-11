@@ -17,7 +17,7 @@
 package com.android.personalcontext.ace.internal.compat
 
 import android.service.personalcontext.insight.ContextInsight
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.isPrototypeInsight
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.isPrototypeInsightV1
 import com.android.personalcontext.ace.client.prototype.empty.EmptyRenderInsight
 import com.android.personalcontext.ace.visualizer.compat.EmptyRenderCompat
 import javax.inject.Inject
@@ -28,6 +28,6 @@ import javax.inject.Inject
  */
 class EmptyRenderCompatImpl @Inject constructor() : EmptyRenderCompat {
   override fun isEmpty(insight: ContextInsight): Boolean {
-    return insight.isPrototypeInsight<EmptyRenderInsight>()
+    return insight.isPrototypeInsightV1<EmptyRenderInsight>()
   }
 }

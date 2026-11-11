@@ -18,17 +18,17 @@ package com.google.android.as.oss.asr.service;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
+import com.google.android.as.oss.asr.api.LanguagepackInfo;
+import com.google.android.as.oss.asr.api.ModelAvailabilityResponse;
+import com.google.android.as.oss.asr.api.ModelAvailabilityResponse.ModelInfo;
+import com.google.android.as.oss.asr.api.ModelDownloadResponse;
+import com.google.android.as.oss.asr.api.ModelDownloadResponse.EndEvent;
+import com.google.android.as.oss.asr.api.ModelDownloadResponse.ProgressEvent;
 import com.google.android.as.oss.asr.api.SrsgDownloadEnd;
 import com.google.android.as.oss.asr.api.SrsgDownloadProgress;
 import com.google.android.as.oss.asr.api.SrsgModelAvailabilityResponse;
 import com.google.android.as.oss.asr.api.SrsgModelDownloadResponse;
 import com.google.android.as.oss.asr.api.SrsgModelInfo;
-import com.google.android.libraries.speech.transcription.recognition.grpc.LanguagepackInfo;
-import com.google.android.libraries.speech.transcription.recognition.grpc.ModelAvailabilityResponse;
-import com.google.android.libraries.speech.transcription.recognition.grpc.ModelAvailabilityResponse.ModelInfo;
-import com.google.android.libraries.speech.transcription.recognition.grpc.ModelDownloadResponse;
-import com.google.android.libraries.speech.transcription.recognition.grpc.ModelDownloadResponse.EndEvent;
-import com.google.android.libraries.speech.transcription.recognition.grpc.ModelDownloadResponse.ProgressEvent;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 
@@ -61,11 +61,6 @@ final class SrsgProxyServiceHelper {
           .setLocale(languagepackInfo.getLocale())
           .setVersion(String.valueOf(languagepackInfo.getVersion()))
           .setSizeBytes(languagepackInfo.getSizeBytes());
-    }
-    if (srsgModelInfo.hasAicoreFeatureInfo()) {
-      builder
-          .setAiFeatureId(srsgModelInfo.getAicoreFeatureInfo().getFeatureId())
-          .setSizeBytes(srsgModelInfo.getAicoreFeatureInfo().getTotalSizeBytes());
     }
     return builder.build();
   }

@@ -22,12 +22,18 @@ import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceFederatedLear
 import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceFederatedLearningTrainingLogReported;
 import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceUnrecognisedNetworkRequestReported;
 import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceValueReported;
+import com.google.android.as.oss.logging.PcsAtomsProto.PrivateInferenceCountReported;
+import com.google.android.as.oss.logging.PcsAtomsProto.PrivateInferenceValueReported;
 
 /** Logging interface for PCS logs. */
 public interface PcsStatsLog {
   void logIntelligenceCountReported(IntelligenceCountReported atom);
 
   void logIntelligenceValueReported(IntelligenceValueReported atom);
+
+  void logPrivateInferenceCountReported(PrivateInferenceCountReported atom);
+
+  void logPrivateInferenceValueReported(PrivateInferenceValueReported atom);
 
   void logIntelligenceUnrecognisedNetworkRequestReported(
       IntelligenceUnrecognisedNetworkRequestReported atom);

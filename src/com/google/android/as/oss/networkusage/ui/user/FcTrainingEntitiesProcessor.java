@@ -84,23 +84,17 @@ class FcTrainingEntitiesProcessor implements EntityListProcessor {
     if (featureSet.isEmpty()) {
       builder.addAll(
           fcEntitiesOfSameTask.stream()
-              .map(
-                  entity ->
-                      entity.toBuilder()
-                          .setConnectionDetails(baseConnectionDetails.build())
-                          .build())
+              .map(entity ->
+                  entity.toBuilder().setConnectionDetails(baseConnectionDetails.build()).build())
               .collect(toImmutableList()));
     } else {
       builder.addAll(
           fcEntitiesOfSameTask.stream()
-              .map(
-                  entity ->
-                      entity.toBuilder()
-                          .setConnectionDetails(
-                              baseConnectionDetails
-                                  .setType(entity.connectionDetails().type())
-                                  .build())
-                          .build())
+              .map(entity ->
+                  entity.toBuilder()
+                      .setConnectionDetails(
+                          baseConnectionDetails.setType(entity.connectionDetails().type()).build())
+                      .build())
               .collect(toImmutableList()));
     }
     return new NetworkUsageItemWrapper(builder.build());

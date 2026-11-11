@@ -69,7 +69,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsight
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsightV1
 import com.android.personalcontext.ace.client.prototype.clientaction.params.showcards.ShowCardsParams
 import com.android.personalcontext.ace.client.prototype.message.MessageMetadataHint
 import com.android.personalcontext.ace.client.prototype.serversideclose.ServerSideCloseInsight
@@ -131,7 +131,7 @@ internal constructor(
           TAG,
           "[MessagesEmbedded] Dismissing visualizer after ${timeoutMs}ms delay for show cards chip",
         )
-        info.onReceiveInsight(ServerSideCloseInsight().toContextInsight())
+        info.onReceiveInsight(ServerSideCloseInsight().toContextInsightV1())
       }
     }
     MainTheme(messageTemplateData.styleConfig) { MergedChipsRow(messageTemplateData) }

@@ -47,7 +47,7 @@ class RequestLoggingHelpers(private val timers: Timers) {
     responseObserver: StreamObserver<TlsSessionResponse>,
   ): StreamObserver<TlsSessionRequest> {
     return TlsStreamObserverHook(
-      tlsStub.tlsSession(StreamObserverHook(responseObserver, this::logTlsHandshakeResponse)),
+      tlsStub.tlsSession(responseObserver),
       this::logTlsHandshakeRequest,
       this::onTlsHandshakeComplete,
     )
@@ -90,16 +90,9 @@ class RequestLoggingHelpers(private val timers: Timers) {
   }
 
   private fun logTlsHandshakeRequest(request: TlsSessionRequest) {
-    if (!tlsHandshakeComplete) {
+    if (!tlsHandshakeComplete && handshakeTimer == null) {
       handshakeTimer =
         timers.start(PrivateInferenceClientTimerNames.OAK_SESSION_PERFORM_TLS_HANDSHAKE_STEP)
-    }
-  }
-
-  private fun logTlsHandshakeResponse(response: TlsSessionResponse) {
-    if (!tlsHandshakeComplete) {
-      handshakeTimer?.stop()
-      handshakeTimer = null
     }
   }
 

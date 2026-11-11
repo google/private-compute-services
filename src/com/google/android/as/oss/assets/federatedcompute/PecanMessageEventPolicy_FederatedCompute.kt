@@ -17,7 +17,7 @@
 package com.google.android.libraries.pcc.policies.federatedcompute
 
 /** Data policy. */
-val PecanMessageEventPolicy_FederatedCompute =
+val PecanMessageEventPolicy_FederatedCompute: FlavoredPolicies =
   flavoredPolicies(
     name = "PecanMessageEventPolicy_FederatedCompute",
     policyType = MonitorOrImproveUserExperienceWithFederatedCompute,

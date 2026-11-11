@@ -21,7 +21,7 @@ package com.android.personalcontext.ace.internal.templates.richcard.placeholder
 import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.DisplayInsight
 import android.service.personalcontext.insight.InsightCollection
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsight
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsightV1
 import com.android.personalcontext.ace.client.prototype.card.CardInsight
 import com.android.personalcontext.ace.internal.templates.richcard.decoder.CardUiDataDecoder
 import javax.inject.Inject
@@ -34,7 +34,7 @@ class PlaceHolderCardUiDataDecoder @Inject constructor() :
   CardUiDataDecoder<PlaceHolderCardUiData>() {
 
   override fun ContextInsight.toCardContext(): PlaceHolderCardUiData {
-    return this.toPrototypeInsight<CardInsight>()?.let { cardInsight ->
+    return this.toPrototypeInsightV1<CardInsight>()?.let { cardInsight ->
       val bodyInsights = cardInsight.body as? InsightCollection
       val displayInsight = bodyInsights?.insights?.filterIsInstance<DisplayInsight>()?.firstOrNull()
       val message = displayInsight?.details?.title?.toString()

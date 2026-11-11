@@ -42,6 +42,7 @@ import io.grpc.Status
 import io.grpc.StatusException
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlin.coroutines.cancellation.CancellationException
 
 class SealedMemorySecretManagementService
 @Inject
@@ -50,16 +51,21 @@ constructor(
   private val backupManager: BackupManager,
 ) : SealedMemorySecretManagementServiceCoroutineImplBase() {
 
-  /** Checks if a secret exists for the given key. */
+  /**
+   * Checks if a valid, decryptable secret exists for the given key. If an existing entry is stored
+   * in [AppSearchKeyStore] but cannot be decrypted due to an irrecoverable error (for example, when
+   * the AndroidKeyStore master key was wiped), it is deleted and `false` is returned so callers can
+   * recreate the secret.
+   */
   override suspend fun doesUserSecretExist(
     request: DoesUserSecretExistRequest
   ): DoesUserSecretExistResponse {
     try {
-      val exists = appSearchKeyStore.get().retrieveKey(request.userIdentifier) != null
+      val exists = hasValidSecret(request.userIdentifier)
       logger.atFine().log("doesUserSecretExist for provided key %s", exists)
       return doesUserSecretExistResponse { this.exists = exists }
     } catch (e: Exception) {
-      if (e is StatusException) throw e
+      if (e is CancellationException || e is StatusException) throw e
       logger.atSevere().withCause(e).log("Exception in doesUserSecretExist for provided key")
       throw Status.INTERNAL.withDescription("Internal error in doesUserSecretExist")
         .withCause(e)
@@ -67,14 +73,17 @@ constructor(
     }
   }
 
-  /** Creates the secret for the given key. Throws an error if one already exists. */
+  /**
+   * Creates the secret for the given key. Returns `success = false` if a valid decryptable secret
+   * already exists, or overwrites an existing entry if it is irrecoverably undecryptable.
+   */
   override suspend fun createUserSecret(
     request: CreateUserSecretRequest
   ): CreateUserSecretResponse {
     try {
       val keyName = request.userIdentifier
 
-      if (appSearchKeyStore.get().retrieveKey(keyName) != null) {
+      if (hasValidSecret(keyName)) {
         logger.atFine().log("createUserSecret: Secret already exists for provided key")
         return createUserSecretResponse { success = false }
       }
@@ -88,7 +97,7 @@ constructor(
       logger.atFine().log("createUserSecret: Created secret for provided key")
       return createUserSecretResponse { success = true }
     } catch (e: Exception) {
-      if (e is StatusException) throw e
+      if (e is CancellationException || e is StatusException) throw e
       logger.atSevere().withCause(e).log("Exception in createUserSecret for provided key")
       throw Status.INTERNAL.withDescription("Internal error in createUserSecret")
         .withCause(e)
@@ -170,6 +179,32 @@ constructor(
       throw Status.INTERNAL.withDescription("Internal error in deleteKeyAssociation")
         .withCause(e)
         .asException()
+    }
+  }
+
+  private suspend fun hasValidSecret(keyName: String): Boolean {
+    val keyStore = appSearchKeyStore.get()
+    val encryptedKey = keyStore.retrieveKey(keyName) ?: return false
+    return when (val decryptionResult = KeyGenerationUtil.decrypt(encryptedKey)) {
+      is EncryptionResult.Success -> true
+      is EncryptionResult.IrrecoverableError -> {
+        logger
+          .atWarning()
+          .withCause(decryptionResult.cause)
+          .log("hasValidSecret: Irrecoverable error for provided key; deleting unrecoverable key")
+        keyStore.deleteKey(keyName)
+        backupManager.dataChanged()
+        false
+      }
+      is EncryptionResult.RetryableError -> {
+        logger
+          .atWarning()
+          .withCause(decryptionResult.cause)
+          .log("hasValidSecret: Retryable error for provided key")
+        throw Status.UNAVAILABLE.withDescription("Failed to verify secret: Retryable error")
+          .withCause(decryptionResult.cause)
+          .asException()
+      }
     }
   }
 

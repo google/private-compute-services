@@ -17,7 +17,7 @@
 package com.google.android.libraries.pcc.policies.federatedcompute
 
 /** FederatedCompute policy. */
-val NotificationIntelligencePolicy_FederatedCompute =
+val NotificationIntelligencePolicy_FederatedCompute: FlavoredPolicies =
   flavoredPolicies(
     name = "NotificationIntelligencePolicy_FederatedCompute",
     policyType = MonitorOrImproveUserExperienceWithFederatedCompute,

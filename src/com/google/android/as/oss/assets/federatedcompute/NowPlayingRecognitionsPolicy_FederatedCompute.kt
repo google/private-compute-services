@@ -17,7 +17,7 @@
 package com.google.android.libraries.pcc.policies.federatedcompute
 
 /** Data policy. */
-val NowPlayingRecognitionsPolicy_FederatedCompute =
+val NowPlayingRecognitionsPolicy_FederatedCompute: FlavoredPolicies =
   flavoredPolicies(
     name = "NowPlayingRecognitionsPolicy_FederatedCompute",
     policyType = MonitorOrImproveUserExperienceWithFederatedCompute,

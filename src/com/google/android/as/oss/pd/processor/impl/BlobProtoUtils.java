@@ -203,14 +203,13 @@ public final class BlobProtoUtils {
     }
     byte[] reencryptedBytes =
         internalEncryption
-            .map(
-                enc -> {
-                  try {
-                    return enc.encrypt(decrypted, associatedData);
-                  } catch (GeneralSecurityException e) {
-                    throw new IllegalArgumentException(e);
-                  }
-                })
+            .map(enc -> {
+              try {
+                return enc.encrypt(decrypted, associatedData);
+              } catch (GeneralSecurityException e) {
+                throw new IllegalArgumentException(e);
+              }
+            })
             .orElse(decrypted);
     return ByteString.copyFrom(reencryptedBytes);
   }
@@ -294,10 +293,9 @@ public final class BlobProtoUtils {
     Client client = blobConstraints.getClient();
     return protoConversions
         .toClientIdString(client)
-        .orElseThrow(
-            () ->
-                new IllegalArgumentException(
-                    String.format("unable to convert %s to string", client.name())));
+        .orElseThrow(() ->
+            new IllegalArgumentException(
+                String.format("unable to convert %s to string", client.name())));
   }
 
   /** Converts the ClientVersion.Type from PCS to a server format. */
@@ -471,10 +469,9 @@ public final class BlobProtoUtils {
       com.google.android.as.oss.pd.api.proto.BlobConstraints blobConstraints) {
     DeviceTier tier = blobConstraints.getDeviceTier();
     return ProtoConversions.toDeviceTierString(tier)
-        .orElseThrow(
-            () ->
-                new IllegalArgumentException(
-                    String.format("unable to convert %s to string", tier.name())));
+        .orElseThrow(() ->
+            new IllegalArgumentException(
+                String.format("unable to convert %s to string", tier.name())));
   }
 
   private static String getClientGroup(Metadata metadata) {
@@ -485,10 +482,9 @@ public final class BlobProtoUtils {
       com.google.android.as.oss.pd.api.proto.BlobConstraints blobConstraints) {
     ClientGroup group = blobConstraints.getClientGroup();
     return ProtoConversions.toClientGroupString(group)
-        .orElseThrow(
-            () ->
-                new IllegalArgumentException(
-                    String.format("unable to convert %s to string", group.name())));
+        .orElseThrow(() ->
+            new IllegalArgumentException(
+                String.format("unable to convert %s to string", group.name())));
   }
 
   private static Optional<String> getVariant(Metadata metadata) {
@@ -503,10 +499,9 @@ public final class BlobProtoUtils {
     }
     return Optional.of(
         ProtoConversions.toVariantString(tag)
-            .orElseThrow(
-                () ->
-                    new IllegalArgumentException(
-                        String.format("unable to convert %s to string", tag.name()))));
+            .orElseThrow(() ->
+                new IllegalArgumentException(
+                    String.format("unable to convert %s to string", tag.name()))));
   }
 
   private static Label toLabel(String key, String value) {

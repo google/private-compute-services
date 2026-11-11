@@ -77,6 +77,7 @@ import com.google.common.flogger.StackSize
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -113,6 +114,21 @@ constructor(
   private var loadDonationDataJob: Job? = null
   private var submitFeedbackJob: Job? = null
 
+  private val serverAppVersion: Long? by lazy {
+    try {
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        context.packageManager.getPackageInfo(PACKAGE_NAME, 0).longVersionCode
+      } else {
+        context.packageManager
+          .getPackageInfo(PACKAGE_NAME, PackageManager.PackageInfoFlags.of(0))
+          .longVersionCode
+      }
+    } catch (e: Exception) {
+      logger.atWarning().withCause(e).log("Failed to get server app info")
+      null
+    }
+  }
+
   fun logUiEvent(
     uiElementType: Int,
     uiElementIndex: Int = 0,
@@ -121,38 +137,32 @@ constructor(
     interactionType: InteractionType = InteractionType.INTERACTION_TYPE_CLICK,
     semanticsType: SemanticsType = SemanticsType.SEMANTICS_TYPE_LOG_USAGE,
   ) {
-    // Check for server app version for backwards compatibility.
-    try {
-      val serverAppVersion =
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-          context.packageManager.getPackageInfo(PACKAGE_NAME, 0).longVersionCode
-        } else {
-          context.packageManager
-            .getPackageInfo(PACKAGE_NAME, PackageManager.PackageInfoFlags.of(0))
-            .longVersionCode
-        }
+    val version = serverAppVersion ?: return
+    if (version <= VERSION_THRESHOLD) {
+      logger.atWarning().log("Server app version is too low to support the new logging API.")
+      return
+    }
 
-      if (serverAppVersion > VERSION_THRESHOLD) {
-        viewModelScope.launch {
-          val unused =
-            usageDataService.logUsageData(
-              logUsageDataRequest {
-                this.clientSessionUuid = clientSessionId
-                this.uiIdToken = uiIdToken {
-                  this.elementType = uiElementType
-                  this.index = uiElementIndex
-                }
-                this.enabledState = enabledState
-                this.semantics = semanticsType
-                this.interaction = interactionType
+    viewModelScope.launch {
+      try {
+        val unused =
+          usageDataService.logUsageData(
+            logUsageDataRequest {
+              this.clientSessionUuid = clientSessionId
+              this.uiIdToken = uiIdToken {
+                this.elementType = uiElementType
+                this.index = uiElementIndex
               }
-            )
-        }
-      } else {
-        logger.atWarning().log("Server app version is too low to support the new logging API.")
+              this.enabledState = enabledState
+              this.semantics = semanticsType
+              this.interaction = interactionType
+            }
+          )
+      } catch (e: CancellationException) {
+        throw e
+      } catch (e: Exception) {
+        logger.atWarning().withCause(e).log("Failed to log usage data via gRPC")
       }
-    } catch (e: Exception) {
-      logger.atWarning().withCause(e).log("Failed to log usage data")
     }
   }
 
@@ -341,6 +351,19 @@ constructor(
     loadDonationDataJob?.cancel()
     loadDonationDataJob = viewModelScope.launch {
       resetDonationState()
+
+      if (!loadSpoonData && quartzCuj == null) {
+        logger
+          .atWarning()
+          .log("loadDonationData: Neither Spoon nor Quartz data requested. Emitting failure state.")
+        updateDonationState(
+          feedbackDonationDataResult =
+            Result.failure(IllegalStateException("No valid donation data source available")),
+          dataCollectionStates = emptyMap(),
+          enableViewDataDialogV2MultiEntity = false,
+        )
+        return@launch
+      }
 
       var blockViewDataV2ForNotification = false
 

@@ -17,6 +17,8 @@
 package com.google.android.`as`.oss.sealedmemory.service.backup
 
 import android.app.backup.BackupAgent
+import android.app.backup.BackupAgent.FLAG_CLIENT_SIDE_ENCRYPTION_ENABLED
+import android.app.backup.BackupAgent.FLAG_DEVICE_TO_DEVICE_TRANSFER
 import android.app.backup.BackupDataInput
 import android.app.backup.BackupDataOutput
 import android.app.backup.BackupManager
@@ -55,6 +57,18 @@ class SealedMemoryBackupAgent : BackupAgent() {
     data: BackupDataOutput,
     newState: ParcelFileDescriptor,
   ): Unit = runBlocking {
+    // Only perform backup if client-side encryption is enabled or if this is a direct
+    // device-to-device (D2D) transfer. Cloud backups without client-side encryption (such as when
+    // the user has not configured a secure lock screen PIN/pattern/password backed by a Lock Screen
+    // Knowledge Factor (LSKF) / hardware security module) must never export raw Sealed Memory
+    // keys and associations off-device in plaintext.
+    if (
+      (data.transportFlags and
+        (FLAG_CLIENT_SIDE_ENCRYPTION_ENABLED or FLAG_DEVICE_TO_DEVICE_TRANSFER)) == 0
+    ) {
+      logger.atWarning().log("Skipping backup because client-side encryption is not enabled.")
+      return@runBlocking
+    }
     try {
       val allKeys = appSearchKeyStore.retrieveAllKeys()
       val allAssociations = appSearchKeyStore.retrieveAllKeyAssociations()

@@ -22,8 +22,8 @@ import android.graphics.drawable.Icon
 import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.DisplayInsight
 import android.service.personalcontext.insight.InsightCollection
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.isPrototypeInsight
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsight
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.isPrototypeInsightV1
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsightV1
 import com.android.personalcontext.ace.client.prototype.card.CardInsight
 import com.android.personalcontext.ace.client.prototype.loading.LoadingInsight
 import com.android.personalcontext.ace.internal.templates.richcard.decoder.CardUiDataDecoder
@@ -36,7 +36,7 @@ class ImageGalleryCardUiDataDecoder @Inject constructor() :
   CardUiDataDecoder<ImageGalleryCardUiData>() {
 
   override fun ContextInsight.toCardContext(): ImageGalleryCardUiData {
-    return this.toPrototypeInsight<CardInsight>()?.let { cardInsight ->
+    return this.toPrototypeInsightV1<CardInsight>()?.let { cardInsight ->
       if (cardInsight.isContentLoading()) {
         ImageGalleryCardUiData.LoadingData
       } else {
@@ -63,8 +63,8 @@ class ImageGalleryCardUiDataDecoder @Inject constructor() :
 
   /** Checks whether this insight collection contains a [LoadingInsight]. */
   private fun ContextInsight?.hasLoadingInsight(): Boolean =
-    this?.isPrototypeInsight<LoadingInsight>() == true ||
-      (this as? InsightCollection)?.insights?.any { it.isPrototypeInsight<LoadingInsight>() } ==
+    this?.isPrototypeInsightV1<LoadingInsight>() == true ||
+      (this as? InsightCollection)?.insights?.any { it.isPrototypeInsightV1<LoadingInsight>() } ==
         true
 
   /**

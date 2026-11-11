@@ -42,12 +42,11 @@ public class NetworkUsageLogAdapter extends ListAdapter<LogItemWrapper, LogItemV
   public LogItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
     LogItemViewHolder viewHolder =
         LogItemViewHolderFactory.ofViewType(viewType).createViewHolder(parent, contentMap);
-    viewHolder.itemView.setOnClickListener(
-        v -> {
-          if (viewHolder.getBindingAdapterPosition() != RecyclerView.NO_POSITION) {
-            getItem(viewHolder.getBindingAdapterPosition()).onItemClick(parent.getContext());
-          }
-        });
+    viewHolder.itemView.setOnClickListener(v -> {
+      if (viewHolder.getBindingAdapterPosition() != RecyclerView.NO_POSITION) {
+        getItem(viewHolder.getBindingAdapterPosition()).onItemClick(parent.getContext());
+      }
+    });
     return viewHolder;
   }
 

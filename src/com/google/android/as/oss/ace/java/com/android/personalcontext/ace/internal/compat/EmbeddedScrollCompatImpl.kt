@@ -16,7 +16,7 @@
 
 package com.android.personalcontext.ace.internal.compat
 
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsight
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsightV1
 import com.android.personalcontext.ace.client.prototype.embeddedscroll.EmbeddedScrollInsight.Companion.toEmbeddedScrollInsight
 import com.android.personalcontext.ace.common.EmbeddedScrollEvent
 import com.android.personalcontext.ace.common.wrappers.IInsightSurfaceClientInfo
@@ -30,6 +30,6 @@ import javax.inject.Inject
  */
 class EmbeddedScrollCompatImpl @Inject constructor() : EmbeddedScrollCompat {
   override fun IInsightSurfaceClientInfo.sendEmbeddedScrollEvent(event: EmbeddedScrollEvent) {
-    onReceiveInsight(event.toEmbeddedScrollInsight().toContextInsight())
+    onReceiveInsight(event.toEmbeddedScrollInsight().toContextInsightV1())
   }
 }

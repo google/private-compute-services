@@ -96,6 +96,7 @@ class FeedbackHttpClientService : Hilt_FeedbackHttpClientService() {
           !SecurityPolicyUtils.isCallerAuthorized(
             PackageSecurityInfoList.newBuilder()
               .addPackageSecurityInfos(securityPolicyConfigReader.config.asiPackageSecurityInfo())
+              .addPackageSecurityInfos(securityPolicyConfigReader.config.nasPackageSecurityInfo())
               .build(),
             context,
             getCallingUid(),

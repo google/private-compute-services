@@ -16,6 +16,7 @@ edition = "2024";
 
 package com.google.android.as.oss.fl.fc.api;
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "TrainingErrorOuterClass";
 option java_package = "com.google.android.as.oss.fl.fc.api.proto";
 

@@ -272,23 +272,27 @@ public final class PrivateInferenceGrpcBindableService
     CountMetricId countMetricId =
         loggingMetricIdProvider.getInferenceSuccessCountMetricId(featureName);
     pcsStatsLogger.logEventCount(countMetricId);
+    pcsStatsLogger.logEventCount(CountMetricId.PCS_PI_SUCCESS, featureName);
   }
 
   private void logInferenceSessionErrorEvent(PcsPrivateInferenceFeatureName featureName) {
     CountMetricId countMetricId =
         loggingMetricIdProvider.getInferenceSessionErrorCountMetricId(featureName);
     pcsStatsLogger.logEventCount(countMetricId);
+    pcsStatsLogger.logEventCount(CountMetricId.PCS_PI_SESSION_ERROR, featureName);
   }
 
   private void logInferenceSessionCountEvent(PcsPrivateInferenceFeatureName featureName) {
     CountMetricId countMetricId =
         loggingMetricIdProvider.getInferenceSessionCountMetricId(featureName);
     pcsStatsLogger.logEventCount(countMetricId);
+    pcsStatsLogger.logEventCount(CountMetricId.PCS_PI_SESSION_COUNT, featureName);
   }
 
   private void logRequestCountEvent(PcsPrivateInferenceFeatureName featureName) {
     CountMetricId countMetricId = loggingMetricIdProvider.getRequestCountMetricId(featureName);
     pcsStatsLogger.logEventCount(countMetricId);
+    pcsStatsLogger.logEventCount(CountMetricId.PCS_PI_COUNT, featureName);
   }
 
   private void logInferenceFailureErrorCode(Throwable t) {

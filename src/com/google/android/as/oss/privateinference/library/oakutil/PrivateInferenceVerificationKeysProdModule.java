@@ -17,6 +17,7 @@
 package com.google.android.as.oss.privateinference.library.oakutil;
 
 import android.content.Context;
+import com.google.android.as.oss.privateinference.Annotations.PrivateInferenceEndpointUrl;
 import com.google.android.as.oss.privateinference.library.oakutil.proto.VerificationKeys;
 import com.google.protobuf.ExtensionRegistryLite;
 import dagger.Module;
@@ -34,9 +35,10 @@ abstract class PrivateInferenceVerificationKeysProdModule {
 
   @Provides
   @Singleton
-  static VerificationKeys provideVerificationKeys(@ApplicationContext Context context) {
-    try (InputStream inStream =
-        context.getResources().openRawResource(R.raw.public_keys_prod_proto)) {
+  static VerificationKeys provideVerificationKeys(
+      @ApplicationContext Context context, @PrivateInferenceEndpointUrl String endpointUrl) {
+    int resourceId = R.raw.public_keys_prod_proto;
+    try (InputStream inStream = context.getResources().openRawResource(resourceId)) {
       return VerificationKeys.parseFrom(inStream, ExtensionRegistryLite.getGeneratedRegistry());
     } catch (IOException e) {
       throw new IllegalStateException("Failed to read public keys", e);

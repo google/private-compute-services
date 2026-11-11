@@ -114,7 +114,9 @@ interface ParcelableOverRpcUtils {
     key: SingleParcelableKey<P>,
     value: P,
     context: Context = Context.current(),
-  ) = key.responseHeaderContextKey.get(context).set(listOf(value))
+  ) {
+    key.responseHeaderContextKey.get(context).set(listOf(value))
+  }
 
   /** Helper to be called on the server for sending repeated parcelables over response headers. */
   @Suppress("UnusedReceiverParameter")
@@ -122,7 +124,9 @@ interface ParcelableOverRpcUtils {
     key: RepeatedParcelableKey<P>,
     values: List<P>,
     context: Context = Context.current(),
-  ) = key.responseHeaderContextKey.get(context).set(values)
+  ) {
+    key.responseHeaderContextKey.get(context).set(values)
+  }
 }
 
 /** Thrown to indicate that the parcelable for the given key was not found. */

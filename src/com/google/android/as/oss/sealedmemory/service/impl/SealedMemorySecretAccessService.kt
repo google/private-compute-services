@@ -16,6 +16,7 @@
 
 package com.google.android.`as`.oss.sealedmemory.service.impl
 
+import android.app.backup.BackupManager
 import com.google.android.`as`.oss.sealedmemory.api.GetUserSecretByAssociationRequest
 import com.google.android.`as`.oss.sealedmemory.api.GetUserSecretRequest
 import com.google.android.`as`.oss.sealedmemory.api.GetUserSecretResponse
@@ -27,27 +28,35 @@ import io.grpc.Status
 import io.grpc.StatusException
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlin.coroutines.cancellation.CancellationException
 
 class SealedMemorySecretAccessService
 @Inject
-constructor(private val appSearchKeyStore: Provider<AppSearchKeyStore>) :
-  SealedMemorySecretAccessServiceCoroutineImplBase() {
+constructor(
+  private val appSearchKeyStore: Provider<AppSearchKeyStore>,
+  private val backupManager: BackupManager,
+) : SealedMemorySecretAccessServiceCoroutineImplBase() {
 
   /** Retrieves the secret for the given key. */
   override suspend fun getUserSecret(request: GetUserSecretRequest): GetUserSecretResponse {
     try {
       val keyName = request.userIdentifier
-      val encryptedKey = appSearchKeyStore.get().retrieveKey(keyName)
+      val keyStore = appSearchKeyStore.get()
+      val encryptedKey = keyStore.retrieveKey(keyName)
 
       if (encryptedKey != null) {
-        val secret = decryptSecret(encryptedKey)
+        val secret =
+          decryptSecret(encryptedKey) {
+            keyStore.deleteKey(keyName)
+            backupManager.dataChanged()
+          }
         return getUserSecretResponse { userSecret = secret }
       } else {
         logger.atFine().log("getUserSecret: Secret not found for provided key")
         throw StatusException(Status.NOT_FOUND.withDescription("Secret not found for provided key"))
       }
     } catch (e: Exception) {
-      if (e is StatusException) throw e
+      if (e is CancellationException || e is StatusException) throw e
       logger.atSevere().withCause(e).log("Exception in getUserSecret for provided key")
       throw Status.INTERNAL.withDescription("Internal error in getUserSecret")
         .withCause(e)
@@ -60,17 +69,23 @@ constructor(private val appSearchKeyStore: Provider<AppSearchKeyStore>) :
   ): GetUserSecretResponse {
     try {
       val cujIdentifier = request.cujIdentifier
-      val encryptedKey = appSearchKeyStore.get().retrieveKeyByAssociation(cujIdentifier)
+      val keyStore = appSearchKeyStore.get()
+      val keyName = keyStore.retrieveKeyAssociation(cujIdentifier)
+      val encryptedKey = keyName?.let { keyStore.retrieveKey(it) }
 
       if (encryptedKey != null) {
-        val secret = decryptSecret(encryptedKey)
+        val secret =
+          decryptSecret(encryptedKey) {
+            keyStore.deleteKey(keyName)
+            backupManager.dataChanged()
+          }
         return getUserSecretResponse { userSecret = secret }
       } else {
         logger.atFine().log("getUserSecretByAssociation: Secret not found for provided CUJ")
         throw StatusException(Status.NOT_FOUND.withDescription("Secret not found for provided CUJ"))
       }
     } catch (e: Exception) {
-      if (e is StatusException) throw e
+      if (e is CancellationException || e is StatusException) throw e
       logger.atSevere().withCause(e).log("Exception in getUserSecretByAssociation for provided CUJ")
       throw Status.INTERNAL.withDescription("Internal error in getUserSecretByAssociation")
         .withCause(e)
@@ -78,14 +93,18 @@ constructor(private val appSearchKeyStore: Provider<AppSearchKeyStore>) :
     }
   }
 
-  private fun decryptSecret(encryptedKey: EncryptedKey): ByteString {
+  private suspend fun decryptSecret(
+    encryptedKey: EncryptedKey,
+    onIrrecoverableError: suspend () -> Unit,
+  ): ByteString {
     return when (val decryptionResult = KeyGenerationUtil.decrypt(encryptedKey)) {
       is EncryptionResult.Success -> decryptionResult.value
       is EncryptionResult.IrrecoverableError -> {
         logger
           .atWarning()
           .withCause(decryptionResult.cause)
-          .log("decryptSecret: Irrecoverable error for provided key")
+          .log("decryptSecret: Irrecoverable error for provided key; deleting unrecoverable key")
+        onIrrecoverableError()
         throw Status.INTERNAL.withDescription("Failed to decrypt secret: Irrecoverable error")
           .withCause(decryptionResult.cause)
           .asException()

@@ -25,6 +25,7 @@ android_library(
     ],
     deps = [
         "//src/com/google/android/as/oss/privateinference/api:private_proxy_service_java_proto_lite",
+        "//src/com/google/android/as/oss/privateinference/service/api:feature_name_java_proto_lite",
         "//src/com/google/android/as/oss/privateinference/service/api:private_inference_java_proto_lite",
     ],
 )
@@ -56,6 +57,7 @@ android_library(
         "//src/com/google/android/as/oss/privateinference/api:private_proxy_service_java_proto_lite",
         "//src/com/google/android/as/oss/privateinference/library/oakutil:private_inference_oak_async_client",
         "//src/com/google/android/as/oss/privateinference/logging",
+        "//src/com/google/android/as/oss/privateinference/service/api:feature_name_java_proto_lite",
         "//src/com/google/android/as/oss/privateinference/service/api:private_inference_java_proto_lite",
         "//third_party/oak/java/src/main/java/com/google/oak/client/grpc:stream_observer_session_client_no_jni_android",
         "@maven//:com_google_code_findbugs_jsr305",

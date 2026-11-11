@@ -22,5 +22,7 @@ import com.google.common.collect.ImmutableList
 data class ConversationIdConfig(
   val enableConversationId: Boolean,
   val enableSecurityPolicy: Boolean,
+  val enableBroadcast: Boolean = false,
   val allowedNonPixelDevices: ImmutableList<String> = ImmutableList.of(),
+  val enableSessionBoundBinding: Boolean = false,
 )

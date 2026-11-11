@@ -22,6 +22,7 @@ edition = "2024";
 package com.google.android.as.oss.logging;
 
 import "src/com/google/android/as/oss/logging/enums.proto";
+import "src/com/google/android/as/oss/privateinference/service/api/private_inference.proto";
 
 import option "third_party/java/protobuf/java_features.proto";
 
@@ -41,6 +42,25 @@ message IntelligenceValueReported {
 
   ValueMetricId value_metric_id = 1;
   int32 value = 2;
+}
+
+message PrivateInferenceCountReported {
+  option features.(pb.java).nest_in_file_class = YES;
+
+  com.google.android.as.oss.privateinference.service.api
+      .PcsPrivateInferenceFeatureName feature_name = 1
+      ;
+  CountMetricId count_metric_id = 2;
+}
+
+message PrivateInferenceValueReported {
+  option features.(pb.java).nest_in_file_class = YES;
+
+  com.google.android.as.oss.privateinference.service.api
+      .PcsPrivateInferenceFeatureName feature_name = 1
+      ;
+  ValueMetricId value_metric_id = 2;
+  int32 value = 3;
 }
 
 message IntelligenceUnrecognisedNetworkRequestReported {

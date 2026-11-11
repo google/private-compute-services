@@ -18,9 +18,11 @@ package com.google.android.`as`.oss.privateinference.logging
 
 import com.google.android.`as`.oss.logging.PcsAtomsProto.IntelligenceCountReported
 import com.google.android.`as`.oss.logging.PcsAtomsProto.IntelligenceValueReported
+import com.google.android.`as`.oss.logging.PcsAtomsProto.PrivateInferenceCountReported
 import com.google.android.`as`.oss.logging.PcsStatsEnums.CountMetricId
 import com.google.android.`as`.oss.logging.PcsStatsEnums.ValueMetricId
 import com.google.android.`as`.oss.logging.PcsStatsLog
+import com.google.android.`as`.oss.privateinference.service.api.proto.PcsPrivateInferenceFeatureName
 import javax.inject.Inject
 
 /** A wrapper around [PcsStatsLog] for logging Private Inference metrics. */
@@ -29,6 +31,18 @@ class PcsStatsLoggerImpl @Inject constructor(private val pcsStatsLog: PcsStatsLo
   override fun logEventCount(countMetricId: CountMetricId) {
     pcsStatsLog.logIntelligenceCountReported(
       IntelligenceCountReported.newBuilder().setCountMetricId(countMetricId).build()
+    )
+  }
+
+  override fun logEventCount(
+    countMetricId: CountMetricId,
+    featureName: PcsPrivateInferenceFeatureName,
+  ) {
+    pcsStatsLog.logPrivateInferenceCountReported(
+      PrivateInferenceCountReported.newBuilder()
+        .setCountMetricId(countMetricId)
+        .setFeatureName(featureName)
+        .build()
     )
   }
 

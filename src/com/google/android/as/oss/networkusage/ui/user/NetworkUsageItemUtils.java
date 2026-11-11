@@ -76,12 +76,11 @@ class NetworkUsageItemUtils {
             .addAll(NetworkUsageItemUtils.sortAndDivideByDates(networkUsageItems))
             .build();
 
-    finalEntityList.forEach(
-        logItemWrapper -> {
-          if (logItemWrapper instanceof NetworkUsageItemWrapper) {
-            ((NetworkUsageItemWrapper) logItemWrapper).setCallback(callback);
-          }
-        });
+    finalEntityList.forEach(logItemWrapper -> {
+      if (logItemWrapper instanceof NetworkUsageItemWrapper) {
+        ((NetworkUsageItemWrapper) logItemWrapper).setCallback(callback);
+      }
+    });
     return finalEntityList;
   }
 
@@ -275,12 +274,11 @@ class NetworkUsageItemUtils {
         .asMap()
         .values()
         .stream()
-        .map(
-            sameFcRunIdEntities ->
-                createFcResultUploadSingleTaskInfo(
-                    context,
-                    new NetworkUsageItemWrapper(ImmutableList.copyOf(sameFcRunIdEntities)),
-                    pcsStatsLogger))
+        .map(sameFcRunIdEntities ->
+            createFcResultUploadSingleTaskInfo(
+                context,
+                new NetworkUsageItemWrapper(ImmutableList.copyOf(sameFcRunIdEntities)),
+                pcsStatsLogger))
         .flatMap(Collection::stream)
         .collect(toImmutableList());
   }

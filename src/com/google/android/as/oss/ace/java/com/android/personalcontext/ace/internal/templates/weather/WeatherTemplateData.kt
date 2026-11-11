@@ -19,7 +19,7 @@
 package com.android.personalcontext.ace.internal.templates.weather
 
 import android.service.personalcontext.insight.ContextInsight
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsight
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsightV1
 import com.android.personalcontext.ace.client.prototype.weather.WeatherHint
 import com.android.personalcontext.ace.client.prototype.weather.WeatherHint.SuggestionType
 import com.android.personalcontext.ace.client.prototype.weather.WeatherInsight
@@ -52,6 +52,6 @@ data class WeatherTemplateData(
     }
 
     private fun ContextInsight.findWeatherInsight(): WeatherInsight? =
-      toPrototypeInsight<WeatherInsight>()
+      toPrototypeInsightV1<WeatherInsight>()
   }
 }

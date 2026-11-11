@@ -17,7 +17,7 @@
 package com.android.personalcontext.ace.internal.templates.richcard.decoder
 
 import android.service.personalcontext.insight.ContextInsight
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsight
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsightV1
 import com.android.personalcontext.ace.client.prototype.grid.InsightGrid
 import com.android.personalcontext.ace.internal.templates.richcard.DeprecatedUiGridCardContext
 import com.android.personalcontext.ace.internal.templates.richcard.toGridEntity
@@ -38,7 +38,7 @@ class GridCardUiDataDecoder @Inject constructor() :
   @Suppress("NewApi")
   override fun ContextInsight.toCardContext(): DeprecatedUiGridCardContext {
     val insightGrid =
-      requireNotNull(this.toPrototypeInsight<InsightGrid>()) { "InsightGrid cannot be null" }
+      requireNotNull(this.toPrototypeInsightV1<InsightGrid>()) { "InsightGrid cannot be null" }
 
     val entities = insightGrid.items.mapNotNull { it.toGridEntity() }
 

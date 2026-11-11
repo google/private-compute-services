@@ -16,6 +16,7 @@ edition = "2024";
 
 package com.google.android.as.oss.fl.api;
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "Training";
 option features.enum_type = CLOSED;
 option features.utf8_validation = NONE;

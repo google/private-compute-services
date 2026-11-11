@@ -31,7 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsight
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsightV1
 import com.android.personalcontext.ace.client.prototype.serversideclose.ServerSideCloseInsight
 import com.android.personalcontext.ace.visualizer.templates.LocalInsightSurfaceClientInfo
 
@@ -58,9 +58,9 @@ fun CardDismissIcon(dismissInsight: ServerSideCloseInsight?, modifier: Modifier 
           .clip(CircleShape)
           .clickable(
             onClick = {
-              info.onReceiveInsight(serverSideCloseInsight.toContextInsight())
+              info.onReceiveInsight(serverSideCloseInsight.toContextInsightV1())
               reportEvent(
-                serverSideCloseInsight.toContextInsight(),
+                serverSideCloseInsight.toContextInsightV1(),
                 InsightEvent.EVENT_USER_DISMISS,
               )
             },

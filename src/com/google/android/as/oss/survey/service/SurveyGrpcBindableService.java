@@ -225,21 +225,20 @@ public class SurveyGrpcBindableService extends SurveyServiceGrpc.SurveyServiceIm
 
     ImmutableList<ListenableFuture<HttpSurveyResponse>> requestFutures =
         requestList.getRequestsList().stream()
-            .map(
-                request ->
-                    Futures.submitAsync(
-                        () ->
-                            handleSurveyRequestInternal(
-                                request.getUrl(),
-                                request.getRequestPropertyList(),
-                                generateSurveyRecordEventRequest(
-                                    request, surveySessionMap.get(surveyTriggerId)),
-                                surveyConfig,
-                                networkUsageLogRepository,
-                                pcsStatsLogger,
-                                buildFlavor,
-                                client),
-                        ioExecutor))
+            .map(request ->
+                Futures.submitAsync(
+                    () ->
+                        handleSurveyRequestInternal(
+                            request.getUrl(),
+                            request.getRequestPropertyList(),
+                            generateSurveyRecordEventRequest(
+                                request, surveySessionMap.get(surveyTriggerId)),
+                            surveyConfig,
+                            networkUsageLogRepository,
+                            pcsStatsLogger,
+                            buildFlavor,
+                            client),
+                    ioExecutor))
             .collect(toImmutableList());
 
     ListenableFuture<List<HttpSurveyResponse>> futureList = Futures.allAsList(requestFutures);

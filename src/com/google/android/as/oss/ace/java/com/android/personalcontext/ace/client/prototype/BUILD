@@ -21,11 +21,12 @@ package(
 )
 
 android_library(
-    name = "prototype_utils",
+    name = "prototype_registry",
     srcs = [
-        "PrototypeHintUtils.kt",
-        "PrototypeInsightUtils.kt",
+        "PrototypeHintRegistry.kt",
+        "PrototypeInsightRegistry.kt",
     ],
+    visibility = ["//visibility:private"],
     deps = [
         ":prototype_hint",
         ":prototype_insight",
@@ -57,8 +58,52 @@ android_library(
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/serversideclose",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/session:embedded_session_hint",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/theme",
+        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/visualizerstate",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/weather",
+    ],
+)
+
+android_library(
+    name = "prototype_utils",
+    srcs = [
+        "PrototypeHintUtils.kt",
+        "PrototypeInsightUtils.kt",
+    ],
+    deps = [
+        ":prototype_hint",
+        ":prototype_insight",
+        ":prototype_registry",
+        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/empty",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/common/builders",
+    ],
+)
+
+android_library(
+    name = "prototype_extras_utils",
+    srcs = [
+        "PrototypeHintExtrasUtils.kt",
+        "PrototypeInsightExtrasUtils.kt",
+    ],
+    deps = [
+        ":prototype_hint",
+        ":prototype_insight",
+        ":prototype_registry",
+    ],
+)
+
+android_library(
+    name = "prototype_utils_v2",
+    srcs = [
+        "PrototypeHintUtilsV2.kt",
+        "PrototypeInsightUtilsV2.kt",
+        "PrototypeV2PayloadUtils.kt",
+    ],
+    deps = [
+        ":prototype_hint",
+        ":prototype_insight",
+        ":prototype_registry",
+        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/common/builders",
+        "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/common/buildersv2",
     ],
 )
 

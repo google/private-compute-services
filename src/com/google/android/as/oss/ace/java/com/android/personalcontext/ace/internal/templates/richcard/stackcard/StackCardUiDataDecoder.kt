@@ -22,7 +22,7 @@ import android.service.personalcontext.insight.ActionableInsight
 import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.DisplayInsight
 import android.service.personalcontext.insight.InsightCollection
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsight
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsightV1
 import com.android.personalcontext.ace.client.prototype.card.CardInsight
 import com.android.personalcontext.ace.client.prototype.metadata.VisualMetadataHint
 import com.android.personalcontext.ace.client.prototype.metadata.VisualStyle
@@ -35,7 +35,7 @@ import javax.inject.Singleton
 class StackCardUiDataDecoder @Inject constructor() : CardUiDataDecoder<StackCardUiData>() {
 
   override fun ContextInsight.toCardContext(): StackCardUiData {
-    return this.toPrototypeInsight<CardInsight>()?.let { cardInsight ->
+    return this.toPrototypeInsightV1<CardInsight>()?.let { cardInsight ->
       val headerInsights = cardInsight.header.toDisplayInsights()
       val bodyInsights = cardInsight.body.toDisplayInsights()
 

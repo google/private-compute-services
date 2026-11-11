@@ -18,9 +18,11 @@
 
 package com.android.personalcontext.ace.common
 
-import android.service.personalcontext.hint.ContextHint
+import android.app.personalcontext.hint.ContextHint as AppContextHint
+import android.app.personalcontext.insight.ContextInsight as AppContextInsight
+import android.service.personalcontext.hint.ContextHint as ServiceContextHint
 import android.service.personalcontext.hint.PublishedContextHint
-import android.service.personalcontext.insight.ContextInsight
+import android.service.personalcontext.insight.ContextInsight as ServiceContextInsight
 import android.service.personalcontext.insight.InsightCollection
 import com.android.personalcontext.ace.common.RenderTokenUtils.hasRendererToken
 import com.android.personalcontext.ace.common.wrappers.IPublishedContextHint
@@ -38,7 +40,7 @@ object PrettyPrintUtils {
    * Postfix with "*" if the hint is [transform]ed.
    */
   fun Collection<PublishedContextHint>.toPrettyPrint(
-    transform: (ContextHint) -> String? = { null }
+    transform: (ServiceContextHint) -> String? = { null }
   ): String = map { it.wrap() }.toPrettyPrint(transform)
 
   /**
@@ -51,7 +53,7 @@ object PrettyPrintUtils {
    */
   @JvmName("toPrettyPrintIPublishedContextHint")
   fun Collection<IPublishedContextHint>.toPrettyPrint(
-    transform: (ContextHint) -> String? = { null }
+    transform: (ServiceContextHint) -> String? = { null }
   ): String {
     return joinToString(", ") {
       val hint = it.contextHint
@@ -70,9 +72,29 @@ object PrettyPrintUtils {
    *
    * Postfix with "*" if the hint is [transform]ed.
    */
-  @JvmName("toPrettyPrintContextHint")
-  fun Collection<ContextHint>.toPrettyPrint(
-    transform: (ContextHint) -> String? = { null }
+  @JvmName("toPrettyPrintServiceContextHint")
+  fun Collection<ServiceContextHint>.toPrettyPrint(
+    transform: (ServiceContextHint) -> String? = { null }
+  ): String {
+    return joinToString(", ") { hint ->
+      val transformed = transform(hint)
+
+      val name = (transformed ?: hint.hintTypeName).substringAfterLast('.')
+      val prefix = ""
+      val postfix = if (transformed != null) "*" else ""
+
+      "$prefix$name$postfix"
+    }
+  }
+
+  /**
+   * Pretty prints the type(s) of the given hints in a human-readable string.
+   *
+   * Postfix with "*" if the hint is [transform]ed.
+   */
+  @JvmName("toPrettyPrintAppContextHint")
+  fun Collection<AppContextHint>.toPrettyPrint(
+    transform: (AppContextHint) -> String? = { null }
   ): String {
     return joinToString(", ") { hint ->
       val transformed = transform(hint)
@@ -93,11 +115,11 @@ object PrettyPrintUtils {
    * @param maxDepth The number of nested collection levels to expand before truncating.
    * @param formatting If true, formats the output with newlines and indentation.
    */
-  fun ContextInsight.toPrettyPrint(
+  fun ServiceContextInsight.toPrettyPrint(
     maxDepth: Int = 1,
     formatting: Boolean = false,
-    transform: (ContextInsight) -> String? = { null },
-    children: (ContextInsight) -> List<LabeledContextInsight>? = {
+    transform: (ServiceContextInsight) -> String? = { null },
+    children: (ServiceContextInsight) -> List<LabeledContextInsight>? = {
       (it as? InsightCollection)?.insights?.withIndexLabels()
     },
   ): String {
@@ -113,12 +135,12 @@ object PrettyPrintUtils {
     }
   }
 
-  private fun ContextInsight.toPrettyPrintInternal(
+  private fun ServiceContextInsight.toPrettyPrintInternal(
     depth: Int,
     maxDepth: Int,
     formatting: Boolean,
-    transform: (ContextInsight) -> String?,
-    children: (ContextInsight) -> List<LabeledContextInsight>?,
+    transform: (ServiceContextInsight) -> String?,
+    children: (ServiceContextInsight) -> List<LabeledContextInsight>?,
     builder: StringBuilder,
   ) {
     val insight = this
@@ -175,5 +197,24 @@ object PrettyPrintUtils {
       }
       builder.append("]")
     }
+  }
+
+  /**
+   * Pretty prints the type(s) of the given insight in a human-readable string.
+   *
+   * Postfix with "*" if the insight is [transform]ed.
+   */
+  fun AppContextInsight.toPrettyPrint(
+    transform: (AppContextInsight) -> String? = { null }
+  ): String {
+    val insight = this
+    val transformed = transform(insight)
+
+    val name =
+      (transformed ?: insight.javaClass.canonicalName ?: insight.toString()).substringAfterLast('.')
+    val prefix = ""
+    val postfix = if (transformed != null) "*" else ""
+
+    return "$prefix$name$postfix"
   }
 }

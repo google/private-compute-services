@@ -20,7 +20,7 @@ package com.android.personalcontext.ace.internal.templates.richcard.grid
 
 import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.DisplayInsight
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsight
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsightV1
 import com.android.personalcontext.ace.client.prototype.card.CardInsight
 import com.android.personalcontext.ace.client.prototype.grid.InsightGrid
 import com.android.personalcontext.ace.client.prototype.metadata.VisualMetadataHint
@@ -36,7 +36,7 @@ import javax.inject.Singleton
 class GridCardUiDataDecoder @Inject constructor() : CardUiDataDecoder<GridCardUiData>() {
 
   override fun ContextInsight.toCardContext(): GridCardUiData {
-    val cardInsight = this.toPrototypeInsight<CardInsight>() ?: error("Expected CardInsight")
+    val cardInsight = this.toPrototypeInsightV1<CardInsight>() ?: error("Expected CardInsight")
     val action = cardInsight.getCardContextAction()
 
     val titleInsight = cardInsight.title as? DisplayInsight
@@ -44,7 +44,7 @@ class GridCardUiDataDecoder @Inject constructor() : CardUiDataDecoder<GridCardUi
     val mainTitleContentDescription = titleInsight?.details?.contentDescription?.toString()
     val mainSubtitle = titleInsight?.details?.subtitle?.toString()
     val statusDisplayInsight = cardInsight.actions as? DisplayInsight
-    val gridInsight = cardInsight.body.toPrototypeInsight<InsightGrid>()
+    val gridInsight = cardInsight.body.toPrototypeInsightV1<InsightGrid>()
 
     val gridItems =
       gridInsight?.items?.map { item ->

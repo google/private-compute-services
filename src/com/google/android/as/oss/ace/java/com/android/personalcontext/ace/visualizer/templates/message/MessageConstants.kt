@@ -17,27 +17,28 @@
 package com.android.personalcontext.ace.visualizer.templates.message
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /** Constants for the underlay template. */
 object MessageConstants {
-  val ButtonHorizontalPadding = 12.dp
-  val ButtonVerticalPadding = 4.dp
-  val ButtonEndPadding = 18.dp
-  val CornerRadius = 100.dp
-  val MinHeight = 52.dp
-  val IconSize = 20.dp
-  val BorderStrokeWidth = 1.dp
-  val InnerBorderStrokeWidth = 8.dp
-  val InnerBorderBlurRadius = 2.dp
-  val Spacing = 8.dp
-  val RowStartPadding = 16.dp
-  val RowEndPadding = 16.dp
-  val RowTopPadding = 20.dp
-  val RowBottomPadding = 12.dp
-  val TextLineHeight = 20.dp
-  val BackgroundColor = Color.Black
-  val IconColor = Color.White
+  val ButtonHorizontalPadding: Dp = 12.dp
+  val ButtonVerticalPadding: Dp = 4.dp
+  val ButtonEndPadding: Dp = 18.dp
+  val CornerRadius: Dp = 100.dp
+  val MinHeight: Dp = 52.dp
+  val IconSize: Dp = 20.dp
+  val BorderStrokeWidth: Dp = 1.dp
+  val InnerBorderStrokeWidth: Dp = 8.dp
+  val InnerBorderBlurRadius: Dp = 2.dp
+  val Spacing: Dp = 8.dp
+  val RowStartPadding: Dp = 16.dp
+  val RowEndPadding: Dp = 16.dp
+  val RowTopPadding: Dp = 20.dp
+  val RowBottomPadding: Dp = 12.dp
+  val TextLineHeight: Dp = 20.dp
+  val BackgroundColor: Color = Color.Black
+  val IconColor: Color = Color.White
 
   const val ROTATION_DURATION_MILLIS: Int = 1500
   const val FADE_DURATION_MILLIS: Int = 500

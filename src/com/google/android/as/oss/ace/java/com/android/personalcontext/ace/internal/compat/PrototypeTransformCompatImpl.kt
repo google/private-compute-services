@@ -20,8 +20,8 @@ package com.android.personalcontext.ace.internal.compat
 
 import android.service.personalcontext.hint.ContextHint
 import android.service.personalcontext.insight.ContextInsight
-import com.android.personalcontext.ace.client.prototype.PrototypeHintUtils.toPrototypeHint
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsight
+import com.android.personalcontext.ace.client.prototype.PrototypeHintUtils.toPrototypeHintV1
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsightV1
 import com.android.personalcontext.ace.common.LabeledContextInsight
 import com.android.personalcontext.ace.visualizer.compat.PrototypeTransformCompat
 import javax.inject.Inject
@@ -35,14 +35,14 @@ import javax.inject.Inject
  */
 class PrototypeTransformCompatImpl @Inject constructor() : PrototypeTransformCompat {
   override fun transform(hint: ContextHint): String? {
-    return hint.toPrototypeHint()?.id?.typeName
+    return hint.toPrototypeHintV1()?.id?.typeName
   }
 
   override fun transform(insight: ContextInsight): String? {
-    return insight.toPrototypeInsight()?.id?.typeName
+    return insight.toPrototypeInsightV1()?.id?.typeName
   }
 
   override fun transformChildren(insight: ContextInsight): List<LabeledContextInsight>? {
-    return insight.toPrototypeInsight()?.children
+    return insight.toPrototypeInsightV1()?.children
   }
 }

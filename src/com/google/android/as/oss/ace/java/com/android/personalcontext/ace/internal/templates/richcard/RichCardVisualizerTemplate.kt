@@ -33,8 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsight
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsight
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsightV1
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsightV1
 import com.android.personalcontext.ace.client.prototype.card.CardInsight
 import com.android.personalcontext.ace.client.prototype.richcard.RichCardErrorHint
 import com.android.personalcontext.ace.client.prototype.richcard.RichCardHint
@@ -77,7 +77,7 @@ internal constructor(
       error("Insight must be an InsightCollection, but was ${insight::class.java.simpleName}")
     }
 
-    val cardInsights = insight.insights.mapNotNull { it.toPrototypeInsight<CardInsight>() }
+    val cardInsights = insight.insights.mapNotNull { it.toPrototypeInsightV1<CardInsight>() }
     val innerContent: @Composable () -> Unit = {
       if (cardInsights.isNotEmpty()) {
         RichCardContent(
@@ -108,7 +108,7 @@ internal constructor(
     DisposableEffect(Unit) {
       onDispose {
         Log.d(TAG, "Card disposed, reporting EVENT_USER_DISMISS")
-        reportEvent(cardInsight.toContextInsight(), InsightEvent.EVENT_USER_DISMISS)
+        reportEvent(cardInsight.toContextInsightV1(), InsightEvent.EVENT_USER_DISMISS)
       }
     }
 

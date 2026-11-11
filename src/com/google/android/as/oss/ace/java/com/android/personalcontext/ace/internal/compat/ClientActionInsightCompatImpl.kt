@@ -18,7 +18,7 @@ package com.android.personalcontext.ace.internal.compat
 
 import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.InsightDisplayDetails
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsight
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsightV1
 import com.android.personalcontext.ace.client.prototype.clientaction.ClientActionInsight
 import com.android.personalcontext.ace.client.prototype.clientaction.params.ClientActionParams
 import com.android.personalcontext.ace.common.InsightExtendedDetails
@@ -35,7 +35,7 @@ class ClientActionInsightCompatImpl @Inject constructor() : ClientActionInsightC
     insight: ContextInsight,
     block: (SafeClientActionInsight) -> T,
   ): T? =
-    insight.toPrototypeInsight<ClientActionInsight>()?.let {
+    insight.toPrototypeInsightV1<ClientActionInsight>()?.let {
       clientActionInsight: ClientActionInsight ->
       block(
         object : SafeClientActionInsight {

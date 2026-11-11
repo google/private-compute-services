@@ -42,6 +42,8 @@ public abstract class PccSecurityConfig {
 
   public abstract PackageSecurityInfo glassesCorePackageSecurityInfo();
 
+  public abstract PackageSecurityInfo nasPackageSecurityInfo();
+
   public abstract boolean enableAllowlistedOnly();
 
   public abstract PackageSecurityInfoList securityInfoList();
@@ -65,6 +67,8 @@ public abstract class PccSecurityConfig {
 
     public abstract PccSecurityConfig.Builder setGlassesCorePackageSecurityInfo(
         PackageSecurityInfo value);
+
+    public abstract PccSecurityConfig.Builder setNasPackageSecurityInfo(PackageSecurityInfo value);
 
     public abstract PccSecurityConfig.Builder setEnableAllowlistedOnly(boolean value);
 

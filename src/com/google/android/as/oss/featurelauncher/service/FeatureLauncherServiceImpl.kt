@@ -16,6 +16,8 @@
 
 package com.google.android.`as`.oss.featurelauncher.service
 
+import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent as AndroidIntent
 import androidx.activity.result.ActivityResult
@@ -23,6 +25,7 @@ import com.google.android.`as`.oss.featurelauncher.api.proto.ExecuteFeatureReque
 import com.google.android.`as`.oss.featurelauncher.api.proto.ExecuteFeatureResponse
 import com.google.android.`as`.oss.featurelauncher.api.proto.Feature as ProtoFeature
 import com.google.android.`as`.oss.featurelauncher.api.proto.FeatureResult
+import com.google.android.`as`.oss.featurelauncher.api.proto.FeatureType
 import com.google.android.`as`.oss.featurelauncher.api.proto.PcsFeatureLauncherServiceGrpcKt.PcsFeatureLauncherServiceCoroutineImplBase
 import com.google.android.`as`.oss.featurelauncher.api.proto.executeFeatureResponse
 import com.google.android.`as`.oss.featurelauncher.api.proto.featureResult
@@ -38,8 +41,11 @@ import kotlinx.coroutines.CompletableDeferred
 /**
  * Implementation of the Pcs Feature Launcher gRPC service.
  *
- * This service receives requests to launch different features, constructs the appropriate intents,
- * starts the launcher trampoline activity to execute the intents, and returns the result.
+ * This service receives requests to launch different features and constructs the appropriate
+ * intents. Most features are started through [FeatureLauncherTrampolineActivity], and the service
+ * returns the target activity's result once that activity finishes. The Keep export features in
+ * [FIRE_AND_FORGET_FEATURE_TYPES] are instead started directly in their own task, and the service
+ * returns as soon as they are started, without waiting for a result.
  */
 internal class FeatureLauncherServiceImpl
 @Inject
@@ -78,10 +84,14 @@ internal constructor(
             return@featureResult
           }
 
-      launchIntent.addFlags(AndroidIntent.FLAG_ACTIVITY_NO_ANIMATION)
-
       try {
-        val result = startTrampolineActivity(launchIntent)
+        val result =
+          if (protoFeature.featureType in FIRE_AND_FORGET_FEATURE_TYPES) {
+            startActivityWithoutResult(launchIntent)
+          } else {
+            launchIntent.addFlags(AndroidIntent.FLAG_ACTIVITY_NO_ANIMATION)
+            startTrampolineActivity(launchIntent)
+          }
         this.status = FeatureResult.Status.SUCCESS
         this.resultCode = result.resultCode
         result.data?.let { data ->
@@ -94,6 +104,12 @@ internal constructor(
         throw e
       } catch (e: SecurityException) {
         throw e
+      } catch (e: ActivityNotFoundException) {
+        logger
+          .atWarning()
+          .withCause(e)
+          .log("Activity not found for feature %s", protoFeature.featureType)
+        this.status = FeatureResult.Status.FAILURE
       } catch (e: Exception) {
         this.status = FeatureResult.Status.FAILURE
       }
@@ -139,8 +155,36 @@ internal constructor(
     }
   }
 
+  /**
+   * Starts [launchIntent] as the root of a new task and returns without waiting for its result.
+   *
+   * Used for the Keep export features in [FIRE_AND_FORGET_FEATURE_TYPES]. Keep's quick-save
+   * activities are open-ended, user-driven sheets that never set a result and can stay open
+   * indefinitely, so awaiting their result would block the RPC, and its caller, until the user
+   * finishes the sheet. Launching them from [FeatureLauncherTrampolineActivity] would also stack
+   * the sheet in the trampoline's task, which defeats Keep's `android:excludeFromRecents`.
+   *
+   * [AndroidIntent.FLAG_ACTIVITY_MULTIPLE_TASK] is required because with
+   * [AndroidIntent.FLAG_ACTIVITY_NEW_TASK] alone, Android reuses an existing Keep task (affinity
+   * match) and opens the sheet over Keep's main UI.
+   *
+   * @param launchIntent The target intent for the feature to launch.
+   * @return [Activity.RESULT_OK] with no data, since the activity's result is not awaited.
+   */
+  private fun startActivityWithoutResult(launchIntent: AndroidIntent): ActivityResult {
+    launchIntent.addFlags(
+      AndroidIntent.FLAG_ACTIVITY_NEW_TASK or AndroidIntent.FLAG_ACTIVITY_MULTIPLE_TASK
+    )
+    appContext.startActivity(launchIntent)
+    return ActivityResult(Activity.RESULT_OK, null)
+  }
+
   companion object {
     private val logger = GoogleLogger.forEnclosingClass()
     val pendingRequests = ConcurrentHashMap<String, CompletableDeferred<ActivityResult>>()
+
+    /** Feature types started without waiting for a result; see [startActivityWithoutResult]. */
+    private val FIRE_AND_FORGET_FEATURE_TYPES =
+      setOf(FeatureType.FEATURE_TYPE_ADD_TO_KEEP_LIST, FeatureType.FEATURE_TYPE_SAVE_TO_KEEP_NOTE)
   }
 }

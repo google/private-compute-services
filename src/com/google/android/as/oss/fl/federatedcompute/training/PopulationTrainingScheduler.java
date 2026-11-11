@@ -83,14 +83,13 @@ public class PopulationTrainingScheduler {
               trainingCriteriaToSchedule.addAll(additionalCriteria);
               return Futures.allAsList(
                   trainingCriteriaToSchedule.stream()
-                      .map(
-                          criteria -> {
-                            if (criteria.canScheduleTraining()) {
-                              return registerPopulation(criteria.getTrainerOptions());
-                            } else {
-                              return unregisterPopulation(criteria.getTrainerOptions());
-                            }
-                          })
+                      .map(criteria -> {
+                        if (criteria.canScheduleTraining()) {
+                          return registerPopulation(criteria.getTrainerOptions());
+                        } else {
+                          return unregisterPopulation(criteria.getTrainerOptions());
+                        }
+                      })
                       .collect(toImmutableList()));
             },
             executor)
@@ -102,29 +101,27 @@ public class PopulationTrainingScheduler {
   }
 
   private ListenableFuture<Void> registerPopulation(TrainerOptions trainerOpts) {
-    return CallbackToFutureAdapter.getFuture(
-        completer -> {
-          logger.atFine().log(
-              "Requesting Training for populationName: %s", trainerOpts.getPopulationName());
-          trainingScheduler.scheduleTraining(
-              trainerOpts,
-              (Void v) -> {
-                logger.atFine().log(
-                    "Training successfully scheduled for the populationName %s",
-                    trainerOpts.getPopulationName());
-                completer.set(null);
-              },
-              (Exception error) -> {
-                logger.atWarning().withCause(error).log(
-                    "Scheduling training failed [populationName=%s]",
-                    trainerOpts.getPopulationName());
-                completer.setException(error);
-              });
+    return CallbackToFutureAdapter.getFuture(completer -> {
+      logger.atFine().log(
+          "Requesting Training for populationName: %s", trainerOpts.getPopulationName());
+      trainingScheduler.scheduleTraining(
+          trainerOpts,
+          (Void v) -> {
+            logger.atFine().log(
+                "Training successfully scheduled for the populationName %s",
+                trainerOpts.getPopulationName());
+            completer.set(null);
+          },
+          (Exception error) -> {
+            logger.atWarning().withCause(error).log(
+                "Scheduling training failed [populationName=%s]", trainerOpts.getPopulationName());
+            completer.setException(error);
+          });
 
-          // This value is used only for debug purposes: it will be used in
-          // toString() of returned future or error cases.
-          return "Register Population Future";
-        });
+      // This value is used only for debug purposes: it will be used in
+      // toString() of returned future or error cases.
+      return "Register Population Future";
+    });
   }
 
   /**
@@ -150,28 +147,25 @@ public class PopulationTrainingScheduler {
   }
 
   private ListenableFuture<Void> unregisterPopulation(TrainerOptions trainerOpts) {
-    return CallbackToFutureAdapter.getFuture(
-        completer -> {
-          logger.atFine().log(
-              "Cancelling Training for populationName: %s", trainerOpts.getPopulationName());
-          trainingScheduler.disableTraining(
-              trainerOpts,
-              (Void v) -> {
-                logger.atFine().log(
-                    "Cancelled training for the populationName %s",
-                    trainerOpts.getPopulationName());
-                completer.set(null);
-              },
-              (Exception error) -> {
-                logger.atWarning().withCause(error).log(
-                    "Cancel training failed for [populationName=%s]",
-                    trainerOpts.getPopulationName());
-                completer.setException(error);
-              });
+    return CallbackToFutureAdapter.getFuture(completer -> {
+      logger.atFine().log(
+          "Cancelling Training for populationName: %s", trainerOpts.getPopulationName());
+      trainingScheduler.disableTraining(
+          trainerOpts,
+          (Void v) -> {
+            logger.atFine().log(
+                "Cancelled training for the populationName %s", trainerOpts.getPopulationName());
+            completer.set(null);
+          },
+          (Exception error) -> {
+            logger.atWarning().withCause(error).log(
+                "Cancel training failed for [populationName=%s]", trainerOpts.getPopulationName());
+            completer.setException(error);
+          });
 
-          // This value is used only for debug purposes: it will be used in
-          // toString() of returned future or error cases.
-          return "Unregister Population Future";
-        });
+      // This value is used only for debug purposes: it will be used in
+      // toString() of returned future or error cases.
+      return "Unregister Population Future";
+    });
   }
 }

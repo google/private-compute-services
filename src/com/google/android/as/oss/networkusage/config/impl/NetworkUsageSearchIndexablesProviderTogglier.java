@@ -43,10 +43,9 @@ public final class NetworkUsageSearchIndexablesProviderTogglier implements PcsIn
   @Override
   public void run() {
     toggle(configReader.getConfig().networkUsageSearchIndexablesProviderEnabled());
-    configReader.addListener(
-        (config, previous) -> {
-          toggle(config.networkUsageSearchIndexablesProviderEnabled());
-        });
+    configReader.addListener((config, previous) -> {
+      toggle(config.networkUsageSearchIndexablesProviderEnabled());
+    });
   }
 
   private void toggle(boolean enabled) {

@@ -22,33 +22,11 @@ import android.service.personalcontext.hint.PublishedContextHint
 import android.service.personalcontext.insight.BundleInsight
 import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.InsightCollection
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightId.CardInsightId
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightId.ClientActionInsightId
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightId.ClientSignalInsightId
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightId.EmbeddedScrollInsightId
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightId.EmptyRenderInsightId
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightId.ExampleEmbeddedInsightId
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightId.InsightGridId
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightId.LoadingInsightId
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightId.RenderTokenInsightId
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightId.ServerSideCloseInsightId
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightId.WeatherInsightId
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsight
-import com.android.personalcontext.ace.client.prototype.card.CardInsight
-import com.android.personalcontext.ace.client.prototype.clientaction.ClientActionInsight
-import com.android.personalcontext.ace.client.prototype.clientsignal.ClientSignalInsight
-import com.android.personalcontext.ace.client.prototype.embeddedscroll.EmbeddedScrollInsight
 import com.android.personalcontext.ace.client.prototype.empty.EmptyRenderInsight
-import com.android.personalcontext.ace.client.prototype.example.ExampleEmbeddedInsight
-import com.android.personalcontext.ace.client.prototype.grid.InsightGrid
-import com.android.personalcontext.ace.client.prototype.loading.LoadingInsight
-import com.android.personalcontext.ace.client.prototype.rendertoken.RenderTokenInsight
-import com.android.personalcontext.ace.client.prototype.serversideclose.ServerSideCloseInsight
-import com.android.personalcontext.ace.client.prototype.weather.WeatherInsight
 import com.android.personalcontext.ace.common.builders.bundleInsight
 import com.android.personalcontext.ace.common.builders.insightCollection
 
-private const val PROTOTYPE_INSIGHT_ID_KEY = "prototype_insight_id_key"
+private const val PROTOTYPE_INSIGHT_V1_ID_KEY = "prototype_insight_id_key"
 
 /**
  * Utilities for marshalling [PrototypeInsight] objects to and from the generic [ContextInsight]
@@ -58,11 +36,11 @@ private const val PROTOTYPE_INSIGHT_ID_KEY = "prototype_insight_id_key"
  * a generic [InsightCollection] for transport.
  *
  * ### Serialization Structure
- * When a [PrototypeInsight] is converted via [toContextInsight], it results in an
+ * When a [PrototypeInsight] is converted via [toContextInsightV1], it results in an
  * [InsightCollection] with a strict layout:
  * 1. **Header (Index 0):** A [BundleInsight] containing metadata and flattened data. **ID:** The
- *    [PROTOTYPE_INSIGHT_ID_KEY] identifies the specific [PrototypeInsight] subclass. **Data:** The
- *    result of [PrototypeInsight.exportDataToBundle]. **Context:** Contains all
+ *    [PROTOTYPE_INSIGHT_V1_ID_KEY] identifies the specific [PrototypeInsight] subclass. **Data:**
+ *    The result of [PrototypeInsight.exportDataToBundle]. **Context:** Contains all
  *    [tokens][PrototypeInsight.tokens] and [originHints][PrototypeInsight.originHints].
  * 2. **Children (Index 1..N):** The list of nested insights returned by
  *    [PrototypeInsight.exportInsightsToList]. Used for container types (e.g., Grids, Lists) that
@@ -77,7 +55,7 @@ object PrototypeInsightUtils {
    * The resulting insight is always an [InsightCollection] where the first element is a
    * [BundleInsight] containing the prototype's ID and data, followed by any child insights.
    */
-  fun PrototypeInsight.toContextInsight(): ContextInsight {
+  fun PrototypeInsight.toContextInsightV1(): ContextInsight {
     val prototype = this
 
     val header =
@@ -89,10 +67,12 @@ object PrototypeInsightUtils {
         }
         .apply {
           prototype.exportDataToBundle(dataBundle)
-          dataBundle.putInt(PROTOTYPE_INSIGHT_ID_KEY, prototype.id.uid)
+          dataBundle.putInt(PROTOTYPE_INSIGHT_V1_ID_KEY, prototype.id.uid)
         }
     val children =
-      prototype.insightsToSerialize.map { it ?: EmptyRenderInsight(emptySet()).toContextInsight() }
+      prototype.insightsToSerialize.map {
+        it ?: EmptyRenderInsight(emptySet()).toContextInsightV1()
+      }
 
     return insightCollection(listOf(header) + children)
   }
@@ -125,61 +105,47 @@ object PrototypeInsightUtils {
    * @return The reconstructed [PrototypeInsight], or `null` if the input is not a valid prototype
    *   collection or the ID is unrecognized.
    */
-  fun ContextInsight.toPrototypeInsight(): PrototypeInsight? {
-    if (this !is InsightCollection || !this.isPrototypeInsight()) return null
+  fun ContextInsight.toPrototypeInsightV1(): PrototypeInsight? {
+    if (this !is InsightCollection || !this.isPrototypeInsightV1Fast()) return null
 
     val data = insights.first() as BundleInsight
     val children =
-      insights.drop(1).map { if (it.isPrototypeInsight<EmptyRenderInsight>()) null else it }
+      insights.drop(1).map { if (it.isPrototypeInsightV1<EmptyRenderInsight>()) null else it }
 
-    val uid = data.dataBundle.getInt(PROTOTYPE_INSIGHT_ID_KEY)
+    val uid = data.dataBundle.getInt(PROTOTYPE_INSIGHT_V1_ID_KEY)
     val id = PrototypeInsightId.entries.find { it.uid == uid } ?: return null
 
-    val creator =
-      when (id) {
-        ExampleEmbeddedInsightId -> ExampleEmbeddedInsight
-        EmbeddedScrollInsightId -> EmbeddedScrollInsight
-        ClientActionInsightId -> ClientActionInsight
-        WeatherInsightId -> WeatherInsight
-        EmptyRenderInsightId -> EmptyRenderInsight
-        CardInsightId -> CardInsight
-        InsightGridId -> InsightGrid
-        ServerSideCloseInsightId -> ServerSideCloseInsight
-        RenderTokenInsightId -> RenderTokenInsight
-        ClientSignalInsightId -> ClientSignalInsight
-        LoadingInsightId -> LoadingInsight
-      }
-
+    val creator = PrototypeInsightRegistry.getInsightCreator(id)
     return creator.create(data.dataBundle, children, originHints ?: emptySet())
   }
 
   /** Deserialize a [ContextInsight] back into a [PrototypeInsight] as [T], if possible. */
-  @JvmName("toTypedPrototypeInsight")
-  inline fun <reified T : PrototypeInsight> ContextInsight.toPrototypeInsight(): T? {
-    return toPrototypeInsight() as? T
+  @JvmName("toTypedPrototypeInsightV1")
+  inline fun <reified T : PrototypeInsight> ContextInsight.toPrototypeInsightV1(): T? {
+    return toPrototypeInsightV1() as? T
   }
 
   /** Deserialize a [ContextInsight] back into a [PrototypeInsightCollection], if possible. */
-  fun ContextInsight.toPrototypeInsightCollection(): PrototypeInsightCollection? {
-    return toPrototypeInsight() as? PrototypeInsightCollection
+  fun ContextInsight.toPrototypeInsightCollectionV1(): PrototypeInsightCollection? {
+    return toPrototypeInsightV1() as? PrototypeInsightCollection
   }
 
   /**
    * Deserialize a [ContextInsight] back into a [PrototypeInsightCollection] as [T], if possible.
    */
-  @JvmName("toTypedPrototypeInsightCollection")
-  inline fun <reified T : PrototypeInsightCollection> ContextInsight.toPrototypeInsightCollection():
-    T? {
-    return toPrototypeInsight() as? T
+  @JvmName("toTypedPrototypeInsightCollectionV1")
+  inline fun <reified T : PrototypeInsightCollection> ContextInsight
+    .toPrototypeInsightCollectionV1(): T? {
+    return toPrototypeInsightV1() as? T
   }
 
   /**
    * Returns whether a [ContextInsight] is a [PrototypeInsight] of type [T] by attempting to
    * deserialize it.
    */
-  @JvmName("toTypedPrototypeInsight")
-  inline fun <reified T : PrototypeInsight> ContextInsight.isPrototypeInsight(): Boolean {
-    return toPrototypeInsight() is T
+  @JvmName("toTypedPrototypeInsightV1")
+  inline fun <reified T : PrototypeInsight> ContextInsight.isPrototypeInsightV1(): Boolean {
+    return toPrototypeInsightV1() is T
   }
 
   /**
@@ -187,8 +153,88 @@ object PrototypeInsightUtils {
    * There are other legitimate use cases for [InsightCollection] which may fail to deserialize into
    * a [PrototypeInsight].
    */
-  fun InsightCollection.isPrototypeInsight(): Boolean {
+  fun InsightCollection.isPrototypeInsightV1Fast(): Boolean {
     val data = insights.firstOrNull()
-    return data is BundleInsight && data.dataBundle.getInt(PROTOTYPE_INSIGHT_ID_KEY) > 0
+    return data is BundleInsight && data.dataBundle.getInt(PROTOTYPE_INSIGHT_V1_ID_KEY) > 0
   }
+
+  /**
+   * Serializes this [PrototypeInsight] into a generic [ContextInsight] for transport.
+   *
+   * The resulting insight is always an [InsightCollection] where the first element is a
+   * [BundleInsight] containing the prototype's ID and data, followed by any child insights.
+   */
+  @Deprecated(
+    message = "Use toContextInsightV1() instead",
+    replaceWith = ReplaceWith("toContextInsightV1()"),
+  )
+  fun PrototypeInsight.toContextInsight(): ContextInsight = toContextInsightV1()
+
+  /**
+   * Deserializes a [ContextInsight] back into a specific [PrototypeInsight] implementation.
+   *
+   * @return The reconstructed [PrototypeInsight], or `null` if the input is not a valid prototype
+   *   collection or the ID is unrecognized.
+   */
+  @Deprecated(
+    message = "Use toPrototypeInsightV1() instead",
+    replaceWith = ReplaceWith("toPrototypeInsightV1()"),
+  )
+  fun ContextInsight.toPrototypeInsight(): PrototypeInsight? = toPrototypeInsightV1()
+
+  /** Deserialize a [ContextInsight] back into a [PrototypeInsight] as [T], if possible. */
+  @Deprecated(
+    message = "Use toPrototypeInsightV1() instead",
+    replaceWith = ReplaceWith("toPrototypeInsightV1<T>()"),
+  )
+  @JvmName("toTypedPrototypeInsight")
+  inline fun <reified T : PrototypeInsight> ContextInsight.toPrototypeInsight(): T? {
+    return toPrototypeInsightV1<T>()
+  }
+
+  /** Deserialize a [ContextInsight] back into a [PrototypeInsightCollection], if possible. */
+  @Deprecated(
+    message = "Use toPrototypeInsightCollectionV1() instead",
+    replaceWith = ReplaceWith("toPrototypeInsightCollectionV1()"),
+  )
+  fun ContextInsight.toPrototypeInsightCollection(): PrototypeInsightCollection? {
+    return toPrototypeInsightCollectionV1()
+  }
+
+  /**
+   * Deserialize a [ContextInsight] back into a [PrototypeInsightCollection] as [T], if possible.
+   */
+  @Deprecated(
+    message = "Use toPrototypeInsightCollectionV1() instead",
+    replaceWith = ReplaceWith("toPrototypeInsightCollectionV1<T>()"),
+  )
+  @JvmName("toTypedPrototypeInsightCollection")
+  inline fun <reified T : PrototypeInsightCollection> ContextInsight.toPrototypeInsightCollection():
+    T? {
+    return toPrototypeInsightCollectionV1<T>()
+  }
+
+  /**
+   * Returns whether a [ContextInsight] is a [PrototypeInsight] of type [T] by attempting to
+   * deserialize it.
+   */
+  @Deprecated(
+    message = "Use isPrototypeInsightV1() instead",
+    replaceWith = ReplaceWith("isPrototypeInsightV1<T>()"),
+  )
+  @JvmName("toTypedPrototypeInsight")
+  inline fun <reified T : PrototypeInsight> ContextInsight.isPrototypeInsight(): Boolean {
+    return isPrototypeInsightV1<T>()
+  }
+
+  /**
+   * Return whether a [InsightCollection] is a wrapped [PrototypeInsight], without deserializing it.
+   * There are other legitimate use cases for [InsightCollection] which may fail to deserialize into
+   * a [PrototypeInsight].
+   */
+  @Deprecated(
+    message = "Use isPrototypeInsightV1Fast() instead",
+    replaceWith = ReplaceWith("isPrototypeInsightV1Fast()"),
+  )
+  fun InsightCollection.isPrototypeInsight(): Boolean = isPrototypeInsightV1Fast()
 }

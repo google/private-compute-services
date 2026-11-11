@@ -17,6 +17,7 @@
 package com.google.android.`as`.oss.privateinference.config.impl
 
 import com.google.common.flogger.GoogleLogger
+import io.grpc.ClientInterceptor
 import io.grpc.Metadata
 import io.grpc.stub.MetadataUtils.newAttachHeadersInterceptor
 
@@ -30,7 +31,7 @@ data class DeviceInfo(
   companion object {
     private val logger = GoogleLogger.forEnclosingClass()
 
-    fun PcsVersionInterceptor(deviceInfo: DeviceInfo?) = deviceInfo?.let {
+    fun PcsVersionInterceptor(deviceInfo: DeviceInfo?): ClientInterceptor? = deviceInfo?.let {
       newAttachHeadersInterceptor(
         /*extraHeaders=*/ Metadata().apply {
           deviceInfo.appVersionName?.let { appVersionName ->
@@ -45,7 +46,7 @@ data class DeviceInfo(
       )
     }
 
-    fun HardwareRevisionInterceptor(deviceInfo: DeviceInfo?) = deviceInfo?.let {
+    fun HardwareRevisionInterceptor(deviceInfo: DeviceInfo?): ClientInterceptor? = deviceInfo?.let {
       newAttachHeadersInterceptor(
         /*extraHeaders=*/ Metadata().apply {
           deviceInfo.hardwareRevision?.let { hardwareRevision ->

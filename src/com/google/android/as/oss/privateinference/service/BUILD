@@ -41,6 +41,7 @@ android_library(
         "//src/com/google/android/as/oss/privateinference/library/oakutil:private_inference_verification_keys_prod_module",
         "//src/com/google/android/as/oss/privateinference/logging",
         "//src/com/google/android/as/oss/privateinference/networkusage",
+        "//src/com/google/android/as/oss/privateinference/service/api:feature_name_java_proto_lite",
         "//src/com/google/android/as/oss/privateinference/service/api:metadata_parcel_file_descriptor_keys",
         "//src/com/google/android/as/oss/privateinference/service/api:private_inference_grpc",
         "//src/com/google/android/as/oss/privateinference/service/api:private_inference_java_proto_lite",
@@ -86,6 +87,7 @@ android_library(
         "//src/com/google/android/as/oss/privateinference/library/oakutil:private_inference_oak_async_client",
         "//src/com/google/android/as/oss/privateinference/logging",
         "//src/com/google/android/as/oss/privateinference/networkusage",
+        "//src/com/google/android/as/oss/privateinference/service/api:feature_name_java_proto_lite",
         "//src/com/google/android/as/oss/privateinference/service/api:metadata_parcel_file_descriptor_keys",
         "//src/com/google/android/as/oss/privateinference/service/api:private_inference_grpc",
         "//src/com/google/android/as/oss/privateinference/service/api:private_inference_java_proto_lite",
@@ -127,7 +129,7 @@ android_library(
     deps = [
         ":logging_metric_id_qualifiers",
         "//src/com/google/android/as/oss/logging:enums_java_proto_lite",
-        "//src/com/google/android/as/oss/privateinference/service/api:private_inference_java_proto_lite",
+        "//src/com/google/android/as/oss/privateinference/service/api:feature_name_kt_proto_lite",
         "@maven//:io_grpc_grpc_api",
         "@maven//:javax_inject_javax_inject",
     ],
@@ -141,7 +143,7 @@ android_library(
     deps = [
         ":logging_metric_id_qualifiers",
         "//src/com/google/android/as/oss/logging:enums_java_proto_lite",
-        "//src/com/google/android/as/oss/privateinference/service/api:private_inference_java_proto_lite",
+        "//src/com/google/android/as/oss/privateinference/service/api:feature_name_kt_proto_lite",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",
         "@maven//:javax_inject_javax_inject",
@@ -156,7 +158,7 @@ android_library(
     deps = [
         ":logging_metric_id_qualifiers",
         "//src/com/google/android/as/oss/logging:enums_java_proto_lite",
-        "//src/com/google/android/as/oss/privateinference/service/api:private_inference_java_proto_lite",
+        "//src/com/google/android/as/oss/privateinference/service/api:feature_name_kt_proto_lite",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",
         "@maven//:javax_inject_javax_inject",

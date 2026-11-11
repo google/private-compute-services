@@ -28,6 +28,7 @@ import androidx.annotation.IntDef
   SuperIconErrorCodes.FEATURE_DISABLED,
   SuperIconErrorCodes.CALLER_NOT_AUTHORIZED,
   SuperIconErrorCodes.RENDER_FAILED,
+  SuperIconErrorCodes.RENDER_CANCELLED,
 )
 annotation class SuperIconErrorCodes {
   companion object {
@@ -38,5 +39,11 @@ annotation class SuperIconErrorCodes {
     const val FEATURE_DISABLED = 4
     const val CALLER_NOT_AUTHORIZED = 5
     const val RENDER_FAILED = 6
+    /**
+     * Indicates that an in-flight render request was cancelled because it was superseded by a newer
+     * request. Clients should release their callback reference without treating this as a fatal UI
+     * render failure.
+     */
+    const val RENDER_CANCELLED = 7
   }
 }

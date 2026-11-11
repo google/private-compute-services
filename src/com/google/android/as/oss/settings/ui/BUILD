@@ -23,7 +23,6 @@ android_library(
     visibility = ["//visibility:public"],
     deps = [
         "//src/com/google/android/as/oss/settings/licenses",
-        "//src/com/google/android/as/oss/third_party_licenses",
         "@maven//:androidx_preference_preference",
         "@maven//:com_google_dagger_dagger",
     ],

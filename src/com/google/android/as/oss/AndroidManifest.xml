@@ -77,6 +77,11 @@
       <additional-certificate android:certDigest="33b94845ed35910c90b2bd970ce0724dbf40fcb67e9db051cad6d66943966d97" /> <!-- Test -->
     </package>
 
+    <package android:name="com.google.android.nas"
+        android:certDigest="d4bb2df211900de457f3c4973880646dca8b7a032c7e5d1449bd9818fda68ca4"> <!-- Prod -->
+      <additional-certificate android:certDigest="9c051f0c2ff4a3326c7f46b90bdbf65ce9079eb9f65c4b1fda687284a32a848d" /> <!-- Test -->
+    </package>
+
     <!-- System & Settings Intelligence -->
     <package android:name="com.google.android.settings.intelligence"
         android:certDigest="d9882b784173aa98c32ad7848ff38bf16bddc61c636883f940d85e2f059aa249"> <!-- Prod -->

@@ -91,12 +91,13 @@ public final class PcsOakServerStreamResponseObserver extends BaseOakServerStrea
     logger.atInfo().log(
         "[startInferenceSession] Received response from server with size: %d.", oakResponse.size());
     logInferenceEvent(loggingMetricIdProvider.getInferenceSuccessCountMetricId(featureName.get()));
+    logInferenceEvent(CountMetricId.PCS_PI_SUCCESS, featureName.get());
   }
 
   @Override
   public void onError(Throwable t) {
     inferenceSessionTimer.stop();
-    logger.atWarning().log(
+    logger.atWarning().withCause(t).log(
         "[startInferenceSession] onError[%s] from server for feature: %s.",
         t.getMessage(), featureName.get().name());
     networkUsageLogHelper.logPrivateInferenceRequest(
@@ -108,6 +109,7 @@ public final class PcsOakServerStreamResponseObserver extends BaseOakServerStrea
     if (hasLoggedSessionError.compareAndSet(false, true)) {
       logInferenceEvent(
           loggingMetricIdProvider.getInferenceSessionErrorCountMetricId(featureName.get()));
+      logInferenceEvent(CountMetricId.PCS_PI_SESSION_ERROR, featureName.get());
     }
     logInferenceFailureErrorCode(t);
     super.onError(t);
@@ -130,6 +132,11 @@ public final class PcsOakServerStreamResponseObserver extends BaseOakServerStrea
 
   private void logInferenceEvent(CountMetricId countMetricId) {
     pcsStatsLogger.logEventCount(countMetricId);
+  }
+
+  private void logInferenceEvent(
+      CountMetricId countMetricId, PcsPrivateInferenceFeatureName featureName) {
+    pcsStatsLogger.logEventCount(countMetricId, featureName);
   }
 
   private void logInferenceFailureErrorCode(Throwable t) {

@@ -49,7 +49,7 @@ data class InsightGridItem(val insight: ContextInsight, val span: Span) {
 
     operator fun minus(other: Int): Int = this.value - other
 
-    val floatValue = value.toFloat()
+    val floatValue: Float = value.toFloat()
 
     companion object {
 

@@ -60,10 +60,9 @@ public class NetworkUsageItemDetailsActivity extends Hilt_NetworkUsageItemDetail
     setTitle(
         contentMap
             .getFeatureName(networkUsageItem.connectionDetails())
-            .orElseThrow(
-                () ->
-                    MissingResourcesForEntityException.missingTitleFor(
-                        networkUsageItem.connectionDetails())));
+            .orElseThrow(() ->
+                MissingResourcesForEntityException.missingTitleFor(
+                    networkUsageItem.connectionDetails())));
 
     NetworkUsageLogAdapter adapter = new NetworkUsageLogAdapter(contentMap);
     RecyclerView recyclerView = findViewById(R.id.network_usage_item_details_list);

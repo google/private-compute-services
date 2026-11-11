@@ -33,6 +33,7 @@ import com.google.common.flogger.GoogleLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,7 +43,7 @@ import kotlinx.coroutines.withContext
 
 /** View model for [DataAttributionDialog]. */
 @HiltViewModel
-internal class DataAttributionDialogViewModel
+class DataAttributionDialogViewModel
 @Inject
 constructor(
   @ApplicationContext private val context: Context,
@@ -56,6 +57,7 @@ constructor(
     viewModelScope.launch { resolveLegacySettingsActivity() }
   }
 
+  @Suppress("QueryPermissionsNeeded")
   private suspend fun resolveLegacySettingsActivity() {
     val intent = createUnresolvedLegacySettingsIntent()
     val resolved =
@@ -73,6 +75,21 @@ constructor(
       )
     }
 
+  private val serverAppVersion: Long? by lazy {
+    try {
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        context.packageManager.getPackageInfo(PACKAGE_NAME, 0).longVersionCode
+      } else {
+        context.packageManager
+          .getPackageInfo(PACKAGE_NAME, PackageManager.PackageInfoFlags.of(0))
+          .longVersionCode
+      }
+    } catch (e: Exception) {
+      logger.atWarning().withCause(e).log("Failed to get server app info")
+      null
+    }
+  }
+
   fun logUiEvent(
     uiElementType: Int,
     uiElementIndex: Int = 0,
@@ -81,37 +98,31 @@ constructor(
     interactionType: InteractionType = InteractionType.INTERACTION_TYPE_CLICK,
     semanticsType: SemanticsType = SemanticsType.SEMANTICS_TYPE_LOG_USAGE,
   ) {
-    try {
-      // Check for server app version for backwards compatibility.
-      val serverAppVersion =
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-          context.packageManager.getPackageInfo(PACKAGE_NAME, 0).longVersionCode
-        } else {
-          context.packageManager
-            .getPackageInfo(PACKAGE_NAME, PackageManager.PackageInfoFlags.of(0))
-            .longVersionCode
-        }
+    val version = serverAppVersion ?: return
+    if (version <= VERSION_THRESHOLD) {
+      logger.atWarning().log("Server app version is too old: %d", version)
+      return
+    }
 
-      if (serverAppVersion > VERSION_THRESHOLD) {
-        viewModelScope.launch {
-          val unused =
-            usageDataService.logUsageData(
-              logUsageDataRequest {
-                this.clientSessionUuid = clientSessionId
-                this.uiIdToken = uiIdToken {
-                  this.elementType = uiElementType
-                  this.index = uiElementIndex
-                }
-                this.semantics = semanticsType
-                this.interaction = interactionType
+    viewModelScope.launch {
+      try {
+        val unused =
+          usageDataService.logUsageData(
+            logUsageDataRequest {
+              this.clientSessionUuid = clientSessionId
+              this.uiIdToken = uiIdToken {
+                this.elementType = uiElementType
+                this.index = uiElementIndex
               }
-            )
-        }
-      } else {
-        logger.atWarning().log("Server app version is too old: %d", serverAppVersion)
+              this.semantics = semanticsType
+              this.interaction = interactionType
+            }
+          )
+      } catch (e: CancellationException) {
+        throw e
+      } catch (e: Exception) {
+        logger.atWarning().withCause(e).log("Failed to log UI event via gRPC")
       }
-    } catch (e: Exception) {
-      logger.atWarning().withCause(e).log("Failed to log UI event")
     }
   }
 

@@ -23,6 +23,8 @@
 
   <queries>
     <package android:name="com.google.android.inputmethod.latin"/>
+    <package android:name="com.google.android.inputmethod.latin.canary"/>
+    <package android:name="com.google.android.inputmethod.latin.dev"/>
   </queries>
 
   <application>

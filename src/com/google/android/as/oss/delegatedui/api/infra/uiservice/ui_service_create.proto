@@ -18,11 +18,12 @@ package com.google.android.as.oss.delegatedui.api.infra.uiservice;
 
 import "src/com/google/android/as/oss/delegatedui/api/common/common.proto";
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "UiServiceCreate";
 option java_package = "com.google.android.as.oss.delegatedui.api.infra.uiservice";
 
 // Create - initialization call to set up remote rendering via delegated UI
-message DelegatedUiCreateRequest {
+export message DelegatedUiCreateRequest {
   // Host token from the local SurfaceView. Used to construct a remote
   // SurfaceControlViewHost. This will be sent through RPC metadata headers, and
   // is only documented here for the record.
@@ -44,7 +45,7 @@ message DelegatedUiCreateRequest {
   string session_uuid = 1;
 }
 
-message DelegatedUiCreateResponse {
+export message DelegatedUiCreateResponse {
   // Surface package of the remote SurfaceControlViewHost. The caller needs to
   // pass this into SurfaceView#setChildSurfacePackage to render the delegated
   // UI. This will be sent through RPC metadata headers, and is only documented

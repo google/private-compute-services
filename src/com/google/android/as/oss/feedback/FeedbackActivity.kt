@@ -16,17 +16,24 @@
 
 package com.google.android.`as`.oss.feedback
 
+import android.app.personalcontext.PersonalContextManager
+import android.app.personalcontext.insight.ActionableInsight
+import android.app.personalcontext.insight.DisplayInsight
+import android.app.personalcontext.understander.FeedbackRequest
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
+import androidx.core.content.IntentCompat
 import com.google.android.`as`.oss.common.config.ConfigReader
 import com.google.android.`as`.oss.feedback.FeedbackApi.EXTRA_ENTITY_FEEDBACK_DIALOG_DATA_PROTO
 import com.google.android.`as`.oss.feedback.FeedbackApi.EXTRA_MULTI_FEEDBACK_DIALOG_DATA_PROTO
 import com.google.android.`as`.oss.feedback.api.EntityFeedbackDialogData
 import com.google.android.`as`.oss.feedback.api.FeedbackRatingSentiment
 import com.google.android.`as`.oss.feedback.api.MultiFeedbackDialogData
+import com.google.android.`as`.oss.feedback.api.copy
 import com.google.android.`as`.oss.feedback.config.FeedbackConfig
 import com.google.android.`as`.oss.feedback.domain.FeedbackSubmissionEvent
 import com.google.android.`as`.oss.feedback.ui.MultiEntityFeedbackDialog
@@ -49,9 +56,10 @@ class FeedbackActivity : Hilt_FeedbackActivity() {
 
     try {
       val entityFeedbackDialogData =
-        intent.getByteArrayExtra(EXTRA_ENTITY_FEEDBACK_DIALOG_DATA_PROTO)?.let {
-          EntityFeedbackDialogData.parseFrom(it)
-        }
+        intent
+          .getByteArrayExtra(EXTRA_ENTITY_FEEDBACK_DIALOG_DATA_PROTO)
+          ?.let { EntityFeedbackDialogData.parseFrom(it) }
+          ?.overwriteWithAceV2FeedbackRequest(intent)
       val multiFeedbackDialogData =
         intent.getByteArrayExtra(EXTRA_MULTI_FEEDBACK_DIALOG_DATA_PROTO)?.let {
           MultiFeedbackDialogData.parseFrom(it)
@@ -185,5 +193,47 @@ class FeedbackActivity : Hilt_FeedbackActivity() {
 
   companion object {
     private val logger = GoogleLogger.forEnclosingClass()
+  }
+}
+
+/**
+ * Overwrites [EntityFeedbackDialogData] with the [FeedbackRequest] passed in [intent] via
+ * [PersonalContextManager.EXTRA_FEEDBACK_REQUEST].
+ */
+@Suppress("FlaggedApi")
+fun EntityFeedbackDialogData.overwriteWithAceV2FeedbackRequest(
+  intent: Intent
+): EntityFeedbackDialogData {
+  if (Build.VERSION.SDK_INT_FULL < Build.VERSION_CODES_FULL.CINNAMON_BUN_2) {
+    return this
+  }
+  val feedbackRequest =
+    IntentCompat.getParcelableExtra(
+      intent,
+      PersonalContextManager.EXTRA_FEEDBACK_REQUEST,
+      FeedbackRequest::class.java,
+    ) ?: return this
+
+  val ratingSentiment =
+    when {
+      feedbackRequest.properties and FeedbackRequest.FEEDBACK_PROPERTY_POSITIVE != 0 ->
+        FeedbackRatingSentiment.RATING_SENTIMENT_THUMBS_UP
+      feedbackRequest.properties and FeedbackRequest.FEEDBACK_PROPERTY_NEGATIVE != 0 ->
+        FeedbackRatingSentiment.RATING_SENTIMENT_THUMBS_DOWN
+      else -> FeedbackRatingSentiment.RATING_SENTIMENT_UNDEFINED
+    }
+
+  val insightId = feedbackRequest.source.insightId.toString()
+  val entityContent =
+    when (val source = feedbackRequest.source) {
+      is DisplayInsight -> source.details.title?.toString()
+      is ActionableInsight -> source.displayDetails.title?.toString()
+      else -> null
+    }?.takeIf { it.isNotEmpty() } ?: insightId
+
+  return copy {
+    this.entityContent = entityContent
+    this.clientSessionId = insightId
+    this.ratingSentiment = ratingSentiment
   }
 }

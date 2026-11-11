@@ -24,6 +24,8 @@ import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceFederatedLear
 import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceUnrecognisedNetworkRequestReported;
 import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceUnrecognisedNetworkRequestReported.ConnectionType;
 import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceValueReported;
+import com.google.android.as.oss.logging.PcsAtomsProto.PrivateInferenceCountReported;
+import com.google.android.as.oss.logging.PcsAtomsProto.PrivateInferenceValueReported;
 import com.google.android.as.oss.logging.PcsStatsEnums;
 import com.google.android.as.oss.logging.PcsStatsEnums.CountMetricId;
 import com.google.android.as.oss.logging.PcsStatsEnums.SecAggClientCryptoOperationType;
@@ -68,6 +70,18 @@ public final class PcsLogMessageConverter {
         COUNT_METRIC_ID_CONVERTER = new CountMetricIdConverter();
   }
 
+  /** Converter for {@link PrivateInferenceCountReported}. */
+  @AutoConverter(
+      from = PrivateInferenceCountReported.class,
+      to = com.android.os.intelligence.PrivateInferenceCountReported.class,
+      implementing = Function.class)
+  public static class PrivateInferenceCountReportedConverter
+      extends AutoConverter_PcsLogMessageConverter_PrivateInferenceCountReportedConverter {
+    @ForAutoConverter
+    static final Function<CountMetricId, IntelligenceStatsEnums.CountMetricId>
+        COUNT_METRIC_ID_CONVERTER = new CountMetricIdConverter();
+  }
+
   /** Converter for {@link CountMetricId}. */
   @AutoEnumConverter(
       from = CountMetricId.class,
@@ -83,6 +97,18 @@ public final class PcsLogMessageConverter {
       implementing = Function.class)
   public static class IntelligenceValueReportedConverter
       extends AutoConverter_PcsLogMessageConverter_IntelligenceValueReportedConverter {
+    @ForAutoConverter
+    static final Function<ValueMetricId, IntelligenceStatsEnums.ValueMetricId>
+        VALUE_METRIC_ID_CONVERTER = new ValueMetricIdConverter();
+  }
+
+  /** Converter for {@link PrivateInferenceValueReported}. */
+  @AutoConverter(
+      from = PrivateInferenceValueReported.class,
+      to = com.android.os.intelligence.PrivateInferenceValueReported.class,
+      implementing = Function.class)
+  public static class PrivateInferenceValueReportedConverter
+      extends AutoConverter_PcsLogMessageConverter_PrivateInferenceValueReportedConverter {
     @ForAutoConverter
     static final Function<ValueMetricId, IntelligenceStatsEnums.ValueMetricId>
         VALUE_METRIC_ID_CONVERTER = new ValueMetricIdConverter();

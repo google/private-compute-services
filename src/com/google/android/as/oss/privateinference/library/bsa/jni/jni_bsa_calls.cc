@@ -23,12 +23,12 @@
 #include <utility>
 #include <vector>
 
-#include "google/protobuf/any.pb.h"
+#include "google/protobuf/any.proto.h"
 #include "java/com/google/android/apps/miphone/pcs/privateinference/library/bsa/jni/jni_global_ref.h"
 #include "java/com/google/android/apps/miphone/pcs/privateinference/library/bsa/jni/jni_helpers.h"
 #include "java/com/google/android/apps/miphone/pcs/privateinference/library/bsa/jni/jni_logging.h"
 #include "java/com/google/android/apps/miphone/pcs/privateinference/library/bsa/jni/jni_message_interface_wrapper.h"
-#include "privacy/net/attestation/proto/attestation.pb.h"
+#include "privacy/net/attestation/proto/attestation.proto.h"
 #include "third_party/absl/functional/any_invocable.h"
 #include "third_party/absl/status/status.h"
 #include "third_party/absl/status/statusor.h"

@@ -17,6 +17,7 @@
 package com.android.personalcontext.ace.visualizer.connector
 
 import android.content.Context
+import android.os.Build
 import android.service.personalcontext.embedded.InsightSurfaceClientInfo
 import android.service.personalcontext.hint.PublishedContextHint
 import android.service.personalcontext.insight.HintInvalidationInsight
@@ -42,7 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.android.personalcontext.ace.client.prototype.PrototypeHintUtils.toPrototypeHint
+import com.android.personalcontext.ace.client.prototype.PrototypeHintUtils.toPrototypeHintV1
 import com.android.personalcontext.ace.client.prototype.session.EmbeddedSessionHint
 import com.android.personalcontext.ace.common.MetaTags.ACE_EMBEDDED_TAG
 import com.android.personalcontext.ace.common.PrettyPrintUtils.toPrettyPrint
@@ -86,13 +87,13 @@ constructor(
   private val insightEventReporterFactoryCompat: InsightEventReporterFactoryCompat,
   private val prototypeTransformationCompat: PrototypeTransformCompat,
   private val clientSignalCompat: ClientSignalCompat,
+  private val composeStateStore: VisualizerComposeStateStore,
 ) : VisualizerServiceConnector {
 
   private val sessions = mutableMapOf<UUID, VisualizerSession>()
   private val embeddedViews = mutableMapOf<UUID, View>()
   private val originHints = mutableMapOf<UUID, Set<PublishedContextHint>>()
   private val clientInfoStates = mutableMapOf<UUID, MutableState<IInsightSurfaceClientInfo>>()
-  private val savedComposeStates = mutableMapOf<UUID, Map<String, List<Any?>>>()
 
   override fun onClientConnected(info: InsightSurfaceClientInfo) {
     Log.i(TAG, "Visualizer: onClientConnected(${info.id}) [$ACE_EMBEDDED_TAG]")
@@ -220,7 +221,7 @@ constructor(
           val saveableStateRegistry =
             remember(composeStateKey) {
               SaveableStateRegistry(
-                restoredValues = savedComposeStates[composeStateKey],
+                restoredValues = composeStateStore[composeStateKey],
                 canBeSaved = { true },
               )
             }
@@ -269,7 +270,7 @@ constructor(
 
               DisposableEffect(composeStateKey) {
                 onDispose {
-                  savedComposeStates[composeStateKey] = saveableStateRegistry.performSave()
+                  composeStateStore[composeStateKey] = saveableStateRegistry.performSave()
                 }
               }
             }
@@ -283,7 +284,7 @@ constructor(
   private val IPublishedContextInsight.embeddedSessionUuid: UUID?
     get() =
       insight.originHints.firstNotNullOfOrNull {
-        it.contextHint.toPrototypeHint<EmbeddedSessionHint>()?.uuid
+        it.contextHint.toPrototypeHintV1<EmbeddedSessionHint>()?.uuid
       }
 
   override fun onClientUpdated(
@@ -309,7 +310,7 @@ constructor(
     embeddedViews.remove(info.id)
     originHints.remove(info.id)
     clientInfoStates.remove(info.id)
-    savedComposeStates.remove(info.id)
+    composeStateStore.remove(info.id)
   }
 
   private fun diff(old: IInsightSurfaceClientInfo, new: IInsightSurfaceClientInfo): String {
@@ -351,6 +352,9 @@ constructor(
         new.themeResourceId,
         "themeResourceId=${new.themeResourceId}",
       )
+      if (Build.VERSION.SDK_INT_FULL >= Build.VERSION_CODES_FULL.CINNAMON_BUN_2) {
+        addIfChanged(old.extras, new.extras, "extras changed")
+      }
       addIfChanged(old.packageName, new.packageName, "packageName=${new.packageName}")
       addIfChanged(old.configuration, new.configuration, "configuration changed")
     }

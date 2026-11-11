@@ -21,6 +21,14 @@ package(
 )
 
 android_library(
+    name = "visualizer_compose_state_store",
+    srcs = ["VisualizerComposeStateStore.kt"],
+    deps = [
+        "@maven//:javax_inject_javax_inject",
+    ],
+)
+
+android_library(
     name = "visualizer_service_connector",
     srcs = ["VisualizerServiceConnector.kt"],
     deps = [
@@ -32,6 +40,7 @@ android_library(
     name = "visualizer_service_connector_impl",
     srcs = ["VisualizerServiceConnectorImpl.kt"],
     deps = [
+        ":visualizer_compose_state_store",
         ":visualizer_service_connector",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype:prototype_utils",
         "//src/com/google/android/as/oss/ace/java/com/android/personalcontext/ace/client/prototype/session:embedded_session_hint",

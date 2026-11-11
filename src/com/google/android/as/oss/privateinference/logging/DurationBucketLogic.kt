@@ -34,11 +34,7 @@ object DurationBucketLogic {
       return 0 // Unknown duration.
     }
     val bucketIndex = Math.round(Math.log(OFFSET + durationMillis) / LOG_BASE - SHIFT)
-    return if (bucketIndex > 200) {
-      200
-    } else {
-      bucketIndex.toInt()
-    }
+    return bucketIndex.coerceAtMost(200L).toInt()
   }
 
   private fun approximateDurationMs(durationBucket: Int): Long {

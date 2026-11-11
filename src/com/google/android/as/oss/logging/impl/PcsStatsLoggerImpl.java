@@ -23,6 +23,8 @@ import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceFederatedLear
 import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceFederatedLearningTrainingLogReported;
 import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceUnrecognisedNetworkRequestReported;
 import com.google.android.as.oss.logging.PcsAtomsProto.IntelligenceValueReported;
+import com.google.android.as.oss.logging.PcsAtomsProto.PrivateInferenceCountReported;
+import com.google.android.as.oss.logging.PcsAtomsProto.PrivateInferenceValueReported;
 import com.google.android.as.oss.logging.PcsStatsLog;
 import com.google.android.as.oss.logging.converter.PcsLogMessageConverter.IntelligenceCountReportedConverter;
 import com.google.android.as.oss.logging.converter.PcsLogMessageConverter.IntelligenceFlDiagLogReportedConverter;
@@ -30,6 +32,8 @@ import com.google.android.as.oss.logging.converter.PcsLogMessageConverter.Intell
 import com.google.android.as.oss.logging.converter.PcsLogMessageConverter.IntelligenceFlTrainingLogReportedConverter;
 import com.google.android.as.oss.logging.converter.PcsLogMessageConverter.IntelligenceUnrecognisedNetworkRequestReportedConverter;
 import com.google.android.as.oss.logging.converter.PcsLogMessageConverter.IntelligenceValueReportedConverter;
+import com.google.android.as.oss.logging.converter.PcsLogMessageConverter.PrivateInferenceCountReportedConverter;
+import com.google.android.as.oss.logging.converter.PcsLogMessageConverter.PrivateInferenceValueReportedConverter;
 
 /**
  * Provides typed access to PcsStatsLog in production builds of PCS.
@@ -45,6 +49,10 @@ public class PcsStatsLoggerImpl implements PcsStatsLog {
       new IntelligenceCountReportedConverter();
   private static final IntelligenceValueReportedConverter INTELLIGENCE_VALUE_REPORTED_CONVERTER =
       new IntelligenceValueReportedConverter();
+  private static final PrivateInferenceCountReportedConverter
+      PRIVATE_INFERENCE_COUNT_REPORTED_CONVERTER = new PrivateInferenceCountReportedConverter();
+  private static final PrivateInferenceValueReportedConverter
+      PRIVATE_INFERENCE_VALUE_REPORTED_CONVERTER = new PrivateInferenceValueReportedConverter();
   private static final IntelligenceUnrecognisedNetworkRequestReportedConverter
       INTELLIGENCE_UNRECOGNISED_NETWORK_REQUEST_REPORTED_CONVERTER =
           new IntelligenceUnrecognisedNetworkRequestReportedConverter();
@@ -71,6 +79,18 @@ public class PcsStatsLoggerImpl implements PcsStatsLog {
   public void logIntelligenceValueReported(IntelligenceValueReported atom) {
     intelligenceStatsLogger.logIntelligenceValueReported(
         INTELLIGENCE_VALUE_REPORTED_CONVERTER.apply(atom));
+  }
+
+  @Override
+  public void logPrivateInferenceCountReported(PrivateInferenceCountReported atom) {
+    intelligenceStatsLogger.logPrivateInferenceCountReported(
+        PRIVATE_INFERENCE_COUNT_REPORTED_CONVERTER.apply(atom));
+  }
+
+  @Override
+  public void logPrivateInferenceValueReported(PrivateInferenceValueReported atom) {
+    intelligenceStatsLogger.logPrivateInferenceValueReported(
+        PRIVATE_INFERENCE_VALUE_REPORTED_CONVERTER.apply(atom));
   }
 
   @Override

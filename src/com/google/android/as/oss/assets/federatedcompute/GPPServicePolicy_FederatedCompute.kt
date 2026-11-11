@@ -17,7 +17,7 @@
 package com.google.android.libraries.pcc.policies.federatedcompute
 
 /** Google Play Protect Harmful app detection policy. */
-val GPPServicePolicy_FederatedCompute =
+val GPPServicePolicy_FederatedCompute: FlavoredPolicies =
   flavoredPolicies(
     name = "GPPServicePolicy_FederatedCompute",
     policyType = MonitorOrImproveUserExperienceWithFederatedCompute,

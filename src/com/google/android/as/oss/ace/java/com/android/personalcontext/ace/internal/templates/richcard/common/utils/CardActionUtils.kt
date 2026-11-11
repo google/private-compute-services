@@ -22,7 +22,7 @@ import android.service.personalcontext.insight.ActionableInsight
 import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.DisplayInsight
 import android.service.personalcontext.insight.InsightCollection
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsight
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toPrototypeInsightV1
 import com.android.personalcontext.ace.client.prototype.clientaction.ClientActionInsight
 import com.android.personalcontext.ace.client.prototype.clientaction.params.textpaste.TextPasteParams
 import com.android.personalcontext.ace.internal.templates.richcard.ActionableCardAction
@@ -40,7 +40,7 @@ fun InsightCollection.toCardActions(): List<CardAction> = insights.mapNotNull { 
     is ActionableInsight -> insight.toActionableCardAction()
     is DisplayInsight -> insight.toEgressableCardAction()
     else -> {
-      val prototypeInsight = insight.toPrototypeInsight()
+      val prototypeInsight = insight.toPrototypeInsightV1()
       if (prototypeInsight is ClientActionInsight) {
         prototypeInsight.toEgressableCardAction(insight)
       } else {

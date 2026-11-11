@@ -50,7 +50,8 @@ class ConfigurableBsaTokenProvider<T : BsaToken>(
   private val tokenFetchErrorLogMapper: (Throwable) -> CountMetricId?,
 ) : BsaTokenProvider<T> {
   @VisibleForTesting
-  val currentProvider = MutableStateFlow<BsaTokenProvider<T>>(authenticatingProvider)
+  val currentProvider: MutableStateFlow<BsaTokenProvider<T>> =
+    MutableStateFlow<BsaTokenProvider<T>>(authenticatingProvider)
 
   init {
     coroutineScope.launch {

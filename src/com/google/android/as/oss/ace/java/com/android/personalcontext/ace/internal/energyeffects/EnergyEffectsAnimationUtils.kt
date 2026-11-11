@@ -53,7 +53,6 @@ import com.google.android.shaderlib.energyeffects.builder.copy
 import com.google.android.shaderlib.energyeffects.compose.energyEffects
 import com.google.android.shaderlib.energyeffects.shader.ShaderUniforms
 import com.google.android.shaderlib.energyeffects.utils.CornerRadii
-import com.google.android.shaderlib.energyeffects.utils.Margins
 import com.google.android.shaderlib.energyeffects.view.EnergyShaderDrawable
 import com.google.android.systemui.graphics.energycolorslib.EnergyColors
 import com.google.ux.material.libmonet.energy.EnergyColors as MonetEnergyColors
@@ -264,7 +263,6 @@ object EnergyEffectsAnimationUtils {
    * @param baseColor The base color from which the energy colors are derived.
    * @param colorScheme The active [ColorScheme]. Defaults to [MaterialTheme.colorScheme].
    * @param cornerRadiusDp The corner radius of the card boundary in DP.
-   * @param cardPaddingDp The card padding in DP.
    * @param spreadDp The spread of the card boundary in DP. Default is 20 DP.
    */
   @OptIn(ExperimentalMaterial3EffectApi::class)
@@ -273,7 +271,6 @@ object EnergyEffectsAnimationUtils {
     baseColor: Color,
     colorScheme: ColorScheme = MaterialTheme.colorScheme,
     cornerRadiusDp: Int,
-    cardPaddingDp: Int,
     spreadDp: Int = 20,
   ): GeminiAnimationSpec {
     val energyColors = deriveEnergyColors(baseColor, colorScheme)
@@ -291,7 +288,6 @@ object EnergyEffectsAnimationUtils {
             layout = layout.copy {
               cornerRadii = CornerRadii(cornerRadiusDp.toFloat())
               spread = spreadDp.toFloat()
-              margins = Margins(cardPaddingDp.toFloat())
             }
             panel =
               this.getOrCreatePanel().copy {
@@ -311,14 +307,12 @@ object EnergyEffectsAnimationUtils {
    *
    * @param glowColor The color of the glow effect.
    * @param cornerRadiusDp The corner radius of the card boundary in DP.
-   * @param cardPaddingDp The card padding in DP.
    * @param spreadDp The spread of the card boundary in DP. Default is 20 DP.
    */
   @Deprecated("Use the baseColor version instead.")
   fun createCardSpecLegacy(
     glowColor: Color,
     cornerRadiusDp: Int,
-    cardPaddingDp: Int,
     spreadDp: Int = 20,
   ): GeminiAnimationSpec {
     val glowColorArgb = glowColor.toArgb()
@@ -334,7 +328,6 @@ object EnergyEffectsAnimationUtils {
             layout = layout.copy {
               cornerRadii = CornerRadii(cornerRadiusDp.toFloat())
               spread = spreadDp.toFloat()
-              margins = Margins(cardPaddingDp.toFloat())
             }
             panel =
               this.getOrCreatePanel().copy {
@@ -483,7 +476,6 @@ class MessageInlineChipConfig(
         layout = layout.copy {
           cornerRadii = it
           spread = 4f
-          margins = Margins(0f)
         }
       }
     }

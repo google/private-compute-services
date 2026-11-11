@@ -315,18 +315,14 @@ public class PrivateLoggerGrpcBindableService
             if (networkUsageLogRepository.isNetworkUsageLogEnabled()) {
               networkUsageLogRepository
                   .getDbExecutor()
-                  .ifPresent(
-                      executor ->
-                          executor.execute(
-                              () ->
-                                  networkUsageLogRepository.insertNetworkUsageEntity(
-                                      NetworkUsageLogUtils
-                                          .createFcTrainingStartQueryNetworkUsageEntity(
-                                              NetworkUsageLogUtils
-                                                  .createFcTrainingStartQueryConnectionDetails(
-                                                      featureName, callingPackageName),
-                                              selectorContext.getComputationProperties().getRunId(),
-                                              Optional.absent() /* policyProto */))));
+                  .ifPresent(executor ->
+                      executor.execute(() ->
+                          networkUsageLogRepository.insertNetworkUsageEntity(
+                              NetworkUsageLogUtils.createFcTrainingStartQueryNetworkUsageEntity(
+                                  NetworkUsageLogUtils.createFcTrainingStartQueryConnectionDetails(
+                                      featureName, callingPackageName),
+                                  selectorContext.getComputationProperties().getRunId(),
+                                  Optional.absent() /* policyProto */))));
             }
             synchronized (lock) {
               // If FCP calls this DataProvider after the RPC session was cancelled and transitioned
@@ -445,12 +441,11 @@ public class PrivateLoggerGrpcBindableService
       }
       ImmutableList<LogEntry> entries =
           response.getEntriesList().stream()
-              .map(
-                  protoEntry ->
-                      LogEntry.builder()
-                          .setTimestamp(protoEntry.getTimestamp())
-                          .setValue(protoEntry.getValue())
-                          .build())
+              .map(protoEntry ->
+                  LogEntry.builder()
+                      .setTimestamp(protoEntry.getTimestamp())
+                      .setValue(protoEntry.getValue())
+                      .build())
               .collect(toImmutableList());
       // Note: any GetDataResponse message received after the first such message will effectively
       // be ignored because the getDataFuture will already have been completed with that earlier

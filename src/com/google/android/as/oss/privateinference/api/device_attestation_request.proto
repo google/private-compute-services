@@ -19,7 +19,6 @@ package mdi.privatearatea;
 import "third_party/protobuf/cpp_features.proto";
 
 option features.(pb.cpp).string_type = VIEW;
-
 option java_multiple_files = true;
 option java_package = "com.google.search.mdi.privatearatea.proto";
 
@@ -36,6 +35,5 @@ message AndroidKeyStoreAttestationEvidence {
   // Android Key Store:
   // * ordered from leaf to root
   // * raw certifcate bytes returned by Certificate.encoded
-  repeated bytes certificate_chain = 1
-      ;
+  repeated bytes certificate_chain = 1;
 }

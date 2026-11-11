@@ -137,9 +137,8 @@ public class SecurityPolicyUtils {
       int uid,
       boolean allowTestKeys) {
     return packageSecurityInfoList.getPackageSecurityInfosList().stream()
-        .flatMap(
-            packageSecurityInfo ->
-                Stream.ofNullable(makeSecurityPolicy(packageSecurityInfo, context, allowTestKeys)))
+        .flatMap(packageSecurityInfo ->
+            Stream.ofNullable(makeSecurityPolicy(packageSecurityInfo, context, allowTestKeys)))
         .anyMatch(securityPolicy -> securityPolicy.checkAuthorization(uid).isOk());
   }
 

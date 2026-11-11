@@ -99,6 +99,11 @@ message FeatureResult {
   Status status = 2;
 
   // The result code from the activity.
+  //
+  // For FEATURE_TYPE_ADD_TO_KEEP_LIST and FEATURE_TYPE_SAVE_TO_KEEP_NOTE, the
+  // launcher does not wait for the activity's result: SUCCESS means that the
+  // activity start was requested, result_code is RESULT_OK (-1), and
+  // parceled_result is empty.
   int32 result_code = 3;
 
   // The parceled result.

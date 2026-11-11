@@ -75,22 +75,20 @@ final class AiCoreServiceConnection implements ServiceConnection {
   private AiCoreServiceConnection initConnect(
       ListeningScheduledExecutorService executorService, ConfigReader<PcsAiConfig> configReader) {
     ListenableFuture<IAICoreService> localFuture =
-        CallbackToFutureAdapter.getFuture(
-            completer -> {
-              this.completer = completer;
-              completer.addCancellationListener(
-                  () -> disconnect("AICore<>PCS Connection cancelled, likely timed-out.", false),
-                  executorService);
+        CallbackToFutureAdapter.getFuture(completer -> {
+          this.completer = completer;
+          completer.addCancellationListener(
+              () -> disconnect("AICore<>PCS Connection cancelled, likely timed-out.", false),
+              executorService);
 
-              String action = IAICoreService.class.getCanonicalName();
-              Intent aiCoreIntent = new Intent(action);
-              aiCoreIntent.setComponent(
-                  new ComponentName(AICORE_PACKAGE_NAME, AICORE_SERVICE_NAME));
-              if (!context.bindService(aiCoreIntent, this, Context.BIND_AUTO_CREATE)) {
-                disconnect("Unable to find/start AICoreService", false);
-              }
-              return "AiCoreServiceConnection";
-            });
+          String action = IAICoreService.class.getCanonicalName();
+          Intent aiCoreIntent = new Intent(action);
+          aiCoreIntent.setComponent(new ComponentName(AICORE_PACKAGE_NAME, AICORE_SERVICE_NAME));
+          if (!context.bindService(aiCoreIntent, this, Context.BIND_AUTO_CREATE)) {
+            disconnect("Unable to find/start AICoreService", false);
+          }
+          return "AiCoreServiceConnection";
+        });
     this.serviceFuture =
         Futures.withTimeout(
             localFuture,

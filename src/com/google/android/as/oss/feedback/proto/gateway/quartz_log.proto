@@ -19,10 +19,11 @@ package com.google.android.as.oss.feedback.api.gateway;
 import "google/protobuf/timestamp.proto";
 
 
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "QuartzLog";
 option java_package = "com.google.android.as.oss.feedback.api.gateway";
 
-enum QuartzCUJ {
+export enum QuartzCUJ {
   QUARTZ_CUJ_UNSPECIFIED = 0;
   QUARTZ_CUJ_KEY_TYPE = 1;
   QUARTZ_CUJ_KEY_SUMMARIZATION = 2;
@@ -210,7 +211,7 @@ message QuartzKeySummarizationData {
      ;
 }
 
-message QuartzDataDonation {
+export message QuartzDataDonation {
   QuartzKeyTypeData quartz_key_type_data = 1;
   QuartzKeySummarizationData quartz_key_summarization_data = 2;
 }
@@ -278,7 +279,7 @@ message QuartzAppInfoData {
   string package_name = 4;
 }
 
-message QuartzDataDonationV2 {
+export message QuartzDataDonationV2 {
   QuartzCUJ quartz_cuj = 1;
   QuartzNotificationData quartz_notification_data = 2;
   QuartzModelData quartz_model_data = 3
@@ -290,7 +291,7 @@ message QuartzDataDonationV2 {
 // Next ID: 4
 // This message extends the generic StructuredUserInput message to define user
 // input data for Quartz.
-message QuartzUserInput {
+export message QuartzUserInput {
   // Follow the defined names from AOSP code in
   // [frameworks/base/core/java/android/service/notification/Adjustment.java].
   enum KeyTypeOptionTag {

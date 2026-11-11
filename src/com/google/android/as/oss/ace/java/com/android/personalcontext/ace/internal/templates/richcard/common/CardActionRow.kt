@@ -56,7 +56,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsight
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsightV1
 import com.android.personalcontext.ace.client.prototype.serversideclose.ServerSideCloseInsight
 import com.android.personalcontext.ace.internal.templates.richcard.ActionableCardAction
 import com.android.personalcontext.ace.internal.templates.richcard.CardAction
@@ -64,11 +64,13 @@ import com.android.personalcontext.ace.internal.templates.richcard.EgressableCar
 import com.android.personalcontext.ace.visualizer.templates.LocalInsightSurfaceClientInfo
 import com.android.personalcontext.ace.visualizer.templates.utils.RemoteActionUtils.execute
 
+private const val MAX_SINGLE_ROW_ACTIONS = 2
+
 /** A composable that renders a row of action buttons for a visualizer card. */
 @Composable
 @Suppress("NewApi")
 fun CardActionRow(cardActions: List<CardAction>, modifier: Modifier = Modifier) {
-  if (LocalDensity.current.fontScale > 1.0f) {
+  if (LocalDensity.current.fontScale > 1.0f || cardActions.size > MAX_SINGLE_ROW_ACTIONS) {
     FlowRow(
       modifier = modifier.fillMaxWidth(),
       horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
@@ -126,7 +128,7 @@ private fun CardActionButton(cardAction: CardAction) {
                   reportEvent(insight, InsightEvent.EVENT_USER_TAP)
                 }
                 cardAction.remoteAction.execute(context)
-                info.onReceiveInsight(ServerSideCloseInsight().toContextInsight())
+                info.onReceiveInsight(ServerSideCloseInsight().toContextInsightV1())
               }
           }
           is EgressableCardAction -> {
@@ -138,7 +140,7 @@ private fun CardActionButton(cardAction: CardAction) {
                 cardAction.insight?.let { insight ->
                   reportEvent(insight, InsightEvent.EVENT_USER_TAP)
                   info.onReceiveInsight(insight)
-                  info.onReceiveInsight(ServerSideCloseInsight().toContextInsight())
+                  info.onReceiveInsight(ServerSideCloseInsight().toContextInsightV1())
                 }
               }
           }

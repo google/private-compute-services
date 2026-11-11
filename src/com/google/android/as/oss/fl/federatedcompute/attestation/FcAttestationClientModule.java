@@ -21,6 +21,7 @@ import com.google.android.as.oss.attestation.config.PcsAttestationMeasurementCon
 import com.google.android.as.oss.common.ExecutorAnnotations.AttestationExecutorQualifier;
 import com.google.android.as.oss.common.config.ConfigReader;
 import com.google.android.as.oss.common.time.TimeSource;
+import com.google.android.as.oss.fl.federatedcompute.config.PcsFcFlags;
 import com.google.fcp.client.AttestationClient;
 import dagger.Module;
 import dagger.Provides;
@@ -40,6 +41,7 @@ interface FcAttestationClientModule {
   @Nullable
   static AttestationClient provideFcAttestationClient(
       ConfigReader<PcsAttestationMeasurementConfig> attestationMeasurementConfigReader,
+      PcsFcFlags pcsFcFlags,
       PccAttestationMeasurementClient attestationMeasurementClient,
       @AttestationExecutorQualifier Executor executor,
       TimeSource timeSource) {
@@ -49,6 +51,7 @@ interface FcAttestationClientModule {
             executor,
             timeSource,
             attestationMeasurementConfigReader,
+            pcsFcFlags.includeContentBindingInAttestationRequest(),
             new Random())
         : null;
   }

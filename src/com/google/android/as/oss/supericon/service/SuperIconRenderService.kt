@@ -145,13 +145,13 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
 
   override fun onUnbind(intent: Intent): Boolean {
     logger.atInfo().log("onUnbind")
-    renderService.cancelRender()
     logger
       .atFine()
       .log(
         "size of activeSuperIconUis: %s when onUnbind()",
         renderService.activeSuperIconUis.size(),
       )
+    renderService.cancelRenderAndClear()
     return super.onUnbind(intent)
   }
 
@@ -207,7 +207,7 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
     private val mainScope: CoroutineScope,
     private val mainDispatcher: CoroutineDispatcher,
   ) : ISuperIconRenderService.Stub() {
-    private val currentRenderRequests = ConcurrentHashMap<Int, RenderRequestParams>()
+    internal val currentRenderRequests = ConcurrentHashMap<Int, RenderRequestParams>()
     internal val activeSuperIconUis =
       object : LruCache<SuperIconUi, Boolean>(MAXIMUM_ACTIVE_UI_COUNT) {
         override fun entryRemoved(
@@ -223,6 +223,17 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
         }
       }
     private var consentDialogUi: SuperIconUi? = null
+
+    fun cancelRenderAndClear() {
+      for (request in currentRenderRequests.values) {
+        request.renderJob?.cancel()
+        request.contentJob?.cancel()
+      }
+      currentRenderRequests.clear()
+      activeSuperIconUis.evictAll()
+      consentDialogUi?.releaseOnEviction()
+      consentDialogUi = null
+    }
 
     // Currently only allow Gboard to connect to [SuperIconRenderService].
     override fun onTransact(code: Int, data: Parcel, reply: Parcel?, flags: Int): Boolean {
@@ -287,12 +298,27 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
       }
       val uiType = renderOptions.uiType
       if (params == currentRenderRequests[uiType]?.params) {
-        logger.atFine().log("ignore render request with exact same options")
+        // `Params` equality includes `callback`, so this branch only matches when the caller
+        // reuses the exact same callback instance as the active request. Invoking
+        // `callback.onError()` here would prematurely clean up the still-active request's callback.
+        logger.atInfo().log("ignore render request with exact same options")
         return
       }
-      logger.atFine().log("cancel render job: %s", currentRenderRequests[uiType]?.renderJob)
-      currentRenderRequests[uiType]?.renderJob?.cancel()
-      currentRenderRequests[uiType]?.contentJob?.cancel()
+      currentRenderRequests[uiType]?.let { previous ->
+        logger.atFine().log("cancel render job: %s", previous.renderJob)
+        if (
+          previous.renderJob?.isActive == true &&
+            previous.params.renderOptions.supportsRenderCancelledError
+        ) {
+          try {
+            previous.params.callback.onError(SuperIconErrorCodes.RENDER_CANCELLED, "superseded")
+          } catch (e: RemoteException) {
+            logger.atWarning().withCause(e).log("Failed to notify superseded callback")
+          }
+        }
+        previous.renderJob?.cancel()
+        previous.contentJob?.cancel()
+      }
       currentRenderRequests[uiType] =
         RenderRequestParams(params, renderJob = null, contentJob = null).apply {
           renderJob =
@@ -1061,7 +1087,18 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
       logger.atFine().log("windowToken: %s", windowToken)
       val host = createSurfaceControlViewHost(display, windowToken, hostInputToken)
       val superIconUi =
-        SuperIconUi(host, params, view, measuredSize, renderContext, display, attachListener)
+        SuperIconUi(
+          host,
+          params,
+          view,
+          measuredSize,
+          renderContext,
+          display,
+          attachListener,
+          // `uiType` may differ from `params.renderOptions.uiType` (e.g. when a CONSENT_DIALOG is
+          // triggered from a SUPER_ICON click).
+          uiType,
+        )
       var success = false
       try {
         val viewToSet =
@@ -1223,6 +1260,14 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
       }
     }
 
+    /**
+     * Holds the rendered [SurfaceControlViewHost] and associated state for a single remote UI
+     * surface.
+     *
+     * @property uiType The effective [SuperIconUiType] of this surface (which may differ from
+     *   `params.renderOptions.uiType`, e.g. when a [SuperIconUiType.CONSENT_DIALOG] is opened from
+     *   a [SuperIconUiType.SUPER_ICON] click).
+     */
     internal inner class SuperIconUi(
       internal var viewHost: SurfaceControlViewHost?,
       val params: Params,
@@ -1231,6 +1276,7 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
       val renderContext: Context,
       val display: Display,
       val attachListener: View.OnAttachStateChangeListener? = null,
+      @SuperIconUiType val uiType: Int = params.renderOptions.uiType,
     ) {
       // Cache the native accessibility pane title before wrapView() clears it
       // from `view` to prevent duplicate announcements. This ensures
@@ -1240,7 +1286,7 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
 
       fun releaseSurfaceControlViewHost(uiType: Int) {
         mainScope.launch {
-          releaseResourcesInternal()
+          releaseResourcesInternal(removeCurrentRequest = true)
           if (uiType == SuperIconUiType.CONSENT_DIALOG) {
             if (this@SuperIconRenderServiceBinderStub.consentDialogUi === this@SuperIconUi) {
               this@SuperIconRenderServiceBinderStub.consentDialogUi = null
@@ -1255,16 +1301,18 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
       }
 
       fun releaseOnEviction() {
-        mainScope.launch { releaseResourcesInternal() }
+        mainScope.launch { releaseResourcesInternal(removeCurrentRequest = true) }
       }
 
-      private fun releaseResourcesInternal() {
+      private fun releaseResourcesInternal(removeCurrentRequest: Boolean = false) {
         logger.atFine().log("release host %s %s", viewHost, this)
         viewHost?.release()
         viewHost = null
-        val uiType = params.renderOptions.uiType
         currentRenderRequests[uiType]?.contentJob?.cancel()
         currentRenderRequests[uiType]?.contentJob = null
+        if (removeCurrentRequest && currentRenderRequests[uiType]?.params === params) {
+          currentRenderRequests.remove(uiType)
+        }
       }
 
       fun getSurfacePackage(surfacePackageResultCallback: ISuperIconSurfacePackageResultCallback) {
@@ -1317,7 +1365,7 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
       }
 
       private fun handleRecreationFailure() {
-        if (params.renderOptions.uiType == SuperIconUiType.CONSENT_DIALOG) {
+        if (uiType == SuperIconUiType.CONSENT_DIALOG) {
           backgroundScope.launch {
             try {
               // If we fail to recreate the surface package, the consent dialog cannot be
@@ -1333,13 +1381,6 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
             }
           }
         }
-      }
-    }
-
-    fun cancelRender() {
-      for (request in currentRenderRequests.values) {
-        request.renderJob?.cancel()
-        request.contentJob?.cancel()
       }
     }
 
@@ -1420,7 +1461,7 @@ class SuperIconRenderService : Hilt_SuperIconRenderService() {
     }
   }
 
-  private data class RenderRequestParams(
+  internal data class RenderRequestParams(
     val params: Params,
     var renderJob: Job?,
     var contentJob: Job?,

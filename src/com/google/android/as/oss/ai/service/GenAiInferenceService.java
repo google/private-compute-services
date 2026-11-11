@@ -65,8 +65,9 @@ public class GenAiInferenceService extends Hilt_GenAiInferenceService {
   private static final GoogleLogger logger = GoogleLogger.forEnclosingClass();
 
   private static final String ASI_PACKAGE_NAME = "com.google.android.as";
+  private static final String NAS_PACKAGE_NAME = "com.google.android.nas";
   private static final ImmutableSet<String> CLIENT_PKG_ALLOWLIST =
-      ImmutableSet.of(ASI_PACKAGE_NAME);
+      ImmutableSet.of(ASI_PACKAGE_NAME, NAS_PACKAGE_NAME);
 
   @Inject ConfigReader<PcsAiConfig> configReader;
   @Inject ConfigReader<PccSecurityConfig> securityPolicyConfigReader;
@@ -144,6 +145,8 @@ public class GenAiInferenceService extends Hilt_GenAiInferenceService {
             PackageSecurityInfoList.newBuilder()
                 .addPackageSecurityInfos(
                     securityPolicyConfigReader.getConfig().asiPackageSecurityInfo())
+                .addPackageSecurityInfos(
+                    securityPolicyConfigReader.getConfig().nasPackageSecurityInfo())
                 .build(),
             /* context= */ this,
             Binder.getCallingUid(),

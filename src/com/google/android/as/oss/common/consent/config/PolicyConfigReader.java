@@ -36,12 +36,11 @@ public class PolicyConfigReader extends AbstractConfigReader<PolicyConfig> {
     instance
         .flagManager
         .listenable()
-        .addListener(
-            (flagNames) -> {
-              if (FlagListener.anyHasPrefix(flagNames, FLAG_PREFIX)) {
-                instance.refreshConfig();
-              }
-            });
+        .addListener(flagNames -> {
+          if (FlagListener.anyHasPrefix(flagNames, FLAG_PREFIX)) {
+            instance.refreshConfig();
+          }
+        });
 
     return instance;
   }

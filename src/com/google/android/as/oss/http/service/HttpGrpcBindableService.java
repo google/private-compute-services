@@ -402,28 +402,25 @@ public class HttpGrpcBindableService extends HttpServiceGrpc.HttpServiceImplBase
             "[onReadyHandler] DOWNLOAD COMPLETE: Downloaded %d bytes from URL [%s].",
             totalBytesRead.get(), request.getUrl());
         responseObserver.onCompleted();
-        backgroundExecutor.execute(
-            () ->
-                insertNetworkUsageLogRow(
-                    networkUsageLogRepository, request, Status.SUCCEEDED, totalBytesRead.get()));
+        backgroundExecutor.execute(() ->
+            insertNetworkUsageLogRow(
+                networkUsageLogRepository, request, Status.SUCCEEDED, totalBytesRead.get()));
       } catch (IOException e) {
         logger.atWarning().withCause(e).log(
             "Failed performing IO operation while downloading URL [%s].", request.getUrl());
         responseObserver.onError(e);
-        backgroundExecutor.execute(
-            () ->
-                insertNetworkUsageLogRow(
-                    networkUsageLogRepository, request, Status.FAILED, totalBytesRead.get()));
+        backgroundExecutor.execute(() ->
+            insertNetworkUsageLogRow(
+                networkUsageLogRepository, request, Status.FAILED, totalBytesRead.get()));
       } catch (StatusRuntimeException e) {
         if (responseObserver.isCancelled()) {
           logCallCancelledByClient(e, networkUsageLogRepository, request, totalBytesRead.get());
         } else {
           responseObserver.onError(e);
           // TODO: Cancellation should also be logged in network usage log.
-          backgroundExecutor.execute(
-              () ->
-                  insertNetworkUsageLogRow(
-                      networkUsageLogRepository, request, Status.FAILED, totalBytesRead.get()));
+          backgroundExecutor.execute(() ->
+              insertNetworkUsageLogRow(
+                  networkUsageLogRepository, request, Status.FAILED, totalBytesRead.get()));
         }
       } finally {
         if (!saveStreamToResumeWhenClientIsReadyAgain) {

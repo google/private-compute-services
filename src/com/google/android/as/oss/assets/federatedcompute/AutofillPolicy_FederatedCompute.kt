@@ -17,7 +17,7 @@
 package com.google.android.libraries.pcc.policies.federatedcompute
 
 /** Autofill FederatedCompute policy. */
-val AutofillPolicy_FederatedCompute =
+val AutofillPolicy_FederatedCompute: FlavoredPolicies =
   flavoredPolicies(
     name = "AutofillPolicy_FederatedCompute",
     policyType = MonitorOrImproveUserExperienceWithFederatedCompute,

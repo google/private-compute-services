@@ -17,7 +17,7 @@
 package com.android.personalcontext.ace.internal.compat
 
 import android.service.personalcontext.insight.ContextInsight
-import com.android.personalcontext.ace.client.prototype.PrototypeHintUtils.toPrototypeHint
+import com.android.personalcontext.ace.client.prototype.PrototypeHintUtils.toPrototypeHintV1
 import com.android.personalcontext.ace.client.prototype.metadata.VisualMetadataHint
 import com.android.personalcontext.ace.client.prototype.metadata.VisualStyle
 import com.android.personalcontext.ace.visualizer.compat.VisualMetadataCompat
@@ -26,6 +26,6 @@ import javax.inject.Inject
 /** [VisualMetadataCompat] implementation */
 class VisualMetadataCompatImpl @Inject constructor() : VisualMetadataCompat {
   override fun ContextInsight.isVariant(): Boolean = originHints.any { hint ->
-    hint.contextHint.toPrototypeHint<VisualMetadataHint>()?.visualStyle == VisualStyle.VARIANT
+    hint.contextHint.toPrototypeHintV1<VisualMetadataHint>()?.visualStyle == VisualStyle.VARIANT
   }
 }

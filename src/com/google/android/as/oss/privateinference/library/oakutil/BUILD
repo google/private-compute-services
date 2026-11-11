@@ -132,8 +132,6 @@ android_library(
         "StreamObserverTlsSessionClient.kt",
         "TcaTrustAnchorProvider.kt",
     ],
-    manifest = "//src/com/google/android/as/oss/privateinference/library/oakutil:AndroidManifest.xml",
-    resource_files = glob(["res/**"]),
     deps = [
         ":client_metadata_flag",
         ":device_attestation_flag",
@@ -163,7 +161,7 @@ android_library(
         "//src/com/google/android/as/oss/privateinference/library/bsa/token",
         "//src/com/google/android/as/oss/privateinference/library/bsa/token:token_provider",
         "//src/com/google/android/as/oss/privateinference/logging",
-        "//src/com/google/android/as/oss/privateinference/service/api:private_inference_kt_proto_lite",
+        "//src/com/google/android/as/oss/privateinference/service/api:feature_name_kt_proto_lite",
         "//src/com/google/android/as/oss/privateinference/util/timers",
         "//src/com/google/android/as/oss/privateinference/util/timers:annotations",
         "//src/com/google/android/as/oss/privateinference/util/timers:latency_logging_timers",
@@ -238,9 +236,13 @@ android_library(
         "PrivateInferenceVerificationKeysProdModule.java",
     ],
     manifest = "//src/com/google/android/as/oss/privateinference/library/oakutil:AndroidManifest.xml",
-    resource_files = glob(["res/**"]),
+    resource_files = [
+        "res/raw/public_keys_nonprod_proto.binarypb",
+        "res/raw/public_keys_prod_proto.binarypb",
+    ],
     deps = [
         ":public_keys_java_proto_lite",
+        "//src/com/google/android/as/oss/privateinference:annotations",
         "@maven//:com_google_dagger_dagger",
         "@maven//:com_google_dagger_hilt-android",
         "@maven//:com_google_protobuf_protobuf_javalite",
@@ -254,7 +256,11 @@ android_library(
         "PrivateInferenceVerificationKeysInternalModule.java",
     ],
     manifest = "//src/com/google/android/as/oss/privateinference/library/oakutil:AndroidManifest.xml",
-    resource_files = glob(["res/**"]),
+    resource_files = [
+        "res/raw/public_keys_labs_proto.binarypb",
+        "res/raw/public_keys_nonprod_proto.binarypb",
+        "res/raw/public_keys_prod_proto.binarypb",
+    ],
     deps = [
         ":public_keys_java_proto_lite",
         "//src/com/google/android/as/oss/privateinference:annotations",
@@ -271,7 +277,9 @@ android_library(
         "PrivateInferenceVerificationKeysLabsModule.java",
     ],
     manifest = "//src/com/google/android/as/oss/privateinference/library/oakutil:AndroidManifest.xml",
-    resource_files = glob(["res/**"]),
+    resource_files = [
+        "res/raw/public_keys_labs_proto.binarypb",
+    ],
     deps = [
         ":public_keys_java_proto_lite",
         "@maven//:com_google_dagger_dagger",

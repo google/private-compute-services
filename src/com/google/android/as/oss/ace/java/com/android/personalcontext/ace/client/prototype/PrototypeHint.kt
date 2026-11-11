@@ -65,7 +65,7 @@ abstract class PrototypeHint(val id: PrototypeHintId, val creator: Creator) {
  * @property uid A unique positive value for each entry that should not change after creation.
  * @property typeName The class name of the prototype, may be used by OSI for comparison.
  */
-// Next ID: 26
+// Next ID: 27
 enum class PrototypeHintId(@field:IntRange(from = 1) val uid: Int, val typeName: String) {
   ExampleEmbeddedHintId(1, "ExampleEmbeddedHint"),
   WeatherHintId(2, "WeatherHint"),
@@ -93,4 +93,5 @@ enum class PrototypeHintId(@field:IntRange(from = 1) val uid: Int, val typeName:
   EmbeddedSessionHintId(23, "EmbeddedSessionHint"),
   AutofillRemoteAppHintId(24, "AutofillRemoteAppHint"),
   DryRunHintId(25, "DryRunHint"),
+  VisualizerStateHintId(26, "VisualizerStateHint"),
 }

@@ -16,11 +16,12 @@
 
 package com.android.personalcontext.ace.visualizer.templates.call.compose
 
+import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import com.android.personalcontext.ace.visualizer.compat.InsightGridCompat
 
-val LocalInsightGridCompat =
+val LocalInsightGridCompat: ProvidableCompositionLocal<InsightGridCompat> =
   compositionLocalOf<InsightGridCompat> {
     error("[CallEmbedded] #LocalInsightGridCompat InsightGridCompat not provided")
   }
@@ -30,4 +31,7 @@ data class CallWidgetBackgrounds(
   val cardBackground: Color = Color.Unspecified,
 )
 
-val LocalCallWidgetBackgrounds = compositionLocalOf { CallWidgetBackgrounds() }
+val LocalCallWidgetBackgrounds: ProvidableCompositionLocal<CallWidgetBackgrounds> =
+  compositionLocalOf {
+    CallWidgetBackgrounds()
+  }

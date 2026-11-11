@@ -16,30 +16,27 @@ edition = "2024";
 
 package com.google.android.as.oss.feedback.api.gateway;
 
-
+option features.default_symbol_visibility = STRICT;
 option java_outer_classname = "Blueflax";
 option java_package = "com.google.android.as.oss.feedback.api.gateway";
 
-enum BlueflaxCUJ {
+export enum BlueflaxCUJ {
   BLUEFLAX_CUJ_UNSPECIFIED = 0;
   BLUEFLAX_CUJ_CONTENT_RATING = 1;
   BLUEFLAX_CUJ_SEARCH_RATING = 2;
   BLUEFLAX_CUJ_APP_EXPERIENCE = 3;
 }
 
-message BlueflaxFeedbackDataDonation {
-  repeated string triggering_messages = 1
-     ;
+export message BlueflaxFeedbackDataDonation {
+  repeated string triggering_messages = 1;
 
   repeated string model_outputs = 2;
 
-  string selected_entity_content = 3
-     ;
+  string selected_entity_content = 3;
 }
 
-message BlueflaxUserInput {
-  string optional_blueflax_comment = 1
-     ;
-  repeated string ground_truth_list = 2
-     ;
+export message BlueflaxUserInput {
+  string optional_blueflax_comment = 1;
+
+  repeated string ground_truth_list = 2;
 }

@@ -18,10 +18,13 @@ package com.google.android.`as`.oss.privateinference.logging
 
 import com.google.android.`as`.oss.logging.PcsStatsEnums.CountMetricId
 import com.google.android.`as`.oss.logging.PcsStatsEnums.ValueMetricId
+import com.google.android.`as`.oss.privateinference.service.api.proto.PcsPrivateInferenceFeatureName
 
 /** A wrapper around [PcsStatsLog] for logging Private Inference metrics. */
 interface PcsStatsLogger {
   fun logEventCount(countMetricId: CountMetricId)
+
+  fun logEventCount(countMetricId: CountMetricId, featureName: PcsPrivateInferenceFeatureName)
 
   fun logEventLatency(valueMetricId: ValueMetricId, latencyMs: Long)
 

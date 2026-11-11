@@ -21,4 +21,9 @@
     package="com.google.android.as.oss.conversationid"
     >
   <uses-sdk android:minSdkVersion="31" android:targetSdkVersion="36"/>
+
+  <permission
+      android:name="com.google.android.as.oss.permission.RECEIVE_CONVERSATION_ID"
+      android:protectionLevel="signature|knownSigner"
+      android:knownCerts="@array/config_conversation_id_receiver_known_certs" />
 </manifest>

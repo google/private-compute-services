@@ -38,12 +38,11 @@ public class StatsdConfigReader extends AbstractConfigReader<StatsdConfig> {
     instance
         .flagManager
         .listenable()
-        .addListener(
-            (flagNames) -> {
-              if (FlagListener.anyHasPrefix(flagNames, FLAG_PREFIX)) {
-                instance.refreshConfig();
-              }
-            });
+        .addListener(flagNames -> {
+          if (FlagListener.anyHasPrefix(flagNames, FLAG_PREFIX)) {
+            instance.refreshConfig();
+          }
+        });
 
     return instance;
   }

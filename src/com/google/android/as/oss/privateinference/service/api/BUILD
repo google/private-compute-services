@@ -23,10 +23,33 @@ package(default_visibility = [
 ])
 
 proto_library(
+    name = "feature_name_proto",
+    srcs = ["feature_name.proto"],
+)
+
+java_lite_proto_library(
+    name = "feature_name_java_proto_lite",
+    deps = [
+        ":feature_name_proto",
+    ],
+)
+
+kt_jvm_lite_proto_library(
+    name = "feature_name_kt_proto_lite",
+    deps = [
+        ":feature_name_proto",
+    ],
+)
+
+proto_library(
     name = "private_inference_proto",
     srcs = ["private_inference.proto"],
     has_services = True,
+    exports = [
+        ":feature_name_proto",
+    ],
     deps = [
+        ":feature_name_proto",
         "//src/com/google/android/as/oss/privateinference/api:private_proxy_service_proto",
     ],
 )

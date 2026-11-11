@@ -18,6 +18,7 @@ package com.google.android.`as`.oss.delegatedui.service.templates.beacon
 
 import android.app.PendingIntent
 import android.content.Context
+import android.util.Log
 import android.view.View
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -61,6 +62,10 @@ internal constructor(val configReader: ConfigReader<BeaconConfig>) : TemplateRen
     response: ResponseWithParcelables<DelegatedUiTemplateData>,
   ): View? {
     if (!response.data.beaconTemplateData.hasWidget()) {
+      Log.w(
+        TAG,
+        "[DelegatedUILifecycle] BeaconTemplateRenderer: beaconTemplateData missing widget (hasBeaconTemplateData=${response.data.hasBeaconTemplateData()})",
+      )
       return null
     }
 
@@ -78,6 +83,10 @@ internal constructor(val configReader: ConfigReader<BeaconConfig>) : TemplateRen
         }
       }
     }
+  }
+
+  private companion object {
+    const val TAG = "BeaconTemplateRenderer"
   }
 }
 

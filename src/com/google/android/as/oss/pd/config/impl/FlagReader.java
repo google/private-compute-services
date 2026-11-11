@@ -63,12 +63,11 @@ final class FlagReader<T> extends AbstractConfigReader<T> {
   private void initialize() {
     flagManager
         .listenable()
-        .addListener(
-            flagNames -> {
-              if (flagNames.contains(flagName)) {
-                refreshConfig();
-              }
-            });
+        .addListener(flagNames -> {
+          if (flagNames.contains(flagName)) {
+            refreshConfig();
+          }
+        });
   }
 
   private FlagReader(FlagManager flagManager, String flagName, Supplier<T> getter) {

@@ -57,6 +57,7 @@ import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -128,7 +129,7 @@ import kotlin.math.sqrt
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-val LocalConfigReader =
+val LocalConfigReader: ProvidableCompositionLocal<ConfigReader<DelegatedUiConfig>> =
   staticCompositionLocalOf<ConfigReader<DelegatedUiConfig>> { error("No ConfigReader provided") }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)

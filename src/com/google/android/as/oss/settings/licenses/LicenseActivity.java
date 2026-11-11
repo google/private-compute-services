@@ -72,16 +72,15 @@ public final class LicenseActivity extends AppCompatActivity {
     final ScrollView scrollView = (ScrollView) findViewById(R.id.license_activity_scrollview);
     final int firstVisibleChar = savedInstanceState.getInt(STATE_SCROLL_POS);
     if (firstVisibleChar != 0) {
-      scrollView.post(
-          () -> {
-            TextView textView = (TextView) findViewById(R.id.license_activity_textview);
-            Layout layout = textView.getLayout();
-            if (layout != null) {
-              int firstVisibleLine = layout.getLineForOffset(firstVisibleChar);
-              int offset = layout.getLineTop(firstVisibleLine);
-              scrollView.scrollTo(0, offset);
-            }
-          });
+      scrollView.post(() -> {
+        TextView textView = (TextView) findViewById(R.id.license_activity_textview);
+        Layout layout = textView.getLayout();
+        if (layout != null) {
+          int firstVisibleLine = layout.getLineForOffset(firstVisibleChar);
+          int offset = layout.getLineTop(firstVisibleLine);
+          scrollView.scrollTo(0, offset);
+        }
+      });
     }
   }
 

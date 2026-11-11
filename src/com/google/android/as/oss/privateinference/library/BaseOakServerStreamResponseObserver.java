@@ -26,6 +26,7 @@ import com.google.protobuf.ByteString;
 import io.grpc.Status;
 import io.grpc.Status.Code;
 import io.grpc.stub.StreamObserver;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -72,7 +73,7 @@ public class BaseOakServerStreamResponseObserver
 
   @Override
   public void onError(Throwable t) {
-    clientSessionResponseObserver.onError(wrapIfAttestationFailure(t));
+    clientSessionResponseObserver.onError(toClientError(t));
   }
 
   @Override
@@ -80,20 +81,41 @@ public class BaseOakServerStreamResponseObserver
     clientSessionResponseObserver.onCompleted();
   }
 
-  private Throwable wrapIfAttestationFailure(Throwable t) {
+  private Throwable toClientError(Throwable t) {
     Status status = Status.fromThrowable(t);
     if (status.getCause() instanceof AttestationVerificationException) {
       return Status.INTERNAL
           .withDescription("Server attestation verification failed (public key expired)")
           .withCause(t)
-          .asRuntimeException();
-    } else if (status.getCode() == Code.PERMISSION_DENIED) {
+          .asRuntimeException(Status.trailersFromThrowable(t));
+    }
+    if (status.getCode() == Code.PERMISSION_DENIED) {
       return Status.INTERNAL
           .withDescription("Device attestation verification failed")
           .withCause(t)
-          .asRuntimeException();
-    } else {
+          .asRuntimeException(Status.trailersFromThrowable(t));
+    }
+
+    Throwable cause = status.getCause() != null ? status.getCause() : t.getCause();
+    if (cause == null || Objects.equals(cause, t)) {
       return t;
     }
+
+    String causeMsg = cause.getMessage();
+    if (causeMsg == null || causeMsg.isEmpty()) {
+      causeMsg = cause.toString();
+    }
+
+    String description = status.getDescription();
+    if (description == null) {
+      description = causeMsg;
+    } else if (!description.contains(causeMsg)) {
+      description = description + ": " + causeMsg;
+    }
+
+    return status
+        .withDescription(description)
+        .withCause(t)
+        .asRuntimeException(Status.trailersFromThrowable(t));
   }
 }

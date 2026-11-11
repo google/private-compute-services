@@ -19,8 +19,8 @@
 package com.android.personalcontext.ace.internal.compat
 
 import android.service.personalcontext.insight.ContextInsight
-import com.android.personalcontext.ace.client.prototype.PrototypeHintUtils.toPrototypeHint
-import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsight
+import com.android.personalcontext.ace.client.prototype.PrototypeHintUtils.toPrototypeHintV1
+import com.android.personalcontext.ace.client.prototype.PrototypeInsightUtils.toContextInsightV1
 import com.android.personalcontext.ace.client.prototype.clientsignal.ClientSignalHint
 import com.android.personalcontext.ace.client.prototype.clientsignal.ClientSignalInsight
 import com.android.personalcontext.ace.client.prototype.clientsignal.ClientSignalType
@@ -36,7 +36,8 @@ class ClientSignalCompatImpl @Inject constructor() : ClientSignalCompat {
 
   override fun ContextInsight.containsPiiHint(): Boolean {
     return this.originHints.any {
-      val clientSignalHint = it.contextHint.toPrototypeHint<ClientSignalHint>() ?: return@any false
+      val clientSignalHint =
+        it.contextHint.toPrototypeHintV1<ClientSignalHint>() ?: return@any false
 
       clientSignalHint.type == ClientSignalType.CONTAINS_PII && clientSignalHint.data
     }
@@ -49,7 +50,7 @@ class ClientSignalCompatImpl @Inject constructor() : ClientSignalCompat {
           data = true,
           originHints = emptySet(),
         )
-        .toContextInsight()
+        .toContextInsightV1()
     )
   }
 }

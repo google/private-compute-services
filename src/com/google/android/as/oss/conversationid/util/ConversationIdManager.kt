@@ -16,17 +16,26 @@
 
 package com.google.android.`as`.oss.conversationid.util
 
+import android.app.BroadcastOptions
+import android.content.Context
+import android.content.Intent
 import android.os.Build.VERSION_CODES
 import android.os.DeadObjectException
 import android.os.RemoteCallbackList
 import android.os.RemoteException
 import androidx.annotation.RequiresApi
+import com.google.android.`as`.oss.common.config.ConfigReader
+import com.google.android.`as`.oss.conversationid.config.ConversationIdConfig
 import com.google.android.`as`.oss.conversationid.service.aidl.IConversationIdListener
 import com.google.common.flogger.GoogleLogger
 
 /** Manages conversation id updates and keep track of the listeners. */
 @RequiresApi(VERSION_CODES.BAKLAVA)
-class ConversationIdManager(private val conversationIdHolder: ConversationIdHolder) {
+class ConversationIdManager(
+  private val conversationIdHolder: ConversationIdHolder,
+  private val context: Context,
+  private val configReader: ConfigReader<ConversationIdConfig>,
+) {
   // RemoteCallbackList will handle the cleanup of the client's callback
   private var listeners: RemoteCallbackList<IConversationIdListener> =
     RemoteCallbackList<IConversationIdListener>()
@@ -35,6 +44,7 @@ class ConversationIdManager(private val conversationIdHolder: ConversationIdHold
   fun enterConversation(conversationId: String, hashSalt: String) {
     if (conversationIdHolder.setValueWithSalt(conversationId, hashSalt)) {
       notifyEnterConversation()
+      broadcast(ACTION_CONVERSATION_ENTERED, conversationIdHolder.getAnonymousId())
     }
   }
 
@@ -42,6 +52,7 @@ class ConversationIdManager(private val conversationIdHolder: ConversationIdHold
   fun exitConversation() {
     conversationIdHolder.clear()
     notifyConversationExited()
+    broadcast(ACTION_CONVERSATION_EXITED, conversationId = null)
   }
 
   @Synchronized
@@ -97,7 +108,42 @@ class ConversationIdManager(private val conversationIdHolder: ConversationIdHold
     logger.atInfo().log("exit")
   }
 
+  private fun broadcast(action: String, conversationId: String?) {
+    if (!configReader.config.enableBroadcast) {
+      return
+    }
+    val options = BroadcastOptions.makeBasic().setShareIdentityEnabled(true).toBundle()
+    for (pkg in GBOARD_PACKAGES) {
+      val intent =
+        Intent(action).apply {
+          setPackage(pkg)
+          if (conversationId != null) {
+            putExtra(EXTRA_CONVERSATION_ID, conversationId)
+          }
+        }
+      try {
+        context.sendBroadcast(intent, PERMISSION_RECEIVE_CONVERSATION_ID, options)
+      } catch (e: Exception) {
+        logger.atWarning().withCause(e).log("Failed to broadcast %s to %s", action, pkg)
+      }
+    }
+    logger.atInfo().log("Broadcasted %s to Gboard variants", action)
+  }
+
   companion object {
+    const val ACTION_CONVERSATION_ENTERED = "com.google.android.as.oss.ACTION_CONVERSATION_ENTERED"
+    const val ACTION_CONVERSATION_EXITED = "com.google.android.as.oss.ACTION_CONVERSATION_EXITED"
+    const val EXTRA_CONVERSATION_ID = "conversation_id"
+    const val PERMISSION_RECEIVE_CONVERSATION_ID =
+      "com.google.android.as.oss.permission.RECEIVE_CONVERSATION_ID"
+
+    val GBOARD_PACKAGES: List<String> =
+      listOf(
+        "com.google.android.inputmethod.latin",
+        "com.google.android.inputmethod.latin.canary",
+        "com.google.android.inputmethod.latin.dev",
+      )
+
     private val logger: GoogleLogger = GoogleLogger.forEnclosingClass()
   }
 }
