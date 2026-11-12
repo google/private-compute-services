@@ -1,4 +1,23 @@
-/*
+package com.google.android.as.oss.networkusage.ui.user;
+
+import static com.google.common.collect.ImmutableList.toImmutableList;
+
+import com.google.common.collect.ImmutableList;
+
+/** Filters entities on denylist from the {@link NetworkUsageItemWrapper} list. */
+class DenylistedEntitiesProcessor implements EntityListProcessor {
+  // Dejamos la lista vacía para que no filtre a nadie
+  static final ImmutableList<String> DENYLISTED_PACKAGE_NAMES = ImmutableList.of();
+
+  @Override
+  public ImmutableList<NetworkUsageItemWrapper> process(
+      ImmutableList<NetworkUsageItemWrapper> networkUsageItems) {
+    // Si la lista está vacía, entregará todos los elementos sin ocultar ninguno
+    return networkUsageItems;
+  }
+}
+
+  }/*
  * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
